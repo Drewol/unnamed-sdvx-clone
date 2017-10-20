@@ -18,14 +18,16 @@ source_group("Source Files\\GUI" FILES ${GUI_src})
 # Compiler stuff
 enable_cpp11()
 enable_precompiled_headers("${Main_src}" stdafx.cpp)
+precompiled_header_exclude("Resource.rc")
 
 include_directories(Audio GUI .)
 add_executable(Main ${Main_src} ${C_src})
 set_output_postfixes(Main)
 
-# Target subsystem on windows
+# Target subsystem on windows, set debugging folder
 if(MSVC)
    set_target_properties(Main PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS")
+   set_target_properties(Main PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 endif(MSVC)
 	
 # Dependencies
