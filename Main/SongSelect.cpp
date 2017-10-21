@@ -448,6 +448,8 @@ private:
     float m_advanveDiff = 0.0f;
 	MouseLockHandle m_lockMouse;
 	bool m_suspended = false;
+	bool m_previewLoaded = true;
+	uint64_t m_previewDelayTicks = 0;
 
 public:
 	bool Init() override
@@ -520,25 +522,34 @@ public:
 	// When a map is selected in the song wheel
 	void OnMapSelected(MapIndex* map)
 	{
-		if(map == m_currentPreviewAudio)
-			return;
+		if (map == m_currentPreviewAudio){
+			if (m_previewDelayTicks){
+				--m_previewDelayTicks;
+			}else if (!m_previewLoaded){
+				// Set current preview audio
+				DifficultyIndex* previewDiff = m_currentPreviewAudio->difficulties[0];
+				String audioPath = m_currentPreviewAudio->path + Path::sep + previewDiff->settings.audioNoFX;
 
-		// Set current preview audio
-		DifficultyIndex* previewDiff = map->difficulties[0];
-		String audioPath = map->path + Path::sep + previewDiff->settings.audioNoFX;
-
-		AudioStream previewAudio = g_audio->CreateStream(audioPath);
-		if(previewAudio)
-		{
-			previewAudio->SetPosition(previewDiff->settings.previewOffset);
-			m_previewPlayer.FadeTo(previewAudio);
+				AudioStream previewAudio = g_audio->CreateStream(audioPath);
+				if (previewAudio)
+				{
+					previewAudio->SetPosition(previewDiff->settings.previewOffset);
+					m_previewPlayer.FadeTo(previewAudio);
+				}
+				else
+				{
+					Logf("Failed to load preview audio from [%s]", Logger::Warning, audioPath);
+					m_previewPlayer.FadeTo(AudioStream());
+				}
+				m_previewLoaded = true;
+				// m_previewPlayer.Restore();
+			}
+		} else{
+			// Wait at least 15 ticks before attempting to load song to prevent loading songs while scrolling very fast
+			m_previewDelayTicks = 15;
+			m_currentPreviewAudio = map;
+			m_previewLoaded = false;
 		}
-		else
-		{
-			Logf("Failed to load preview audio from [%s]", Logger::Warning, audioPath);
-			m_previewPlayer.FadeTo(AudioStream());
-		}
-		m_currentPreviewAudio = map;
 	}
 	// When a difficulty is selected in the song wheel
 	void OnDifficultySelected(DifficultyIndex* diff)
