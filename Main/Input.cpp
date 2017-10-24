@@ -21,6 +21,8 @@ void Input::Init(Graphics::Window& wnd)
 	m_laserDevice = g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::LaserInputDevice);
 	m_buttonDevice = g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice);
 
+	m_keySensitivity = g_gameConfig.GetFloat(GameConfigKeys::Key_Sensitivity);
+
 	m_mouseAxisMapping[0] = g_gameConfig.GetInt(GameConfigKeys::Mouse_Laser0Axis);
 	m_mouseAxisMapping[1] = g_gameConfig.GetInt(GameConfigKeys::Mouse_Laser1Axis);
 	m_mouseSensitivity = g_gameConfig.GetFloat(GameConfigKeys::Mouse_Sensitivity);
@@ -251,6 +253,7 @@ void Input::m_OnButtonInput(Button b, bool pressed)
 			else
 				m_laserStates[laserIdx] = 0;
 		}
+		m_laserStates[laserIdx] *= m_keySensitivity;
 	}
 }
 

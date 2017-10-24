@@ -75,6 +75,7 @@ private:
 
 	// Keyboard bindings
 	Multimap<int32, Button> m_buttonMap;
+	float m_keySensitivity;
 
 	// Mouse bindings
 	uint32 m_mouseAxisMapping[2] = { 0,1 };
