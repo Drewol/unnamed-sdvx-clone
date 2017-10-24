@@ -760,7 +760,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 			}
 		}
 
-		m_laserInput[i] = autoplay ? 0.0f : m_input->GetInputLaserDir(i);
+		m_laserInput[i] = autoplay ? 0.0f : m_input->GetInputLaserDir(i) * deltaTime;
 
 		bool notAffectingGameplay = true;
 		if(currentSegment)

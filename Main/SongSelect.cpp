@@ -443,9 +443,9 @@ private:
 	// Select sound
 	Sample m_selectSound;
 
-    // Navigation variables
-    float m_advanceSong = 0.0f;
-    float m_advanveDiff = 0.0f;
+	// Navigation variables
+	float m_advanceSong = 0.0f;
+	float m_advanceDiff = 0.0f;
 	MouseLockHandle m_lockMouse;
 	bool m_suspended = false;
 	bool m_previewLoaded = true;
@@ -675,16 +675,16 @@ public:
 		
 		
         // Song navigation using laser inputs
-        float diff_input = g_input.GetInputLaserDir(0);
-        float song_input = g_input.GetInputLaserDir(1);
+        float diff_input = g_input.GetInputLaserDir(0) * deltaTime;
+        float song_input = g_input.GetInputLaserDir(1) * deltaTime;
         
-        m_advanveDiff += diff_input;
+        m_advanceDiff += diff_input;
         m_advanceSong += song_input;
 
-        m_selectionWheel->AdvanceDifficultySelection((int)m_advanveDiff);
+        m_selectionWheel->AdvanceDifficultySelection((int)m_advanceDiff);
         m_selectionWheel->AdvanceSelection((int)m_advanceSong);
         
-        m_advanveDiff -= (int)m_advanveDiff;
+        m_advanceDiff -= (int)m_advanceDiff;
         m_advanceSong -= (int)m_advanceSong; 
     }
 

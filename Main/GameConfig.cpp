@@ -58,7 +58,7 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::Key_Laser0Pos, SDLK_e);
 	Set(GameConfigKeys::Key_Laser1Neg, SDLK_o);
 	Set(GameConfigKeys::Key_Laser1Pos, SDLK_p);
-	Set(GameConfigKeys::Key_Sensitivity, 0.0025f);
+	Set(GameConfigKeys::Key_Sensitivity, 3.0f);
 
 	// Default controller settings
 	Set(GameConfigKeys::Controller_DeviceID, 0); // First device
