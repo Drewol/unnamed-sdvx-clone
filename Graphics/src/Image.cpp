@@ -39,6 +39,27 @@ namespace Graphics
 			Clear();
 			Allocate();
 		}
+		void ReSize(Vector2i size)
+		{
+			size_t new_DataLength = size.x * size.y;
+			if (new_DataLength == 0){
+				return;
+			}
+			Colori* new_pData = new Colori[new_DataLength];
+
+			for (int32 ix = 0; ix < size.x; ++ix){
+				for (int32 iy = 0; iy < size.y; ++iy){
+					int32 sampledX = ix * ((double)m_size.x / (double)size.x);
+					int32 sampledY = iy * ((double)m_size.y / (double)size.y);
+					new_pData[size.x * iy + ix] = m_pData[m_size.x * sampledY + sampledX];
+				}
+			}
+
+			delete[] m_pData;
+			m_pData = new_pData;
+			m_size = size;
+			m_nDataLength = m_size.x * m_size.y;
+		}
 		Vector2i GetSize() const
 		{
 			return m_size;

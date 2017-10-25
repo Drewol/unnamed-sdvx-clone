@@ -41,8 +41,10 @@ SongSelectStyle::~SongSelectStyle()
 {
 	for(auto t : m_jacketImages)
 	{
-		t.second->loadingJob->Terminate();
-		delete t.second;
+		if (t.second){
+			t.second->loadingJob->Terminate();
+			delete t.second;
+		}
 	}
 }
 
@@ -51,7 +53,7 @@ Texture SongSelectStyle::GetJacketThumnail(const String& path)
 	Texture ret = loadingJacketImage;
 
 	auto it = m_jacketImages.find(path);
-	if(it == m_jacketImages.end())
+	if(it == m_jacketImages.end() || !it->second)
 	{
 		CachedJacketImage* newImage = new CachedJacketImage();
 		JacketLoadingJob* job = new JacketLoadingJob();
@@ -73,12 +75,31 @@ Texture SongSelectStyle::GetJacketThumnail(const String& path)
 		}
 	}
 
+	// cleanup
+	/*
+	auto now = m_timer.SecondsAsFloat();
+	for (auto& jacket : m_jacketImages){
+		if (jacket.second){
+			// evict jackets not used in past minute
+			if (now - jacket.second->lastUsage > 60){
+				delete jacket.second;
+				jacket.second = nullptr;
+			}
+		}
+	}
+	//*/
+
 	return ret;
 }
 bool JacketLoadingJob::Run()
 {
 	// Create loading task
 	loadedImage = ImageRes::Create(imagePath);
+	if (loadedImage.IsValid()){
+		if (loadedImage->GetSize().x > 150 || loadedImage->GetSize().y > 150){
+			loadedImage->ReSize({150,150});
+		}
+	}
 	return loadedImage.IsValid();
 }
 void JacketLoadingJob::Finalize()
