@@ -111,6 +111,14 @@ void Input::Update(float deltaTime)
 		}
 	}
 
+	if(m_laserDevice == InputDevice::Keyboard)
+	{
+		for(uint32 i = 0; i < 2; i++)
+		{
+			m_laserStates[i] = m_rawKeyLaserStates[i] * deltaTime;
+		}
+	}
+
 
 	if(m_gamepad)
 	{
@@ -243,17 +251,17 @@ void Input::m_OnButtonInput(Button b, bool pressed)
 		int32 laserIdx = btnIdx / 2;
 		// Set laser state based uppon the button that was pressed last
 		if(pressed)
-			m_laserStates[laserIdx] = (btnIdx % 2) == 0 ? -1.0f : 1.0f;
+			m_rawKeyLaserStates[laserIdx] = (btnIdx % 2) == 0 ? -1.0f : 1.0f;
 		else // If a button was released check if the other one is still held
 		{
 			if(m_buttonStates[(int32)Button::LS_0Neg + laserIdx * 2])
-				m_laserStates[laserIdx] = -1;
+				m_rawKeyLaserStates[laserIdx] = -1;
 			else if(m_buttonStates[(int32)Button::LS_0Neg + laserIdx * 2 + 1])
-				m_laserStates[laserIdx] = 1;
+				m_rawKeyLaserStates[laserIdx] = 1;
 			else
-				m_laserStates[laserIdx] = 0;
+				m_rawKeyLaserStates[laserIdx] = 0;
 		}
-		m_laserStates[laserIdx] *= m_keySensitivity;
+		m_rawKeyLaserStates[laserIdx] *= m_keySensitivity;
 	}
 }
 
