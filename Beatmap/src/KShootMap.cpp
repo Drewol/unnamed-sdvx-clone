@@ -115,7 +115,7 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 	{
 		if(line.empty())
 		{
-			break;
+			continue;
 		}
 
 		lineNumber++;

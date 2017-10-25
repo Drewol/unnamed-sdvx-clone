@@ -29,6 +29,7 @@ bool BeatmapPlayback::Reset(MapTime startTime)
 	m_holdObjects.clear();
 
 	m_barTime = 0;
+	m_beatTime = 0;
 	m_initialEffectStateSent = false;
 	return true;
 }
@@ -59,6 +60,7 @@ void BeatmapPlayback::Update(MapTime newTime)
 	const TimingPoint& tp = GetCurrentTimingPoint();
 	double effectiveTime = ((double)newTime - tp.time); // Time with offset applied
 	m_barTime = (float)fmod(effectiveTime / (tp.beatDuration * tp.numerator), 1.0);
+	m_beatTime = (float)fmod(effectiveTime / tp.beatDuration, 1.0);
 
 	// Set new time
 	m_playbackTime = newTime;
@@ -363,6 +365,11 @@ float BeatmapPlayback::TimeToViewDistance(MapTime time)
 float BeatmapPlayback::GetBarTime() const
 {
 	return m_barTime;
+}
+
+float BeatmapPlayback::GetBeatTime() const
+{
+	return m_beatTime;
 }
 
 float BeatmapPlayback::GetZoom(uint8 index)

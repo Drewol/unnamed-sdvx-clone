@@ -72,7 +72,7 @@ class TestBackground : public FullscreenBackground
 
 		Vector3 timing;
 		const TimingPoint& tp = game->GetPlayback().GetCurrentTimingPoint();
-		timing.x = game->GetPlayback().GetBarTime();
+		timing.x = game->GetPlayback().GetBeatTime();
 		timing.z = game->GetPlayback().GetLastTime() / 1000.0f;
 		// every 1/4 tick
 		float tickTime = fmodf(timing.x * (float)tp.numerator, 1.0f);

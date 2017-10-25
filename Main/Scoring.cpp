@@ -4,7 +4,8 @@
 #include <math.h>
 #include "GameConfig.hpp"
 
-const MapTime Scoring::goodHitTime = 75;
+const MapTime Scoring::missHitTime = 150;
+const MapTime Scoring::goodHitTime = 100;
 const MapTime Scoring::perfectHitTime = 35;
 const float Scoring::idleLaserSpeed = 1.0f;
 
@@ -451,10 +452,14 @@ void Scoring::m_UpdateTicks()
 					if(!tick->HasFlag(TickFlags::Start) || (autoplay || autoplayButtons))
 					{
 						// Check buttons here for holds
-						if(m_input && (m_input->GetButton(button) || autoplay || autoplayButtons))
-						{
-							m_TickHit(tick, buttonCode);
-							processed = true;
+						if((m_input && m_input->GetButton(button)) || autoplay || autoplayButtons)
+						{							
+							// Make sure the button wasnt being held long before the hold became active.
+							if (tick->object->time - goodHitTime < m_buttonHitTime[buttonCode] || autoplay || autoplayButtons)
+							{
+								m_TickHit(tick, buttonCode);
+								processed = true;
+							}
 						}
 					}
 				}
@@ -537,8 +542,10 @@ ObjectState* Scoring::m_ConsumeTick(uint32 buttonCode)
 				// Ignore laser ticks
 				continue;
 			}
-
-			m_TickHit(tick, buttonCode, delta);
+			if(delta < Scoring::goodHitTime)
+				m_TickHit(tick, buttonCode, delta);
+			else
+				m_TickMiss(tick, buttonCode, delta);
 			delete tick;
 			ticks.Remove(tick, false);
 
@@ -828,6 +835,7 @@ void Scoring::m_OnButtonPressed(Input::Button buttonCode)
 
 	if(buttonCode < Input::Button::BT_S)
 	{
+		m_buttonHitTime[(uint32)buttonCode] = m_playback->GetLastTime();
 		ObjectState* obj = m_ConsumeTick((uint32)buttonCode);
 		if(!obj)
 		{
@@ -924,7 +932,7 @@ MapTime ScoreTick::GetHitWindow() const
 		if(!HasFlag(TickFlags::Start) && !HasFlag(TickFlags::Slam))
 			return 0;
 	}
-	return Scoring::goodHitTime;
+	return Scoring::missHitTime;
 }
 ScoreHitRating ScoreTick::GetHitRating(MapTime currentTime) const
 {
@@ -937,7 +945,7 @@ ScoreHitRating ScoreTick::GetHitRatingFromDelta(MapTime delta) const
 	if(HasFlag(TickFlags::Button))
 	{
 		// Button hit judgeing
-		if(delta > GetHitWindow())
+		if(delta > Scoring::goodHitTime)
 			return ScoreHitRating::Miss;
 		if(delta < Scoring::perfectHitTime)
 			return ScoreHitRating::Perfect;

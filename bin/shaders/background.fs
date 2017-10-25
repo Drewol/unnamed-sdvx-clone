@@ -57,11 +57,11 @@ void main()
     uv.y *=  thing;
     uv.y = (uv.y + 1.0) / 2.0;
     uv.x *= thing / 3.0;
-    uv.x += timing.x * 10.0;
+    uv.x += timing.x * 2.0;
 	
     vec4 col = texture2D(mainTex, uv);
     float hsvVal = (col.x + col.y + col.z) / 3.0;
-    vec3 clear_col = hsv2rgb(vec3(0.3 * uv.x + 0.3, 1.0, hsvVal));
+    vec3 clear_col = hsv2rgb(vec3(0.5 * uv.x + 0.1, 1.0, hsvVal));
     
     col.xyz *= (1.0 - clearTransition);
     col.xyz += clear_col * clearTransition * 2;
