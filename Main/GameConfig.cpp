@@ -34,7 +34,7 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::UseCMod, false);
 	Set(GameConfigKeys::ModSpeed, 300.0f);
 	Set(GameConfigKeys::SongFolder, "songs");
-
+	Set(GameConfigKeys::SongSelectLaserSpeed, 3.0f);
 
 	// Input settings
 	SetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice, InputDevice::Keyboard);

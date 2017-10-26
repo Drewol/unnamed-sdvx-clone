@@ -21,6 +21,7 @@ DefineEnum(GameConfigKeys,
 	SongFolder,
 	FPSTarget,
 	LaserAssistLevel,
+	SongSelectLaserSpeed,
 
 	// Input device setting per element
 	LaserInputDevice,

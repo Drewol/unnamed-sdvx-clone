@@ -675,8 +675,9 @@ public:
 		
 		
         // Song navigation using laser inputs
-        float diff_input = g_input.GetInputLaserDir(0);
-        float song_input = g_input.GetInputLaserDir(1);
+        float songSelectLaserSpeed = g_gameConfig.GetFloat(GameConfigKeys::SongSelectLaserSpeed);
+        float diff_input = g_input.GetInputLaserDir(0) * songSelectLaserSpeed;
+        float song_input = g_input.GetInputLaserDir(1) * songSelectLaserSpeed;
         
         m_advanceDiff += diff_input;
         m_advanceSong += song_input;
