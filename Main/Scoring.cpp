@@ -769,7 +769,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 			float positionDelta = laserTargetPositions[i] - laserPositions[i];
 			float moveDir = Math::Sign(positionDelta);
 			float laserDir = currentSegment->GetDirection();
-			float input = m_laserInput[i];		
+			float input = m_laserInput[i];
 			float inputDir = Math::Sign(input);
 
 			// Always snap laser to start sections if they are completely vertical
@@ -793,6 +793,10 @@ void Scoring::m_UpdateLasers(float deltaTime)
 				{
 					laserPositions[i] = Math::Min(laserPositions[i] + input, laserTargetPositions[i]);
 				}
+				else if (laserDir < 0 && positionDelta > 0 || laserDir > 0 && positionDelta < 0)
+				{
+					laserPositions[i] = laserPositions[i] + input;
+				}
 				else if (laserDir == 0.0f)
 				{
 					if (positionDelta > 0)
@@ -801,13 +805,10 @@ void Scoring::m_UpdateLasers(float deltaTime)
 						laserPositions[i] = Math::Max(laserPositions[i] + input, laserTargetPositions[i]);
 				}
 				notAffectingGameplay = false;
-				if (inputDir == moveDir && positionDelta < laserDistanceLeniency && m_autoLaserTick[i] < m_assistLevel)
+				if (inputDir == moveDir && fabs(positionDelta) < laserDistanceLeniency && m_autoLaserTick[i] < m_assistLevel)
 				{
 					m_autoLaserTick[i] += 1;
 				}
-				
-
-				
 			}
 			timeSinceLaserUsed[i] = 0.0f;
 		}
