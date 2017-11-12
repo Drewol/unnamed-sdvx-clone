@@ -19,12 +19,11 @@ A game based on [KShootMania](http://www.kshootmania.com/) and [SDVX](https://re
 - Supports new sound FX method (real-time sound FX) and old sound FX method (separate NOFX & sound effected music files)
 - Song database cache for near-instant game startup (sqlite3)
 - Song database searching
-- ~~Linux~~/Windows support
+- Linux/Windows support
 
 ### Features currently on hold / in progress:
 - GUI remake
 - Song select UI/Controls to change HiSpeed and other game settings
-- Fix Linux support
 
 The folder that is scanned for songs can be changed in the "Main.cfg" file (`songfolder = "path to song folder"`).  
 Make sure you use a *plain* text editor like Notepad, Notepad++ or gedit; NOT a *rich* text editor like Wordpad or Word!
