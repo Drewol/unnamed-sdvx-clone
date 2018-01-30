@@ -69,3 +69,5 @@ if(DEFINED INSTALL_INC_DIR)
                      include/squirrel.h)
   install(FILES ${SQ_PUB_HEADERS} DESTINATION ${INSTALL_INC_DIR})
 endif()
+
+target_include_directories(squirrel PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

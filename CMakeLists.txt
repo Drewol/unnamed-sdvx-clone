@@ -85,6 +85,12 @@ if(MSVC)
 	set_target_properties(vorbis PROPERTIES FOLDER "Third Party")
 	set_target_properties(freetype PROPERTIES FOLDER "Third Party")
 	set_target_properties(SDL2 PROPERTIES FOLDER "Third Party")
+	set_target_properties(squirrel PROPERTIES FOLDER "Third Party")
+	set_target_properties(squirrel_static PROPERTIES FOLDER "Third Party")
+	set_target_properties(sq PROPERTIES FOLDER "Third Party")
+	set_target_properties(sq_static PROPERTIES FOLDER "Third Party")
+	set_target_properties(sqstdlib PROPERTIES FOLDER "Third Party")
+	set_target_properties(sqstdlib_static PROPERTIES FOLDER "Third Party")
 	
 	# My libraries in the libraries folder
 	set_target_properties(Shared PROPERTIES FOLDER Libraries)
