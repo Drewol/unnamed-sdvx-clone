@@ -30,7 +30,7 @@
 // TODO(local): TryLoadMap taken from Game.cpp, might, want to find a better place to put it then.
 
 // Try load map helper
-Ref<Beatmap> TryLoadMap(const String& path)
+Ref<Beatmap> TryLoadChart(const String& path)
 {
 	// Load map file
 	Beatmap* newMap = new Beatmap();
@@ -114,7 +114,7 @@ public:
 			return false;
 		}
 
-		m_chart = TryLoadMap(m_chartPath);
+		m_chart = TryLoadChart(m_chartPath);
 
 		// Check failure of above loading attempts
 		if (!m_chart)
