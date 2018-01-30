@@ -293,6 +293,10 @@ bool Application::m_Init()
 		g_commonGUIStyle = Ref<CommonGUIStyle>(new CommonGUIStyle(g_gl, m_skin));
 	}
 
+	{
+		ProfilerScope $1("Squirrel Init");
+	}
+
 	// Create root canvas
 	g_rootCanvas = Ref<Canvas>(new Canvas());
 
