@@ -9,6 +9,7 @@
 #include "SongSelectItem.hpp"
 #include <Beatmap/MapDatabase.hpp>
 #include "Game.hpp"
+#include "Editor.hpp"
 #include "TransitionScreen.hpp"
 #include "GameConfig.hpp"
 #include "SongFilter.hpp"
@@ -862,6 +863,25 @@ public:
 			else if (key == SDLK_RIGHT)
 			{
 				m_selectionWheel->AdvanceDifficultySelection(1);
+			}
+			else if (key == SDLK_F1)
+			{
+				MapIndex* map = m_selectionWheel->GetSelection();
+				if (map)
+				{
+					DifficultyIndex* diff = m_selectionWheel->GetSelectedDifficulty();
+
+					Editor* editor = Editor::Create(*diff);
+					if (!editor)
+					{
+						Logf("Failed to start editor", Logger::Error);
+						return;
+					}
+
+					// Transition to game
+					TransitionScreen* transistion = TransitionScreen::Create(editor);
+					g_application->AddTickable(transistion);
+				}
 			}
 			else if (key == SDLK_F5)
 			{
