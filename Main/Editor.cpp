@@ -63,6 +63,9 @@ private:
 	bool m_ended = false;
 
 	Ref<Canvas> m_canvas;
+	Ref<CommonGUIStyle> m_guiStyle;
+
+	Graphics::Font m_fontDivlit;
 
 	// The beatmap
 	Ref<Beatmap> m_chart;
@@ -125,6 +128,10 @@ public:
 
 		const BeatmapSettings& chartSettings = m_chart->GetMapSettings();
 
+		// Initialize input/scoring
+		if (!InitEditor())
+			return false;
+
 		// Load beatmap audio
 		if (!m_audioPlayback.Init(m_playback, m_chartRootPath))
 			return false;
@@ -146,6 +153,9 @@ public:
 
 		// I guess something as simple as this for the time being is good enough
 		//loader.AddTexture(squareParticleTexture, "particle_square.png");
+
+		if (!InitHUD())
+			return false;
 
 		if (!loader.Load())
 			return false;
@@ -180,6 +190,27 @@ public:
 		}
 		else
 			rootSlot->anchor = Anchors::Full;
+		return true;
+	}
+
+	// Initialize HUD elements/layout
+	bool InitHUD()
+	{
+		String skin = g_gameConfig.GetString(GameConfigKeys::Skin);
+		CheckedLoad(m_fontDivlit = FontRes::Create(g_gl, "skins/" + skin + "/fonts/divlit_custom.ttf"));
+		m_guiStyle = g_commonGUIStyle;
+
+		// Game GUI canvas
+		m_canvas = Utility::MakeRef(new Canvas());
+
+		Vector2 canvasRes = GUISlotBase::ApplyFill(FillMode::Fit, Vector2(640, 480), Rect(0, 0, g_resolution.x, g_resolution.y)).size;
+		Vector2 topLeft = Vector2(g_resolution / 2 - canvasRes / 2);
+		Vector2 bottomRight = topLeft + canvasRes;
+		topLeft.y = Math::Min(topLeft.y, g_resolution.y * 0.2f);
+		canvasRes.y = bottomRight.y - topLeft.y;
+
+		float scale = canvasRes.x / 640.f;
+
 		return true;
 	}
 
@@ -262,6 +293,7 @@ public:
 		else if (key == SDLK_ESCAPE)
 		{
 			// TODO(local): menu or something
+			g_application->RemoveTickable(this);
 		}
 		else if (key == SDLK_F5)
 		{
