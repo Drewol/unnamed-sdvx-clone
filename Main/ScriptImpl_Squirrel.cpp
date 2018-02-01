@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Shared/Shared.hpp"
 #include "Script.hpp"
 #include "AsyncLoadable.hpp"
