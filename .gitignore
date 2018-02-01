@@ -42,4 +42,3 @@ Makefile
 
 # Not adding photoshop source files for textures
 *.psd
-/bin
