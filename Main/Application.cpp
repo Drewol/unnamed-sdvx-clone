@@ -2,6 +2,7 @@
 #include "Application.hpp"
 #include <Beatmap/Beatmap.hpp>
 #include "Game.hpp"
+#include "Script.hpp"
 #include "Test.hpp"
 #include "SongSelect.hpp"
 #include "TitleScreen.hpp"
@@ -22,7 +23,6 @@
 #else
 #include "SDL2/SDL_keycode.h"
 #endif
-#include "squirrel.h"
 
 GameConfig g_gameConfig;
 OpenGL* g_gl = nullptr;
@@ -292,10 +292,6 @@ bool Application::m_Init()
 		ProfilerScope $1("Loading common GUI elements");
 		// Load GUI style for common elements
 		g_commonGUIStyle = Ref<CommonGUIStyle>(new CommonGUIStyle(g_gl, m_skin));
-	}
-
-	{
-		ProfilerScope $1("Squirrel Init");
 	}
 
 	// Create root canvas
