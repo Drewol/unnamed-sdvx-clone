@@ -10,5 +10,7 @@ if(WIN32)
 	add_subdirectory(lpng1621)
 	add_subdirectory(libogg-1.3.2)
 	add_subdirectory(libvorbis-1.3.5)
-	add_subdirectory(squirrel-3.1)
 endif(WIN32)
+
+# and use bundled Squirrel project even on Linux
+add_subdirectory(squirrel-3.1)
