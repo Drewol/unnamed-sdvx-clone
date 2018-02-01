@@ -1,4 +1,5 @@
 #include "Shared/Shared.hpp"
+#include "Script.hpp"
 #include "AsyncLoadable.hpp"
 
 #include "squirrel.h"
