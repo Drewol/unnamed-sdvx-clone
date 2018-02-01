@@ -26,19 +26,19 @@ static void CompilerErrorHandler(HSQUIRRELVM vm, const SQChar* desc, const SQCha
 {
 }
 
-class Script_Impl : public Script, IAsyncLoadable
+class Script_SqImpl : public Script, IAsyncLoadable
 {
 private:
 	const String& m_scriptPath;
 	HSQUIRRELVM m_sqvm;
 
 public:
-	Script_Impl(const String& scriptPath)
+	Script_SqImpl(const String& scriptPath)
 		: m_scriptPath(scriptPath)
 	{
 	}
 
-	~Script_Impl()
+	~Script_SqImpl()
 	{
 		Close();
 	}
@@ -89,6 +89,6 @@ public:
 
 Script* Script::Create(const String& scriptPath)
 {
-	Script* impl = new Script_Impl(scriptPath);
+	Script* impl = new Script_SqImpl(scriptPath);
 	return impl;
 }
