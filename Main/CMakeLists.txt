@@ -36,6 +36,7 @@ target_link_libraries(Main Graphics)
 target_link_libraries(Main Audio)
 target_link_libraries(Main GUI)
 target_link_libraries(Main Beatmap)
+target_link_libraries(Main squirrel)
 
 if(WIN32)
 	# Bundled libraries

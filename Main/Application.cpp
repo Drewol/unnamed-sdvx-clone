@@ -22,6 +22,7 @@
 #else
 #include "SDL2/SDL_keycode.h"
 #endif
+#include "squirrel.h"
 
 GameConfig g_gameConfig;
 OpenGL* g_gl = nullptr;
