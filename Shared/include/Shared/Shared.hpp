@@ -33,3 +33,6 @@
 #include "Rect.hpp"
 #include "Margin.hpp"
 #include "Random.hpp"
+
+// Scripts
+#include "Script.hpp"

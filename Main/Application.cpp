@@ -2,7 +2,7 @@
 #include "Application.hpp"
 #include <Beatmap/Beatmap.hpp>
 #include "Game.hpp"
-#include "Script.hpp"
+#include "Shared/Script.hpp"
 #include "Test.hpp"
 #include "SongSelect.hpp"
 #include "TitleScreen.hpp"

@@ -1,5 +1,5 @@
 #include "Shared/Shared.hpp"
-#include "Script.hpp"
+#include "AsyncLoadable.hpp"
 
 #include "squirrel.h"
 
@@ -26,11 +26,11 @@ static void CompilerErrorHandler(HSQUIRRELVM vm, const SQChar* desc, const SQCha
 {
 }
 
-class Script_Impl : public Script
+class Script_Impl : public Script, IAsyncLoadable
 {
 private:
-	HSQUIRRELVM m_sqvm;
 	const String& m_scriptPath;
+	HSQUIRRELVM m_sqvm;
 
 public:
 	Script_Impl(const String& scriptPath)
@@ -43,12 +43,18 @@ public:
 		Close();
 	}
 
+	void Close()
+	{
+		sq_close(m_sqvm);
+	}
+
+	// Inherited via IAsyncLoadable
 	virtual bool AsyncLoad() override
 	{
 		m_sqvm = sq_open(SQVM_INIT_STACK_SIZE);
 		sq_setcompilererrorhandler(m_sqvm, CompilerErrorHandler);
 
-		std::ifstream fileStream (m_scriptPath, std::ios::binary);
+		std::ifstream fileStream(m_scriptPath, std::ios::binary);
 		if (!fileStream.is_open())
 		{
 			// LOGGGG
@@ -79,15 +85,10 @@ public:
 	{
 		return true;
 	}
-
-	void Close()
-	{
-		sq_close(m_sqvm);
-	}
 };
 
 Script* Script::Create(const String& scriptPath)
 {
 	Script* impl = new Script_Impl(scriptPath);
-	return nullptr;
+	return impl;
 }

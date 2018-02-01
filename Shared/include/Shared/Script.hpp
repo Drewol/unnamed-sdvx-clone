@@ -1,7 +1,6 @@
 #pragma once
-#include "AsyncLoadable.hpp"
 
-class Script : public IAsyncLoadable
+class Script
 {
 protected:
 	Script() = default;
