@@ -332,7 +332,8 @@ public:
 		m_currentSelection->SetSelectedDifficulty(newDiff);
 		m_currentlySelectedDiff = newDiff;
 
-		SongSelectIndex* map = m_maps.Find(m_currentlySelectedId);
+		Map<int32, SongSelectIndex> maps = m_SourceCollection();
+		SongSelectIndex* map = maps.Find(m_currentlySelectedId);
 		if(map)
 		{
 			OnDifficultySelected.Call(map[0].GetDifficulties()[m_currentlySelectedDiff]);
@@ -342,7 +343,8 @@ public:
 	{
 		if(!m_currentSelection)
 			return;
-		SongSelectIndex map = m_maps[m_currentlySelectedId];
+		Map<int32, SongSelectIndex> maps = m_SourceCollection();
+		SongSelectIndex map = maps[m_currentlySelectedId];
 		int32 newIdx = m_currentlySelectedDiff + offset;
 		newIdx = Math::Clamp(newIdx, 0, (int32)map.GetDifficulties().size() - 1);
 		SelectDifficulty(newIdx);
