@@ -1,15 +1,18 @@
 #include "stdafx.h"
 #include "SongFilter.hpp"
 
-Map<int32, MapIndex*> LevelFilter::GetFiltered(const Map<int32, MapIndex*>& source)
+Map<int32, SongSelectIndex> LevelFilter::GetFiltered(const Map<int32, SongSelectIndex>& source)
 {
-	Map<int32, MapIndex*> filtered;
+	Map<int32, SongSelectIndex> filtered;
 	for (auto kvp : source)
 	{
-		for (auto diff : kvp.second->difficulties)
+		for (auto diff : kvp.second.GetDifficulties())
 		{
 			if (diff->settings.level == m_level)
-				filtered.Add(kvp.first, kvp.second);
+			{
+				SongSelectIndex index(kvp.second.GetMap(), diff);
+				filtered.Add(index.id, index);
+			}
 		}
 	}
 	return filtered;
@@ -25,9 +28,12 @@ bool LevelFilter::IsAll()
 	return false;
 }
 
-Map<int32, MapIndex*> FolderFilter::GetFiltered(const Map<int32, MapIndex*>& source)
+Map<int32, SongSelectIndex> FolderFilter::GetFiltered(const Map<int32, SongSelectIndex>& source)
 {
-	return m_mapDatabase->FindMapsByFolder(m_folder);
+	Map<int32, MapIndex*> maps = m_mapDatabase->FindMapsByFolder(m_folder);
+
+	Map<int32, SongSelectIndex> result;
+	return result;
 }
 
 String FolderFilter::GetName()

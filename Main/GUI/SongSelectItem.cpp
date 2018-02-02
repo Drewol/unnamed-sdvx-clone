@@ -203,16 +203,17 @@ Vector2 SongSelectItem::GetDesiredSize(GUIRenderData rd)
 	sizeOut.x = Math::Min(sizeOut.x, rd.area.size.x);
 	return sizeOut;
 }
-void SongSelectItem::SetMap(struct MapIndex* map)
+// TODO(local): Change this to SetEntry or something
+void SongSelectItem::SetIndex(struct SongSelectIndex map)
 {
-	const BeatmapSettings& settings = map->difficulties[0]->settings;
+	const BeatmapSettings& settings = map.GetDifficulties()[0]->settings;
 	m_title->SetText(Utility::ConvertToWString(settings.title));
 	m_artist->SetText(Utility::ConvertToWString(settings.artist));
 
 	// Add all difficulty icons
 	m_diffSelect->Clear();
 	m_diffSelectors.clear();
-	for(auto d : map->difficulties)
+	for(auto d : map.GetDifficulties())
 	{
 		SongDifficultyFrame* frame = new SongDifficultyFrame(m_style, d);
 		LayoutBox::Slot* slot = m_diffSelect->Add(frame->MakeShared());

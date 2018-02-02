@@ -6,7 +6,6 @@
 #include "Scoring.hpp"
 #include "Input.hpp"
 #include <GUI/GUI.hpp>
-#include "SongSelectItem.hpp"
 #include "Game.hpp"
 #include "TransitionScreen.hpp"
 #include "GameConfig.hpp"
@@ -101,11 +100,10 @@ const float PreviewPlayer::m_fadeDuration = 0.5f;
 */
 class SelectionWheel : public Canvas
 {
-	Map<MapIndex*, Ref<SongSelectItem>> m_guiElements;
-
-	Map<int32, MapIndex*> m_maps;
-
-	Map<int32, MapIndex*> m_mapFilter;
+	// keyed on SongSelectIndex::id
+	Map<int32, Ref<SongSelectItem>> m_guiElements;
+	Map<int32, SongSelectIndex> m_maps;
+	Map<int32, SongSelectIndex> m_mapFilter;
 	bool m_filterSet = false;
 
 	// Currently selected map ID
@@ -127,7 +125,8 @@ public:
 	{
 		for(auto m : maps)
 		{
-			m_maps.Add(m->id, m);
+			SongSelectIndex index(m);
+			m_maps.Add(index.id, index);
 		}
 		if(!m_currentSelection)
 			AdvanceSelection(0);
@@ -136,8 +135,11 @@ public:
 	{
 		for(auto m : maps)
 		{
-			m_maps.erase(m->id);
-			auto it = m_guiElements.find(m);
+			// TODO(local): don't hard-code the id calc here, maybe make it a utility function?
+			SongSelectIndex index = m_maps.at(m->id * 10);
+			m_maps.erase(index.id);
+
+			auto it = m_guiElements.find(index.id);
 			if(it != m_guiElements.end())
 			{
 				// Clear selection if a removed item was selected
@@ -158,10 +160,13 @@ public:
 	{
 		for(auto m : maps)
 		{
-			auto it = m_guiElements.find(m);
+			// TODO(local): don't hard-code the id calc here, maybe make it a utility function?
+			SongSelectIndex index = m_maps.at(m->id * 10);
+
+			auto it = m_guiElements.find(index.id);
 			if(it != m_guiElements.end())
 			{
-				it->second->SetMap(m);
+				it->second->SetIndex(index.GetMap());
 			}
 		}
 	}
@@ -176,7 +181,11 @@ public:
 		m_filterSet = false;
 		m_mapFilter.clear();
 		m_maps.clear();
-		m_maps = newList;
+		for (auto m : newList)
+		{
+			SongSelectIndex index(m.second);
+			m_maps.Add(index.id, index);
+		}
 		if(m_maps.size() > 0)
 		{
 			AdvanceSelection(0);
@@ -193,7 +202,7 @@ public:
 	}
 	void SelectMap(int32 newIndex)
 	{
-		Set<MapIndex*> visibleMaps;
+		Set<int32> visibleIndices;
 		auto& srcCollection = m_SourceCollection();
 		auto it = srcCollection.find(newIndex);
 		if(it != srcCollection.end())
@@ -217,11 +226,14 @@ public:
 			{
 				if(it != srcCollection.end())
 				{
-					visibleMaps.Add(it->second);
+					SongSelectIndex index = it->second;
+					int32 id = index.id;
+
+					visibleIndices.Add(id);
 
 					// Add a new map slot
-					bool newItem = m_guiElements.find(it->second) == m_guiElements.end();
-					Ref<SongSelectItem> item = m_GetMapGUIElement(it->second);
+					bool newItem = m_guiElements.find(id) == m_guiElements.end();
+					Ref<SongSelectItem> item = m_GetMapGUIElement(index);
 					float offset = 0;
 					if(i != 0)
 					{
@@ -258,7 +270,7 @@ public:
 					if(i == 0)
 					{
 						m_currentlySelectedId = newIndex;
-						m_OnMapSelected(it->second);
+						m_OnMapSelected(index);
 					}
 
 					it++;
@@ -270,7 +282,7 @@ public:
 		// Cleanup invisible elements
 		for(auto it = m_guiElements.begin(); it != m_guiElements.end();)
 		{
-			if(!visibleMaps.Contains(it->first))
+			if(!visibleIndices.Contains(it->first))
 			{
 				Remove(it->second.As<GUIElementBase>());
 				it = m_guiElements.erase(it);
@@ -320,19 +332,19 @@ public:
 		m_currentSelection->SetSelectedDifficulty(newDiff);
 		m_currentlySelectedDiff = newDiff;
 
-		MapIndex** map = m_maps.Find(m_currentlySelectedId);
+		SongSelectIndex* map = m_maps.Find(m_currentlySelectedId);
 		if(map)
 		{
-			OnDifficultySelected.Call(map[0]->difficulties[m_currentlySelectedDiff]);
+			OnDifficultySelected.Call(map[0].GetDifficulties()[m_currentlySelectedDiff]);
 		}
 	}
 	void AdvanceDifficultySelection(int32 offset)
 	{
 		if(!m_currentSelection)
 			return;
-		MapIndex* map = m_maps[m_currentlySelectedId];
+		SongSelectIndex map = m_maps[m_currentlySelectedId];
 		int32 newIdx = m_currentlySelectedDiff + offset;
-		newIdx = Math::Clamp(newIdx, 0, (int32)map->difficulties.size() - 1);
+		newIdx = Math::Clamp(newIdx, 0, (int32)map.GetDifficulties().size() - 1);
 		SelectDifficulty(newIdx);
 	}
 
@@ -343,7 +355,12 @@ public:
 	// Set display filter
 	void SetFilter(Map<int32, MapIndex *> filter)
 	{
-		m_mapFilter = filter;
+		m_mapFilter.clear();
+		for (auto m : filter)
+		{
+			SongSelectIndex index(m.second);
+			m_mapFilter.Add(index.id, index);
+		}
 		m_filterSet = true;
 		AdvanceSelection(0);
 	}
@@ -364,46 +381,45 @@ public:
 
 	MapIndex* GetSelection() const
 	{
-		MapIndex*const* map = m_maps.Find(m_currentlySelectedId);
+		SongSelectIndex const* map = m_SourceCollection().Find(m_currentlySelectedId);
 		if(map)
-			return *map;
+			return map->GetMap();
 		return nullptr;
 	}
 	DifficultyIndex* GetSelectedDifficulty() const
 	{
-		MapIndex*const* map = m_maps.Find(m_currentlySelectedId);
+		SongSelectIndex const* map = m_SourceCollection().Find(m_currentlySelectedId);
 		if(map)
-		{
-			return map[0]->difficulties[m_currentlySelectedDiff];
-		}
+			return map->GetDifficulties()[m_currentlySelectedDiff];
 		return nullptr;
 	}
 
 private:
-	const Map<int32, MapIndex*>& m_SourceCollection()
+	const Map<int32, SongSelectIndex>& m_SourceCollection() const
 	{
 		return m_filterSet ? m_mapFilter : m_maps;
 	}
-	Ref<SongSelectItem> m_GetMapGUIElement(MapIndex* index)
+	Ref<SongSelectItem> m_GetMapGUIElement(SongSelectIndex index)
 	{
-		auto it = m_guiElements.find(index);
+		auto it = m_guiElements.find(index.id);
 		if(it != m_guiElements.end())
 			return it->second;
 
 		Ref<SongSelectItem> newItem = Ref<SongSelectItem>(new SongSelectItem(m_style));
 
 		// Send first map as metadata settings
-		const BeatmapSettings& firstSettings = index->difficulties[0]->settings;
-		newItem->SetMap(index);
-		m_guiElements.Add(index, newItem);
+		const BeatmapSettings& firstSettings = index.GetDifficulties()[0]->settings;
+		newItem->SetIndex(index);
+		m_guiElements.Add(index.id, newItem);
 		return newItem;
 	}
-	void m_OnMapSelected(MapIndex* map)
+	// TODO(local): pretty sure this should be m_OnIndexSelected, and we should filter a call to OnMapSelected
+	void m_OnMapSelected(SongSelectIndex index)
 	{
 		// Update compact mode selection views
 		if(m_currentSelection)
 			m_currentSelection->SwitchCompact(true);
-		m_currentSelection = m_guiElements[map];
+		m_currentSelection = m_guiElements[index.id];
 		m_currentSelection->SwitchCompact(false);
 
 		//if(map && map->id == m_currentlySelectedId)
@@ -411,13 +427,13 @@ private:
 
 		// Clamp diff selection
 		int32 selectDiff = m_currentlySelectedDiff;
-		if(m_currentlySelectedDiff >= (int32)map->difficulties.size())
+		if(m_currentlySelectedDiff >= (int32)index.GetDifficulties().size())
 		{
-			selectDiff = (int32)map->difficulties.size() - 1;
+			selectDiff = (int32)index.GetDifficulties().size() - 1;
 		}
 		SelectDifficulty(selectDiff);
 
-		OnMapSelected.Call(map);
+		OnMapSelected.Call(index.GetMap());
 	}
 };
 
@@ -497,7 +513,7 @@ public:
 		for (String p : Path::GetSubDirs(g_gameConfig.GetString(GameConfigKeys::SongFolder)))
 		{
 			SongFilter* filter = new FolderFilter(p, m_mapDB);
-			if(filter->GetFiltered(Map<int32, MapIndex*>()).size() > 0)
+			if(filter->GetFiltered(Map<int32, SongSelectIndex>()).size() > 0)
 				AddFilter(filter);
 		}
 	}
