@@ -32,8 +32,13 @@ Map<int32, SongSelectIndex> FolderFilter::GetFiltered(const Map<int32, SongSelec
 {
 	Map<int32, MapIndex*> maps = m_mapDatabase->FindMapsByFolder(m_folder);
 
-	Map<int32, SongSelectIndex> result;
-	return result;
+	Map<int32, SongSelectIndex> filtered;
+	for (auto m : maps)
+	{
+		SongSelectIndex index(m.second);
+		filtered.Add(index.id, index);
+	}
+	return filtered;
 }
 
 String FolderFilter::GetName()
