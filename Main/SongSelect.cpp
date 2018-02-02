@@ -7,7 +7,6 @@
 #include "Input.hpp"
 #include <GUI/GUI.hpp>
 #include "SongSelectItem.hpp"
-#include <Beatmap/MapDatabase.hpp>
 #include "Game.hpp"
 #include "TransitionScreen.hpp"
 #include "GameConfig.hpp"
