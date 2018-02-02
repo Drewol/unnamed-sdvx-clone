@@ -188,7 +188,11 @@ public:
 		}
 		if(m_maps.size() > 0)
 		{
-			AdvanceSelection(0);
+			// Doing this here, before applying filters, causes our wheel to go
+			//  back to the top when a filter should be applied
+			// TODO(local): Go through everything in this file and try to clean
+			//  up all calls to things like this, to keep it from updating like 7 times >.>
+			//AdvanceSelection(0);
 		}
 	}
 	void SelectRandom()
