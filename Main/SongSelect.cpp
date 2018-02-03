@@ -282,8 +282,11 @@ public:
 	}
 	void m_SelectNearest(int32 id, MapIndex* map, DifficultyIndex* diff)
 	{
-		int32 resultId = 0;
 		Map<int32, SongSelectIndex> maps = m_SourceCollection();
+		int32 resultId = maps[0].id;
+		if (maps.empty())
+			resultId = 0;
+		else resultId = maps[0].id;
 
 		// attempt to get the exact id first, which is the pair of map/diff
 		auto exact = maps.Find(id);
