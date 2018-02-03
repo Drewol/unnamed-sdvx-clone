@@ -102,8 +102,8 @@ class SelectionWheel : public Canvas
 {
 	// keyed on SongSelectIndex::id
 	Map<int32, Ref<SongSelectItem>> m_guiElements;
-	Map<int32, SongSelectIndex> m_maps;
-	Map<int32, SongSelectIndex> m_mapFilter;
+	Map<int32, SongSelectIndex> m_mapPool;
+	Map<int32, SongSelectIndex> m_filteredMaps;
 	bool m_filterSet = false;
 
 	// Currently selected map ID
@@ -121,23 +121,15 @@ public:
 	SelectionWheel(Ref<SongSelectStyle> style) : m_style(style)
 	{
 	}
-	void OnMapsAdded(Vector<MapIndex*> maps)
+	// FIXME(local): removing indices DOESN'T REMOVE THEM FROM THE FILTERED SELECTION YET
+	void RemoveMapIndices(Vector<MapIndex*> maps)
 	{
-		for(auto m : maps)
-		{
-			SongSelectIndex index(m);
-			m_maps.Add(index.id, index);
-		}
-		if(!m_currentSelection)
-			AdvanceSelection(0);
-	}
-	void OnMapsRemoved(Vector<MapIndex*> maps)
-	{
+		// this doesn't invalidate the filters, so it simply removes and re-selects where it can
 		for(auto m : maps)
 		{
 			// TODO(local): don't hard-code the id calc here, maybe make it a utility function?
-			SongSelectIndex index = m_maps.at(m->id * 10);
-			m_maps.erase(index.id);
+			SongSelectIndex index = m_mapPool.at(m->id * 10);
+			m_mapPool.erase(index.id);
 
 			auto it = m_guiElements.find(index.id);
 			if(it != m_guiElements.end())
@@ -151,49 +143,42 @@ public:
 				m_guiElements.erase(it);
 			}
 		}
-		if(!m_maps.Contains(m_currentlySelectedId))
+		if(!m_mapPool.Contains(m_currentlySelectedId))
 		{
 			AdvanceSelection(1);
 		}
 	}
-	void OnMapsUpdated(Vector<MapIndex*> maps)
+	void UpdateMapIndex(MapIndex* m)
 	{
-		for(auto m : maps)
-		{
-			// TODO(local): don't hard-code the id calc here, maybe make it a utility function?
-			SongSelectIndex index = m_maps.at(m->id * 10);
+		// TODO(local): don't hard-code the id calc here, maybe make it a utility function?
+		SongSelectIndex index = m_mapPool.at(m->id * 10);
 
-			auto it = m_guiElements.find(index.id);
-			if(it != m_guiElements.end())
-			{
-				it->second->SetIndex(index.GetMap());
-			}
+		auto it = m_guiElements.find(index.id);
+		if(it != m_guiElements.end())
+		{
+			it->second->SetIndex(index.GetMap());
 		}
 	}
-	void OnMapsCleared(Map<int32, MapIndex*> newList)
+	void SetMapPool(Map<int32, MapIndex*> maps)
 	{
-		m_currentSelection.Release();
-		for(auto g : m_guiElements)
-		{
+		// backup info so we can try to restore as close to the previous selection as possible
+		int32 curIndexId = m_currentlySelectedId;
+		MapIndex* curMap = GetSelection();
+		DifficultyIndex* curDiff = GetSelectedDifficulty();
+
+		for (auto g : m_guiElements)
 			Remove(g.second.As<GUIElementBase>());
-		}
 		m_guiElements.clear();
-		m_filterSet = false;
-		m_mapFilter.clear();
-		m_maps.clear();
-		for (auto m : newList)
+
+		m_mapPool.clear();
+		for (auto m : maps)
 		{
 			SongSelectIndex index(m.second);
-			m_maps.Add(index.id, index);
+			m_mapPool.Add(index.id, index);
 		}
-		if(m_maps.size() > 0)
-		{
-			// Doing this here, before applying filters, causes our wheel to go
-			//  back to the top when a filter should be applied
-			// TODO(local): Go through everything in this file and try to clean
-			//  up all calls to things like this, to keep it from updating like 7 times >.>
-			//AdvanceSelection(0);
-		}
+
+		m_ApplyFilter();
+		m_SelectNearest(curIndexId, curMap, curDiff);
 	}
 	void SelectRandom()
 	{
@@ -295,6 +280,49 @@ public:
 			it++;
 		}
 	}
+	void m_SelectNearest(int32 id, MapIndex* map, DifficultyIndex* diff)
+	{
+		int32 resultId = 0;
+		Map<int32, SongSelectIndex> maps = m_SourceCollection();
+
+		// attempt to get the exact id first, which is the pair of map/diff
+		auto exact = maps.Find(id);
+		if (exact)
+			resultId = id;
+		else
+		{
+			Vector<SongSelectIndex> possible;
+			for (auto m : maps)
+			{
+				if (m.second.GetMap() != map)
+					continue;
+				possible.Add(m.second);
+			}
+
+			if (!possible.empty())
+			{
+				// check if an exact match for the difficulty exists
+				bool found = false;
+				for (auto m : possible)
+				{
+					if (found) break;
+					for (auto d : m.GetDifficulties())
+					{
+						if (d != diff)
+							continue;
+
+						resultId = m.id;
+
+						found = true;
+						break;
+					}
+				}
+				// TODO(local): select the closest match if not found
+			}
+		}
+		SelectMap(resultId);
+		AdvanceSelection(0);
+	}
 	void AdvanceSelection(int32 offset)
 	{
 		auto& srcCollection = m_SourceCollection();
@@ -357,29 +385,31 @@ public:
 	// Called when a new map is selected
 	Delegate<MapIndex*> OnMapSelected;
 	Delegate<DifficultyIndex*> OnDifficultySelected;
-
-	// Set display filter
-	void SetFilter(Map<int32, MapIndex *> filter)
+	
+	void m_ApplyFilter()
 	{
-		m_mapFilter.clear();
-		for (auto m : filter)
-		{
-			SongSelectIndex index(m.second);
-			m_mapFilter.Add(index.id, index);
-		}
-		m_filterSet = true;
-		AdvanceSelection(0);
+		m_filteredMaps.clear();
+
+		int32 curIndexId = m_currentlySelectedId;
+		MapIndex* curMap = GetSelection();
+		DifficultyIndex* curDiff = GetSelectedDifficulty();
+
+		if (m_filterSet)
+			m_filteredMaps = m_filter->GetFiltered(m_mapPool);
+
+		m_SelectNearest(curIndexId, curMap, curDiff);
 	}
 	void SetFilter(SongFilter* filter)
 	{
-		m_mapFilter = filter->GetFiltered(m_maps);
-		m_filterSet = !filter->IsAll();
-		AdvanceSelection(0);
+		m_filter = filter;
+		m_filterSet = !m_filter->IsAll();
+		m_ApplyFilter();
 	}
 	void ClearFilter()
 	{
 		if(m_filterSet)
 		{
+			m_filter = nullptr;
 			m_filterSet = false;
 			AdvanceSelection(0);
 		}
@@ -401,9 +431,10 @@ public:
 	}
 
 private:
+	SongFilter* m_filter = nullptr;
 	const Map<int32, SongSelectIndex>& m_SourceCollection() const
 	{
-		return m_filterSet ? m_mapFilter : m_maps;
+		return m_filterSet ? m_filteredMaps : m_mapPool;
 	}
 	Ref<SongSelectItem> m_GetMapGUIElement(SongSelectIndex index)
 	{
@@ -557,6 +588,8 @@ private:
 	// Panel to fade out selection wheel
 	Ref<Panel> m_fadePanel;
 
+	Map<int32, MapIndex*> m_totalMapsDb;
+	Map<int32, MapIndex*> m_searchedMapsDb;
 
 	// Score list canvas
 	Ref<Canvas> m_scoreCanvas;
@@ -663,10 +696,10 @@ public:
 		// Setup the map database
 		m_mapDatabase.AddSearchPath(g_gameConfig.GetString(GameConfigKeys::SongFolder));
 
-		m_mapDatabase.OnMapsAdded.Add(m_selectionWheel.GetData(), &SelectionWheel::OnMapsAdded);
-		m_mapDatabase.OnMapsUpdated.Add(m_selectionWheel.GetData(), &SelectionWheel::OnMapsUpdated);
-		m_mapDatabase.OnMapsRemoved.Add(m_selectionWheel.GetData(), &SelectionWheel::OnMapsRemoved);
-		m_mapDatabase.OnMapsCleared.Add(m_selectionWheel.GetData(), &SelectionWheel::OnMapsCleared);
+		m_mapDatabase.OnMapsAdded.Add(this, &SongSelect_Impl::OnMapsAdded);
+		m_mapDatabase.OnMapsUpdated.Add(this, &SongSelect_Impl::OnMapsUpdated);
+		m_mapDatabase.OnMapsRemoved.Add(this, &SongSelect_Impl::OnMapsRemoved);
+		m_mapDatabase.OnMapsCleared.Add(this, &SongSelect_Impl::OnMapsCleared);
 		m_mapDatabase.StartSearching();
 
 		m_selectionWheel->SelectRandom();
@@ -679,8 +712,53 @@ public:
 	~SongSelect_Impl()
 	{
 		// Clear callbacks
+		m_mapDatabase.OnMapsAdded.RemoveAll(this);
+		m_mapDatabase.OnMapsUpdated.RemoveAll(this);
+		m_mapDatabase.OnMapsRemoved.RemoveAll(this);
+		// TODO(local): which is better/necessary?
+		m_mapDatabase.OnMapsCleared.RemoveAll(this);
 		m_mapDatabase.OnMapsCleared.Clear();
 		g_input.OnButtonPressed.RemoveAll(this);
+	}
+
+	void OnMapsAdded(Vector<MapIndex*> maps)
+	{
+		for (auto m : maps)
+			m_totalMapsDb.Add(m->id, m);
+
+		UpdatedSearchedFromDatabase();
+	}
+	void OnMapsRemoved(Vector<MapIndex*> maps)
+	{
+		m_selectionWheel->RemoveMapIndices(maps);
+		for (auto m : maps)
+		{
+			m_totalMapsDb.erase(m->id);
+		}
+	}
+	void OnMapsUpdated(Vector<MapIndex*> maps)
+	{
+		for (auto m : maps)
+			m_selectionWheel->UpdateMapIndex(m);
+	}
+	void OnMapsCleared(Map<int32, MapIndex*> newList)
+	{
+		m_totalMapsDb.clear();
+		m_totalMapsDb = newList;
+
+		UpdatedSearchedFromDatabase();
+	}
+
+	void UpdatedSearchedFromDatabase()
+	{
+		const WString& search = m_searchField->GetText();
+		if (!search.empty())
+		{
+			String utf8Search = Utility::ConvertToUTF8(search);
+			m_searchedMapsDb = m_mapDatabase.FindMaps(utf8Search);
+		}
+		else m_searchedMapsDb = m_totalMapsDb;
+		m_selectionWheel->SetMapPool(m_searchedMapsDb);
 	}
 
 	// When a map is selected in the song wheel
@@ -737,24 +815,12 @@ public:
 			if (place++ > 9)
 				break;
 		}
-
-
 	}
-
 	/// TODO: Fix some conflicts between search field and filter selection
 	void OnSearchTermChanged(const WString& search)
 	{
-		if(search.empty())
-			m_filterSelection->AdvanceSelection(0);
-		else
-		{
-			String utf8Search = Utility::ConvertToUTF8(search);
-			Map<int32, MapIndex*> filter = m_mapDatabase.FindMaps(utf8Search);
-			m_selectionWheel->SetFilter(filter);
-		}
+		UpdatedSearchedFromDatabase();
 	}
-    
-
     void m_OnButtonPressed(Input::Button buttonCode)
     {
 		if (m_suspended)
@@ -978,6 +1044,19 @@ public:
         m_advanceSong -= advanceSongActual;
     }
 
+	void UpdateMapSets()
+	{
+		m_totalMapsDb = m_mapDatabase.GetMaps();
+
+		const WString& search = m_searchField->GetText();
+		if (!search.empty())
+		{
+			String utf8Search = Utility::ConvertToUTF8(search);
+			m_searchedMapsDb = m_mapDatabase.FindMaps(utf8Search);
+		}
+		else m_searchedMapsDb = m_totalMapsDb;
+	}
+
 	virtual void OnSuspend()
 	{
 		m_suspended = true;
@@ -994,7 +1073,7 @@ public:
 		m_previewPlayer.Restore();
 		m_mapDatabase.StartSearching();
 
-		OnSearchTermChanged(m_searchField->GetText());
+		UpdatedSearchedFromDatabase();
 		
 		Canvas::Slot* slot = g_rootCanvas->Add(m_canvas.As<GUIElementBase>());
 		slot->anchor = Anchors::Full;
