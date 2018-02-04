@@ -30,15 +30,20 @@ bool LevelFilter::IsAll()
 
 Map<int32, SongSelectIndex> FolderFilter::GetFiltered(const Map<int32, SongSelectIndex>& source)
 {
-	Map<int32, MapIndex*> maps = m_mapDatabase->FindMapsByFolder(m_folder);
-
 	Map<int32, SongSelectIndex> filtered;
-	for (auto m : maps)
+	String folder = "\\" + m_folder + "\\";
+	for (auto kvp : source)
 	{
-		SongSelectIndex index(m.second);
-		filtered.Add(index.id, index);
+		MapIndex* map = kvp.second.GetMap();
+		if (map->path.find(folder) != -1)
+		{
+			SongSelectIndex index(map);
+			filtered.Add(index.id, index);
+		}
 	}
+	Logf("%d items in filter for %s", Logger::Info, filtered.size(), m_folder);
 	return filtered;
+//	Map<int32, MapIndex*> maps = m_mapDatabase->FindMapsByFolder(m_folder);
 }
 
 String FolderFilter::GetName()

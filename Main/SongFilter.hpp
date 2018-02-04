@@ -33,13 +33,11 @@ private:
 class FolderFilter : public SongFilter
 {
 public:
-	FolderFilter(String folder, MapDatabase* database) : m_folder(folder), m_mapDatabase(database) {}
+	FolderFilter(String folder) : m_folder(folder) {}
 	virtual Map<int32, SongSelectIndex> GetFiltered(const Map<int32, SongSelectIndex>& source);
 	virtual String GetName() override;
 	virtual bool IsAll() override;
 
 private:
 	String m_folder;
-	MapDatabase* m_mapDatabase;
-
 };

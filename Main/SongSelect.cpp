@@ -550,10 +550,18 @@ public:
 	void SetMapDB(MapDatabase* db)
 	{
 		m_mapDB = db;
+
+		Map<int32, SongSelectIndex> mapPool;
+		for (auto m : db->GetMaps())
+		{
+			SongSelectIndex index(m.second);
+			mapPool.Add(index.id, index);
+		}
+
 		for (String p : Path::GetSubDirs(g_gameConfig.GetString(GameConfigKeys::SongFolder)))
 		{
-			SongFilter* filter = new FolderFilter(p, m_mapDB);
-			if(filter->GetFiltered(Map<int32, SongSelectIndex>()).size() > 0)
+			SongFilter* filter = new FolderFilter(p);
+			if (filter->GetFiltered(mapPool).size() > 0)
 				AddFilter(filter);
 		}
 	}
