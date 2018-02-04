@@ -790,9 +790,18 @@ public:
 				// m_previewPlayer.Restore();
 			}
 		} else{
-			// Wait at least 15 ticks before attempting to load song to prevent loading songs while scrolling very fast
-			m_previewDelayTicks = 15;
-			m_currentPreviewAudio = map;
+			// make sure that the map we got has difficulties, it's not garbage data
+			// TODO(local): This caused me problems when re-loading the game with different 
+			//  charts (one copied in directly to the bin/songs folder after changing the
+			//  settings from my ksm songs)
+			// Investigate where we need to guarantee that charts are loaded befure making
+			//  updates to audio and UI proper, then this can be removed again.
+			if (map->difficulties.size() > 0)
+			{
+				// Wait at least 15 ticks before attempting to load song to prevent loading songs while scrolling very fast
+				m_previewDelayTicks = 15;
+				m_currentPreviewAudio = map;
+			}
 			m_previewLoaded = false;
 		}
 	}
