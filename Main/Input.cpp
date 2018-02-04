@@ -71,6 +71,7 @@ void Input::Cleanup()
 	{
 		m_window->OnKeyPressed.RemoveAll(this);
 		m_window->OnKeyReleased.RemoveAll(this);
+		m_window->OnMouseMotion.RemoveAll(this);
 		m_window = nullptr;
 	}
 }
