@@ -121,6 +121,7 @@ public:
 	SelectionWheel(Ref<SongSelectStyle> style) : m_style(style)
 	{
 	}
+	/*
 	// FIXME(local): removing indices DOESN'T REMOVE THEM FROM THE FILTERED SELECTION YET
 	void RemoveMapIndices(Vector<MapIndex*> maps)
 	{
@@ -159,6 +160,7 @@ public:
 			it->second->SetIndex(index.GetMap());
 		}
 	}
+	*/
 	void SetMapPool(Map<int32, MapIndex*> maps)
 	{
 		// backup info so we can try to restore as close to the previous selection as possible
@@ -707,9 +709,9 @@ public:
 		// Setup the map database
 		m_mapDatabase.AddSearchPath(g_gameConfig.GetString(GameConfigKeys::SongFolder));
 
-		m_mapDatabase.OnMapsAdded.Add(this, &SongSelect_Impl::OnMapsAdded);
-		m_mapDatabase.OnMapsUpdated.Add(this, &SongSelect_Impl::OnMapsUpdated);
-		m_mapDatabase.OnMapsRemoved.Add(this, &SongSelect_Impl::OnMapsRemoved);
+		//m_mapDatabase.OnMapsAdded.Add(this, &SongSelect_Impl::OnMapsAdded);
+		//m_mapDatabase.OnMapsUpdated.Add(this, &SongSelect_Impl::OnMapsUpdated);
+		//m_mapDatabase.OnMapsRemoved.Add(this, &SongSelect_Impl::OnMapsRemoved);
 		m_mapDatabase.OnMapsCleared.Add(this, &SongSelect_Impl::OnMapsCleared);
 		m_mapDatabase.StartSearching();
 
@@ -731,7 +733,7 @@ public:
 		m_mapDatabase.OnMapsCleared.Clear();
 		g_input.OnButtonPressed.RemoveAll(this);
 	}
-
+	/*
 	void OnMapsAdded(Vector<MapIndex*> maps)
 	{
 		for (auto m : maps)
@@ -752,6 +754,7 @@ public:
 		for (auto m : maps)
 			m_selectionWheel->UpdateMapIndex(m);
 	}
+	*/
 	void OnMapsCleared(Map<int32, MapIndex*> newList)
 	{
 		m_totalMapsDb.clear();
