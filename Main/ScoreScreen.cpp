@@ -25,6 +25,7 @@ private:
 	Ref<Canvas> m_canvas;
 	Ref<HealthGauge> m_gauge;
 	Ref<Panel> m_jacket;
+	Ref<Canvas> m_timingStatsCanvas;
 	Ref<LayoutBox> m_itemBox;
 	MapDatabase m_mapDatabase;
 	// Things for score screen
@@ -41,6 +42,9 @@ private:
 	float m_finalGaugeValue;
 	float* m_gaugeSamples;
 	String m_jacketPath;
+	uint32 m_timedHits[2];
+	float m_meanHitDelta;
+	MapTime m_medianHitDelta;
 
 	Ref<SongSelectStyle> m_songSelectStyle;
 
@@ -59,8 +63,12 @@ public:
 		m_maxCombo = scoring.maxComboCounter;
 		m_finalGaugeValue = scoring.currentGauge;
 		m_gaugeSamples = game->GetGaugeSamples();
-		memcpy(m_categorizedHits, scoring.categorizedHits, sizeof(scoring.categorizedHits));
+		m_timedHits[0] = scoring.timedHits[0];
+		m_timedHits[1] = scoring.timedHits[1];
 
+		memcpy(m_categorizedHits, scoring.categorizedHits, sizeof(scoring.categorizedHits));
+		m_meanHitDelta = scoring.GetMeanHitDelta();
+		m_medianHitDelta = scoring.GetMedianHitDelta();
 		// Don't save the score if autoplay was on or if the song was launched using command line
 		if(!m_autoplay && !m_autoButtons && game->GetDifficultyIndex().mapId != -1)
 			m_mapDatabase.AddScore(game->GetDifficultyIndex(), m_score, m_categorizedHits[2], m_categorizedHits[1], m_categorizedHits[0], m_finalGaugeValue);
@@ -83,6 +91,7 @@ public:
 			graphPixels[i].x = 255.0f * Math::Clamp(m_gaugeSamples[i], 0.0f, 1.0f);
 		}
 		m_graphTex->SetData(Vector2i(256, 1), graphPixels);
+		m_graphTex->SetWrap(Graphics::TextureWrap::Clamp, Graphics::TextureWrap::Clamp);
 
 	}
 	~ScoreScreen_Impl()
@@ -302,6 +311,49 @@ public:
 				LayoutBox::Slot* slot = scoreContainer->Add(m_gauge.As<GUIElementBase>());
 				slot->fillY = true;
 			}
+
+			{
+				m_timingStatsCanvas = Ref<Canvas>(new Canvas());
+				Canvas::Slot* slot = innerCanvas->Add(m_timingStatsCanvas->MakeShared());
+				slot->anchor = Anchor(0, 0.75, 0.25, 1);
+
+				Panel* statBackground = new Panel();
+				statBackground->color = Color(0, 0, 0).WithAlpha(0.75f);
+				slot = m_timingStatsCanvas->Add(statBackground->MakeShared());
+				slot->anchor = Anchors::Full;
+
+				LayoutBox* statsList = new LayoutBox();
+				statsList->layoutDirection = LayoutBox::LayoutDirection::Vertical;
+
+				{
+					Label* timingStat = new Label();
+					timingStat->SetText(Utility::WSprintf(L"Early: %d / Late: %d", m_timedHits[0], m_timedHits[1]));
+					timingStat->SetFontSize(24 * scale);
+					LayoutBox::Slot* boxSlot = statsList->Add(timingStat->MakeShared());
+					boxSlot->fillX = true;
+					boxSlot->padding = Margin(3 * scale, 3 * scale, 0, 0);
+				}
+				{
+					Label* timingStat = new Label();
+					timingStat->SetText(Utility::WSprintf(L"Mean hit delta: %.2fms", m_meanHitDelta));
+					timingStat->SetFontSize(24 * scale);
+					LayoutBox::Slot* boxSlot = statsList->Add(timingStat->MakeShared());
+					boxSlot->fillX = true;
+					boxSlot->padding = Margin(3 * scale, 3 * scale, 0, 0);
+				}
+				{
+					Label* timingStat = new Label();
+					timingStat->SetText(Utility::WSprintf(L"Median hit delta: %dms", m_medianHitDelta));
+					timingStat->SetFontSize(24 * scale);
+					LayoutBox::Slot* boxSlot = statsList->Add(timingStat->MakeShared());
+					boxSlot->fillX = true;
+					boxSlot->padding = Margin(3 * scale, 3 * scale, 0, 0);
+				}
+				slot = m_timingStatsCanvas->Add(statsList->MakeShared());
+				slot->anchor = Anchors::Full;
+				m_timingStatsCanvas->visibility = Visibility::Hidden;
+			}
+
 		}
 
 		// Load hit textures (Good, Perfect, Miss)
@@ -405,6 +457,11 @@ public:
 			g_application->RemoveTickable(this);
 
 		m_startPressed = g_input.GetButton(Input::Button::BT_S);
+
+		if (g_input.GetButton(Input::Button::FX_0))
+			m_timingStatsCanvas->visibility = Visibility::Visible;
+		else
+			m_timingStatsCanvas->visibility = Visibility::Hidden;
 	}
 
 	virtual void OnSuspend()

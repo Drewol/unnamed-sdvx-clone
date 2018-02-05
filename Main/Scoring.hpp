@@ -86,6 +86,9 @@ public:
 	bool GetLaserActive();
 	float GetLaserOutput();
 
+	float GetMeanHitDelta();
+	int16 GetMedianHitDelta();
+
 	// Check if an object is currently held
 	//	works only for lasers and hold buttons
 	bool IsObjectHeld(ObjectState* object);

@@ -154,6 +154,33 @@ float Scoring::GetLaserOutput()
 	float f = Math::Min(1.0f, m_timeSinceOutputSet / laserOutputInterpolationDuration);
 	return m_laserOutputSource + (m_laserOutputTarget - m_laserOutputSource) * f;
 }
+float Scoring::GetMeanHitDelta()
+{
+	float sum = 0;
+	uint32 count = 0;
+	for (auto hit : hitStats)
+	{
+		if (hit->object->type != ObjectType::Single || hit->rating == ScoreHitRating::Miss)
+			continue;
+		sum += hit->delta;
+		count++;
+	}
+	return sum / count;
+}
+int16 Scoring::GetMedianHitDelta()
+{
+	Vector<MapTime> deltas;
+	for (auto hit : hitStats)
+	{
+		if (hit->object->type != ObjectType::Single || hit->rating == ScoreHitRating::Miss)
+			continue;
+		deltas.Add(hit->delta);
+	}
+	if (deltas.size() == 0)
+		return 0;
+	std::sort(deltas.begin(), deltas.end());
+	return deltas[deltas.size() / 2];
+}
 float Scoring::m_GetLaserOutputRaw()
 {
 	float val = 0.0f;
