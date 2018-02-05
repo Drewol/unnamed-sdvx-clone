@@ -60,12 +60,12 @@ public:
 
 	// Camera variables Landscape, Portrait
 	float basePitch[2] = { -35.f, -47.f };
-	float minPitch[2] = { -40.f, -47.f };
-	float maxPitch[2] = { -28.f, -47.f };
+	float minPitch[2] = { -40.f, -52.f };
+	float maxPitch[2] = { -28.f, -40.f };
 
 	float baseRadius[2] = { 0.3f, 0.275f };
-	float minRadius[2] = { 0.4f, 0.275f };
-	float maxRadius[2] = { 0.225f, 0.275f };
+	float minRadius[2] = { 0.4f, 0.35f };
+	float maxRadius[2] = { 0.225f, 0.225f };
 
 	float pitchOffsets[2] = { 0.05f, 0.27f }; // how far from the bottom of the screen should the crit line be
 	float fovs[2] = { 70.f, 90.f };
