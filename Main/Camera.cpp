@@ -106,6 +106,11 @@ Vector2 Camera::Project(const Vector3& pos)
 	return screenSpace.xy();
 }
 
+static float Lerp(float a, float b, float alpha)
+{
+	return a + (b - a) * alpha;
+}
+
 RenderState Camera::CreateRenderState(bool clipped)
 {
 	// Extension of clipping planes in outward direction
@@ -117,10 +122,18 @@ RenderState Camera::CreateRenderState(bool clipped)
 	float fov = fovs[portrait];
 	float pitchOffset = ( 0.5 - pitchOffsets[portrait]) * fov / 1.0f;
 
-
 	// Tilt, Height and Near calculated from zoom values
-	float base_pitch = basePitch[portrait] * pow(1.4f, -zoomTop);
-	float base_radius = 4.f * baseRadius[portrait] * pow(1.15f, -zoomBottom * 3.0f);
+	float base_pitch;
+	if (zoomTop <= 0)
+		base_pitch = Lerp(minPitch[portrait], basePitch[portrait], zoomTop + 1);
+	else base_pitch = Lerp(basePitch[portrait], maxPitch[portrait], zoomTop);
+
+	float base_radius;
+	if (zoomBottom <= 0)
+		base_radius = Lerp(minRadius[portrait], baseRadius[portrait], zoomBottom + 1);
+	else base_radius = Lerp(baseRadius[portrait], maxRadius[portrait], zoomBottom);
+
+	base_radius *= 4;
 
 	float targetHeight = base_radius * sin(Math::degToRad * base_pitch);
 	float targetNear = base_radius * cos(Math::degToRad * base_pitch);
@@ -152,7 +165,7 @@ RenderState Camera::CreateRenderState(bool clipped)
 	float d1 = fabsf(cosf(angleToTrackEnd - (Math::degToRad * m_pitch)) * distToTrackEnd);
 	rs.cameraTransform = cameraTransform;
 
-	rs.projectionTransform = ProjectionMatrix::CreatePerspective(fov, g_aspectRatio, 0.5f, d1 + viewRangeExtension);
+	rs.projectionTransform = ProjectionMatrix::CreatePerspective(fov, g_aspectRatio, 0.1f, d1 + viewRangeExtension);
 
 	m_rsLast = rs;
 
