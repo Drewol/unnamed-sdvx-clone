@@ -183,7 +183,11 @@ public:
 		m_pendingChangesLock.unlock();
 		return std::move(changes);
 	}
-	
+
+	Map<int32, MapIndex*> GetMaps()
+	{
+		return m_maps;
+	}
 	Map<int32, MapIndex*> FindMaps(const String& searchString)
 	{
 		WString test = Utility::ConvertToWString(searchString);
@@ -717,6 +721,10 @@ void MapDatabase::StartSearching()
 void MapDatabase::StopSearching()
 {
 	m_impl->StopSearching();
+}
+Map<int32, MapIndex*> MapDatabase::GetMaps()
+{
+	return m_impl->GetMaps();
 }
 Map<int32, MapIndex*> MapDatabase::FindMaps(const String& search)
 {
