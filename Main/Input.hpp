@@ -36,6 +36,7 @@ public:
 	void Update(float deltaTime);
 
 	bool GetButton(Button button) const;
+	bool Are3BTsHeld() const;
 
 	// Controller state as a string
 	// Primarily used for debugging

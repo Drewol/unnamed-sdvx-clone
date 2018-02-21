@@ -166,6 +166,16 @@ bool Input::GetButton(Button button) const
 	return m_buttonStates[(size_t)button];
 }
 
+bool Input::Are3BTsHeld() const
+{
+	bool bta = GetButton(Input::Button::BT_0);
+	bool btb = GetButton(Input::Button::BT_1);
+	bool btc = GetButton(Input::Button::BT_2);
+	bool btd = GetButton(Input::Button::BT_3);
+
+	return (bta && btb && btc) || (bta && btb && btd) || (bta && btc && btd) || (btb && btc && btd);
+}
+
 String Input::GetControllerStateString() const
 {
 	if(m_gamepad)
