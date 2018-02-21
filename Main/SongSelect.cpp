@@ -882,7 +882,7 @@ public:
 			}
 		}
 
-	    if(buttonCode == Input::Button::BT_S && !m_filterSelection->Active && !IsSuspended())
+	    else if(buttonCode == Input::Button::BT_S && !m_filterSelection->Active && !IsSuspended())
         {
             
 			bool autoplay = (g_gameWindow->GetModifierKeys() & ModifierKeys::Ctrl) == ModifierKeys::Ctrl;
