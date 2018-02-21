@@ -369,6 +369,8 @@ public:
 		m_scoring.SetInput(&g_input);
 		m_scoring.Reset(); // Initialize
 
+		g_input.OnButtonPressed.Add(this, &Game_Impl::m_OnButtonPressed);
+
 		return true;
 	}
 	virtual bool Init() override
@@ -1310,6 +1312,14 @@ public:
 		{
 			g_gameWindow->SetCursorVisible(!m_settingsBar->IsShown());
 			m_settingsBar->SetShow(!m_settingsBar->IsShown());
+		}
+	}
+	void m_OnButtonPressed(Input::Button buttonCode)
+	{
+		if (buttonCode == Input::Button::BT_S)
+		{
+			if (g_input.Are3BTsHeld())
+				FinishGame();
 		}
 	}
 
