@@ -863,6 +863,25 @@ public:
 		if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice) == InputDevice::Keyboard && m_searchField->HasInputFocus())
 			return;
 
+		if (buttonCode == Input::Button::BT_S && g_input.Are3BTsHeld())
+		{
+			if (m_filterSelection->Active)
+			{
+				m_canvas->AddAnimation(Ref<IGUIAnimation>(
+					new GUIAnimation<float>(&((Canvas::Slot*)m_filterSelection->slot)->anchor.left, -1.0f, 0.2f)), true);
+				m_canvas->AddAnimation(Ref<IGUIAnimation>(
+					new GUIAnimation<float>(&((Canvas::Slot*)m_filterSelection->slot)->anchor.right, 0.0f, 0.2f)), true);
+				m_canvas->AddAnimation(Ref<IGUIAnimation>(
+					new GUIAnimation<float>(&m_fadePanel->color.w, 0.0, 0.25)), true);
+				m_filterSelection->Active = !m_filterSelection->Active;
+			}
+			else
+			{
+				m_suspended = true;
+				g_application->RemoveTickable(this);
+			}
+		}
+
 	    if(buttonCode == Input::Button::BT_S && !m_filterSelection->Active && !IsSuspended())
         {
             
