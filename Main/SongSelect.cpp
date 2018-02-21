@@ -865,17 +865,9 @@ public:
 
 		if (buttonCode == Input::Button::BT_S && g_input.Are3BTsHeld())
 		{
-			if (m_filterSelection->Active)
-			{
-				m_canvas->AddAnimation(Ref<IGUIAnimation>(
-					new GUIAnimation<float>(&((Canvas::Slot*)m_filterSelection->slot)->anchor.left, -1.0f, 0.2f)), true);
-				m_canvas->AddAnimation(Ref<IGUIAnimation>(
-					new GUIAnimation<float>(&((Canvas::Slot*)m_filterSelection->slot)->anchor.right, 0.0f, 0.2f)), true);
-				m_canvas->AddAnimation(Ref<IGUIAnimation>(
-					new GUIAnimation<float>(&m_fadePanel->color.w, 0.0, 0.25)), true);
-				m_filterSelection->Active = !m_filterSelection->Active;
-			}
-			else
+			// NOTE(local): if filter selection is active, back doesn't work.
+			// For now that sounds right, but maybe it shouldn't matter
+			if (!m_filterSelection->Active)
 			{
 				m_suspended = true;
 				g_application->RemoveTickable(this);
