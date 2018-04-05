@@ -20,7 +20,7 @@ A game based on [KShootMania](http://www.kshootmania.com/) and [SDVX](https://re
 - Supports new sound FX method (real-time sound FX) and old sound FX method (separate NOFX & sound effected music files)
 - Song database cache for near-instant game startup (sqlite3)
 - Song database searching
-- Linux/Windows support
+- Linux/Windows/macOS support
 
 ### Features currently on hold / in progress:
 - GUI remake
@@ -76,3 +76,9 @@ To run from Visual Studio, go to Properties for Main > Debugging > Working Direc
 2. Check 'build.linux' for libraries to install
 3. Run `cmake .` and then `make` from the root of the project
 4. Run the executable made in the 'bin' folder
+
+### macOS
+1. Install dependencies
+  * [Homebrew](https://github.com/Homebrew/brew): `brew install cmake freetype libvorbis sdl2 libpng jpeg`
+2. Run `cmake .` and then `make` from the root of the project.
+3. Run the executable made in the 'bin' folder.
