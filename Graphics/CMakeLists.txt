@@ -33,7 +33,6 @@ add_definitions(-DGLEW_NO_GLU -DGLEW_STATIC)
 # Dependencies
 target_link_libraries(Graphics Shared)
 if(WIN32)
-
 	target_link_libraries(Graphics zlib)
 	target_link_libraries(Graphics freetype)
 	target_link_libraries(Graphics SDL2)
@@ -41,6 +40,7 @@ if(WIN32)
 	target_link_libraries(Graphics jpeg)
 	target_include_directories(Graphics PUBLIC ${SDL2_SOURCE_DIR}/include/)
 else(WIN32)
+
 	set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/third_party)
 	include(FindLibraries)
 	target_link_libraries(Graphics ${FREETYPE_LIBRARIES})
