@@ -40,7 +40,6 @@ namespace Graphics
 
 			if(m_texture == 0)
 				return false;
-
 			return true;
 		}
 		virtual void Init(Vector2i size, TextureFormat format)
@@ -106,42 +105,42 @@ namespace Graphics
 		{
 			#ifdef __APPLE__
 			if(!m_mipmaps)
-            {
+			{
 				glTexParameteri(m_texture, GL_TEXTURE_MIN_FILTER, m_filter ? GL_LINEAR : GL_NEAREST);
 				glTexParameteri(m_texture, GL_TEXTURE_MAG_FILTER, m_filter ? GL_LINEAR : GL_NEAREST);
-            }
-            else
-            {
-                if(m_mipFilter)
+			}
+			else
+			{
+				if(m_mipFilter)
 					glTexParameteri(m_texture, GL_TEXTURE_MIN_FILTER, m_filter ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR);
-                else
+				else
 					glTexParameteri(m_texture, GL_TEXTURE_MIN_FILTER, m_filter ? GL_LINEAR : GL_NEAREST);
 				glTexParameteri(m_texture, GL_TEXTURE_MAG_FILTER, m_filter ? GL_LINEAR : GL_NEAREST);
-            }
-            if(GL_TEXTURE_MAX_ANISOTROPY_EXT)
-            {
+			}
+			if(GL_TEXTURE_MAX_ANISOTROPY_EXT)
+			{
 				glTexParameteri(m_texture, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_anisotropic);
-            }
+			}
 			#else
 			if(glTextureParameteri)
-            {
-                if(!m_mipmaps)
-                {
+			{
+				if(!m_mipmaps)
+				{
 					glTextureParameteri(m_texture, GL_TEXTURE_MIN_FILTER, m_filter ? GL_LINEAR : GL_NEAREST);
 					glTextureParameteri(m_texture, GL_TEXTURE_MAG_FILTER, m_filter ? GL_LINEAR : GL_NEAREST);
-                }
-                else
-                {
-                    if(m_mipFilter)
+				}
+				else
+				{
+					if(m_mipFilter)
 						glTextureParameteri(m_texture, GL_TEXTURE_MIN_FILTER, m_filter ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR);
-                    else
+					else
 						glTextureParameteri(m_texture, GL_TEXTURE_MIN_FILTER, m_filter ? GL_LINEAR : GL_NEAREST);
 					glTextureParameteri(m_texture, GL_TEXTURE_MAG_FILTER, m_filter ? GL_LINEAR : GL_NEAREST);
-                }
-                if(GL_TEXTURE_MAX_ANISOTROPY_EXT)
-                {
+				}
+				if(GL_TEXTURE_MAX_ANISOTROPY_EXT)
+				{
 					glTextureParameteri(m_texture, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_anisotropic);
-                }
+				}
 			}
 			else /* Sigh */
 			{
@@ -179,15 +178,15 @@ namespace Graphics
 			{
 				#ifdef __APPLE__
 				glGenerateMipmap(m_texture);
-                #else
-                if(glGenerateTextureMipmap)
-                    glGenerateTextureMipmap(m_texture);
-                else
-                    glGenerateTextureMipmapEXT(m_texture, GL_TEXTURE_2D);
-                #endif
+				#else
+				if(glGenerateTextureMipmap)
+					glGenerateTextureMipmap(m_texture);
+				else
+					glGenerateTextureMipmapEXT(m_texture, GL_TEXTURE_2D);
+				#endif
 			}
 			m_mipmaps = enabled;
-		    UpdateFilterState();
+			UpdateFilterState();
 		}
 		virtual const Vector2i& GetSize() const
 		{
@@ -245,7 +244,6 @@ namespace Graphics
 				glTextureParameteriEXT(m_texture, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wmode[(size_t)m_wmode[1]]);
 			}
 			#endif
-			
 		}
 
 		TextureFormat GetFormat() const

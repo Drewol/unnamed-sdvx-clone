@@ -74,7 +74,6 @@ namespace Utility
 #else
 		snprintf(buffer, 8000-1, fmt, SprintfArgFilter(args)...);
 #endif
-
 		return String(buffer);
 	}
 

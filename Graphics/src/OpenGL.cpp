@@ -86,6 +86,7 @@ namespace Graphics
 
 		SDL_GL_MakeCurrent(sdlWnd, m_impl->context);
 
+		// macOS doesnt need glew
 		#ifndef __APPLE__
 		// To allow usage of experimental features
 		glewExperimental = true;

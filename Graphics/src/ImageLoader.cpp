@@ -3,9 +3,9 @@
 #include "Image.hpp"
 
 #ifdef __APPLE__
-	#include "libpng16/png.h"
+#include "libpng16/png.h"
 #else
-	#include "png.h"
+#include "png.h"
 #endif
 
 // HAVE_STDDEF_H redefinition

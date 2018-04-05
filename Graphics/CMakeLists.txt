@@ -33,6 +33,7 @@ add_definitions(-DGLEW_NO_GLU -DGLEW_STATIC)
 # Dependencies
 target_link_libraries(Graphics Shared)
 if(WIN32)
+
 	target_link_libraries(Graphics zlib)
 	target_link_libraries(Graphics freetype)
 	target_link_libraries(Graphics SDL2)

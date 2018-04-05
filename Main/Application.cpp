@@ -218,7 +218,6 @@ bool Application::m_Init()
 		g_gameConfig.GetInt(GameConfigKeys::ScreenHeight));
 	g_aspectRatio = (float)g_resolution.x / (float)g_resolution.y;
 	g_gameWindow = new Graphics::Window(g_resolution);
-
 	g_gameWindow->Show();
 
 	g_gameWindow->OnKeyPressed.Add(this, &Application::m_OnKeyPressed);
@@ -236,13 +235,11 @@ bool Application::m_Init()
 	g_gameWindow->SetCursor(cursorImg, Vector2i(5, 5));
 
 	if(startFullscreen)
-	{
 		g_gameWindow->SwitchFullscreen(
 			g_gameConfig.GetInt(GameConfigKeys::ScreenWidth), g_gameConfig.GetInt(GameConfigKeys::ScreenHeight),
 			g_gameConfig.GetInt(GameConfigKeys::FullScreenWidth), g_gameConfig.GetInt(GameConfigKeys::FullScreenHeight),
 			fullscreenMonitor
 		);
-	}
 
 	// Set render state variables
 	m_renderStateBase.aspectRatio = g_aspectRatio;
@@ -642,7 +639,6 @@ void Application::m_OnWindowResized(const Vector2i& newSize)
 
 	m_renderStateBase.aspectRatio = g_aspectRatio;
 	m_renderStateBase.viewportSize = g_resolution;
-
 	glViewport(0, 0, newSize.x, newSize.y);
 	glScissor(0, 0, newSize.x, newSize.y);
 
