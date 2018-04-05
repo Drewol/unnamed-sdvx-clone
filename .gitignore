@@ -1,3 +1,6 @@
+# macOS system files
+.DS_Store
+
 # Compiled Products
 *.dll
 *.lib
