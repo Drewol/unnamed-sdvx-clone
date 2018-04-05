@@ -1,7 +1,13 @@
 #include "stdafx.h"
 #include "ImageLoader.hpp"
 #include "Image.hpp"
-#include "png.h"
+
+#ifdef __APPLE__
+	#include "libpng16/png.h"
+#else
+	#include "png.h"
+#endif
+
 // HAVE_STDDEF_H redefinition
 #pragma warning(disable:4005)
 #include "jpeglib.h"

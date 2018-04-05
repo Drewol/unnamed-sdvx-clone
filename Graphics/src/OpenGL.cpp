@@ -86,9 +86,11 @@ namespace Graphics
 
 		SDL_GL_MakeCurrent(sdlWnd, m_impl->context);
 
+		#ifndef __APPLE__
 		// To allow usage of experimental features
 		glewExperimental = true;
 		glewInit();
+		#endif
 
 		//#define LIST_OGL_EXTENSIONS
 #ifdef LIST_OGL_EXTENSIONS

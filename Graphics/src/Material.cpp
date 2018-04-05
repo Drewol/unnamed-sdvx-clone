@@ -250,6 +250,10 @@ namespace Graphics
 					uint32 texture = p.second.Get<int32>();
 
 					// Bind the texture
+					#ifdef __APPLE__
+					glActiveTexture(GL_TEXTURE0 + *textureUnit);
+					glBindTexture(GL_TEXTURE_2D, texture);
+					#else
 					if (glBindTextureUnit)
 					{
 						glBindTextureUnit(*textureUnit, texture);
@@ -259,6 +263,7 @@ namespace Graphics
 						glActiveTexture(GL_TEXTURE0 + *textureUnit);
 						glBindTexture(GL_TEXTURE_2D, texture);
 					}
+					#endif
 
 					// Bind sampler
 					BindAll<int32>(p.first, *textureUnit);

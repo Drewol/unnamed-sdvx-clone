@@ -217,7 +217,8 @@ AudioEffect ParseCustomEffect(const KShootEffectDefinition& def)
 				MultiParamRange pr = { ParseParam(a), ParseParam(b) };
 				if (pr.params[0].type != pr.params[1].type)
 				{
-					Logf("Non matching parameters types \"%s\" for key: %s", Logger::Warning, s, s.first);
+					// todo: logging error
+					// Logf("Non matching parameters types \"%s\" for key: %s", Logger::Warning, s, s.first);
 					continue;
 				}
 				params.Add(s.first, pr);

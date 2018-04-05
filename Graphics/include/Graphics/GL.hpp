@@ -14,12 +14,15 @@
 #define GLEW_NO_GLU
 #endif
 
-#include <Graphics/glew/GL/glew.h>
-
 // Include platform specific OpenGL headers
 #ifdef _WIN32
+#include <Graphics/glew/GL/glew.h>
 #include <Graphics/glew/GL/wglew.h>
-#else
+#elif __APPLE__
+#include <OpenGL/gl3.h>
+#include <OpenGL/gl3ext.h>
+#elif __linux
+#include <Graphics/glew/GL/glew.h>
 #include <Graphics/glew/GL/glxew.h>
 #endif
 

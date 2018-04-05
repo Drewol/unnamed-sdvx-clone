@@ -39,13 +39,23 @@ namespace Graphics
 			TextureFormat fmt = tex->GetFormat();
 			if(fmt == TextureFormat::D32)
 			{
+				#ifdef __APPLE__
+				glFramebufferTexture2D(m_fb, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texHandle, 0);
+				#else
 				glNamedFramebufferTexture2DEXT(m_fb, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texHandle, 0);
+				#endif
+
 				m_depthAttachment = true;
 			}
 			else
 			{
+				#ifdef __APPLE__
+				glFramebufferTexture2D(m_fb, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texHandle, 0);
+				#else
 				glNamedFramebufferTexture2DEXT(m_fb, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texHandle, 0);
+				#endif
 			}
+
 			return IsComplete();
 		}
 		virtual void Bind()
@@ -89,7 +99,12 @@ namespace Graphics
 		}
 		virtual bool IsComplete() const
 		{
+			#ifdef __APPLE__
+			int complete = glCheckFramebufferStatus(m_fb);
+			#else
 			int complete = glCheckNamedFramebufferStatus(m_fb, GL_DRAW_FRAMEBUFFER);
+			#endif	
+
 			return complete == GL_FRAMEBUFFER_COMPLETE;
 		}
 		virtual uint32 Handle() const

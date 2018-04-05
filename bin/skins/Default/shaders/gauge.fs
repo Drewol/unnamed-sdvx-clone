@@ -12,9 +12,9 @@ uniform vec4 barColor;
 
 void main()
 {
-	vec4 tex = texture2D(mainTex, fsTex);
+	vec4 tex = texture(mainTex, fsTex);
 
-    float mask = texture2D(maskTex, fsTex).x;
+    float mask = texture(maskTex, fsTex).x;
     mask = rate - mask;
     mask *= 100;
     mask = clamp(mask, 0.0, 1.0);
