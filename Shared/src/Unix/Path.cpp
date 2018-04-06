@@ -5,11 +5,14 @@
 #include "Math.hpp"
 
 /*
-	Linux version
+	Unix version
 */
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
+
 #include <unistd.h>
 #include <dirent.h>
-#include <linux/limits.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 // Convenience
@@ -78,17 +81,24 @@ String Path::GetCurrentPath()
 }
 String Path::GetExecutablePath()
 {
-	char filename[MAX_PATH];
+    #ifdef __APPLE__
+        char path[1024];
+        uint32_t size = sizeof(path);
+        if (_NSGetExecutablePath(path, &size) == 0)
+            return String(path);
+    #else
+        char filename[MAX_PATH];
 
-	pid_t pid = getpid();
+        pid_t pid = getpid();
 
-	// Get name from pid
-	char path[MAX_PATH];
-	sprintf(path, "/proc/%d/exe", pid);
-	int r = readlink(path, filename, PATH_MAX);
-	assert(r != -1);
+        // Get name from pid
+        char path[MAX_PATH];
+        sprintf(path, "/proc/%d/exe", pid);
+        int r = readlink(path, filename, PATH_MAX);
+        assert(r != -1);
 
-	return String(filename, filename + r);
+        return String(filename, filename + r);
+    #endif
 }
 String Path::GetTemporaryPath()
 {

@@ -10,10 +10,14 @@ source_group("Header Files" FILES ${Shared_include})
 if(WIN32)
 	file(GLOB Platform_src "src/Windows/*.cpp")
 	source_group("Source Files\\Windows" FILES ${Platform_src})
-elseif(APPLE)
-	file(GLOB Platform_src "src/MacOS/*.cpp")
 else(WIN32)
-	file(GLOB Platform_src "src/Linux/*.cpp")
+	file(GLOB Unix_src "src/Unix/*.cpp")
+
+	if(APPLE)
+		file(GLOB Platform_src ${Unix_src} "src/MacOS/*.cpp")
+	else(APPLE)
+		file(GLOB Platform_src ${Unix_src} "src/Linux/*.cpp")
+	endif(APPLE)
 endif(WIN32)
 
 # Compiler stuff
