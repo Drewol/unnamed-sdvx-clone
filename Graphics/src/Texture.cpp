@@ -68,7 +68,7 @@ namespace Graphics
 			}
 
 			#ifdef __APPLE__
-			glBindTexture(GL_TEXTURE_2D, m_texture);
+			Bind(m_texture);
 			glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, size.x, size.y);
 			#else
 			if(glTextureStorage2D)
@@ -86,8 +86,9 @@ namespace Graphics
 			m_size = size;
 			m_data = pData;
 			#ifdef __APPLE__
-			glBindTexture(GL_TEXTURE_2D, m_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_size.x, m_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData);
+			Bind(m_texture);
+			glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, m_size.x, m_size.y);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_size.x, m_size.y, GL_RGBA, GL_UNSIGNED_BYTE, pData);
 			#else
 			if (glTextureStorage2D)
 			{
@@ -106,7 +107,7 @@ namespace Graphics
 		void UpdateFilterState()
 		{
 			#ifdef __APPLE__
-			glBindTexture(GL_TEXTURE_2D, m_texture);
+			Bind(m_texture);
 			if(!m_mipmaps)
 			{
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_filter ? GL_LINEAR : GL_NEAREST);
@@ -180,7 +181,7 @@ namespace Graphics
 			if(enabled)
 			{
 				#ifdef __APPLE__
-				glBindTexture(GL_TEXTURE_2D, m_texture);
+				Bind(m_texture);
 				glGenerateMipmap(GL_TEXTURE_2D);
 				#else
 				if(glGenerateTextureMipmap)
@@ -199,7 +200,6 @@ namespace Graphics
 		virtual void Bind(uint32 index)
 		{
 			#ifdef __APPLE__
-			glActiveTexture(GL_TEXTURE0 + index);
 			glBindTexture(GL_TEXTURE_2D, m_texture);
 			#else
 			if (glBindTextureUnit)
@@ -234,7 +234,7 @@ namespace Graphics
 			};
 
 			#ifdef __APPLE__
-			glBindTexture(GL_TEXTURE_2D, m_texture);
+			Bind(m_texture);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wmode[(size_t)m_wmode[0]]);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wmode[(size_t)m_wmode[1]]);
 			#else
