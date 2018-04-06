@@ -69,8 +69,6 @@ namespace Utility
 		static char buffer[8000];
 #ifdef _WIN32
 		sprintf_s(buffer, fmt, SprintfArgFilter(args)...);
-#elif __APPLE__
-		snprintf(buffer, 8000-1, fmt, SprintfArgFilter(args)...);
 #else
 		snprintf(buffer, 8000-1, fmt, SprintfArgFilter(args)...);
 #endif

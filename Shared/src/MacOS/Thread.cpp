@@ -1,7 +1,5 @@
 #include "Thread.hpp"
 
-// just leaving macOS thread affinity out for now
-
 size_t Thread::SetAffinityMask(size_t affinityMask)
 {
 	return 0;
