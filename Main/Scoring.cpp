@@ -738,11 +738,9 @@ void Scoring::m_TickMiss(ScoreTick* tick, uint32 index, MapTime delta)
 	float shortMissDrain = 0.02f;
 	if ((m_flags & GameFlags::Hard) != GameFlags::None)
 	{
-		shortMissDrain = 0.09f;
-		if (currentGauge <= 0.1f)
-			shortMissDrain *= 0.5f;
-		else if (currentGauge <= 0.2f)
-			shortMissDrain *= 0.75f;
+		// Thanks to Hibiki_ext in the discord for help with this
+		float drainMultiplier = Math::Clamp(1.0f - ((0.3f - currentGauge) * 2.f), 0.5f, 1.0f);
+		shortMissDrain = 0.09f * drainMultiplier;
 	}
 	if(tick->HasFlag(TickFlags::Button))
 	{

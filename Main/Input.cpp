@@ -110,7 +110,7 @@ void Input::Update(float deltaTime)
 			}
 			
 			m_laserStates[i] = m_mouseSensitivity * m_mousePos[m_mouseAxisMapping[i]];
-			m_mousePos[i] = 0;
+			m_mousePos[m_mouseAxisMapping[i]] = 0;
 		}
 	}
 
