@@ -85,6 +85,7 @@ namespace Graphics
 			m_format = TextureFormat::RGBA8;
 			m_size = size;
 			m_data = pData;
+
 			#ifdef __APPLE__
 			Bind(m_texture);
 			glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, m_size.x, m_size.y);

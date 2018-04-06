@@ -9,6 +9,8 @@
 */
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
+#else
+#include <linux/limits.h>
 #endif
 
 #include <unistd.h>
