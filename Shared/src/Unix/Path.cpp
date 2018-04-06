@@ -81,24 +81,24 @@ String Path::GetCurrentPath()
 }
 String Path::GetExecutablePath()
 {
-    #ifdef __APPLE__
-        char path[1024];
-        uint32_t size = sizeof(path);
-        if (_NSGetExecutablePath(path, &size) == 0)
-            return String(path);
-    #else
-        char filename[MAX_PATH];
+	#ifdef __APPLE__
+		char path[1024];
+		uint32_t size = sizeof(path);
+		if (_NSGetExecutablePath(path, &size) == 0)
+			return String(path);
+	#else
+		char filename[MAX_PATH];
 
-        pid_t pid = getpid();
+		pid_t pid = getpid();
 
-        // Get name from pid
-        char path[MAX_PATH];
-        sprintf(path, "/proc/%d/exe", pid);
-        int r = readlink(path, filename, PATH_MAX);
-        assert(r != -1);
+		// Get name from pid
+		char path[MAX_PATH];
+		sprintf(path, "/proc/%d/exe", pid);
+		int r = readlink(path, filename, PATH_MAX);
+		assert(r != -1);
 
-        return String(filename, filename + r);
-    #endif
+		return String(filename, filename + r);
+	#endif
 }
 String Path::GetTemporaryPath()
 {
