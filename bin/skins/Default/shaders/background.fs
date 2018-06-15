@@ -90,7 +90,8 @@ void main()
 	vec2 uv = vec2(texVp.x / viewport.x, texVp.y / viewport.y);
     uv.x *= ar;
     
-    vec2 center = vec2(screenCenter) / vec2(viewport);
+    // NOTE: I'm not sure why offsetting the center fixes the issue
+    vec2 center = vec2(screenCenter) / vec2(viewport) + vec2(0, 1.5);
     center.x *= ar;
     
     vec2 point = uv;
