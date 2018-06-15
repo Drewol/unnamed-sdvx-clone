@@ -13,6 +13,7 @@ Camera::~Camera()
 }
 void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 {
+#if false
 	const TimingPoint& currentTimingPoint = playback.GetCurrentTimingPoint();
 	//Calculate camera roll
 	//Follow the laser track exactly but with a roll speed limit
@@ -69,6 +70,72 @@ void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 
 		m_shakeOffset += shakeVec;
 	}
+#else
+	auto LerpTo = [&](float &value, float target, float speed = 10)
+	{
+		float diff = abs(target - value);
+		float change = diff * deltaTime * speed;
+		change = Math::Min(deltaTime * speed * 0.05f, change);
+
+		if (target < value)
+			value = Math::Max(value - change, target);
+		else value = Math::Min(value + change, target);
+	};
+
+	const TimingPoint& currentTimingPoint = playback.GetCurrentTimingPoint();
+
+	LerpTo(m_laserRoll, m_targetRoll, m_targetRoll != 0.0f ? 8 : 3);
+
+	m_spinProgress = (float)(playback.GetLastTime() - m_spinStart) / m_spinDuration;
+	// Calculate camera spin
+	if (m_spinProgress < 2.0f)
+	{
+		if (m_spinType == SpinStruct::SpinType::Full)
+		{
+			if (m_spinProgress <= 1.0f)
+				m_spinRoll = -m_spinDirection * (1.0 - m_spinProgress);
+			else
+			{
+				float amplitude = (15.0f / 360.0f) / (m_spinProgress + 1);
+				m_spinRoll = sin(m_spinProgress * Math::pi * 2.0f) * amplitude * m_spinDirection;
+			}
+		}
+		else if (m_spinType == SpinStruct::SpinType::Quarter)
+		{
+			float amplitude = (80.0f / 360.0f) / ((m_spinProgress)+1);
+			m_spinRoll = sin(m_spinProgress * Math::pi) * amplitude * m_spinDirection;
+		}
+
+		m_spinProgress = Math::Clamp(m_spinProgress, 0.0f, 2.0f);
+	}
+	else
+	{
+		m_spinRoll = 0.0f;
+		m_spinProgress = 0.0f;
+	}
+
+	m_roll = pBaseRoll + m_spinRoll + m_laserRoll;
+
+	if (!rollKeep)
+	{
+		m_targetRollSet = false;
+		m_targetRoll = 0.0f;
+	}
+
+	// Update camera shake effects
+	m_shakeOffset = Vector3(0.0f);
+
+	m_shakeEffect.time -= deltaTime;
+	if (m_shakeEffect.time >= 0.f)
+	{
+		float shakeProgress = m_shakeEffect.time / m_shakeEffect.duration;
+		float shakeIntensity = sinf(powf(shakeProgress, 1.6) * Math::pi);
+
+		Vector3 shakeVec = Vector3(m_shakeEffect.amplitude * shakeIntensity) * Vector3(cameraShakeX, cameraShakeY, cameraShakeZ);
+
+		m_shakeOffset += shakeVec;
+	}
+#endif
 }
 void Camera::AddCameraShake(CameraShake cameraShake)
 {
@@ -215,7 +282,7 @@ RenderState Camera::CreateRenderState(bool clipped)
 	auto cameraTransform = Transform::Rotation(Vector3(m_pitch, 0, 0) + m_shakeOffset);
 
 	// Calculate clipping distances
-	Vector3 toTrackEnd = worldNormal.TransformPoint(Vector3(0.0f, track->trackLength, 0));
+	Vector3 toTrackEnd = (track->trackOrigin).TransformPoint(Vector3(0.0f, track->trackLength, 0));
 	float distToTrackEnd = sqrtf(toTrackEnd.x * toTrackEnd.x + toTrackEnd.y * toTrackEnd.y + toTrackEnd.z * toTrackEnd.z);
 
 	rs.cameraTransform = cameraTransform;

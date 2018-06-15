@@ -63,6 +63,7 @@ public:
 	float cameraShakeZ = 0.0f;
 
 	// Camera variables Landscape, Portrait
+#if false
 	float basePitch[2] = { -35.f, -47.f };
 	float minPitch[2] = { -40.f, -52.f };
 	float maxPitch[2] = { -28.f, -40.f };
@@ -73,7 +74,16 @@ public:
 
 	float pitchOffsets[2] = { 0.05f, 0.27f }; // how far from the bottom of the screen should the crit line be
 	float fovs[2] = { 70.f, 90.f };
+#else
+	float basePitch[2] = { 0.f, -47.f };
+	float pitchUnit = 7.0f;
 
+	float baseRadius[2] = { 0.3f, 0.275f };
+	float radiusUnit = 0.075f;
+
+	float pitchOffsets[2] = { 0.05f, 0.27f }; // how far from the bottom of the screen should the crit line be
+	float fovs[2] = { 60.f, 90.f };
+#endif
 
 private:
 	float m_baseRollBlend = 0.0f;
@@ -95,8 +105,7 @@ private:
 	uint8 m_spinType;
 	float m_spinDirection = 0.0f;
 	float m_spinRoll = 0.0f;
-
-
+	float m_spinProgress = 0.0f;
 
 	float m_pitch = 0.0f;
 
