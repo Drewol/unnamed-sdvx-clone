@@ -91,7 +91,8 @@ void main()
     uv.x *= ar;
     
     // NOTE: I'm not sure why offsetting the center fixes the issue
-    vec2 center = vec2(screenCenter) / vec2(viewport) + vec2(0, 1.5);
+    float cOffs = ar > 1 ? 1.5 : 1.0;
+    vec2 center = vec2(screenCenter) / vec2(viewport) + vec2(0, cOffs);
     center.x *= ar;
     
     vec2 point = uv;

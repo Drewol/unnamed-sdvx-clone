@@ -135,6 +135,8 @@ RenderState Camera::CreateRenderState(bool clipped)
 		return contnr * anchor * origin;
 	};
 
+	int portrait = g_aspectRatio > 1 ? 0 : 1;
+
 	// Extension of clipping planes in outward direction
 	float viewRangeExtension = clipped ? 0.0f : 5.0f;
 
@@ -158,10 +160,10 @@ RenderState Camera::CreateRenderState(bool clipped)
 	auto critDir = worldNoRoll.GetPosition().Normalized();
 	float rotToCrit = -atan2(critDir.y, -critDir.z) * Math::radToDeg;
 
-	float fov = fovs[0];
-	float cameraRot = fov / 2 - fov * pitchOffsets[0];
+	float fov = fovs[portrait];
+	float cameraRot = fov / 2 - fov * pitchOffsets[portrait];
 
-	m_pitch = rotToCrit - cameraRot + basePitch[0];
+	m_pitch = rotToCrit - cameraRot + basePitch[portrait];
 	auto cameraTransform = Transform::Rotation(Vector3(m_pitch, 0, 0) + m_shakeOffset);
 
 	// Calculate clipping distances

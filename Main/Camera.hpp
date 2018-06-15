@@ -63,7 +63,7 @@ public:
 	float cameraShakeZ = 0.0f;
 
 	// Camera variables Landscape, Portrait
-	float basePitch[2] = { 0.f, -47.f };
+	float basePitch[2] = { 0.f, 0.f };
 	float pitchUnit = 7.0f;
 
 	float baseRadius[2] = { 0.3f, 0.275f };
