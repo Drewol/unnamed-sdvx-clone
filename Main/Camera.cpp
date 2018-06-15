@@ -13,64 +13,6 @@ Camera::~Camera()
 }
 void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 {
-#if false
-	const TimingPoint& currentTimingPoint = playback.GetCurrentTimingPoint();
-	//Calculate camera roll
-	//Follow the laser track exactly but with a roll speed limit
-	float rollSpeedLimit = (m_rollIntensity / (currentTimingPoint.beatDuration / 1000.0f)) * deltaTime;
-	rollSpeedLimit /= m_targetRoll != 0.0f ? 1.0f : 2.0f;
-
-	float rollDelta = m_targetRoll - m_laserRoll;
-	rollSpeedLimit *= Math::Sign(rollDelta);
-	m_laserRoll += (fabs(rollDelta) < fabs(rollSpeedLimit)) ? rollDelta : rollSpeedLimit;
-
-	float spinProgress = (float)(playback.GetLastTime() - m_spinStart) / m_spinDuration;
-	// Calculate camera spin
-	if (spinProgress < 2.0f)
-	{
-		if (m_spinType == SpinStruct::SpinType::Full)
-		{
-			if(spinProgress <= 1.0f)
-				m_spinRoll = -m_spinDirection * (1.0 - spinProgress);
-			else
-			{
-				float amplitude = (15.0f / 360.0f) / (spinProgress + 1);
-				m_spinRoll = sin(spinProgress * Math::pi * 2.0f) * amplitude * m_spinDirection;
-			}
-		}
-		else if (m_spinType == SpinStruct::SpinType::Quarter)
-		{
-			float amplitude = (80.0f / 360.0f) / ((spinProgress) + 1);
-			m_spinRoll = sin(spinProgress * Math::pi) * amplitude * m_spinDirection;
-		}
-	}
-	else
-	{
-		m_spinRoll = 0.0f;
-	}
-
-	m_roll = m_spinRoll + m_laserRoll;
-
-	if(!rollKeep)
-	{
-		m_targetRollSet = false;
-		m_targetRoll = 0.0f;
-	}
-
-	// Update camera shake effects
-	m_shakeOffset = Vector3(0.0f);
-
-	m_shakeEffect.time -= deltaTime;
-	if (m_shakeEffect.time >= 0.f)
-	{
-		float shakeProgress = m_shakeEffect.time / m_shakeEffect.duration;
-		float shakeIntensity = sinf(powf(shakeProgress, 1.6) * Math::pi);
-
-		Vector3 shakeVec = Vector3(m_shakeEffect.amplitude * shakeIntensity) * Vector3(cameraShakeX, cameraShakeY, cameraShakeZ);
-
-		m_shakeOffset += shakeVec;
-	}
-#else
 	auto LerpTo = [&](float &value, float target, float speed = 10)
 	{
 		float diff = abs(target - value);
@@ -135,7 +77,6 @@ void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 
 		m_shakeOffset += shakeVec;
 	}
-#endif
 }
 void Camera::AddCameraShake(CameraShake cameraShake)
 {
@@ -169,64 +110,6 @@ static float Lerp(float a, float b, float alpha)
 
 RenderState Camera::CreateRenderState(bool clipped)
 {
-#if false
-	// Extension of clipping planes in outward direction
-	float viewRangeExtension = clipped ? 0.0f : 5.0f;
-
-	RenderState rs = g_application->GetRenderStateBase();
-	
-	uint8 portrait = g_aspectRatio > 1.0f ? 0 : 1;
-	float fov = fovs[portrait];
-	float pitchOffset = ( 0.5 - pitchOffsets[portrait]) * fov / 1.0f;
-
-	// Tilt, Height and Near calculated from zoom values
-	float base_pitch;
-	if (pPitch <= 0)
-		base_pitch = Lerp(minPitch[portrait], basePitch[portrait], pPitch + 1);
-	else base_pitch = Lerp(basePitch[portrait], maxPitch[portrait], pPitch);
-
-	float base_radius;
-	if (pZoom <= 0)
-		base_radius = Lerp(minRadius[portrait], baseRadius[portrait], pZoom + 1);
-	else base_radius = Lerp(baseRadius[portrait], maxRadius[portrait], pZoom);
-
-	base_radius *= 4;
-
-	float targetHeight = base_radius * sin(Math::degToRad * base_pitch);
-	float targetNear = base_radius * cos(Math::degToRad * base_pitch);
-
-	Transform cameraTransform;
-
-	// Set track origin
-	track->trackOrigin = Transform();
-	track->trackOrigin *= Transform::Rotation({ 0.0f, -m_roll * 360.0f,0.0f });
-	track->trackOrigin *= Transform::Translation(Vector3(0.0f, -targetHeight, -targetNear));
-
-	// Calculate clipping distances
-	Vector3 cameraPos = cameraTransform.TransformDirection(-Vector3(cameraTransform.GetPosition()));
-	Vector3 cameraDir = cameraTransform.TransformDirection(Vector3(0.0f, 0.0f, 1.0f));
-	float offset = VectorMath::Dot(cameraPos, cameraDir);
-
-	Vector3 toTrackEnd = Vector3(0, 0, 0) - Vector3(0.0f, targetNear + track->trackLength, -targetHeight);
-	float distToTrackEnd = sqrtf(toTrackEnd.x * toTrackEnd.x + toTrackEnd.y * toTrackEnd.y + toTrackEnd.z * toTrackEnd.z);
-	float angleToTrackEnd = atan2f(toTrackEnd.y, toTrackEnd.z);
-
-	cameraTransform *= Transform::Rotation(Vector3(base_pitch - pitchOffset,
-											0.0f,
-											0.0f ) + m_shakeOffset);
-
-	m_pitch = base_pitch - pitchOffset + m_shakeOffset.x;
-
-	float d0 = VectorMath::Dot(Vector3(0.0f, 0.0f, 0.0f), cameraDir) + offset;
-	float d1 = fabsf(cosf(angleToTrackEnd - (Math::degToRad * m_pitch)) * distToTrackEnd);
-	rs.cameraTransform = cameraTransform;
-
-	rs.projectionTransform = ProjectionMatrix::CreatePerspective(fov, g_aspectRatio, 0.1f, d1 + viewRangeExtension);
-
-	m_rsLast = rs;
-
-	return rs;
-#else
 	const float ROLL_AMT = 8;
 	const float PITCH_AMT = 10;
 	const float ZOOM_POW = 1.65f;
@@ -290,7 +173,6 @@ RenderState Camera::CreateRenderState(bool clipped)
 
 	m_rsLast = rs;
 	return rs;
-#endif
 }
 
 void Camera::SetTargetRoll(float target)
