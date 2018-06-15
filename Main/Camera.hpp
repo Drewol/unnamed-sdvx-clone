@@ -44,14 +44,15 @@ public:
 	// the clipped boolean indicates whenether to clip the cameras clipping planes to the track range
 	RenderState CreateRenderState(bool clipped);
 
-	bool rollKeep = false;
-
 	// The track being watched
 	class Track* track;
 
+	bool rollKeep = false;
+
 	// Zoom values, both can range from -1 to 1 to control the track zoom
-	float zoomBottom = 0.0f;
-	float zoomTop = 0.0f;
+	float pZoom = 0.0f;
+	float pPitch = 0.0f;
+	float pBaseRoll = 0.0f;
 
 	float cameraHeightBase = 0.25f;
 	float cameraHeightMult = 1.0f;

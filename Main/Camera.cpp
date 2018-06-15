@@ -102,6 +102,7 @@ static float Lerp(float a, float b, float alpha)
 
 RenderState Camera::CreateRenderState(bool clipped)
 {
+#if false
 	// Extension of clipping planes in outward direction
 	float viewRangeExtension = clipped ? 0.0f : 5.0f;
 
@@ -113,14 +114,14 @@ RenderState Camera::CreateRenderState(bool clipped)
 
 	// Tilt, Height and Near calculated from zoom values
 	float base_pitch;
-	if (zoomTop <= 0)
-		base_pitch = Lerp(minPitch[portrait], basePitch[portrait], zoomTop + 1);
-	else base_pitch = Lerp(basePitch[portrait], maxPitch[portrait], zoomTop);
+	if (pPitch <= 0)
+		base_pitch = Lerp(minPitch[portrait], basePitch[portrait], pPitch + 1);
+	else base_pitch = Lerp(basePitch[portrait], maxPitch[portrait], pPitch);
 
 	float base_radius;
-	if (zoomBottom <= 0)
-		base_radius = Lerp(minRadius[portrait], baseRadius[portrait], zoomBottom + 1);
-	else base_radius = Lerp(baseRadius[portrait], maxRadius[portrait], zoomBottom);
+	if (pZoom <= 0)
+		base_radius = Lerp(minRadius[portrait], baseRadius[portrait], pZoom + 1);
+	else base_radius = Lerp(baseRadius[portrait], maxRadius[portrait], pZoom);
 
 	base_radius *= 4;
 
@@ -158,6 +159,71 @@ RenderState Camera::CreateRenderState(bool clipped)
 	m_rsLast = rs;
 
 	return rs;
+#else
+	const float ROLL_AMT = 8;
+	const float PITCH_AMT = 10;
+	const float ZOOM_POW = 1.65f;
+	const float LENGTH_BASE = 12;
+	const float ROT = 0;
+
+	auto GetOriginTransform = [&](float pitch, float roll)
+	{
+		auto origin = Transform::Rotation({ 0, 0, 0 });
+		auto anchor = Transform::Rotation({ 1.5f, 0, 0 })
+			* Transform::Translation({ 0, -0.825f, 0 });
+		auto contnr = Transform::Scale({ 1, 1, 1 })
+			* Transform::Rotation({ -90, 0, 0, })
+			* Transform::Translation({ 0, 0, -1.1f });
+
+		origin = Transform::Rotation({ 0, 0, roll });
+		anchor = Transform::Translation({ 0, -1.0f, 0 })
+			* Transform::Rotation({ 1.5f, 0, 0 });
+		contnr = Transform::Translation({ 0, 0, -0.9f })
+			* Transform::Rotation({ -90 + pitch, 0, 0, });
+
+		return origin * anchor * contnr;
+		return contnr * anchor * origin;
+	};
+
+	// Extension of clipping planes in outward direction
+	float viewRangeExtension = clipped ? 0.0f : 5.0f;
+
+	RenderState rs = g_application->GetRenderStateBase();
+
+	auto worldNormal = GetOriginTransform(pPitch * PITCH_AMT, m_roll * 360.0f);
+	auto worldNoRoll = GetOriginTransform(pPitch * PITCH_AMT, 0);
+
+	auto zoomDir = worldNormal.GetPosition();
+	float highwayDist = zoomDir.Length();
+	zoomDir = zoomDir.Normalized();
+
+	float zoomAmt;
+	if (pZoom <= 0) zoomAmt = pow(ZOOM_POW, -pZoom) - 1;
+	else zoomAmt = highwayDist * (pow(ZOOM_POW, -pow(pZoom, 1.35f)) - 1);
+
+	//m_calcZoomBottom = zoomAmt / highwayDist + 1;
+
+	track->trackOrigin = Transform::Translation(zoomDir * zoomAmt) * worldNormal;
+
+	auto critDir = worldNoRoll.GetPosition().Normalized();
+	float rotToCrit = -atan2(critDir.y, -critDir.z) * Math::radToDeg;
+
+	float fov = fovs[0];
+	float cameraRot = fov / 2 - fov * pitchOffsets[0];
+
+	m_pitch = rotToCrit - cameraRot + basePitch[0];
+	auto cameraTransform = Transform::Rotation(Vector3(m_pitch, 0, 0) + m_shakeOffset);
+
+	// Calculate clipping distances
+	Vector3 toTrackEnd = worldNormal.TransformPoint(Vector3(0.0f, track->trackLength, 0));
+	float distToTrackEnd = sqrtf(toTrackEnd.x * toTrackEnd.x + toTrackEnd.y * toTrackEnd.y + toTrackEnd.z * toTrackEnd.z);
+
+	rs.cameraTransform = cameraTransform;
+	rs.projectionTransform = ProjectionMatrix::CreatePerspective(fov, g_aspectRatio, 0.1f, distToTrackEnd + viewRangeExtension);
+
+	m_rsLast = rs;
+	return rs;
+#endif
 }
 
 void Camera::SetTargetRoll(float target)
