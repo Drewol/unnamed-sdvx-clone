@@ -222,7 +222,7 @@ float Camera::GetRoll() const
 
 float Camera::GetHorizonHeight()
 {
-	return (0.5 + ((-90.f - m_pitch) / fovs[g_aspectRatio > 1.0f ? 0 : 1])) * m_rsLast.viewportSize.y;
+	return (0.5 + (-m_pitch / fovs[g_aspectRatio > 1.0f ? 0 : 1])) * m_rsLast.viewportSize.y;
 }
 
 Vector2i Camera::GetScreenCenter()
