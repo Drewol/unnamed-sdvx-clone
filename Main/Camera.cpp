@@ -118,21 +118,13 @@ RenderState Camera::CreateRenderState(bool clipped)
 
 	auto GetOriginTransform = [&](float pitch, float roll)
 	{
-		auto origin = Transform::Rotation({ 0, 0, 0 });
-		auto anchor = Transform::Rotation({ 1.5f, 0, 0 })
-			* Transform::Translation({ 0, -0.825f, 0 });
-		auto contnr = Transform::Scale({ 1, 1, 1 })
-			* Transform::Rotation({ -90, 0, 0, })
-			* Transform::Translation({ 0, 0, -1.1f });
-
-		origin = Transform::Rotation({ 0, 0, roll });
-		anchor = Transform::Translation({ 0, -1.0f, 0 })
+		auto origin = Transform::Rotation({ 0, 0, roll });
+		auto anchor = Transform::Translation({ 0, -0.9f, 0 })
 			* Transform::Rotation({ 1.5f, 0, 0 });
-		contnr = Transform::Translation({ 0, 0, -0.9f })
+		auto contnr = Transform::Translation({ 0, 0, -1.1f })
 			* Transform::Rotation({ -90 + pitch, 0, 0, });
 
 		return origin * anchor * contnr;
-		return contnr * anchor * origin;
 	};
 
 	int portrait = g_aspectRatio > 1 ? 0 : 1;
