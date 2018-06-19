@@ -38,7 +38,8 @@ public:
 	Vector2i GetScreenCenter();
 	Vector3 GetShakeOffset();
 
-	float GetSpinProgress() const { return m_spinProgress; }
+	// Gets the spin angle for the background shader
+	float GetBackgroundSpin() const { return m_bgSpin; }
 
 	Vector2 Project(const Vector3& pos);
 
@@ -95,6 +96,7 @@ private:
 	float m_spinDirection = 0.0f;
 	float m_spinRoll = 0.0f;
 	float m_spinProgress = 0.0f;
+	float m_bgSpin = 0.0f;
 
 	float m_pitch = 0.0f;
 
