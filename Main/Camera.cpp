@@ -113,8 +113,6 @@ RenderState Camera::CreateRenderState(bool clipped)
 	const float ROLL_AMT = 8;
 	const float PITCH_AMT = 10;
 	const float ZOOM_POW = 1.65f;
-	const float LENGTH_BASE = 12;
-	const float ROT = 0;
 
 	auto GetOriginTransform = [&](float pitch, float roll)
 	{
