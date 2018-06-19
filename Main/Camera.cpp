@@ -42,18 +42,27 @@ void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 
 	LerpTo(m_laserRoll, m_targetRoll, m_targetRoll != 0.0f ? 8 : 3);
 
+	m_bgSpin = 0.0f;
 	m_spinProgress = (float)(playback.GetLastTime() - m_spinStart) / m_spinDuration;
 	// Calculate camera spin
 	if (m_spinProgress < 2.0f)
 	{
 		if (m_spinType == SpinStruct::SpinType::Full)
 		{
+			m_bgSpin = m_spinProgress;
 			if (m_spinProgress <= 1.0f)
 				m_spinRoll = -m_spinDirection * (1.0 - m_spinProgress);
 			else m_spinRoll = Swing(m_spinProgress - 1, 0.2f, m_spinDirection);
 		}
 		else if (m_spinType == SpinStruct::SpinType::Quarter)
+		{
+			m_bgSpin = m_spinProgress / 2;
 			m_spinRoll = Swing(m_spinProgress / 2, 1, m_spinDirection);
+		}
+		else if (m_spinType == SpinStruct::SpinType::Bounce)
+		{
+			// TODO(local): add x offset calc
+		}
 
 		m_spinProgress = Math::Clamp(m_spinProgress, 0.0f, 2.0f);
 	}
