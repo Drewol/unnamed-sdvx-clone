@@ -11,6 +11,20 @@ Camera::~Camera()
 {
 
 }
+
+static float Swing(float time, float amplitude, float direction)
+{
+	float A = 120.0f / 360;
+	float w = 1;
+	float k = 3.5;
+	float t = time;
+
+	float result = A * (float)pow(Math::e, -k * t) * sin(2 * t * Math::pi / w)
+				 * direction;
+
+	return result * amplitude;
+}
+
 void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 {
 	auto LerpTo = [&](float &value, float target, float speed = 10)
@@ -36,17 +50,10 @@ void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 		{
 			if (m_spinProgress <= 1.0f)
 				m_spinRoll = -m_spinDirection * (1.0 - m_spinProgress);
-			else
-			{
-				float amplitude = (15.0f / 360.0f) / (m_spinProgress + 1);
-				m_spinRoll = sin(m_spinProgress * Math::pi * 2.0f) * amplitude * m_spinDirection;
-			}
+			else m_spinRoll = Swing(m_spinProgress - 1, 0.2f, m_spinDirection);
 		}
 		else if (m_spinType == SpinStruct::SpinType::Quarter)
-		{
-			float amplitude = (80.0f / 360.0f) / ((m_spinProgress)+1);
-			m_spinRoll = sin(m_spinProgress * Math::pi) * amplitude * m_spinDirection;
-		}
+			m_spinRoll = Swing(m_spinProgress / 2, 1, m_spinDirection);
 
 		m_spinProgress = Math::Clamp(m_spinProgress, 0.0f, 2.0f);
 	}
@@ -117,9 +124,9 @@ RenderState Camera::CreateRenderState(bool clipped)
 	auto GetOriginTransform = [&](float pitch, float roll)
 	{
 		auto origin = Transform::Rotation({ 0, 0, roll });
-		auto anchor = Transform::Translation({ 0, -0.9f, 0 })
+		auto anchor = Transform::Translation({ 0, -1.0f, 0 })
 			* Transform::Rotation({ 1.5f, 0, 0 });
-		auto contnr = Transform::Translation({ 0, 0, -1.1f })
+		auto contnr = Transform::Translation({ 0, 0, -1.0f })
 			* Transform::Rotation({ -90 + pitch, 0, 0, });
 
 		return origin * anchor * contnr;
