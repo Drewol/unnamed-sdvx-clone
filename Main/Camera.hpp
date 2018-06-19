@@ -38,6 +38,8 @@ public:
 	Vector2i GetScreenCenter();
 	Vector3 GetShakeOffset();
 
+	float GetSpinProgress() const { return m_spinProgress; }
+
 	Vector2 Project(const Vector3& pos);
 
 	// Generates a new render state for drawing from this cameras Point of View
