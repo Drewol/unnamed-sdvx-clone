@@ -183,7 +183,7 @@ void Camera::SetTargetRoll(float target)
 				m_targetRoll = actualTarget;
 			if (m_targetRoll < 0 && actualTarget < m_targetRoll)
 				m_targetRoll = actualTarget;
-			else if (actualTarget > m_targetRoll)
+			else if (m_targetRoll > 0 && actualTarget > m_targetRoll)
 				m_targetRoll = actualTarget;
 		}
 		m_targetRollSet = true;
