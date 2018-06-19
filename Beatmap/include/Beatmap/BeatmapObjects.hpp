@@ -136,11 +136,17 @@ struct SpinStruct
 	{
 		None = 0x0,
 		Full = 0x1,
-		Quarter = 0x2
+		Quarter = 0x2,
+		// the side bounce thing
+		Bounce = 0x3,
 	};
 	SpinType type = SpinType::None;
 	float direction = 0;
 	uint32 duration = 0;
+	// for the side bounce thing
+	uint32 amplitude = 0;
+	uint32 frequency = 0;
+	uint32 decay = 0;
 };
 
 
