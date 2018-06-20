@@ -56,7 +56,7 @@ void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 		{
 			m_bgSpin = 0.0f;
 			m_spinBounceOffset = DampedSin(m_spinProgress / 2, m_spinBounceAmplitude,
-				m_spinBounceFrequency, m_spinBounceDecay);
+				m_spinBounceFrequency / 2, m_spinBounceDecay) * m_spinDirection;
 		}
 
 		m_spinProgress = Math::Clamp(m_spinProgress, 0.0f, 2.0f);
@@ -218,7 +218,8 @@ void Camera::SetXOffsetBounce(float direction, uint32 duration, uint32 amplitude
 	const TimingPoint& currentTimingPoint = playback.GetCurrentTimingPoint();
 
 	m_spinDirection = direction;
-	m_spinDuration = (duration / 192.0f) * (currentTimingPoint.beatDuration) * 4;
+	// since * 2 and stuff
+	m_spinDuration = 0.5f * (duration / 192.0f) * (currentTimingPoint.beatDuration) * 4;
 	m_spinStart = playback.GetLastTime();
 	m_spinType = SpinStruct::SpinType::Bounce;
 
