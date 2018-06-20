@@ -709,6 +709,14 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 				point->duration = atol(*p.second);
 				m_laneTogglePoints.Add(point);
 			}
+			else if (p.first == "roll")
+			{
+				ZoomControlPoint* point = new ZoomControlPoint();
+				point->time = mapTime;
+				point->index = 2;
+				point->zoom = (float)atol(*p.second) / 360.0f;
+				m_zoomControlPoints.Add(point);
+			}
 			else if (p.first == "tilt")
 			{
 				EventObjectState* evt = new EventObjectState();

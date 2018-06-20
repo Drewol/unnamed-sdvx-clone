@@ -77,10 +77,6 @@ public:
 	float laserAlertOpacity[2] = { 1.0f };
 
 	float laserSpeedOffset = 0.90;
-
-	float zoomTop = .0f;
-	float zoomBottom = .0f;
-	float roll = .0f;
 	Vector3 shakeOffset;
 
 	// Visible time elements on the playfield track

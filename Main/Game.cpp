@@ -552,10 +552,8 @@ public:
 		{
 			m_camera.pZoom = m_playback.GetZoom(0);
 			m_camera.pPitch = m_playback.GetZoom(1);
-			m_track->roll = m_camera.GetRoll();
+			m_camera.pBaseRoll = m_playback.GetZoom(2);
 		}
-		m_track->zoomBottom = m_camera.pZoom;
-		m_track->zoomTop = m_camera.pPitch;
 		m_camera.track = m_track;
 		m_camera.Tick(deltaTime,m_playback);
 		m_track->Tick(m_playback, deltaTime);
@@ -778,7 +776,7 @@ public:
 			m_settingsBar = Ref<SettingsBar>(sb);
 			sb->AddSetting(&m_camera.pZoom, -1.0f, 1.0f, "Bottom Zoom");
 			sb->AddSetting(&m_camera.pPitch, -1.0f, 1.0f, "Top Zoom");
-			sb->AddSetting(&(m_track->roll), 0.0f, 1.0f, "Track roll");
+			sb->AddSetting(&m_camera.pBaseRoll, -1.0f, 1.0f, "Track roll");
 			sb->AddSetting(m_camera.pitchOffsets + portrait, 0.0f, 1.0f, "Crit Line Height");
 			sb->AddSetting(m_camera.fovs + portrait, 0.0f, 180.0f, "FOV");
 			sb->AddSetting(m_camera.baseRadius + portrait, 0.0f, 2.0f, "Base distance to track");
