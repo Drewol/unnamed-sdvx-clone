@@ -12,18 +12,12 @@ Camera::~Camera()
 
 }
 
-static float Swing(float time, float amplitude, float direction)
+static float DampedSin(float t, float amplitude, float frequency, float decay)
 {
-	float A = 120.0f / 360;
-	float w = 1;
-	float k = 3.5;
-	float t = time;
-
-	float result = A * (float)pow(Math::e, -k * t) * sin(2 * t * Math::pi / w)
-				 * direction;
-
-	return result * amplitude;
+	return amplitude * (float)pow(Math::e, -decay * t) * sin(frequency * 2 * t * Math::pi);
 }
+
+static float Swing(float time) { return DampedSin(time, 120.0f / 360, 1, 3.5f); }
 
 void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 {
@@ -52,16 +46,17 @@ void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 			m_bgSpin = m_spinProgress;
 			if (m_spinProgress <= 1.0f)
 				m_spinRoll = -m_spinDirection * (1.0 - m_spinProgress);
-			else m_spinRoll = Swing(m_spinProgress - 1, 0.2f, m_spinDirection);
+			else m_spinRoll = Swing(m_spinProgress - 1) * 0.2f * m_spinDirection;
 		}
 		else if (m_spinType == SpinStruct::SpinType::Quarter)
 		{
 			m_bgSpin = m_spinProgress / 2;
-			m_spinRoll = Swing(m_spinProgress / 2, 1, m_spinDirection);
+			m_spinRoll = Swing(m_spinProgress / 2) * m_spinDirection;
 		}
 		else if (m_spinType == SpinStruct::SpinType::Bounce)
 		{
-			// TODO(local): add x offset calc
+			m_spinBounceOffset = DampedSin(m_spinProgress / 2, m_spinBounceAmplitude,
+				m_spinBounceFrequency, m_spinBounceDecay);
 		}
 
 		m_spinProgress = Math::Clamp(m_spinProgress, 0.0f, 2.0f);
@@ -73,6 +68,7 @@ void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 	}
 
 	m_roll = pBaseRoll + m_spinRoll + m_laserRoll;
+	m_totalOffset = pOffset + m_spinBounceOffset;
 
 	if (!rollKeep)
 	{
@@ -130,10 +126,10 @@ RenderState Camera::CreateRenderState(bool clipped)
 	const float PITCH_AMT = 10;
 	const float ZOOM_POW = 1.65f;
 
-	auto GetOriginTransform = [&](float pitch, float roll)
+	auto GetOriginTransform = [&](float pitch, float offs, float roll)
 	{
 		auto origin = Transform::Rotation({ 0, 0, roll });
-		auto anchor = Transform::Translation({ 0, -1.0f, 0 })
+		auto anchor = Transform::Translation({ offs, -1.1f, 0 })
 			* Transform::Rotation({ 1.5f, 0, 0 });
 		auto contnr = Transform::Translation({ 0, 0, -1.0f })
 			* Transform::Rotation({ -90 + pitch, 0, 0, });
@@ -148,8 +144,8 @@ RenderState Camera::CreateRenderState(bool clipped)
 
 	RenderState rs = g_application->GetRenderStateBase();
 
-	auto worldNormal = GetOriginTransform(pPitch * PITCH_AMT, m_roll * 360.0f);
-	auto worldNoRoll = GetOriginTransform(pPitch * PITCH_AMT, 0);
+	auto worldNormal = GetOriginTransform(pPitch * PITCH_AMT, m_totalOffset, m_roll * 360.0f);
+	auto worldNoRoll = GetOriginTransform(pPitch * PITCH_AMT, 0, 0);
 
 	auto zoomDir = worldNormal.GetPosition();
 	float highwayDist = zoomDir.Length();
@@ -214,6 +210,20 @@ void Camera::SetSpin(float direction, uint32 duration, uint8 type, class Beatmap
 	m_spinDuration = (duration / 192.0f) * (currentTimingPoint.beatDuration) * 4;
 	m_spinStart = playback.GetLastTime();
 	m_spinType = type;
+}
+
+void Camera::SetXOffsetBounce(float direction, uint32 duration, uint32 amplitude, uint32 frequency, float decay, class BeatmapPlayback &playback)
+{
+	const TimingPoint& currentTimingPoint = playback.GetCurrentTimingPoint();
+
+	m_spinDirection = direction;
+	m_spinDuration = (duration / 192.0f) * (currentTimingPoint.beatDuration) * 4;
+	m_spinStart = playback.GetLastTime();
+	m_spinType = SpinStruct::SpinType::Bounce;
+
+	m_spinBounceAmplitude = amplitude / 250.0f;
+	m_spinBounceFrequency = frequency;
+	m_spinBounceDecay = decay == 0 ? 0 : (decay == 1 ? 1.5f : 3.0f);
 }
 
 void Camera::SetLasersActive(bool lasersActive)

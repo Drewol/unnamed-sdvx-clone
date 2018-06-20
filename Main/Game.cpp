@@ -1235,7 +1235,9 @@ public:
 
 		if (object->spin.type != 0)
 		{
-			m_camera.SetSpin(object->GetDirection(), object->spin.duration, object->spin.type, m_playback);
+			if (object->spin.type == SpinStruct::SpinType::Bounce)
+				m_camera.SetXOffsetBounce(object->GetDirection(), object->spin.duration, object->spin.amplitude, object->spin.frequency, object->spin.duration, m_playback);
+			else m_camera.SetSpin(object->GetDirection(), object->spin.duration, object->spin.type, m_playback);
 		}
 
 

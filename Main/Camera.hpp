@@ -33,6 +33,7 @@ public:
 	void SetLasersActive(bool lasersActive);
 	void SetTargetRoll(float target);
 	void SetSpin(float direction, uint32 duration, uint8 type, class BeatmapPlayback& playback);
+	void SetXOffsetBounce(float direction, uint32 duration, uint32 amplitude, uint32 frequency, float decay, class BeatmapPlayback &playback);
 	float GetRoll() const;
 	float GetHorizonHeight();
 	Vector2i GetScreenCenter();
@@ -53,6 +54,7 @@ public:
 	bool rollKeep = false;
 
 	// Zoom values, both can range from -1 to 1 to control the track zoom
+	float pOffset = 0.0f;
 	float pZoom = 0.0f;
 	float pPitch = 0.0f;
 	float pBaseRoll = 0.0f;
@@ -78,7 +80,10 @@ public:
 private:
 	float m_baseRollBlend = 0.0f;
 	float m_ClampRoll(float in) const;
-	// -1 to 1 roll value
+	// x offset
+	float m_totalOffset = 0.0f;
+	float m_spinBounceOffset = 0.0f;
+	// roll value
 	float m_roll = 0.0f;
 	float m_laserRoll = 0.0f;
 	// Target to roll towards
@@ -97,6 +102,10 @@ private:
 	float m_spinRoll = 0.0f;
 	float m_spinProgress = 0.0f;
 	float m_bgSpin = 0.0f;
+
+	float m_spinBounceAmplitude = 0.0f;
+	float m_spinBounceFrequency = 0.0f;
+	float m_spinBounceDecay = 0.0f;
 
 	float m_pitch = 0.0f;
 

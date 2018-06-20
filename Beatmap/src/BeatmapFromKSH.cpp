@@ -33,8 +33,12 @@ struct TempLaserState
 	MapTime startTime;
 	uint32 numTicks = 0;
 	uint32 effectType = 0;
+	bool spinIsBounce = false;
 	char spinType = 0;
 	uint32 spinDuration = 0;
+	uint32 spinBounceAmplitude = 0;
+	uint32 spinBounceFrequency = 0;
+	uint32 spinBounceDecay = 0;
 	uint8 effectParams = 0;
 	float startPosition; // Entry position
 	// Previous segment
@@ -987,19 +991,29 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 					if (state->spinType != 0)
 					{
 						obj->spin.duration = state->spinDuration;
-						switch (state->spinType)
+						obj->spin.amplitude = state->spinBounceAmplitude;
+						obj->spin.frequency = state->spinBounceFrequency;
+						obj->spin.decay = state->spinBounceDecay;
+
+						if (state->spinIsBounce)
+							obj->spin.type = SpinStruct::SpinType::Bounce;
+						else
 						{
-						case '(':
-						case ')':
-							obj->spin.type = SpinStruct::SpinType::Full;
-							break;
-						case '<':
-						case '>':
-							obj->spin.type = SpinStruct::SpinType::Quarter;
-							break;
-						default:
-							break;
+							switch (state->spinType)
+							{
+							case '(':
+							case ')':
+								obj->spin.type = SpinStruct::SpinType::Full;
+								break;
+							case '<':
+							case '>':
+								obj->spin.type = SpinStruct::SpinType::Quarter;
+								break;
+							default:
+								break;
+							}
 						}
+
 						switch (state->spinType)
 						{
 						case '<':
@@ -1085,14 +1099,32 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 				//) or ( = full spin
 				//> or < = quarter spin
 				//Speed is number of 192nd notes
-				if (!tick.add.empty() && tick.add[0] == '@')
+				if (!tick.add.empty() && (tick.add[0] == '@' || tick.add[0] == 'S'))
 				{
+					state->spinIsBounce = tick.add[0] == 'S';
 					state->spinType = tick.add[1];
-					state->spinDuration = std::stoi(tick.add.substr(2));
-					if(state->spinType == '(' || state->spinType == ')')
-						state->spinDuration = (3 * std::stoi(tick.add.substr(2))) / 4;
-				}
 
+					String add = tick.add.substr(2);
+					if (state->spinIsBounce)
+					{
+						String duration, amplitude, frequency, decay;
+
+						add.Split(";", &duration, &amplitude);
+						amplitude.Split(";", &amplitude, &frequency);
+						frequency.Split(";", &frequency, &decay);
+
+						state->spinDuration = std::stoi(duration);
+						state->spinBounceAmplitude = std::stoi(amplitude);
+						state->spinBounceFrequency = std::stoi(frequency);
+						state->spinBounceDecay = std::stoi(decay);
+					}
+					else
+					{
+						state->spinDuration = std::stoi(add);
+						if (state->spinType == '(' || state->spinType == ')')
+							state->spinDuration = 3 * state->spinDuration / 4;
+					}
+				}
 			}
 		}
 	}
