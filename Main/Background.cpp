@@ -128,7 +128,7 @@ class TestBackground : public FullscreenBackground
 		
 
 
-		float tilt = game->GetCamera().GetRoll();
+		float tilt = game->GetCamera().GetLaserRoll() * 0.5f + game->GetCamera().GetBackgroundSpin();
 		fullscreenMaterialParams.SetParameter("clearTransition", clearTransition);
 		fullscreenMaterialParams.SetParameter("tilt", tilt);
 		fullscreenMaterialParams.SetParameter("mainTex", backgroundTexture);

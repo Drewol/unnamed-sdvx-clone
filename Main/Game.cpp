@@ -662,8 +662,8 @@ public:
 					Color hitColor = (i < 4) ? Color::White : Color::FromHSV(20, 0.7f, 1.0f);
 					float hitWidth = (i < 4) ? m_track->buttonWidth : m_track->fxbuttonWidth;
 					m_holdEmitters[i] = CreateHoldEmitter(hitColor, hitWidth);
-					m_holdEmitters[i]->position.x = m_track->GetButtonPlacement(i);
 				}
+				m_holdEmitters[i]->position = m_track->TransformPoint(Vector3(m_track->GetButtonPlacement(i), 0.f, 0.f));
 			}
 			else
 			{

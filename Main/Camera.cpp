@@ -36,25 +36,25 @@ void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 
 	LerpTo(m_laserRoll, m_targetRoll, m_targetRoll != 0.0f ? 8 : 3);
 
-	m_bgSpin = 0.0f;
 	m_spinProgress = (float)(playback.GetLastTime() - m_spinStart) / m_spinDuration;
 	// Calculate camera spin
 	if (m_spinProgress < 2.0f)
 	{
 		if (m_spinType == SpinStruct::SpinType::Full)
 		{
-			m_bgSpin = m_spinProgress;
+			m_bgSpin = m_spinProgress * m_spinDirection;
 			if (m_spinProgress <= 1.0f)
 				m_spinRoll = -m_spinDirection * (1.0 - m_spinProgress);
 			else m_spinRoll = Swing(m_spinProgress - 1) * 0.2f * m_spinDirection;
 		}
 		else if (m_spinType == SpinStruct::SpinType::Quarter)
 		{
-			m_bgSpin = m_spinProgress / 2;
+			m_bgSpin = m_spinProgress * m_spinDirection / 2;
 			m_spinRoll = Swing(m_spinProgress / 2) * m_spinDirection;
 		}
 		else if (m_spinType == SpinStruct::SpinType::Bounce)
 		{
+			m_bgSpin = 0.0f;
 			m_spinBounceOffset = DampedSin(m_spinProgress / 2, m_spinBounceAmplitude,
 				m_spinBounceFrequency, m_spinBounceDecay);
 		}
@@ -63,6 +63,7 @@ void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 	}
 	else
 	{
+		m_bgSpin = 0.0f;
 		m_spinRoll = 0.0f;
 		m_spinProgress = 0.0f;
 	}
@@ -234,6 +235,11 @@ void Camera::SetLasersActive(bool lasersActive)
 float Camera::GetRoll() const
 {
 	return m_roll;
+}
+
+float Camera::GetLaserRoll() const
+{
+	return m_laserRoll;
 }
 
 float Camera::GetHorizonHeight()
