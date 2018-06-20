@@ -552,7 +552,8 @@ public:
 		{
 			m_camera.pZoom = m_playback.GetZoom(0);
 			m_camera.pPitch = m_playback.GetZoom(1);
-			m_camera.pBaseRoll = m_playback.GetZoom(2);
+			m_camera.pOffset = m_playback.GetZoom(2);
+			m_camera.pBaseRoll = m_playback.GetZoom(3);
 		}
 		m_camera.track = m_track;
 		m_camera.Tick(deltaTime,m_playback);
