@@ -507,7 +507,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 	float laserRanges[2] = { 1.0f, 1.0f };
 
 	uint8 sampleIndex = 0;
-
+	ZoomControlPoint *firstControlPoints[4] = { nullptr };
 
 	for (KShootMap::TickIterator it(kshootMap); it; ++it)
 	{
@@ -686,6 +686,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 				evt->data.floatVal = vol;
 				m_objectStates.Add(*evt);
 			}
+#define CHECK_FIRST if (!firstControlPoints[point->index]) firstControlPoints[point->index] = point
 			else if (p.first == "zoom_bottom")
 			{
 				ZoomControlPoint* point = new ZoomControlPoint();
@@ -693,6 +694,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 				point->index = 0;
 				point->zoom = (float)atol(*p.second) / 100.0f;
 				m_zoomControlPoints.Add(point);
+				CHECK_FIRST;
 			}
 			else if (p.first == "zoom_top")
 			{
@@ -701,6 +703,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 				point->index = 1;
 				point->zoom = (float)atol(*p.second) / 100.0f;
 				m_zoomControlPoints.Add(point);
+				CHECK_FIRST;
 			}
 			else if (p.first == "zoom_side")
 			{
@@ -709,6 +712,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 				point->index = 2;
 				point->zoom = (float)atol(*p.second) / 100.0f;
 				m_zoomControlPoints.Add(point);
+				CHECK_FIRST;
 			}
 			else if (p.first == "roll")
 			{
@@ -717,6 +721,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 				point->index = 3;
 				point->zoom = (float)atol(*p.second) / 360.0f;
 				m_zoomControlPoints.Add(point);
+				CHECK_FIRST;
 			}
 			else if (p.first == "lane_toggle")
 			{
@@ -1145,46 +1150,18 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 		}
 	}
 
-	//// Split laser segments on bpm changes
+	for (int i = 0; i < sizeof(firstControlPoints) / sizeof(ZoomControlPoint *); i++)
+	{
+		ZoomControlPoint *point = firstControlPoints[i];
+		if (!point) continue;
 
-	//Vector<ObjectState*> newLasers;
-	//for (ObjectState* it : m_objectStates)
-	//{
-	//	if (it->type == ObjectType::Laser)
-	//	{
-	//		LaserObjectState* laser = (LaserObjectState*)it;
-	//		if (laser->flags & LaserObjectState::flag_Instant)
-	//			continue;
-	//		for (TimingPoint* tp : m_timingPoints)
-	//		{
-	//			if (laser->time < tp->time && laser->time + laser->duration > tp->time)
-	//			{
-	//				LaserObjectState* obj = new LaserObjectState();
+		ZoomControlPoint *dup = new ZoomControlPoint();
+		dup->index = point->index;
+		dup->zoom = point->zoom;
+		dup->time = INT32_MIN;
 
-	//				obj->time = tp->time;
-	//				obj->duration = (laser->time + laser->duration) - tp->time;
-	//				obj->index = laser->index;
-	//				obj->flags = laser->flags;
-	//				float meetingPoint = (float)(laser->duration - obj->duration) / laser->duration;
-	//				meetingPoint = laser->points[0] + (meetingPoint * (laser->points[1] - laser->points[0]));
-	//				obj->points[0] = meetingPoint;
-	//				obj->points[1] = laser->points[1];
-	//				laser->points[1] = meetingPoint;
-	//				laser->duration -= obj->duration;
-	//				
-	//				obj->next = laser->next;
-	//				obj->prev = laser;
-	//				if (laser->next)
-	//					laser->next->prev = obj;
-	//				laser->next = obj;
-	//				newLasers.Add(*obj);
-	//			}
-	//		}
-	//	}
-	//}
-
-	//m_objectStates.reserve(newLasers.size());
-	//m_objectStates.insert(m_objectStates.end(), newLasers.begin(), newLasers.end());
+		m_zoomControlPoints.insert(m_zoomControlPoints.begin(), dup);
+	}
 
 	// Re-sort collection to fix some inconsistencies caused by corrections after laser slams
 	ObjectState::SortArray(m_objectStates);
