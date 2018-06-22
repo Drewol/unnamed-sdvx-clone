@@ -550,10 +550,10 @@ public:
 		// Set track zoom
 		if(!m_settingsBar->IsShown()) // Overridden settings?
 		{
-			m_camera.pZoom = m_playback.GetZoom(0);
-			m_camera.pPitch = m_playback.GetZoom(1);
-			m_camera.pOffset = m_playback.GetZoom(2);
-			m_camera.pBaseRoll = m_playback.GetZoom(3);
+			m_camera.pLaneZoom = m_playback.GetZoom(0);
+			m_camera.pLanePitch = m_playback.GetZoom(1);
+			m_camera.pLaneOffset = m_playback.GetZoom(2);
+			m_camera.pLaneBaseRoll = m_playback.GetZoom(3);
 		}
 		m_camera.track = m_track;
 		m_camera.Tick(deltaTime,m_playback);
@@ -775,9 +775,9 @@ public:
 
 			SettingsBar* sb = new SettingsBar(m_guiStyle);
 			m_settingsBar = Ref<SettingsBar>(sb);
-			sb->AddSetting(&m_camera.pZoom, -1.0f, 1.0f, "Bottom Zoom");
-			sb->AddSetting(&m_camera.pPitch, -1.0f, 1.0f, "Top Zoom");
-			sb->AddSetting(&m_camera.pBaseRoll, -1.0f, 1.0f, "Track roll");
+			sb->AddSetting(&m_camera.pLaneZoom, -1.0f, 1.0f, "Bottom Zoom");
+			sb->AddSetting(&m_camera.pLanePitch, -1.0f, 1.0f, "Top Zoom");
+			sb->AddSetting(&m_camera.pLaneBaseRoll, -1.0f, 1.0f, "Track roll");
 			sb->AddSetting(m_camera.pitchOffsets + portrait, 0.0f, 1.0f, "Crit Line Height");
 			sb->AddSetting(m_camera.fovs + portrait, 0.0f, 180.0f, "FOV");
 			sb->AddSetting(m_camera.baseRadius + portrait, 0.0f, 2.0f, "Base distance to track");
@@ -1174,8 +1174,8 @@ public:
 		textPos.y += RenderText(Utility::Sprintf("Roll: %f(x%f) %s",
 			m_camera.GetRoll(), m_rollIntensity, m_camera.rollKeep ? "[Keep]" : ""), textPos).y;
 
-		textPos.y += RenderText(Utility::Sprintf("Track Zoom Top: %f", m_camera.pPitch), textPos).y;
-		textPos.y += RenderText(Utility::Sprintf("Track Zoom Bottom: %f", m_camera.pZoom), textPos).y;
+		textPos.y += RenderText(Utility::Sprintf("Track Zoom Top: %f", m_camera.pLanePitch), textPos).y;
+		textPos.y += RenderText(Utility::Sprintf("Track Zoom Bottom: %f", m_camera.pLaneZoom), textPos).y;
 
 		Vector2 buttonStateTextPos = Vector2(g_resolution.x - 200.0f, 100.0f);
 		RenderText(g_input.GetControllerStateString(), buttonStateTextPos);

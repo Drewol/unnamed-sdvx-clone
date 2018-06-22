@@ -55,37 +55,31 @@ public:
 	bool rollKeep = false;
 
 	// Zoom values, both can range from -1 to 1 to control the track zoom
-	float pOffset = 0.0f;
-	float pZoom = 0.0f;
-	float pPitch = 0.0f;
-	float pBaseRoll = 0.0f;
+	float pLaneOffset = 0.0f;
+	float pLaneZoom = 0.0f;
+	float pLanePitch = 0.0f;
+	float pLaneBaseRoll = 0.0f;
 
-	float cameraHeightBase = 0.25f;
-	float cameraHeightMult = 1.0f;
-	float cameraNearBase = 0.53f;
-	float cameraNearMult = 1.0f;
+	float pitchUnit = 7.0f;
+
 	float cameraShakeX = 0.0f;
 	float cameraShakeY = 0.4f;
 	float cameraShakeZ = 0.0f;
 
 	// Camera variables Landscape, Portrait
 	float basePitch[2] = { 0.f, 0.f };
-	float pitchUnit = 7.0f;
-
 	float baseRadius[2] = { 0.3f, 0.275f };
-	float radiusUnit = 0.075f;
 
 	float pitchOffsets[2] = { 0.05f, 0.27f }; // how far from the bottom of the screen should the crit line be
 	float fovs[2] = { 60.f, 90.f };
 
 private:
-	float m_baseRollBlend = 0.0f;
 	float m_ClampRoll(float in) const;
 	// x offset
 	float m_totalOffset = 0.0f;
 	float m_spinBounceOffset = 0.0f;
 	// roll value
-	float m_roll = 0.0f;
+	float m_totalRoll = 0.0f;
 	float m_laserRoll = 0.0f;
 	// Target to roll towards
 	float m_targetRoll = 0.0f;
@@ -108,7 +102,7 @@ private:
 	float m_spinBounceFrequency = 0.0f;
 	float m_spinBounceDecay = 0.0f;
 
-	float m_pitch = 0.0f;
+	float m_actualCameraPitch = 0.0f;
 
 	RenderState m_rsLast;
 
