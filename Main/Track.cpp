@@ -20,7 +20,7 @@ Track::Track()
 	if (g_aspectRatio < 1.0f)
 		trackLength = 12.0f;
 	else
-		trackLength = 8.0f;
+		trackLength = 10.0f;
 }
 Track::~Track()
 {
