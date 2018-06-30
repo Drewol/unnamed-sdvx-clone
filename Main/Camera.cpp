@@ -131,9 +131,9 @@ RenderState Camera::CreateRenderState(bool clipped)
 	auto GetOriginTransform = [&](float pitch, float offs, float roll)
 	{
 		auto origin = Transform::Rotation({ 0, 0, roll });
-		auto anchor = Transform::Translation({ offs, -1.1f, 0 })
+		auto anchor = Transform::Translation({ offs, -0.9f, 0 })
 			* Transform::Rotation({ 1.5f, 0, 0 });
-		auto contnr = Transform::Translation({ 0, 0, -1.0f })
+		auto contnr = Transform::Translation({ 0, 0, -0.9f })
 			* Transform::Rotation({ -90 + pitch, 0, 0, });
 
 		return origin * anchor * contnr;
@@ -146,8 +146,10 @@ RenderState Camera::CreateRenderState(bool clipped)
 
 	RenderState rs = g_application->GetRenderStateBase();
 
-	auto worldNormal = GetOriginTransform(pLanePitch * pitchUnit, m_totalOffset, m_totalRoll * 360.0f);
-	auto worldNoRoll = GetOriginTransform(pLanePitch * pitchUnit, 0, 0);
+	float lanePitch = pLanePitch * pitchUnit;
+
+	auto worldNormal = GetOriginTransform(lanePitch, m_totalOffset, m_totalRoll * 360.0f);
+	auto worldNoRoll = GetOriginTransform(lanePitch, 0, 0);
 
 	auto zoomDir = worldNormal.GetPosition();
 	float highwayDist = zoomDir.Length();
