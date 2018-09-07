@@ -1143,7 +1143,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 					{
 						state->spinDuration = std::stoi(add);
 						if (state->spinType == '(' || state->spinType == ')')
-							state->spinDuration = 3 * state->spinDuration / 4;
+							state->spinDuration = state->spinDuration;
 					}
 				}
 			}

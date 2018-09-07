@@ -19,6 +19,22 @@ static float DampedSin(float t, float amplitude, float frequency, float decay)
 
 static float Swing(float time) { return DampedSin(time, 120.0f / 360, 1, 3.5f); }
 
+static void Spin(float time, float &roll, float &bgAngle, float dir)
+{
+	const float TSPIN = 0.75f / 2.0f;
+	const float TRECOV = 0.75f / 2.0f;
+
+	bgAngle = Math::Clamp(time * 4.0f, 0.0f, 2.0f) * dir;
+	if (time <= TSPIN)
+		roll = -dir * (TSPIN - time) / TSPIN;
+	else
+	{
+		if (time < TSPIN + TRECOV)
+			roll = Swing((time - TSPIN) / TRECOV) * 0.25f * dir;
+		else roll = 0.0f;
+	}
+}
+
 void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 {
 	auto LerpTo = [&](float &value, float target, float speed = 10)
@@ -38,15 +54,12 @@ void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 
 	m_spinProgress = (float)(playback.GetLastTime() - m_spinStart) / m_spinDuration;
 	// Calculate camera spin
+	// TODO(local): spins need a progress of 1
 	if (m_spinProgress < 2.0f)
 	{
 		if (m_spinType == SpinStruct::SpinType::Full)
 		{
-			const float BG_SPIN_SPEED = 4.0f / 3.0f;
-			m_bgSpin = Math::Clamp(m_spinProgress * BG_SPIN_SPEED, 0.0f, 2.0f) * m_spinDirection;
-			if (m_spinProgress <= 1.0f)
-				m_spinRoll = -m_spinDirection * (1.0 - m_spinProgress);
-			else m_spinRoll = Swing(m_spinProgress - 1) * 0.2f * m_spinDirection;
+			Spin(m_spinProgress / 2.0f, m_spinRoll, m_bgSpin, m_spinDirection);
 		}
 		else if (m_spinType == SpinStruct::SpinType::Quarter)
 		{
