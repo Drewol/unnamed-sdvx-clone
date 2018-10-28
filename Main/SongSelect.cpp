@@ -109,12 +109,14 @@ class SelectionWheel
 
 	// Currently selected selection ID
 	int32 m_currentlySelectedId = 0;
-	// Currently selected map ID
+	// Currently selected selection ID
 	int32 m_currentlySelectedMapId = 0;
-	// Currently selected sub-widget
 
 	// Current difficulty index
 	int32 m_currentlySelectedDiff = 0;
+
+	// current lua map index
+	uint32 m_currentlySelectedLuaMapIndex = 0;
 
 	// Style to use for everything song select related
 	lua_State* m_lua;
@@ -133,6 +135,9 @@ public:
 	void ReloadScript()
 	{
 		g_application->ReloadScript("songselect/songwheel", m_lua);
+
+		m_SetLuaMapIndex();
+		m_SetLuaDiffIndex();
 	}
 	virtual void Render(float deltaTime)
 	{
@@ -227,16 +232,11 @@ public:
 		auto it = srcCollection.find(newIndex);
 		if(it != srcCollection.end())
 		{
-			//set index in lua
-			uint32 selectedPosition = std::distance(srcCollection.begin(), it);
-			lua_getglobal(m_lua, "set_index");
-			lua_pushinteger(m_lua, selectedPosition + 1);
 			m_OnMapSelected(it->second);
-			if (lua_pcall(m_lua, 1, 0, 0) != 0)
-			{
-				Logf("Lua error: %s", Logger::Error, lua_tostring(m_lua, -1));
-				assert(false);
-			}
+
+			//set index in lua
+			m_currentlySelectedLuaMapIndex = std::distance(srcCollection.begin(), it);
+			m_SetLuaMapIndex();
 		}
 		m_currentlySelectedId = newIndex;
 	}
@@ -271,15 +271,7 @@ public:
 	void SelectDifficulty(int32 newDiff)
 	{
 		m_currentlySelectedDiff = newDiff;
-
-		lua_getglobal(m_lua, "set_diff");
-		lua_pushinteger(m_lua, newDiff + 1);
-		if (lua_pcall(m_lua, 1, 0, 0) != 0)
-		{
-			Logf("Lua error: %s", Logger::Error, lua_tostring(m_lua, -1));
-			assert(false);
-		}
-
+		m_SetLuaDiffIndex();
 
 		Map<int32, SongSelectIndex> maps = m_SourceCollection();
 		SongSelectIndex* map = maps.Find(m_currentlySelectedId);
@@ -378,6 +370,26 @@ private:
 		lua_pushinteger(m_lua, data);
 		lua_settable(m_lua, -3);
 	}
+	void m_SetLuaDiffIndex()
+	{
+		lua_getglobal(m_lua, "set_diff");
+		lua_pushinteger(m_lua, m_currentlySelectedDiff + 1);
+		if (lua_pcall(m_lua, 1, 0, 0) != 0)
+		{
+			Logf("Lua error: %s", Logger::Error, lua_tostring(m_lua, -1));
+			assert(false);
+		}
+	}
+	void m_SetLuaMapIndex()
+	{
+		lua_getglobal(m_lua, "set_index");
+		lua_pushinteger(m_lua, m_currentlySelectedLuaMapIndex + 1);
+		if (lua_pcall(m_lua, 1, 0, 0) != 0)
+		{
+			Logf("Lua error: %s", Logger::Error, lua_tostring(m_lua, -1));
+			assert(false);
+		}
+	}
 	void m_SetLuaMaps()
 	{
 		lua_getglobal(m_lua, "songwheel");
@@ -445,6 +457,7 @@ private:
 		SelectDifficulty(selectDiff);
 
 		OnMapSelected.Call(index.GetMap());
+		m_currentlySelectedMapId = index.GetMap()->id;
 	}
 };
 
