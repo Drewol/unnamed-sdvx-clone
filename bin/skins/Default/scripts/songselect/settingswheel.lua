@@ -1,35 +1,23 @@
-resx,resy = game.GetResolution()
-local wheelY = -resy
-local bgFade = 0
-local yoff = 0
-local lastSelected = 0
-
 render = function(deltaTime, shown)
+    resx,resy = game.GetResolution();
     gfx.BeginPath();
     gfx.LoadSkinFont("segoeui.ttf");
     gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE);
-    gfx.FontSize(40);
     if shown then
-        bgFade = math.min(bgFade + deltaTime * 10, 1)
-        wheelY = math.min(wheelY + deltaTime * resy * 10, 0)
-    else
-        wheelY = math.max(wheelY - deltaTime * resy * 10, -resy)
-        bgFade = math.max(bgFade - deltaTime * 10, 0)
-    end
-    gfx.FillColor(0,0,0,math.floor(200 * bgFade))
-    gfx.Rect(0,0,resx,resy)
-    gfx.Fill()
-    gfx.BeginPath()
-    yoff = 0.8 * yoff + (settings.currentSelection - lastSelected)
-    lastSelected = settings.currentSelection
-    if bgFade > 0 then
+        gfx.FillColor(0,0,0,200)
+        gfx.Rect(0,0,resx,resy)
+        gfx.Fill()
+        gfx.BeginPath()
         for i,setting in ipairs(settings) do
+            game.Log(string.format("%s, %s",i,CurrentSelection), game.LOGGER_INFO)
             if i == settings.currentSelection then
-                gfx.FillColor(255,255,255)
+              gfx.FillColor(222,222,222,255)
+              gfx.FontSize(50);
             else
-                gfx.FillColor(70,70,70)
+              gfx.FillColor(222,222,222,170)
+              gfx.FontSize(40);
             end
-            gfx.FastText(string.format("%s: %s", setting.name, setting.value), resx/2, resy/2 + 40 * (i - settings.currentSelection + yoff) + wheelY, 40, gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE);
+            gfx.Text(string.format("%s: %s", setting.name, setting.value), resx/2, resy/2 + 40 * (i - settings.currentSelection), 40);
         end
     end
 end

@@ -18,12 +18,12 @@ draw_button = function(name, x, y, hoverindex)
     gfx.BeginPath();
     gfx.FillColor(0,128,255);
     if mouse_clipped(rx,ty, buttonWidth, buttonHeight) then
-       hovered = hoverindex; 
+       hovered = hoverindex;
        gfx.FillColor(255,128,0);
     end
     gfx.Rect(rx - buttonBorder,
-        ty - buttonBorder, 
-        buttonWidth + (buttonBorder * 2), 
+        ty - buttonBorder,
+        buttonWidth + (buttonBorder * 2),
         buttonHeight + (buttonBorder * 2));
     gfx.Fill();
     gfx.BeginPath();
@@ -61,7 +61,7 @@ render = function(deltaTime)
         label = gfx.CreateLabel("unnamed_sdvx_clone", 120, 0);
     end
     gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE);
-    gfx.DrawLabel(label, resx / 2, resy / 2 - 200);
+    gfx.DrawLabel(label, resx / 2, resy / 2 - 200, resx-40);
 end;
 
 mouse_pressed = function(button)
