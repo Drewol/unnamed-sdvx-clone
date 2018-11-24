@@ -16,73 +16,70 @@
 #include "Shared/Enum.hpp"
 #include "Scriptable.hpp"
 
+#include <functional>
+
 class TitleScreen_Impl : public TitleScreen, public Scriptable
 {
 private:
 	Ref<CommonGUIStyle> m_guiStyle;
 	Ref<Canvas> m_canvas;
-	lua_State* m_lua = nullptr;
-
-
-	void Exit()
-	{
-		g_application->Shutdown();
-	}
-
-	void Start()
-	{
-		g_application->AddTickable(SongSelect::Create());
-	}
-
-	void Settings()
-	{
-		g_application->AddTickable(SettingsScreen::Create());
-	}
 
 	void MousePressed(MouseButton button)
 	{
 		if (IsSuspended())
 			return;
-		lua_getglobal(m_lua, "mouse_pressed");
-		lua_pushnumber(m_lua, (int32)button);
-		if (lua_pcall(m_lua, 1, 1, 0) != 0)
+		lua_getglobal(L, "mouse_pressed");
+		lua_pushnumber(L, (int32)button);
+		if (lua_pcall(L, 1, 0, 0) != 0)
 		{
-			Logf("Lua error on mouse_pressed: %s", Logger::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error on mouse_pressed", lua_tostring(m_lua, -1), 0);
+			Logf("Lua error on mouse_pressed: %s", Logger::Error, lua_tostring(L, -1));
+			g_gameWindow->ShowMessageBox("Lua Error on mouse_pressed", lua_tostring(L, -1), 0);
 			assert(false);
 		}
-		int ret = luaL_checkinteger(m_lua, 1);
-		lua_settop(m_lua, 0);
-		switch (ret)
-		{
-		case 1:
-			Start();
-			break;
-		case 2:
-			Settings();
-			break;
-		case 3:
-			Exit();
-			break;
-		default:
-			break;
-		}
+		lua_settop(L, 0);
+	}
+
+	void Start() { g_application->AddTickable(SongSelect::Create()); }
+	int lStart(lua_State* L)
+	{
+		Start();
+		return 0;
+	}
+
+	void Exit() { g_application->Shutdown(); }
+	int lExit(lua_State* L)
+	{
+		Exit();
+		return 0;
+	}
+
+	void Settings() { g_application->AddTickable(SettingsScreen::Create()); }
+	int lSettings(lua_State* L)
+	{
+		Settings();
+		return 0;
 	}
 
 public:
 	bool Init()
 	{
 		m_guiStyle = g_commonGUIStyle;
-		CheckedLoad(m_lua = g_application->LoadScript("titlescreen"));
+		CheckedLoad(g_application->LoadScript("titlescreen", this));
 		g_gameWindow->OnMousePressed.Add(this, &TitleScreen_Impl::MousePressed);
 		return true;
 	}
 
-	~TitleScreen_Impl()
+	virtual void m_InitScriptState()
 	{
-	}
+#define BIND(Type, Member) (std::bind(& Type :: Member, this, std::placeholders::_1))
+		m_RegisterMemberFunction("Start", BIND(TitleScreen_Impl, lStart));
+		m_RegisterMemberFunction("Settings", BIND(TitleScreen_Impl, lSettings));
+		m_RegisterMemberFunction("Exit", BIND(TitleScreen_Impl, lExit));
 
-	virtual void InitScriptState(lua_State* L)
+		m_CreateGlobalObject("menu");
+	};
+
+	~TitleScreen_Impl()
 	{
 	}
 
@@ -91,12 +88,12 @@ public:
 		if (IsSuspended())
 			return;
 
-		lua_getglobal(m_lua, "render");
-		lua_pushnumber(m_lua, deltaTime);
-		if (lua_pcall(m_lua, 1, 0, 0) != 0)
+		lua_getglobal(L, "render");
+		lua_pushnumber(L, deltaTime);
+		if (lua_pcall(L, 1, 0, 0) != 0)
 		{
-			Logf("Lua error: %s", Logger::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
+			Logf("Lua error: %s", Logger::Error, lua_tostring(L, -1));
+			g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(L, -1), 0);
 			assert(false);
 		}
 	}
@@ -107,7 +104,7 @@ public:
 	{
 		g_gameWindow->SetCursorVisible(true);
 		g_application->ReloadSkin();
-		g_application->ReloadScript("titlescreen", m_lua);
+		g_application->ReloadScript("titlescreen", L);
 		g_application->DiscordPresenceMenu("Title Screen");
 	}
 

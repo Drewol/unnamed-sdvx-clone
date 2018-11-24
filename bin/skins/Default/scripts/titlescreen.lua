@@ -65,5 +65,7 @@ render = function(deltaTime)
 end;
 
 mouse_pressed = function(button)
-    return hovered;
+    if hovered == 1 then menu.Start() end
+    if hovered == 2 then menu.Settings() end
+    if hovered == 3 then menu.Exit() end
 end;
