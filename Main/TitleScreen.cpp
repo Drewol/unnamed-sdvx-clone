@@ -39,10 +39,10 @@ private:
 		lua_settop(L, 0);
 	}
 
-	void Start() { g_application->AddTickable(SongSelect::Create()); }
-	int lStart(lua_State* L)
+	void SongSelect() { g_application->AddTickable(SongSelect::Create()); }
+	int lSongSelect(lua_State* L)
 	{
-		Start();
+		SongSelect();
 		return 0;
 	}
 
@@ -72,7 +72,7 @@ public:
 	virtual void m_InitScriptState()
 	{
 #define BIND(Type, Member) (std::bind(& Type :: Member, this, std::placeholders::_1))
-		m_RegisterMemberFunction("Start", BIND(TitleScreen_Impl, lStart));
+		m_RegisterMemberFunction("SongSelect", BIND(TitleScreen_Impl, lSongSelect));
 		m_RegisterMemberFunction("Settings", BIND(TitleScreen_Impl, lSettings));
 		m_RegisterMemberFunction("Exit", BIND(TitleScreen_Impl, lExit));
 
