@@ -15,7 +15,7 @@
 #include "Input.hpp"
 #include "TransitionScreen.hpp"
 #include "GUI/HealthGauge.hpp"
-#include "lua.hpp"
+#include "Scriptable.hpp"
 #include "nanovg.h"
 #include "discord_rpc.h"
 #define NANOVG_GL3_IMPLEMENTATION
@@ -725,13 +725,14 @@ int Application::LoadImageJob(const String & path, Vector2i size, int placeholde
 	return ret;
 }
 
-lua_State* Application::LoadScript(const String & name)
+lua_State* Application::LoadScript(const String & name, Scriptable* scriptable)
 {
 	lua_State* s = luaL_newstate();
 	luaL_openlibs(s);
 	String path = "skins/" + m_skin + "/scripts/" + name + ".lua";
 	String commonPath = "skins/" + m_skin + "/scripts/" + "common.lua";
 	m_SetNvgLuaBindings(s);
+	if (scriptable) scriptable->InitScriptState(s);
 	if (luaL_dofile(s, commonPath.c_str()) || luaL_dofile(s, path.c_str()))
 	{
 		Logf("Lua error: %s", Logger::Error, lua_tostring(s, -1));

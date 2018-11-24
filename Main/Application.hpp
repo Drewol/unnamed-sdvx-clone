@@ -1,6 +1,7 @@
 #pragma once
 #include <Audio/Sample.hpp>
 #include <Shared/Jobs.hpp>
+#include "Scriptable.hpp"
 #define DISCORD_APPLICATION_ID "514489760568573952"
 extern class OpenGL* g_gl;
 extern class GUIState g_guiState;
@@ -66,7 +67,7 @@ public:
 	Sample LoadSample(const String& name, const bool& external = false);
 	Graphics::Font LoadFont(const String& name, const bool& external = false);
 	int LoadImageJob(const String& path, Vector2i size, int placeholder);
-	class lua_State* LoadScript(const String& name);
+	class lua_State* LoadScript(const String& name, Scriptable* scriptable = nullptr);
 	void ReloadScript(const String& name, lua_State* L);
 	void LoadGauge(bool hard);
 	void DrawGauge(float rate, float x, float y, float w, float h, float deltaTime);
