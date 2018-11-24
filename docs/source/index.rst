@@ -17,6 +17,7 @@ Contents:
    game
    gfx
    gameplay
+   titlescreen
    scorescreen
    songwheel
    filterwheel
