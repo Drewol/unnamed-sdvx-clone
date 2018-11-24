@@ -85,3 +85,10 @@ returns r,g,b
 GetButton(int button)
 *********************
 Returns the state of the specified button. Returns true if the button is pressed.
+
+GetKnob(int knob)
+*****************
+Returns the absolute rotation of a knob with the parameter ``knob`` being ``0 = Left``
+and ``1 = Right``.
+
+The returned value ranges from 0 to 2*pi.

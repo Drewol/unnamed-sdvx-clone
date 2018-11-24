@@ -36,6 +36,7 @@ public:
 	void Update(float deltaTime);
 
 	bool GetButton(Button button) const;
+	float GetAbsoluteLaser(int laser) const;
 	bool Are3BTsHeld() const;
 
 	// Controller state as a string
@@ -75,6 +76,7 @@ private:
 	float m_laserStates[2] = { 0.0f };
 	float m_rawKeyLaserStates[2] = { 0.0f };
 	float m_prevLaserStates[2] = { 0.0f };
+	float m_absoluteLaserStates[2] = { 0.0f };
 
 	// Keyboard bindings
 	Multimap<int32, Button> m_buttonMap;

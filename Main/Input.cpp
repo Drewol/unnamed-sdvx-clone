@@ -159,11 +159,19 @@ void Input::Update(float deltaTime)
 			}
 		}
 	}
+
+	m_absoluteLaserStates[0] = fmodf(m_absoluteLaserStates[0] + m_laserStates[0], Math::pi * 2);
+	m_absoluteLaserStates[1] = fmodf(m_absoluteLaserStates[1] + m_laserStates[1], Math::pi * 2);
 }
 
 bool Input::GetButton(Button button) const
 {
 	return m_buttonStates[(size_t)button];
+}
+
+float Input::GetAbsoluteLaser(int laser) const
+{
+	return m_absoluteLaserStates[laser];
 }
 
 bool Input::Are3BTsHeld() const

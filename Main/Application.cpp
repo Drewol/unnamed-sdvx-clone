@@ -1027,6 +1027,12 @@ static int lGetButton(lua_State* L /* int button */)
 	lua_pushboolean(L, g_input.GetButton((Input::Button)button));
 	return 1;
 }
+static int lGetKnob(lua_State* L /* int knob */)
+{
+	int knob = luaL_checkinteger(L, 1);
+	lua_pushnumber(L, g_input.GetAbsoluteLaser(knob));
+	return 1;
+}
 
 static int lCreateSkinImage(lua_State* L /*const char* filename, int imageflags */)
 {
@@ -1235,6 +1241,7 @@ void Application::m_SetNvgLuaBindings(lua_State * state)
 		pushFuncToTable("StopSample", lStopSample);
 		pushFuncToTable("GetLaserColor", lGetLaserColor);
 		pushFuncToTable("GetButton", lGetButton);
+		pushFuncToTable("GetKnob", lGetKnob);
 
 		//constants
 		pushIntToTable("LOGGER_INFO", Logger::Severity::Info);
