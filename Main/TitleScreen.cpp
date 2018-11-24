@@ -71,10 +71,9 @@ public:
 
 	virtual void m_InitScriptState()
 	{
-#define BIND(Type, Member) (std::bind(& Type :: Member, this, std::placeholders::_1))
-		m_RegisterMemberFunction("SongSelect", BIND(TitleScreen_Impl, lSongSelect));
-		m_RegisterMemberFunction("Settings", BIND(TitleScreen_Impl, lSettings));
-		m_RegisterMemberFunction("Exit", BIND(TitleScreen_Impl, lExit));
+		m_RegisterMemberFunction("SongSelect", m_Bind(&TitleScreen_Impl::lSongSelect));
+		m_RegisterMemberFunction("Settings", m_Bind(&TitleScreen_Impl::lSettings));
+		m_RegisterMemberFunction("Exit", m_Bind(&TitleScreen_Impl::lExit));
 
 		m_CreateGlobalObject("menu");
 	};
