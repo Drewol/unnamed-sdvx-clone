@@ -62,6 +62,10 @@ render = function(deltaTime)
     end
     gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE);
     gfx.DrawLabel(label, resx / 2, resy / 2 - 200, resx-40);
+
+    if game.GetButton(game.BUTTON_STA) then
+        menu.SongSelect()
+    end
 end;
 
 mouse_pressed = function(button)
