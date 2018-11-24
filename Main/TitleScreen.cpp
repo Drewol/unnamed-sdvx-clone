@@ -14,9 +14,9 @@
 #include "Shared/Jobs.hpp"
 #include "ScoreScreen.hpp"
 #include "Shared/Enum.hpp"
-#include "lua.hpp"
+#include "Scriptable.hpp"
 
-class TitleScreen_Impl : public TitleScreen
+class TitleScreen_Impl : public TitleScreen, public Scriptable
 {
 private:
 	Ref<CommonGUIStyle> m_guiStyle;
@@ -77,7 +77,12 @@ public:
 		g_gameWindow->OnMousePressed.Add(this, &TitleScreen_Impl::MousePressed);
 		return true;
 	}
+
 	~TitleScreen_Impl()
+	{
+	}
+
+	virtual void InitScriptState(lua_State* L)
 	{
 	}
 
