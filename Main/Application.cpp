@@ -1134,8 +1134,8 @@ int lInclude(lua_State* L)
 	String param = luaL_checkstring(L, 1);
 	lua_settop(L, 0);
 	
-	if (luaIncludedFileIds.Contains(param)) return 0;
-	luaIncludedFileIds.Add(param);
+	//if (luaIncludedFileIds.Contains(param)) return 0;
+	//luaIncludedFileIds.Add(param);
 
 	String path = "skins/" + g_application->GetCurrentSkin() + "/scripts/" + param + ".lua";
 	if (luaL_dofile(L, path.c_str()))
