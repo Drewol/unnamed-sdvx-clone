@@ -80,6 +80,9 @@ public:
 
 	~TitleScreen_Impl()
 	{
+		// TODO(local): needs to handled by Scriptable, but I can't get it to have
+		//  access to g_application without a bunch of errors so
+		g_application->DisposeLua(L);
 	}
 
 	virtual void Render(float deltaTime)
