@@ -1127,16 +1127,11 @@ static int lSetGaugeColor(lua_State* L /*int colorIndex, int r, int g, int b*/)
 	return 0;
 }
 
-static Vector<String> luaIncludedFileIds;
-
 int lInclude(lua_State* L)
 {
 	String param = luaL_checkstring(L, 1);
 	lua_settop(L, 0);
 	
-	//if (luaIncludedFileIds.Contains(param)) return 0;
-	//luaIncludedFileIds.Add(param);
-
 	String path = "skins/" + g_application->GetCurrentSkin() + "/scripts/" + param + ".lua";
 	if (luaL_dofile(L, path.c_str()))
 	{
