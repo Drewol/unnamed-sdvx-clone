@@ -92,3 +92,7 @@ Returns the absolute rotation of a knob with the parameter ``knob`` being ``0 = 
 and ``1 = Right``.
 
 The returned value ranges from 0 to 2*pi.
+
+GetSkin()
+*****************
+Returns the directory name of the currently selected skin.

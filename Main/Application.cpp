@@ -1002,8 +1002,10 @@ static int lGetLaserColor(lua_State* L /*int laser*/)
 
 static int lLog(lua_State* L)
 {
+	int severity = Logger::Info;
+	if (lua_checkstack(L, 2))
+		severity = luaL_checkinteger(L, 2);
 	String msg = luaL_checkstring(L, 1);
-	int severity = luaL_checkinteger(L, 2);
 	Log(msg, (Logger::Severity)severity);
 	return 0;
 }
@@ -1031,6 +1033,13 @@ static int lGetKnob(lua_State* L /* int knob */)
 {
 	int knob = luaL_checkinteger(L, 1);
 	lua_pushnumber(L, g_input.GetAbsoluteLaser(knob));
+	return 1;
+}
+
+static int lGetSkin(lua_State* L)
+{
+	String path = g_application->GetCurrentSkin();
+	lua_pushstring(L, path.c_str());
 	return 1;
 }
 
@@ -1118,6 +1127,28 @@ static int lSetGaugeColor(lua_State* L /*int colorIndex, int r, int g, int b*/)
 	return 0;
 }
 
+static Vector<String> luaIncludedFileIds;
+
+int lInclude(lua_State* L)
+{
+	String param = luaL_checkstring(L, 1);
+	lua_settop(L, 0);
+	
+	if (luaIncludedFileIds.Contains(param)) return 0;
+	luaIncludedFileIds.Add(param);
+
+	String path = "skins/" + g_application->GetCurrentSkin() + "/scripts/" + param + ".lua";
+	if (luaL_dofile(L, path.c_str()))
+	{
+		Logf("Lua error: %s", Logger::Error, lua_tostring(L, -1));
+		g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(L, -1), 0);
+		lua_close(L);
+		assert(false);
+	}
+
+	return lua_gettop(L);
+}
+
 void Application::m_SetNvgLuaBindings(lua_State * state)
 {
 	auto pushFuncToTable = [&](const char* name, int (*func)(lua_State*))
@@ -1133,6 +1164,10 @@ void Application::m_SetNvgLuaBindings(lua_State * state)
 		lua_pushinteger(state, data);
 		lua_settable(state, -3);
 	};
+
+	//include
+	lua_pushcfunction(state, lInclude);
+	lua_setglobal(state, "include");
 
 	//gfx
 	{
@@ -1242,6 +1277,7 @@ void Application::m_SetNvgLuaBindings(lua_State * state)
 		pushFuncToTable("GetLaserColor", lGetLaserColor);
 		pushFuncToTable("GetButton", lGetButton);
 		pushFuncToTable("GetKnob", lGetKnob);
+		pushFuncToTable("GetSkin", lGetSkin);
 
 		//constants
 		pushIntToTable("LOGGER_INFO", Logger::Severity::Info);
