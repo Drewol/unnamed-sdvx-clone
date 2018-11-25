@@ -1,10 +1,19 @@
 
 local ini = { }
 
+local function CheckFileExists(fileName)
+   local f = io.open(fileName, "r")
+   if f ~= nil then io.close(f) return true else return false end
+end
+
 local function GetIniPath(fileName) return "skins/" .. game.GetSkin() .. "/" .. fileName .. ".ini" end
 
 function ini.Load(fileName)
    local path = GetIniPath(fileName)
+
+   if not CheckFileExists(path) then
+      return { }
+   end
 
    local result = { }
    local section = result
