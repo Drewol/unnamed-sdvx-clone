@@ -14,7 +14,7 @@ you would like to export to someone who includes the script.
 See the ini.lua file in the default script.
 
 Included files are re-loaded every time they are include.
-USC is very library with reloading scripts, so include avoids caching anything.
+USC is very liberal with reloading scripts, so include avoids caching anything.
 
 .. code-block:: c#
 
