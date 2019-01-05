@@ -21,7 +21,8 @@ enable_cpp14()
 enable_precompiled_headers("${Graphics_src}" src/stdafx.cpp)
 precompiled_header_exclude("src/glew.c")
 
-include_directories(include include/Graphics src include/Graphics/glew)
+# Look for static included GLEW before other directories
+include_directories(BEFORE include include/Graphics src include/Graphics/glew)
 add_library(Graphics ${Graphics_src})
 
 # Public include paths for library
