@@ -17,7 +17,7 @@ endif(WIN32)
 file(GLOB Graphics_src ${Graphics_src} ${Platform_src})
 
 # Compiler stuff
-enable_cpp11()
+enable_cpp14()
 enable_precompiled_headers("${Graphics_src}" src/stdafx.cpp)
 precompiled_header_exclude("src/glew.c")
 

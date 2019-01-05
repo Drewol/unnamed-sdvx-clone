@@ -4,7 +4,7 @@
 file(GLOB Main_src "*.cpp" "*.hpp")
 
 # Compiler stuff
-enable_cpp11()
+enable_cpp14()
 
 include_directories(.)
 add_executable(Tests.Game ${Main_src})

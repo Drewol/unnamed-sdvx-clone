@@ -18,7 +18,7 @@ source_group("Header Files\\GUI" FILES ${GUI_include})
 source_group("Source Files\\GUI" FILES ${GUI_src})
 
 # Compiler stuff
-enable_cpp11()
+enable_cpp14()
 enable_precompiled_headers("${Main_src}" stdafx.cpp)
 precompiled_header_exclude("Resource.rc")
 

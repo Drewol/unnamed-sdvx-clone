@@ -22,7 +22,7 @@ endif(WIN32)
 file(GLOB Audio_src ${Audio_src} ${Platform_src})
 
 # Compiler stuff
-enable_cpp11()
+enable_cpp14()
 enable_precompiled_headers("${Audio_src}" src/stdafx.cpp)
 precompiled_header_exclude("${minimp3_src}" "${soundtouch_src}")
 

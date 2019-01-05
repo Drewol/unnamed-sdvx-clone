@@ -15,7 +15,7 @@ else(WIN32)
 endif(WIN32)
 
 # Compiler stuff
-enable_cpp11()
+enable_cpp14()
 enable_precompiled_headers("${Tests_src}" src/stdafx.cpp)
 
 include_directories(include include/Tests src)

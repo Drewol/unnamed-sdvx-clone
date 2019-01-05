@@ -6,7 +6,7 @@ file(GLOB C_src "src/*.c")
 
 
 # Compiler stuff
-enable_cpp11()
+enable_cpp14()
 enable_precompiled_headers("${Beatmap_src}" src/stdafx.cpp)
 precompiled_header_exclude("${C_src}")
 
