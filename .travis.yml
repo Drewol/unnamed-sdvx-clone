@@ -1,52 +1,65 @@
-branches:
-  only:
-   - master
 language: cpp
-compiler: gcc
-os: linux
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-7
-env:
-  - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+      before_install:
+        - eval "${MATRIX_EVAL}"
+        - "sudo apt-get -qq update"
+        - "sudo apt-get install -y cmake"
+        - "sudo apt-get install -y libegl1-mesa-dev"
+        - "sudo apt-get install -y libfreetype6-dev"
+        - "sudo apt-get install -y libogg-dev"
+        - "sudo apt-get install -y libvorbis-dev"
+        - "sudo apt-get install -y libsdl2-dev"
+        - "sudo apt-get install -y zlib1g-dev --reinstall"
+        - "sudo apt-get install -y libjpeg-dev --reinstall"
+      install:
+        - CMAKE_URL="https://cmake.org/files/v3.8/cmake-3.8.0-Linux-x86_64.tar.gz"
+        - mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+        - export "PATH=${TRAVIS_BUILD_DIR}/cmake/bin:${PATH}"
+        - cmake --version
+        #Libpng
+        - LIBPNG_URL="http://download.sourceforge.net/libpng/libpng-1.6.24.tar.gz"
+        - mkdir libpng && travis_retry wget --no-check-certificate --quiet -O - ${LIBPNG_URL} | tar --strip-components=1 -xz -C libpng
+        - cd libpng
+        - cmake .
+        - LIBS="-lpthread ./configure --prefix=/usr --disable-static &&"
+        - make
+        - sudo make install
+        - cd ..
+        #SDL-2.0.4  
+        - SDL_URL="https://www.libsdl.org/release/SDL2-2.0.4.tar.gz"
+        - mkdir sdl && travis_retry wget --no-check-certificate --quiet -O - ${SDL_URL} | tar --strip-components=1 -xz -C sdl
+        - cd sdl
+        - ./configure
+        - make
+        - sudo make install
+        - cd ..
+        
+    - os: osx 
+      osx_image: xcode9.3
+      addons:
+        homebrew:
+          packages:
+            - cmake
+            - freetype
+            - libvorbis
+            - sdl2
+            - libpng
+            - jpeg
+
 before_install:
-	- "git submodule update --init"
-  - eval "${MATRIX_EVAL}"
-  - "sudo apt-get -qq update"
-  - "sudo apt-get install -y cmake"
-  - "sudo apt-get install -y libegl1-mesa-dev"
-  - "sudo apt-get install -y libfreetype6-dev"
-  - "sudo apt-get install -y libogg-dev"
-  - "sudo apt-get install -y libvorbis-dev"
-  - "sudo apt-get install -y libsdl2-dev"
-  - "sudo apt-get install -y zlib1g-dev --reinstall"
-  - "sudo apt-get install -y libjpeg-dev --reinstall"
-install:
-  - CMAKE_URL="https://cmake.org/files/v3.8/cmake-3.8.0-Linux-x86_64.tar.gz"
-  - mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
-  - export "PATH=${TRAVIS_BUILD_DIR}/cmake/bin:${PATH}"
-  - cmake --version
-  #Libpng
-  - LIBPNG_URL="http://download.sourceforge.net/libpng/libpng-1.6.24.tar.gz"
-  - mkdir libpng && travis_retry wget --no-check-certificate --quiet -O - ${LIBPNG_URL} | tar --strip-components=1 -xz -C libpng
-  - cd libpng
-  - cmake .
-  - LIBS="-lpthread ./configure --prefix=/usr --disable-static &&"
-  - make
-  - sudo make install
-  - cd ..
-  #SDL-2.0.4  
-  - SDL_URL="https://www.libsdl.org/release/SDL2-2.0.4.tar.gz"
-  - mkdir sdl && travis_retry wget --no-check-certificate --quiet -O - ${SDL_URL} | tar --strip-components=1 -xz -C sdl
-  - cd sdl
-  - ./configure
-  - make
-  - sudo make install
-  - cd ..
-  
+  - "git submodule update --init --recursive"
+
 script:
   - "gcc --version"
   - "cmake ."
