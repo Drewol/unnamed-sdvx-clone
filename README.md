@@ -70,7 +70,7 @@ Just run 'Main_Release' or 'Main_Debug' from within the 'bin' folder. Or, to pla
 - `-test` - Runs test scene, for development purposes only
 
 ## How to build:
-Clone the project and then run `git submodule update --init` to download the required submodules.
+Clone the project and then run `git submodule update --init --recursive` to download the required submodules.
 
 ### Windows:
 It is not required to build from source. A download link to a pre-built copy of the game is located at the beginning of this README. But, if you must:
