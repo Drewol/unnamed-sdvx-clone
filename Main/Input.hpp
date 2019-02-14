@@ -26,7 +26,8 @@ public:
 		LS_0Pos, // Left laser+		(|---->)
 		LS_1Neg, // Right laser-	(<----|)
 		LS_1Pos, // Right laser+
-		Length);
+		Length,
+		BT_B); // Back Button
 
 	~Input();
 	void Init(Graphics::Window& wnd);

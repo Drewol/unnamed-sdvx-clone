@@ -229,6 +229,7 @@ void Input::m_InitKeyboardMapping()
 		m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_BT1), Button::BT_1);
 		m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_BT2), Button::BT_2);
 		m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_BT3), Button::BT_3);
+		m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_BTB), Button::BT_B);
 		// Alternate button mappings
 		m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_BT0Alt), Button::BT_0);
 		m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_BT1Alt), Button::BT_1);
@@ -264,6 +265,7 @@ void Input::m_InitControllerMapping()
 		m_controllerMap.Add(g_gameConfig.GetInt(GameConfigKeys::Controller_BT3), Button::BT_3);
 		m_controllerMap.Add(g_gameConfig.GetInt(GameConfigKeys::Controller_FX0), Button::FX_0);
 		m_controllerMap.Add(g_gameConfig.GetInt(GameConfigKeys::Controller_FX1), Button::FX_1);
+		m_controllerMap.Add(g_gameConfig.GetInt(GameConfigKeys::Controller_BTB), Button::BT_B);
 	}
 }
 

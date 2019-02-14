@@ -59,7 +59,8 @@ private:
 		GameConfigKeys::Key_BT2,
 		GameConfigKeys::Key_BT3,
 		GameConfigKeys::Key_FX0,
-		GameConfigKeys::Key_FX1
+		GameConfigKeys::Key_FX1,
+		GameConfigKeys::Key_BTB
 	};
 
 	Vector<GameConfigKeys> m_keyboardLaserKeys = {
@@ -76,7 +77,8 @@ private:
 		GameConfigKeys::Controller_BT2,
 		GameConfigKeys::Controller_BT3,
 		GameConfigKeys::Controller_FX0,
-		GameConfigKeys::Controller_FX1
+		GameConfigKeys::Controller_FX1,
+		GameConfigKeys::Controller_BTB
 	};
 
 	Vector<GameConfigKeys> m_controllerLaserKeys = {
@@ -105,7 +107,7 @@ private:
 	float m_laserSens = 1.0f;
 	float m_masterVolume = 1.0f;
 	float m_laserColors[2] = { 0.25f, 0.75f };
-	String m_controllerButtonNames[7];
+	String m_controllerButtonNames[8];
 	String m_controllerLaserNames[2];
 	char m_songsPath[1024];
 	int m_pathlen = 0;
@@ -178,6 +180,14 @@ private:
 	void SetRL()
 	{
 		g_application->AddTickable(ButtonBindingScreen::Create(GameConfigKeys::Controller_Laser1Axis, m_laserMode == 2, m_selectedGamepad));
+	}
+
+	void SetKey_BK()
+	{
+		if (m_buttonMode == 1)
+			g_application->AddTickable(ButtonBindingScreen::Create(GameConfigKeys::Controller_BTB, true, m_selectedGamepad));
+		else
+			g_application->AddTickable(ButtonBindingScreen::Create(GameConfigKeys::Key_BTB));
 	}
 
 	void CalibrateSens()
@@ -368,7 +378,7 @@ public:
 		}
 		nk_input_end(m_nctx);
 
-		for (size_t i = 0; i < 7; i++)
+		for (size_t i = 0; i < 8; i++)
 		{
 			if (m_buttonMode == 1)
 			{
@@ -442,6 +452,9 @@ public:
 
 			nk_layout_row_dynamic(m_nctx, buttonheight, 1);
 			if (nk_button_label(m_nctx, "Calibrate Laser Sensitivity")) CalibrateSens();
+
+			nk_layout_row_dynamic(m_nctx, buttonheight, 1);
+			if (nk_button_label(m_nctx, m_controllerButtonNames[7].c_str())) SetKey_BK();
 
 			nk_labelf(m_nctx, nk_text_alignment::NK_TEXT_LEFT, "Laser sensitivity (%f):", m_laserSens);
 			nk_slider_float(m_nctx, 0, &m_laserSens, 20, 0.001);
@@ -778,6 +791,8 @@ public:
 				m_firstStart = true;
 			}
 		}
+		else if (button == Input::Button::BT_B)
+			g_application->RemoveTickable(this);
 	}
 
 	virtual void OnKeyPressed(int32 key)

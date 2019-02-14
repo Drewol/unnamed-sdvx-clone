@@ -1197,6 +1197,21 @@ public:
 					m_settingsWheel->Active = false;
 				}
 				break;
+			case Input::Button::BT_B:
+				if (m_settingsWheel->Active)
+				{
+					m_settingsWheel->Active = false;
+				}
+				else if (m_filterSelection->Active)
+				{
+					m_filterSelection->Active = !m_filterSelection->Active;
+				}
+				else
+				{
+					m_suspended = true;
+					g_application->RemoveTickable(this);
+				}
+
 			default:
 				break;
 			}

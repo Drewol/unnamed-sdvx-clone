@@ -1503,6 +1503,14 @@ public:
 				FinishGame();
 			}
 		}
+		else if (buttonCode == Input::Button::BT_B)
+		{
+			ObjectState *const* lastObj = &m_beatmap->GetLinearObjects().back();
+			MapTime timePastEnd = m_lastMapTime - m_endTime;
+			if (timePastEnd < 0)
+				m_manualExit = true;
+			FinishGame();
+		}
 	}
 	int m_getClearState()
 	{

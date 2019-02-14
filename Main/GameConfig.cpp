@@ -71,6 +71,7 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::Key_Laser1Pos, SDLK_p);
 	Set(GameConfigKeys::Key_Sensitivity, 3.0f);
 	Set(GameConfigKeys::Key_LaserReleaseTime, 0.0f);
+	Set(GameConfigKeys::Key_BTB, SDLK_ESCAPE);
 
 	// Default controller settings
 	Set(GameConfigKeys::Controller_DeviceID, 0); // First device
@@ -85,6 +86,7 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::Controller_Laser1Axis, 1);
 	Set(GameConfigKeys::Controller_Sensitivity, 1.0f);
 	Set(GameConfigKeys::Controller_Deadzone, 0.f);
+	Set(GameConfigKeys::Controller_BTB, 7);
 
 	// Default mouse settings
 	Set(GameConfigKeys::Mouse_Laser0Axis, 0);

@@ -62,6 +62,7 @@ DefineEnum(GameConfigKeys,
 	Key_Laser1Neg,
 	Key_Sensitivity,
 	Key_LaserReleaseTime,
+	Key_BTB,
 
 	// Controller bindings
 	Controller_DeviceID,
@@ -77,6 +78,7 @@ DefineEnum(GameConfigKeys,
 	Controller_Deadzone,
 	Controller_Sensitivity,
 	InputBounceGuard,
+	Controller_BTB,
 
 	LastSelected,
 	LevelFilter,
