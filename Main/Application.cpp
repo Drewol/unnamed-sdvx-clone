@@ -1328,6 +1328,7 @@ void Application::m_SetNvgLuaBindings(lua_State * state)
 		pushIntToTable("BUTTON_FXL", (int)Input::Button::FX_0);
 		pushIntToTable("BUTTON_FXR", (int)Input::Button::FX_1);
 		pushIntToTable("BUTTON_STA", (int)Input::Button::BT_S);
+		pushIntToTable("BUTTON_BCK", (int)Input::Button::BT_B);
 
 		lua_setglobal(state, "game");
 	}

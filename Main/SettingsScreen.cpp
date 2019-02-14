@@ -451,10 +451,10 @@ public:
 			if (nk_button_label(m_nctx, m_controllerButtonNames[6].c_str())) SetKey_FXR();
 
 			nk_layout_row_dynamic(m_nctx, buttonheight, 1);
-			if (nk_button_label(m_nctx, "Calibrate Laser Sensitivity")) CalibrateSens();
-
-			nk_layout_row_dynamic(m_nctx, buttonheight, 1);
 			if (nk_button_label(m_nctx, m_controllerButtonNames[7].c_str())) SetKey_BK();
+			
+			nk_layout_row_dynamic(m_nctx, buttonheight, 1);
+			if (nk_button_label(m_nctx, "Calibrate Laser Sensitivity")) CalibrateSens();
 
 			nk_labelf(m_nctx, nk_text_alignment::NK_TEXT_LEFT, "Laser sensitivity (%f):", m_laserSens);
 			nk_slider_float(m_nctx, 0, &m_laserSens, 20, 0.001);

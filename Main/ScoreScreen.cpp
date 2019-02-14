@@ -315,10 +315,10 @@ public:
 	{
 		// Check for button pressed here instead of adding to onbuttonpressed for stability reasons
 		//TODO: Change to onbuttonpressed
-		if(m_startPressed && !g_input.GetButton(Input::Button::BT_S))
+		if(m_startPressed && (!g_input.GetButton(Input::Button::BT_S) || !g_input.GetButton(Input::Button::BT_B)))
 			g_application->RemoveTickable(this);
 
-		m_startPressed = g_input.GetButton(Input::Button::BT_S);
+		m_startPressed = g_input.GetButton(Input::Button::BT_S) || g_input.GetButton(Input::Button::BT_B);
 
 		if (g_input.GetButton(Input::Button::FX_0))
 			m_showStats = true;
