@@ -162,6 +162,7 @@ RenderState Camera::CreateRenderState(bool clipped)
 	float lanePitch = pLanePitch * pitchUnit;
 
 	auto worldNormal = GetOriginTransform(lanePitch, m_totalOffset, m_totalRoll * 360.0f);
+	auto worldLaserOnly = GetOriginTransform(lanePitch, m_totalOffset, m_laserRoll * 360.0f);
 	auto worldNoRoll = GetOriginTransform(lanePitch, 0, 0);
 
 	auto zoomDir = worldNormal.GetPosition();
@@ -175,6 +176,7 @@ RenderState Camera::CreateRenderState(bool clipped)
 	//m_calcZoomBottom = zoomAmt / highwayDist + 1;
 
 	track->trackOrigin = Transform::Translation(zoomDir * zoomAmt) * worldNormal;
+	critOrigin = Transform::Translation(zoomDir * zoomAmt) * worldLaserOnly;
 
 	auto critDir = worldNoRoll.GetPosition().Normalized();
 	float rotToCrit = -atan2(critDir.y, -critDir.z) * Math::radToDeg;

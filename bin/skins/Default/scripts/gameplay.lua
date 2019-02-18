@@ -20,6 +20,8 @@ local artist = nil
 local jacketFallback = gfx.CreateSkinImage("song_select/loading.png", 0)
 local bottomFill = gfx.CreateSkinImage("fill_bottom.png",0)
 local topFill = gfx.CreateSkinImage("fill_top.png",0)
+local critLine = gfx.CreateSkinImage("scorebar.png",0)
+local laserCursor = gfx.CreateSkinImage("pointer.png",0)
 local diffNames = {"NOV", "ADV", "EXH", "INF"}
 local introTimer = 2
 local outroTimer = 0
@@ -43,6 +45,33 @@ draw_stat = function(x,y,w,h, name, value, format,r,g,b)
   gfx.Stroke()
   gfx.Restore()
   return y + h + 5
+end
+
+drawCrit = function(deltaTime)
+    local critWidth = resx * 0.9
+    local critHeight = 100
+    local r, g, b
+
+    gfx.Save()
+    
+    gfx.Translate(gameplay.critLine.x, gameplay.critLine.y)
+    gfx.Rotate(-gameplay.critLine.laserRoll)
+
+    gfx.BeginPath()
+    gfx.FillColor(255, 255, 255, 255)
+    gfx.ImageRect(-critWidth / 2 - gameplay.critLine.laserRoll * critWidth * 0.75, -critHeight / 2, critWidth, critHeight, critLine, 1, 0)
+
+    gfx.BeginPath()
+    r, g, b = game.GetLaserColor(0)
+    gfx.FillColor(r, g, b, 255 * gameplay.critLine.leftCursor.alpha)
+    gfx.ImageRect(gameplay.critLine.leftCursor.pos - 25, -25, 50, 50, laserCursor, gameplay.critLine.leftCursor.alpha, 0)
+
+    gfx.BeginPath()
+    r, g, b = game.GetLaserColor(1)
+    gfx.FillColor(r, g, b, 255 * gameplay.critLine.rightCursor.alpha)
+    gfx.ImageRect(gameplay.critLine.rightCursor.pos - 25, -25, 50, 50, laserCursor, gameplay.critLine.rightCursor.alpha, 0)
+
+    gfx.Restore()
 end
 
 drawSongInfo = function(deltaTime)
@@ -308,6 +337,7 @@ render = function(deltaTime)
         gfx.FillColor(0,0,0, math.floor(255 * math.min(introTimer, 1)))
         gfx.Fill()
     end
+    drawCrit(deltaTime)
     gfx.Scale(scale,scale)
     if portrait then yshift = drawFill(deltaTime) end
     gfx.Translate(0, yshift - 150 * math.max(introTimer - 1, 0))

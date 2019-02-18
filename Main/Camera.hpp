@@ -73,6 +73,8 @@ public:
 	float pitchOffsets[2] = { 0.05f, 0.27f }; // how far from the bottom of the screen should the crit line be
 	float fovs[2] = { 60.f, 90.f };
 
+	Transform critOrigin;
+
 private:
 	float m_ClampRoll(float in) const;
 	// x offset

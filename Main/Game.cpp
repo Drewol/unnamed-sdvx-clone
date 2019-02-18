@@ -393,6 +393,18 @@ public:
 			lua_pushstring(m_lua, "scoreReplays");
 			lua_newtable(m_lua);
 			lua_settable(m_lua, -3);
+			lua_pushstring(m_lua, "critLine");
+			lua_newtable(m_lua);
+			{
+				lua_pushstring(m_lua, "leftCursor");
+				lua_newtable(m_lua);
+				lua_settable(m_lua, -3);
+
+				lua_pushstring(m_lua, "rightCursor");
+				lua_newtable(m_lua);
+				lua_settable(m_lua, -3);
+			}
+			lua_settable(m_lua, -3);
 			lua_setglobal(m_lua, "gameplay");
 		}
 
@@ -1035,6 +1047,66 @@ public:
 		lua_pushstring(m_lua, "comboState");
 		lua_pushnumber(m_lua, m_scoring.comboState);
 		lua_settable(m_lua, -3);
+		//critLine
+		{
+			lua_getfield(m_lua, -1, "critLine");
+
+			Vector2 critPos = m_camera.Project(m_camera.critOrigin.TransformPoint(Vector3(0, 0, 0)));
+			Vector2 leftPos = m_camera.Project(m_camera.critOrigin.TransformPoint(Vector3(-1, 0, 0)));
+			Vector2 rightPos = m_camera.Project(m_camera.critOrigin.TransformPoint(Vector3(1, 0, 0)));
+			Vector2 line = rightPos - leftPos;
+
+			lua_pushstring(m_lua, "x"); // x screen position
+			lua_pushnumber(m_lua, critPos.x);
+			lua_settable(m_lua, -3);
+
+			lua_pushstring(m_lua, "y"); // y screen position
+			lua_pushnumber(m_lua, critPos.y);
+			lua_settable(m_lua, -3);
+
+			lua_pushstring(m_lua, "laserRoll"); // rotation based on laser roll
+			lua_pushnumber(m_lua, -atan2f(line.y, line.x));
+			lua_settable(m_lua, -3);
+
+			{
+				lua_getfield(m_lua, -1, "leftCursor");
+
+				Vector2 leftCursorPos = m_camera.Project(m_camera.critOrigin.TransformPoint(Vector3((m_scoring.laserPositions[0] - Track::trackWidth * 0.5f) * (5.0f / 6), 0, 0)));
+				float distFromCritCenter = (critPos - leftCursorPos).Length() * (m_scoring.laserPositions[0] < 0.5 ? -1 : 1);
+				float alpha = (1.0f - Math::Clamp<float>(m_scoring.timeSinceLaserUsed[0] / 0.5f - 1.0f, 0, 1));
+
+				lua_pushstring(m_lua, "pos");
+				lua_pushnumber(m_lua, distFromCritCenter * (m_scoring.lasersAreExtend[0] ? 2 : 1));
+				lua_settable(m_lua, -3);
+
+				lua_pushstring(m_lua, "alpha");
+				lua_pushnumber(m_lua, alpha);
+				lua_settable(m_lua, -3);
+
+				lua_pop(m_lua, 1);
+			}
+
+			{
+				lua_getfield(m_lua, -1, "rightCursor");
+
+				Vector2 leftCursorPos = m_camera.Project(m_camera.critOrigin.TransformPoint(Vector3((m_scoring.laserPositions[1] - Track::trackWidth * 0.5f) * (5.0f / 6), 0, 0)));
+				float distFromCritCenter = (critPos - leftCursorPos).Length() * (m_scoring.laserPositions[1] < 0.5 ? -1 : 1);
+				float alpha = (1.0f - Math::Clamp<float>(m_scoring.timeSinceLaserUsed[1] / 0.5f - 1.0f, 0, 1));
+
+				lua_pushstring(m_lua, "pos");
+				lua_pushnumber(m_lua, distFromCritCenter * (m_scoring.lasersAreExtend[1] ? 2 : 1));
+				lua_settable(m_lua, -3);
+
+				lua_pushstring(m_lua, "alpha");
+				lua_pushnumber(m_lua, alpha);
+				lua_settable(m_lua, -3);
+
+				lua_pop(m_lua, 1);
+			}
+
+			//lua_setfield(m_lua, -2, "critLine");
+			lua_pop(m_lua, 1); // critLine
+		}
 
 		lua_setglobal(m_lua, "gameplay");
 
