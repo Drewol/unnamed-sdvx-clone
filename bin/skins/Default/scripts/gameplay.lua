@@ -333,13 +333,13 @@ drawAlerts = function(deltaTime)
 end
 
 render = function(deltaTime)
+    drawCrit(deltaTime)
     if introTimer > 0 then
         gfx.BeginPath()
         gfx.Rect(0,0,resx,resy)
         gfx.FillColor(0,0,0, math.floor(255 * math.min(introTimer, 1)))
         gfx.Fill()
     end
-    drawCrit(deltaTime)
     gfx.Scale(scale,scale)
     if portrait then yshift = drawFill(deltaTime) end
     gfx.Translate(0, yshift - 150 * math.max(introTimer - 1, 0))
