@@ -442,3 +442,7 @@ nanovg.h:488_
 
 .. _nanovg.h:488: https://github.com/memononen/nanovg/blob/master/src/nanovg.h#L488
 
+SetImageTint(int r, int g, int b)
+*********************************
+Sets the color to tint all coming image drawing calls with.
+(Multiplies the color given with the image colors)

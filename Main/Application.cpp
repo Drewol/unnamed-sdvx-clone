@@ -562,7 +562,7 @@ void Application::m_Tick()
 		g_guiState.fillMaterial = &m_fillMaterial;
 		g_guiState.resolution = g_resolution;
 		g_guiState.scissor = Rect(0,0,-1,-1);
-
+		g_guiState.imageTint = nvgRGB(255, 255, 255);
 		// Render all items
 		for(auto& tickable : g_tickables)
 		{
@@ -1272,6 +1272,7 @@ void Application::m_SetNvgLuaBindings(lua_State * state)
 		pushFuncToTable("FastTextSize", lFastTextSize);
 		pushFuncToTable("ImageSize", lImageSize);
 		pushFuncToTable("Arc", lArc);
+		pushFuncToTable("SetImageTint", lSetImageTint);
 		//constants
 		//Text align
 		pushIntToTable("TEXT_ALIGN_BASELINE",	NVGalign::NVG_ALIGN_BASELINE);

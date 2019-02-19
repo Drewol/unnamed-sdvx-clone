@@ -26,6 +26,7 @@ struct GUIState
 	Material* fillMaterial;
 	NVGcolor otrColor; //outer color
 	NVGcolor inrColor; //inner color
+	NVGcolor imageTint;
 	Rect scissor;
 	Vector2i resolution;
 };
@@ -191,6 +192,17 @@ static int lImagePatternFill(lua_State* L /*int image, float alpha*/)
 	nvgFillPaint(g_guiState.vg, nvgImagePattern(g_guiState.vg, 0, 0, w, h, 0, image, alpha));
 	return 0;
 }
+
+static int lSetImageTint(lua_State* L /*int r, int g, int b*/)
+{
+	int r, g, b;
+	r = luaL_checkinteger(L, 1);
+	g = luaL_checkinteger(L, 2);
+	b = luaL_checkinteger(L, 3);
+	g_guiState.imageTint = nvgRGB(r, g, b);
+	return 0;
+}
+
 static int lImageRect(lua_State* L /*float x, float y, float w, float h, int image, float alpha, float angle*/)
 {
 	float x, y, w, h, alpha, angle;
@@ -211,7 +223,9 @@ static int lImageRect(lua_State* L /*float x, float y, float w, float h, int ima
 	nvgTranslate(g_guiState.vg, x, y);
 	nvgRotate(g_guiState.vg, angle);
 	nvgScale(g_guiState.vg, scaleX, scaleY);
-	nvgFillPaint(g_guiState.vg, nvgImagePattern(g_guiState.vg, 0, 0, imgW, imgH, 0, image, alpha));
+	NVGpaint paint = nvgImagePattern(g_guiState.vg, 0, 0, imgW, imgH, 0, image, alpha);
+	paint.innerColor = g_guiState.imageTint;
+	nvgFillPaint(g_guiState.vg, paint);
 	nvgRect(g_guiState.vg, 0, 0, imgW, imgH);
 	nvgFill(g_guiState.vg);
 	nvgScale(g_guiState.vg, 1.0 / scaleX, 1.0 / scaleY);
