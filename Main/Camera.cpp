@@ -3,6 +3,9 @@
 #include "Application.hpp"
 #include "Track.hpp"
 
+const float ROLL_AMT = 8;
+const float ZOOM_POW = 1.65f;
+
 Camera::Camera()
 {
 
@@ -34,6 +37,18 @@ static void Spin(float time, float &roll, float &bgAngle, float dir)
 		else roll = 0.0f;
 	}
 }
+
+
+static Transform GetOriginTransform(float pitch, float offs, float roll)
+{
+	auto origin = Transform::Rotation({ 0, 0, roll });
+	auto anchor = Transform::Translation({ offs, -0.9f, 0 })
+		* Transform::Rotation({ 1.5f, 0, 0 });
+	auto contnr = Transform::Translation({ 0, 0, -0.9f })
+		* Transform::Rotation({ -90 + pitch, 0, 0, });
+
+	return origin * anchor * contnr;
+};
 
 void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 {
@@ -105,6 +120,28 @@ void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 
 		m_shakeOffset += shakeVec;
 	}
+
+	float lanePitch = pLanePitch * pitchUnit;
+
+	worldNormal = GetOriginTransform(lanePitch, m_totalOffset, m_totalRoll * 360.0f);
+	worldNoRoll = GetOriginTransform(lanePitch, 0, 0);
+
+	auto GetZoomedTransform = [&](Transform t)
+	{
+		auto zoomDir = t.GetPosition();
+		float highwayDist = zoomDir.Length();
+		zoomDir = zoomDir.Normalized();
+
+		float zoomAmt;
+		if (pLaneZoom <= 0) zoomAmt = pow(ZOOM_POW, -pLaneZoom) - 1;
+		else zoomAmt = highwayDist * (pow(ZOOM_POW, -pow(pLaneZoom, 1.35f)) - 1);
+
+		return Transform::Translation(zoomDir * zoomAmt) * t;
+	};
+
+	track->trackOrigin = GetZoomedTransform(worldNormal);
+
+	critOrigin = GetZoomedTransform(GetOriginTransform(lanePitch, m_totalOffset, m_laserRoll * 360.0f + sin(m_spinRoll * Math::pi * 2) * 20));
 }
 void Camera::AddCameraShake(CameraShake cameraShake)
 {
@@ -136,47 +173,14 @@ static float Lerp(float a, float b, float alpha)
 	return a + (b - a) * alpha;
 }
 
-const float ROLL_AMT = 8;
-const float ZOOM_POW = 1.65f;
-
 RenderState Camera::CreateRenderState(bool clipped)
 {
-	auto GetOriginTransform = [&](float pitch, float offs, float roll)
-	{
-		auto origin = Transform::Rotation({ 0, 0, roll });
-		auto anchor = Transform::Translation({ offs, -0.9f, 0 })
-			* Transform::Rotation({ 1.5f, 0, 0 });
-		auto contnr = Transform::Translation({ 0, 0, -0.9f })
-			* Transform::Rotation({ -90 + pitch, 0, 0, });
-
-		return origin * anchor * contnr;
-	};
-
 	int portrait = g_aspectRatio > 1 ? 0 : 1;
 
 	// Extension of clipping planes in outward direction
 	float viewRangeExtension = clipped ? 0.0f : 5.0f;
 
 	RenderState rs = g_application->GetRenderStateBase();
-
-	float lanePitch = pLanePitch * pitchUnit;
-
-	auto worldNormal = GetOriginTransform(lanePitch, m_totalOffset, m_totalRoll * 360.0f);
-	auto worldLaserOnly = GetOriginTransform(lanePitch, m_totalOffset, m_laserRoll * 360.0f);
-	auto worldNoRoll = GetOriginTransform(lanePitch, 0, 0);
-
-	auto zoomDir = worldNormal.GetPosition();
-	float highwayDist = zoomDir.Length();
-	zoomDir = zoomDir.Normalized();
-
-	float zoomAmt;
-	if (pLaneZoom <= 0) zoomAmt = pow(ZOOM_POW, -pLaneZoom) - 1;
-	else zoomAmt = highwayDist * (pow(ZOOM_POW, -pow(pLaneZoom, 1.35f)) - 1);
-
-	//m_calcZoomBottom = zoomAmt / highwayDist + 1;
-
-	track->trackOrigin = Transform::Translation(zoomDir * zoomAmt) * worldNormal;
-	critOrigin = Transform::Translation(zoomDir * zoomAmt) * worldLaserOnly;
 
 	auto critDir = worldNoRoll.GetPosition().Normalized();
 	float rotToCrit = -atan2(critDir.y, -critDir.z) * Math::radToDeg;

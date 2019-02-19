@@ -482,16 +482,6 @@ void Track::DrawTrackOverlay(RenderQueue& rq, Texture texture, float heightOffse
 	transform *= Transform::Translation({ 0.0f, heightOffset, 0.0f });
 	rq.Draw(transform, trackMesh, trackOverlay, params);
 }
-void Track::DrawDarkTrack(RenderQueue & rq)
-{
-	// Base
-	MaterialParameterSet params;
-	Transform transform = trackOrigin;
-	//transform *= Transform::Translation({ 0.0f, 0.0f, 0.1f });
-	params.SetParameter("mainTex", trackDarkTexture);
-	params.SetParameter("hasSample", false);
-	rq.Draw(transform, trackDarkMesh, buttonMaterial, params);
-}
 void Track::DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, Color color /*= Color::White*/, float tilt /*= 0.0f*/)
 {
 	Transform spriteTransform = trackOrigin;
