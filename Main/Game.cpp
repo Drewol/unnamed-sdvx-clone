@@ -395,18 +395,17 @@ public:
 			lua_settable(m_lua, -3);
 			lua_pushstring(m_lua, "critLine");
 			lua_newtable(m_lua);
+			lua_pushstring(m_lua, "cursors");
+			lua_newtable(m_lua);
 			{
-				//lua_pushstring(m_lua, "leftCursor");
 				lua_newtable(m_lua);
-				//lua_settable(m_lua, -3);
 				lua_seti(m_lua, -2, 0);
 
-				//lua_pushstring(m_lua, "rightCursor");
 				lua_newtable(m_lua);
-				//lua_settable(m_lua, -3);
 				lua_seti(m_lua, -2, 1);
 			}
-			lua_settable(m_lua, -3);
+			lua_settable(m_lua, -3); // cursors -> critLine
+			lua_settable(m_lua, -3); // critLine -> gameplay
 			lua_setglobal(m_lua, "gameplay");
 		}
 
@@ -1106,7 +1105,7 @@ public:
 			lua_pushnumber(m_lua, critPos.y);
 			lua_settable(m_lua, -3);
 
-			lua_pushstring(m_lua, "laserRoll"); // rotation based on laser roll
+			lua_pushstring(m_lua, "rotation"); // rotation based on laser roll
 			lua_pushnumber(m_lua, -atan2f(line.y, line.x));
 			lua_settable(m_lua, -3);
 
@@ -1141,10 +1140,11 @@ public:
 				lua_pop(m_lua, 1);
 			};
 
+			lua_getfield(m_lua, -1, "cursors");
 			setCursorData(0);
 			setCursorData(1);
 
-			lua_pop(m_lua, 1); // critLine
+			lua_pop(m_lua, 2); // cursors, critLine
 		}
 
 		lua_setglobal(m_lua, "gameplay");

@@ -15,6 +15,7 @@ The following fields are available under the ``gameplay`` table:
     float gauge
     int comboState // 2 = puc, 1 = uc, 0 = normal
     ScoreReplay[] scoreReplays //Array of previous scores for the current song
+    CritLine critLine // info about crit line and everything attached to it
     
 Example:    
 
@@ -44,6 +45,29 @@ A ``ScoreReplay`` contains the following fields:
 
     int maxScore //the final score of this replay
     int currentScore //the current score of this replay
+
+    
+CritLine
+********
+A ``CritLine`` contains the following fields:
+    
+.. code-block:: c
+
+    int x //the x screen coordinate of the center of the critical line
+    int y //the y screen coordinate of the center of the critical line
+    float rotation //the rotation of the critical line in radians
+    Cursor[] cursors //the laser cursors, indexed 0 and 1 for left and right
+
+    
+Cursor
+******
+A ``Cursor`` contains the following fields:
+    
+.. code-block:: c
+
+    float pos //the x position relative to the center of the crit line
+    float alpha //the transparency of this cursor. 0 is transparent, 1 is opaque
+    float skew //the x skew of this cursor to simulate a more 3d look
     
 
 Calls made to lua
@@ -69,10 +93,31 @@ For starting laser alert animations::
     if isRight == true then restart right alert animation
     else restart left alert animation
     
+render(deltaTime)
+^^^^^^^^^^^^^^^^^
+The GUI render call. This is called last and will draw over everything else.
+    
+render_crit_base(deltaTime)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Function to render the base of the critical line. This function will be called
+after rendering the highway and playable objects, but before the built-in particle
+effects. Use this to draw the critical line itself as well as the darkening effects
+placed over the playable objects.
+
+See the default skin for an example.
+    
+render_crit_overlay(deltaTime)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Function to render the rest of the critical line, this is the last thing to be called
+before ``render`` so anything else which belongs above the built-in particle effects goes here.
+This is the place to draw the laser cursors.
+
+See the default skin for an example.
+    
 render_intro(deltaTime)
 ^^^^^^^^^^^^^^^^^^^^^^^
 Function for rendering an intro or keeping an intro timer. This function will be
-called every frame untill it returns ``true`` and never again after it has.
+called every frame until it returns ``true`` and never again after it has.
 
 Example:
 

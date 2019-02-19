@@ -309,7 +309,7 @@ end
 
 setupCritTransform = function()
     gfx.Translate(gameplay.critLine.x, gameplay.critLine.y)
-    gfx.Rotate(-gameplay.critLine.laserRoll)
+    gfx.Rotate(-gameplay.critLine.rotation)
 end
 
 render_crit_base = function(deltaTime)
@@ -324,7 +324,7 @@ render_crit_base = function(deltaTime)
 
     gfx.BeginPath()
     gfx.FillColor(255, 255, 255, 255)
-    gfx.ImageRect(-critWidth / 2 - gameplay.critLine.laserRoll * critWidth * 0.75, -critHeight / 2, critWidth, critHeight, critLine, 1, 0)
+    gfx.ImageRect(-critWidth / 2 - gameplay.critLine.rotation * critWidth * 0.75, -critHeight / 2, critWidth, critHeight, critLine, 1, 0)
 
     gfx.Restore()
 end
@@ -335,7 +335,7 @@ render_crit_overlay = function(deltaTime)
     setupCritTransform()
 
     local drawCursor = function(i)
-        local cursor = gameplay.critLine[i]
+        local cursor = gameplay.critLine.cursors[i]
         local r, g, b = game.GetLaserColor(i)
         local pos, skew = cursor.pos, cursor.skew
 
