@@ -50,6 +50,7 @@ end
 drawCrit = function(deltaTime)
     local critWidth = resx * 0.9
     local critHeight = 100
+    local cursorSize = 100
     local r, g, b
 
     gfx.Save()
@@ -63,14 +64,15 @@ drawCrit = function(deltaTime)
 
     gfx.BeginPath()
     r, g, b = game.GetLaserColor(0)
-    gfx.FillColor(r, g, b, 255 * gameplay.critLine.leftCursor.alpha)
-    gfx.ImageRect(gameplay.critLine.leftCursor.pos - 25, -25, 50, 50, laserCursor, gameplay.critLine.leftCursor.alpha, 0)
+    gfx.SetImageTint(r, g, b)
+    gfx.ImageRect(gameplay.critLine.leftCursor.pos - cursorSize / 2, -cursorSize / 2, cursorSize, cursorSize, laserCursor, gameplay.critLine.leftCursor.alpha, 0)
 
     gfx.BeginPath()
     r, g, b = game.GetLaserColor(1)
-    gfx.FillColor(r, g, b, 255 * gameplay.critLine.rightCursor.alpha)
-    gfx.ImageRect(gameplay.critLine.rightCursor.pos - 25, -25, 50, 50, laserCursor, gameplay.critLine.rightCursor.alpha, 0)
+    gfx.SetImageTint(r, g, b)
+    gfx.ImageRect(gameplay.critLine.rightCursor.pos - cursorSize / 2, -cursorSize / 2, cursorSize, cursorSize, laserCursor, gameplay.critLine.rightCursor.alpha, 0)
 
+    gfx.SetImageTint(255, 255, 255)
     gfx.Restore()
 end
 
