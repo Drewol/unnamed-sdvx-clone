@@ -759,14 +759,9 @@ public:
 		// Render Critical Line Overlay
 		lua_getglobal(m_lua, "render_crit_overlay");
 		lua_pushnumber(m_lua, deltaTime);
-		if (lua_pcall(m_lua, 1, 0, 0) != 0)
-		{
-			Logf("Lua error: %s", Logger::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
-			assert(false);
-		}
-		// flush NVG
-		NVG_FLUSH();
+		// only flush if the overlay exists. overlay isn't required, only one crit function is required.
+		if (lua_pcall(m_lua, 1, 0, 0) == 0)
+			NVG_FLUSH();
 
 		// Render foreground
 		m_foreground->Render(deltaTime);
