@@ -20,7 +20,9 @@ local artist = nil
 local jacketFallback = gfx.CreateSkinImage("song_select/loading.png", 0)
 local bottomFill = gfx.CreateSkinImage("fill_bottom.png",0)
 local topFill = gfx.CreateSkinImage("fill_top.png",0)
-local critLine = gfx.CreateSkinImage("scorebar.png",0)
+local critAnim = gfx.CreateSkinImage("crit_anim.png",0)
+local critCap = gfx.CreateSkinImage("crit_cap.png",0)
+local critCapBack = gfx.CreateSkinImage("crit_cap_back.png",0)
 local laserCursor = gfx.CreateSkinImage("pointer.png",0)
 local laserCursorOverlay = gfx.CreateSkinImage("pointer_overlay.png",0)
 local diffNames = {"NOV", "ADV", "EXH", "INF"}
@@ -28,9 +30,13 @@ local introTimer = 2
 local outroTimer = 0
 local clearTexts = {"TRACK FAILED", "TRACK COMPLETE", "TRACK COMPLETE", "FULL COMBO", "PERFECT" }
 local yshift = 0
-local critWidth = resx
-local clw, clh = gfx.ImageSize(critLine)
-local critHeight = critWidth * (clh / clw)
+local critAnimTimer = 0
+local critAnimHeight = 15 * scale
+local clw, clh = gfx.ImageSize(critAnim)
+local critAnimWidth = critAnimHeight * (clw / clh)
+local ccw, cch = gfx.ImageSize(critCap)
+local critCapHeight = critAnimHeight * (cch / clh)
+local critCapWidth = critCapHeight * (ccw / cch)
 local cursorWidth = 40 * scale
 local cw, ch = gfx.ImageSize(laserCursor)
 local cursorHeight = cursorWidth * (ch / cw)
@@ -315,18 +321,56 @@ setupCritTransform = function()
 end
 
 render_crit_base = function(deltaTime)
+    critAnimTimer = critAnimTimer + deltaTime
     gfx.Save()
+    
+    local distFromCenter = resx / 2 - gameplay.critLine.x
+    local dvx = math.cos(gameplay.critLine.rotation)
+    local dvy = math.sin(gameplay.critLine.rotation)
+    local rotOffset = math.sqrt(dvx * dvx + dvy * dvy) * distFromCenter
+
+    --local rotOffset = -gameplay.critLine.rotation * resx * 0.25
 
     setupCritTransform()
+    gfx.Translate(rotOffset, 0)
     
     gfx.BeginPath()
     gfx.Rect(-resx, 0, resx * 2, resy)
     gfx.FillColor(0, 0, 0, 225)
     gfx.Fill()
 
+    local critWidth = resx * 0.8
+    local numPieces = 1 + math.ceil(critWidth / (critAnimWidth * 2))
+    local startOffset = critAnimWidth * ((critAnimTimer * 1.5) % 1)
+
     gfx.BeginPath()
-    gfx.FillColor(255, 255, 255, 255)
-    gfx.ImageRect(-critWidth / 2 - gameplay.critLine.rotation * critWidth * 0.75, -critHeight / 2, critWidth, critHeight, critLine, 1, 0)
+    gfx.ImageRect(-critWidth / 2 - critCapWidth / 2, -critCapHeight / 2, critCapWidth, critCapHeight, critCapBack, 1, 0)
+    gfx.Scale(-1, 1)
+    gfx.BeginPath()
+    gfx.ImageRect(-critWidth / 2 - critCapWidth / 2, -critCapHeight / 2, critCapWidth, critCapHeight, critCapBack, 1, 0)
+    gfx.Scale(-1, 1)
+
+    -- right side
+    gfx.Scissor(0, -critAnimHeight / 2, critWidth / 2, critAnimHeight)
+    for i = 1, numPieces do
+        gfx.BeginPath()
+        gfx.ImageRect(-critAnimWidth + startOffset + critAnimWidth * (i - 1), -critAnimHeight / 2, critAnimWidth, critAnimHeight, critAnim, 1, 0)
+    end
+    gfx.ResetScissor()
+    -- left side
+    gfx.Scissor(-critWidth / 2, -critAnimHeight / 2, critWidth / 2, critAnimHeight)
+    for i = 1, numPieces do
+        gfx.BeginPath()
+        gfx.ImageRect(-startOffset - critAnimWidth * (i - 1), -critAnimHeight / 2, critAnimWidth, critAnimHeight, critAnim, 1, 0)
+    end
+    gfx.ResetScissor()
+
+    gfx.BeginPath()
+    gfx.ImageRect(-critWidth / 2 - critCapWidth / 2, -critCapHeight / 2, critCapWidth, critCapHeight, critCap, 1, 0)
+    gfx.Scale(-1, 1)
+    gfx.BeginPath()
+    gfx.ImageRect(-critWidth / 2 - critCapWidth / 2, -critCapHeight / 2, critCapWidth, critCapHeight, critCap, 1, 0)
+    gfx.Scale(-1, 1)
 
     gfx.Restore()
 end
