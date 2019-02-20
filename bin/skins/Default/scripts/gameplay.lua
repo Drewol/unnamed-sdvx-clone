@@ -31,7 +31,7 @@ local yshift = 0
 local critWidth = resx
 local clw, clh = gfx.ImageSize(critLine)
 local critHeight = critWidth * (clh / clw)
-local cursorWidth = 60
+local cursorWidth = 40 * scale
 local cw, ch = gfx.ImageSize(laserCursor)
 local cursorHeight = cursorWidth * (ch / cw)
 
