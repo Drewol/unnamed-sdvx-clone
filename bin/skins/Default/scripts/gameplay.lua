@@ -227,6 +227,7 @@ drawFill = function(deltaTime)
     bottomAspect = bh/bw
     bottomHeight = desw * bottomAspect
     gfx.Translate(0, (bottomHeight + 100) * math.max(introTimer - 1, 0))
+    gfx.BeginPath()
     gfx.Rect(0, desh * critLinePos[2] + bottomHeight - 20, desw, 100)
     gfx.ImageRect(0, desh * critLinePos[2],  desw, bottomHeight, bottomFill, 1,0)
     gfx.Translate(0, (bottomHeight + 100) * -math.max(introTimer - 1, 0))
@@ -343,11 +344,9 @@ render_crit_overlay = function(deltaTime)
         gfx.BeginPath()
         gfx.SkewX(skew)
         gfx.SetImageTint(r, g, b)
-        gfx.ImageRect(pos - cursorWidth / 2, -cursorHeight / 2,
-                cursorWidth, cursorHeight, laserCursor, cursor.alpha, 0)
+        gfx.ImageRect(pos - cursorWidth / 2, -cursorHeight / 2, cursorWidth, cursorHeight, laserCursor, cursor.alpha, 0)
         gfx.SetImageTint(255, 255, 255)
-        gfx.ImageRect(pos - cursorWidth / 2, -cursorHeight / 2,
-                cursorWidth, cursorHeight, laserCursorOverlay, cursor.alpha, 0)
+        gfx.ImageRect(pos - cursorWidth / 2, -cursorHeight / 2, cursorWidth, cursorHeight, laserCursorOverlay, cursor.alpha, 0)
         gfx.SkewX(-skew)
     end
 
@@ -359,8 +358,6 @@ render_crit_overlay = function(deltaTime)
 end
 
 render = function(deltaTime)
-    --render_crit_base(deltaTime)
-    --render_crit_overlay(deltaTime)
     if introTimer > 0 then
         gfx.BeginPath()
         gfx.Rect(0,0,resx,resy)
