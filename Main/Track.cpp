@@ -43,16 +43,6 @@ bool Track::AsyncLoad()
 {
 	loader = new AsyncAssetLoader();
 	String skin = g_gameConfig.GetString(GameConfigKeys::Skin);
-	// Load laser colors
-
-	// Old laser coloring
-	/*
-	Image laserColorPalette;
-	CheckedLoad(laserColorPalette = ImageRes::Create("skins/" + skin + "/textures/lasercolors.png"));
-	assert(laserColorPalette->GetSize().x >= 2);
-	for(uint32 i = 0; i < 2; i++)
-		laserColors[i] = laserColorPalette->GetBits()[i];
-	*/
 
 	float laserHues[2] = { 0.f };
 	laserHues[0] = g_gameConfig.GetFloat(GameConfigKeys::Laser0Color);
@@ -70,14 +60,11 @@ bool Track::AsyncLoad()
 
 	// mip-mapped and anisotropicaly filtered track textures
 	loader->AddTexture(trackTexture, "track.png");
-	loader->AddTexture(trackDarkTexture, "track_dark.png");
 	loader->AddTexture(trackTickTexture, "tick.png");
 
 	// Scoring texture
-	loader->AddTexture(scoreBarTexture, "scorebar.png");
 	loader->AddTexture(scoreHitTexture, "scorehit.png");
 
-	loader->AddTexture(laserPointerTexture, "pointer.png"); 
 
 	for(uint32 i = 0; i < 3; i++)
 	{
@@ -179,7 +166,6 @@ bool Track::AsyncFinalize()
 
 	// Generate simple planes for the playfield track and elements
 	trackMesh = MeshGenerators::Quad(g_gl, Vector2(-trackWidth * 0.5f, -trackLength), Vector2(trackWidth, trackLength * 2));
-	trackDarkMesh = MeshGenerators::Quad(g_gl, Vector2(-trackWidth, -trackLength), Vector2(trackWidth * 2, trackLength));
 	trackTickMesh = MeshGenerators::Quad(g_gl, Vector2(-buttonTrackWidth * 0.5f, 0.0f), Vector2(buttonTrackWidth, trackTickLength));
 	centeredTrackMesh = MeshGenerators::Quad(g_gl, Vector2(-0.5f, -0.5f), Vector2(1.0f, 1.0f));
 

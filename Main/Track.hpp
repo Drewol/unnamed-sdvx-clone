@@ -83,11 +83,9 @@ public:
 
 	/* Track base graphics */
 	Mesh trackMesh;
-	Mesh trackDarkMesh;
 	Mesh trackTickMesh;
 	Material trackMaterial; // Also used for buttons
 	Texture trackTexture;
-	Texture trackDarkTexture;
 	Texture trackTickTexture;
 
 	/* Object graphics */
@@ -109,9 +107,7 @@ public:
 	Material trackOverlay;
 
 	/* Scoring and feedback elements */
-	Texture scoreBarTexture;
 	Texture scoreHitTexture;
-	Texture laserPointerTexture;
 	Texture scoreHitTextures[3]; // Ok, Miss, Perfect
 	// Combo counter sprite sheet
 	Mesh comboSpriteMeshes[10];
