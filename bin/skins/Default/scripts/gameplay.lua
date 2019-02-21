@@ -429,6 +429,7 @@ render_intro = function(deltaTime)
 end
 
 render_outro = function(deltaTime, clearState)
+    gfx.ResetTransform()
     if clearState == 0 then return true end
     gfx.ResetTransform()
     gfx.BeginPath()
