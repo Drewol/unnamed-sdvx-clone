@@ -14,9 +14,11 @@ Contents:
 .. toctree::
    :maxdepth: 2
    
+   globals
    game
    gfx
    gameplay
+   titlescreen
    scorescreen
    songwheel
    filterwheel
