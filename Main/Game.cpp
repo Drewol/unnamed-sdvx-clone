@@ -873,7 +873,7 @@ public:
 		m_fxSamples = new Sample[samples.size()];
 		for (int i = 0; i < samples.size(); i++)
 		{
-			String ext = samples[i].substr(samples[i].length() - 4, 4);
+			String ext = samples[i].length() > 4 ? samples[i].substr(samples[i].length() - 4, 4) : "";
 			ext.ToUpper();
 			if (ext == ".WAV")
 			{
