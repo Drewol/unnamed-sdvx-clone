@@ -53,7 +53,7 @@ If something breaks in the song database, delete "maps.db". **Please note this w
 - Press \[FX-L\] to open up filter select to filter the displayed songs
 - Press \[Start\] when selecting filters to toggle between level and folder filters
 - Press \[FX-L\] + \[FX-R\] to open up game settings (Hard gauge, Random, Mirror, etc.)
-- Use the Search bar on the top to search for songs
+- Press \[TAB\] to open the Search bar on the top to search for songs
 
 ## How to run:
 Just run 'Main_Release' or 'Main_Debug' from within the 'bin' folder. Or, to play a chart immediately:  
