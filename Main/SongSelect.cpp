@@ -579,6 +579,7 @@ private:
 				m_PushIntToTable("difficulty", settings.difficulty);
 				m_PushIntToTable("id", diff->id);
 				m_PushStringToTable("effector", settings.effector.c_str());
+				m_PushStringToTable("illustrator", settings.illustrator.c_str());
 				m_PushIntToTable("topBadge", Scoring::CalculateBestBadge(diff->scores));
 				lua_pushstring(m_lua, "scores");
 				lua_newtable(m_lua);
