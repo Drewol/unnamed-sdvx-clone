@@ -304,6 +304,7 @@ public:
 				lua_pushstring(m_lua, *screenshotPath);
 				lua_call(m_lua, 1, 0);
 			}
+			lua_settop(m_lua, 0);
 		}
 		if (key == SDLK_F9)
 		{
