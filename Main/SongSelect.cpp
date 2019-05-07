@@ -388,7 +388,7 @@ public:
 				Logf("Lua error: %s", Logger::Error, lua_tostring(m_lua, -1));
 				g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
 			}
-			int ret = luaL_checkinteger(m_lua, 0);
+			int ret = luaL_checkinteger(m_lua, -1);
 			lua_settop(m_lua, 0);
 			AdvanceSelection(ret * direction);
 		}
