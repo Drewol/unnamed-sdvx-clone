@@ -133,7 +133,6 @@ bool Track::AsyncFinalize()
 	fxbuttonMesh = MeshGenerators::Quad(g_gl, Vector2(0.0f, 0.0f), Vector2(fxbuttonWidth, fxbuttonLength));
 
 	holdButtonMaterial->opaque = false;
-	holdButtonMaterial->blendMode = MaterialBlendMode::Additive;
 
 	for (uint32 i = 0; i < 4; i++)
 	{
