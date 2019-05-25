@@ -522,6 +522,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 	// Process initial timing point
 	TimingPoint* lastTimingPoint = new TimingPoint();
 	lastTimingPoint->time = atol(*kshootMap.settings["o"]);
+	double realMapTime = (double)lastTimingPoint->time;
 	double bpm = atof(*kshootMap.settings["t"]);
 	lastTimingPoint->beatDuration = 60000.0 / bpm;
 	lastTimingPoint->numerator = 4;
@@ -593,7 +594,8 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 		// Sub-Block offset by adding ticks together
 		double blockPercent = (double)tickFromStartOfTimingPoint / (double)block.ticks.size();
 		double tickOffset = blockPercent * blockDuration;
-		MapTime mapTime = lastTimingPoint->time + MapTime(blockDurationOffset + tickOffset);
+		double currentMapTime = realMapTime + blockDurationOffset + tickOffset;
+		MapTime mapTime = MapTime(currentMapTime);
 
 		bool lastTick = &block == &kshootMap.blocks.back() &&
 			&tick == &block.ticks.back();
@@ -614,6 +616,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 				{
 					lastTimingPoint = new TimingPoint(*lastTimingPoint);
 					lastTimingPoint->time = mapTime;
+					realMapTime = currentMapTime;
 					m_timingPoints.Add(lastTimingPoint);
 					timingPointMap.Add(mapTime, lastTimingPoint);
 					timingPointBlockOffset = time.block;
