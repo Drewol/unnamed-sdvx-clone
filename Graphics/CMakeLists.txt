@@ -60,6 +60,7 @@ else(WIN32)
 		include_directories(${X11_INCLUDE_DIR})
 	endif(APPLE)
 
-	include_directories(${FREETYPE_INCLUDE_DIRS})
-	find_package(Freetype REQUIRED)
+	get_target_property(gfx_includes Graphics INCLUDE_DIRECTORIES)
+	set_property(TARGET Graphics PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${gfx_includes})
+
 endif(WIN32)
