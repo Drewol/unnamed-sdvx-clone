@@ -134,7 +134,7 @@ bool Track::AsyncFinalize()
 
 	holdButtonMaterial->opaque = false;
 
-	for (uint32 i = 0; i < 4; i++)
+	for (uint32 i = 0; i < 2; i++)
 	{
 		laserTextures[i]->SetMipmaps(true);
 		laserTextures[i]->SetFilter(true, true, 16.0f);
