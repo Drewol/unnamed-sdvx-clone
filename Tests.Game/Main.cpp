@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <Tests/TestManager.hpp>
+#include <typeinfo>
 
 void ListTests()
 {
