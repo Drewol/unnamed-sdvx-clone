@@ -8,7 +8,7 @@ const float ZOOM_POW = 1.65f;
 
 Camera::Camera()
 {
-
+	m_spinType = SpinStruct::SpinType::None;
 }
 Camera::~Camera()
 {
