@@ -72,7 +72,7 @@ public:
 	MapDatabase_Impl(MapDatabase& outer) : m_outer(outer)
 	{
 		String databasePath = Path::Absolute("maps.db");
-		if (!m_database.Open(databasePath))
+		if(!m_database.Open(databasePath))
 		{
 			Logf("Failed to open database [%s]", Logger::Warning, databasePath);
 			assert(false);
@@ -82,10 +82,10 @@ public:
 		bool update = false;
 		DBStatement versionQuery = m_database.Query("SELECT version FROM `Database`");
 		int32 gotVersion = 0;
-		if (versionQuery && versionQuery.Step())
+		if(versionQuery && versionQuery.Step())
 		{
 			gotVersion = versionQuery.IntColumn(0);
-			if (gotVersion != m_version)
+			if(gotVersion != m_version)
 			{
 				update = true;
 			}
@@ -100,32 +100,32 @@ public:
 		}
 		versionQuery.Finish();
 
-		if (rebuild)
+		if(rebuild)
 		{
 			m_CreateTables();
 
 			// Update database version
 			m_database.Exec(Utility::Sprintf("UPDATE Database SET `version`=%d WHERE `rowid`=1", m_version));
 		}
-		else if (update)
+		else if(update)
 		{
 			///TODO: Make loop for doing iterative upgrades
-			if (gotVersion == 8)  //upgrade from 8 to 9
+			if(gotVersion == 8)  //upgrade from 8 to 9
 			{
 				m_database.Exec("ALTER TABLE Scores ADD COLUMN hitstats BLOB");
 				gotVersion = 9;
 			}
-			if (gotVersion == 9)  //upgrade from 9 to 10
+			if(gotVersion == 9)  //upgrade from 9 to 10
 			{
 				m_database.Exec("ALTER TABLE Scores ADD COLUMN timestamp INTEGER");
 				gotVersion = 10;
 			}
-			if (gotVersion == 10)  //upgrade from 10 to 11
+			if(gotVersion == 10)  //upgrade from 10 to 11
 			{
 				m_database.Exec("ALTER TABLE Difficulties ADD COLUMN hash TEXT");
 				gotVersion = 11;
 			}
-			if (gotVersion == 11) //upgrade from 11 to 12
+			if(gotVersion == 11) //upgrade from 11 to 12
 			{
 				m_database.Exec("ALTER TABLE Maps ADD COLUMN effector TEXT");
 				gotVersion = 12;
@@ -146,10 +146,10 @@ public:
 
 	void StartSearching()
 	{
-		if (m_searching)
+		if(m_searching)
 			return;
 
-		if (m_thread.joinable())
+		if(m_thread.joinable())
 			m_thread.join();
 
 		// Create initial data set to compare to when evaluating if a file is added/removed/updated
@@ -162,7 +162,7 @@ public:
 	{
 		m_interruptSearch = true;
 		m_searching = false;
-		if (m_thread.joinable())
+		if(m_thread.joinable())
 		{
 			m_thread.join();
 		}
@@ -170,7 +170,7 @@ public:
 	void AddSearchPath(const String& path)
 	{
 		String normalizedPath = Path::Normalize(Path::Absolute(path));
-		if (m_searchPaths.Contains(normalizedPath))
+		if(m_searchPaths.Contains(normalizedPath))
 			return;
 
 		m_searchPaths.Add(normalizedPath);
@@ -178,7 +178,7 @@ public:
 	void RemoveSearchPath(const String& path)
 	{
 		String normalizedPath = Path::Normalize(Path::Absolute(path));
-		if (!m_searchPaths.Contains(normalizedPath))
+		if(!m_searchPaths.Contains(normalizedPath))
 			return;
 
 		m_searchPaths.erase(normalizedPath);
@@ -198,13 +198,13 @@ public:
 	{
 		List<Event> changes;
 		m_pendingChangesLock.lock();
-		if (maxChanges == -1)
+		if(maxChanges == -1)
 		{
 			changes = std::move(m_pendingChanges); // All changes
 		}
 		else
 		{
-			for (size_t i = 0; i < maxChanges && !m_pendingChanges.empty(); i++)
+			for(size_t i = 0; i < maxChanges && !m_pendingChanges.empty(); i++)
 			{
 				changes.AddFront(m_pendingChanges.front());
 				m_pendingChanges.pop_front();
@@ -222,11 +222,11 @@ public:
 		search.BindString(1, hash);
 
 		Map<int32, MapIndex*> res;
-		while (search.StepRow())
+		while(search.StepRow())
 		{
 			int32 id = search.IntColumn(0);
 			MapIndex** map = m_maps.Find(id);
-			if (map)
+			if(map)
 			{
 				res.Add(id, *map);
 			}
@@ -243,9 +243,9 @@ public:
 		//search.spl
 		Vector<String> terms = searchString.Explode(" ");
 		int32 i = 0;
-		for (auto term : terms)
+		for(auto term : terms)
 		{
-			if (i > 0)
+			if(i > 0)
 				stmt += " AND";
 			stmt += " (artist LIKE \"%" + term + "%\"" +
 				" OR title LIKE \"%" + term + "%\"" +
@@ -257,11 +257,11 @@ public:
 
 		Map<int32, MapIndex*> res;
 		DBStatement search = m_database.Query(stmt);
-		while (search.StepRow())
+		while(search.StepRow())
 		{
 			int32 id = search.IntColumn(0);
 			MapIndex** map = m_maps.Find(id);
-			if (map)
+			if(map)
 			{
 				res.Add(id, *map);
 			}
@@ -281,11 +281,11 @@ public:
 
 		Map<int32, MapIndex*> res;
 		DBStatement search = m_database.Query(stmt);
-		while (search.StepRow())
+		while(search.StepRow())
 		{
 			int32 id = search.IntColumn(0);
 			MapIndex** map = m_maps.Find(id);
-			if (map)
+			if(map)
 			{
 				res.Add(id, *map);
 			}
@@ -297,7 +297,7 @@ public:
 	void Update()
 	{
 		List<Event> changes = FlushChanges();
-		if (changes.empty())
+		if(changes.empty())
 			return;
 
 		DBStatement addDiff = m_database.Query("INSERT INTO Difficulties(path,lwt,metadata,rowid,mapid,hash) VALUES(?,?,?,?,?,?)");
@@ -311,9 +311,9 @@ public:
 		Set<MapIndex*> updatedEvents;
 
 		m_database.Exec("BEGIN");
-		for (Event& e : changes)
+		for(Event& e : changes)
 		{
-			if (e.action == Event::Added)
+			if(e.action == Event::Added)
 			{
 				Buffer metadata;
 				MemoryWriter metadataWriter(metadata);
@@ -325,7 +325,7 @@ public:
 
 				// Add or get map
 				auto mapIt = m_mapsByPath.find(mapPath);
-				if (mapIt == m_mapsByPath.end())
+				if(mapIt == m_mapsByPath.end())
 				{
 					// Add map
 					map = new MapIndex();
@@ -377,7 +377,7 @@ public:
 				addDiff.Rewind();
 
 				// Send appropriate notification
-				if (existingUpdated)
+				if(existingUpdated)
 				{
 					updatedEvents.Add(map);
 				}
@@ -386,7 +386,7 @@ public:
 					addedEvents.Add(map);
 				}
 			}
-			else if (e.action == Event::Updated)
+			else if(e.action == Event::Updated)
 			{
 				Buffer metadata;
 				MemoryWriter metadataWriter(metadata);
@@ -412,7 +412,7 @@ public:
 				// Send notification
 				updatedEvents.Add(itMap->second);
 			}
-			else if (e.action == Event::Removed)
+			else if(e.action == Event::Removed)
 			{
 				auto itDiff = m_difficulties.find(e.id);
 				assert(itDiff != m_difficulties.end());
@@ -430,7 +430,7 @@ public:
 				removeDiff.Step();
 				removeDiff.Rewind();
 
-				if (itMap->second->difficulties.empty()) // Remove map as well
+				if(itMap->second->difficulties.empty()) // Remove map as well
 				{
 					removeEvents.Add(itMap->second);
 
@@ -446,16 +446,16 @@ public:
 					updatedEvents.Add(itMap->second);
 				}
 			}
-			if (e.mapData)
+			if(e.mapData)
 				delete e.mapData;
 		}
 		m_database.Exec("END");
 
 		// Fire events
-		if (!removeEvents.empty())
+		if(!removeEvents.empty())
 		{
 			Vector<MapIndex*> eventsArray;
-			for (auto i : removeEvents)
+			for(auto i : removeEvents)
 			{
 				// Don't send 'updated' or 'added' events for removed maps
 				addedEvents.erase(i);
@@ -464,15 +464,15 @@ public:
 			}
 
 			m_outer.OnMapsRemoved.Call(eventsArray);
-			for (auto e : eventsArray)
+			for(auto e : eventsArray)
 			{
 				delete e;
 			}
 		}
-		if (!addedEvents.empty())
+		if(!addedEvents.empty())
 		{
 			Vector<MapIndex*> eventsArray;
-			for (auto i : addedEvents)
+			for(auto i : addedEvents)
 			{
 				// Don't send 'updated' events for added maps
 				updatedEvents.erase(i);
@@ -481,10 +481,10 @@ public:
 
 			m_outer.OnMapsAdded.Call(eventsArray);
 		}
-		if (!updatedEvents.empty())
+		if(!updatedEvents.empty())
 		{
 			Vector<MapIndex*> eventsArray;
-			for (auto i : updatedEvents)
+			for(auto i : updatedEvents)
 			{
 				eventsArray.Add(i);
 			}
@@ -530,11 +530,11 @@ public:
 private:
 	void m_CleanupMapIndex()
 	{
-		for (auto m : m_maps)
+		for(auto m : m_maps)
 		{
 			delete m.second;
 		}
-		for (auto m : m_difficulties)
+		for(auto m : m_difficulties)
 		{
 			delete m.second;
 		}
@@ -570,7 +570,7 @@ private:
 
 		// Select Maps
 		DBStatement mapScan = m_database.Query("SELECT rowid,path FROM Maps ORDER BY " + m_sortField + " COLLATE NOCASE");
-		while (mapScan.StepRow())
+		while(mapScan.StepRow())
 		{
 			MapIndex* map = new MapIndex();
 			map->id = mapScan.IntColumn(0);
@@ -583,7 +583,7 @@ private:
 
 		// Select Difficulties
 		DBStatement diffScan = m_database.Query("SELECT rowid,path,lwt,metadata,mapid,hash FROM Difficulties");
-		while (diffScan.StepRow())
+		while(diffScan.StepRow())
 		{
 			DifficultyIndex* diff = new DifficultyIndex();
 			diff->id = diffScan.IntColumn(0);
@@ -607,7 +607,7 @@ private:
 			// Add to search state
 			SearchState::ExistingDifficulty ed;
 			ed.id = diff->id;
-			if (diff->hash.length() == 0)
+			if(diff->hash.length() == 0)
 			{
 				ed.lwt = 0;
 			}
@@ -621,7 +621,7 @@ private:
 		// Select Scores
 		DBStatement scoreScan = m_database.Query("SELECT rowid,score,crit,near,miss,gauge,gameflags,hitstats,timestamp,diffid FROM Scores");
 
-		while (scoreScan.StepRow())
+		while(scoreScan.StepRow())
 		{
 			ScoreIndex* score = new ScoreIndex();
 			score->id = scoreScan.IntColumn(0);
@@ -634,7 +634,7 @@ private:
 
 			Buffer hitstats = scoreScan.BlobColumn(7);
 			MemoryReader hitstatreader(hitstats);
-			if (hitstats.size() > 0)
+			if(hitstats.size() > 0)
 				hitstatreader.SerializeObject(score->hitStats);
 
 			score->timestamp = scoreScan.Int64Column(8);
@@ -642,7 +642,7 @@ private:
 
 			// Add difficulty to map and resort difficulties
 			auto diffIt = m_difficulties.find(score->diffid);
-			if (diffIt == m_difficulties.end()) // If for whatever reason the diff that the score is attatched to is not in the db, ignore the score.
+			if(diffIt == m_difficulties.end()) // If for whatever reason the diff that the score is attatched to is not in the db, ignore the score.
 				continue;
 
 			diffIt->second->scores.Add(score);
@@ -679,12 +679,12 @@ private:
 		{
 			ProfilerScope $("Chart Database - Enumerate Files and Folders");
 			m_outer.OnSearchStatusUpdated.Call("[START] Chart Database - Enumerate Files and Folders");
-			for (String rootSearchPath : m_searchPaths)
+			for(String rootSearchPath : m_searchPaths)
 			{
 				Vector<FileInfo> files = Files::ScanFilesRecursive(rootSearchPath, "ksh", &m_interruptSearch);
-				if (m_interruptSearch)
+				if(m_interruptSearch)
 					return;
-				for (FileInfo& fi : files)
+				for(FileInfo& fi : files)
 				{
 					fileList.Add(fi.fullPath, fi);
 				}
@@ -696,9 +696,9 @@ private:
 			ProfilerScope $("Chart Database - Process Removed Files");
 			m_outer.OnSearchStatusUpdated.Call("[START] Chart Database - Process Removed Files");
 			// Process scanned files
-			for (auto f : m_searchState.difficulties)
+			for(auto f : m_searchState.difficulties)
 			{
-				if (!fileList.Contains(f.first))
+				if(!fileList.Contains(f.first))
 				{
 					Event evt;
 					evt.action = Event::Removed;
@@ -714,9 +714,9 @@ private:
 			ProfilerScope $("Chart Database - Process New Files");
 			m_outer.OnSearchStatusUpdated.Call("[START] Chart Database - Process New Files");
 			// Process scanned files
-			for (auto f : fileList)
+			for(auto f : fileList)
 			{
-				if (!m_searching)
+				if(!m_searching)
 					break;
 
 				uint64 mylwt = f.second.lastWriteTime;
@@ -724,10 +724,10 @@ private:
 				evt.lwt = mylwt;
 
 				SearchState::ExistingDifficulty* existing = m_searchState.difficulties.Find(f.first);
-				if (existing)
+				if(existing)
 				{
 					evt.id = existing->id;
-					if (existing->lwt != mylwt)
+					if(existing->lwt != mylwt)
 					{
 						// Map Updated
 						evt.action = Event::Updated;
@@ -750,17 +750,17 @@ private:
 				bool mapValid = false;
 				File fileStream;
 				Beatmap map;
-				if (fileStream.OpenRead(f.first))
+				if(fileStream.OpenRead(f.first))
 				{
 					FileReader reader(fileStream);
 
-					if (map.Load(reader, true))
+					if(map.Load(reader, true))
 					{
 						mapValid = true;
 					}
 				}
 
-				if (mapValid)
+				if(mapValid)
 				{
 					evt.mapData = new BeatmapSettings(map.GetMapSettings());
 
@@ -770,7 +770,7 @@ private:
 					const String audioFile = Path::Normalize(Path::RemoveLast(f.first) + Path::sep + evt.mapData->audioNoFX);
 
 					File audioFileStream;
-					if (audioFileStream.OpenRead(audioFile))
+					if(audioFileStream.OpenRead(audioFile))
 					{
 						char data_buffer[0x8000];
 						uint32_t digest[5];
@@ -782,7 +782,7 @@ private:
 						{
 							read_size = audioFileStream.Read(data_buffer + amount_read, sizeof(data_buffer) - amount_read);
 							amount_read += read_size;
-						} while (amount_read < sizeof(data_buffer) && read_size != 0);
+						} while(amount_read < sizeof(data_buffer) && read_size != 0);
 
 						s.processBytes(data_buffer, amount_read);
 						s.getDigest(digest);
@@ -796,9 +796,9 @@ private:
 					}
 				}
 
-				if (!mapValid)
+				if(!mapValid)
 				{
-					if (!existing) // Never added
+					if(!existing) // Never added
 					{
 						Logf("Skipping corrupted chart [%s]", Logger::Warning, f.first);
 						m_outer.OnSearchStatusUpdated.Call(Utility::Sprintf("Skipping corrupted chart [%s]", f.first));
