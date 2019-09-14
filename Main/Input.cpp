@@ -35,6 +35,7 @@ void Input::Init(Graphics::Window& wnd)
 	m_controllerAxisMapping[1] = g_gameConfig.GetInt(GameConfigKeys::Controller_Laser1Axis);
 	m_controllerSensitivity = g_gameConfig.GetFloat(GameConfigKeys::Controller_Sensitivity);
 	m_controllerDeadzone = g_gameConfig.GetFloat(GameConfigKeys::Controller_Deadzone);
+	m_controllerDirectMode = g_gameConfig.GetBool(GameConfigKeys::Controller_DirectMode);
 
 	// Init controller mapping
 	if(m_laserDevice == InputDevice::Controller || m_buttonDevice == InputDevice::Controller)
@@ -148,7 +149,9 @@ void Input::Update(float deltaTime)
 			for(uint32 i = 0; i < 2; i++)
 			{
 				float axisState = m_gamepad->GetAxis(m_controllerAxisMapping[i]);
-				float delta = axisState - m_prevLaserStates[i];
+				float delta = axisState;
+				if (!m_controllerDirectMode)
+					delta -= m_prevLaserStates[i];
 				if (fabs(delta) > 1.5f)
 					delta += 2 * (Math::Sign(delta) * -1);
 				if (fabs(delta) < m_controllerDeadzone)

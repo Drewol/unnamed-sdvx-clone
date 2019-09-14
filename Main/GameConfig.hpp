@@ -81,6 +81,7 @@ DefineEnum(GameConfigKeys,
 	Controller_Laser0Axis,
 	Controller_Laser1Axis,
 	Controller_Deadzone,
+	Controller_DirectMode,
 	Controller_Sensitivity,
 	InputBounceGuard,
 

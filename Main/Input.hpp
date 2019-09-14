@@ -94,6 +94,7 @@ private:
 	uint32 m_controllerAxisMapping[2] = { 0,1 };
 	float m_controllerSensitivity;
 	float m_controllerDeadzone;
+	bool m_controllerDirectMode;
 
 	Ref<Gamepad> m_gamepad;
 

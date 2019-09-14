@@ -87,6 +87,7 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::Controller_Laser1Axis, 1);
 	Set(GameConfigKeys::Controller_Sensitivity, 1.0f);
 	Set(GameConfigKeys::Controller_Deadzone, 0.f);
+	Set(GameConfigKeys::Controller_DirectMode, false);
 
 	// Default mouse settings
 	Set(GameConfigKeys::Mouse_Laser0Axis, 0);
