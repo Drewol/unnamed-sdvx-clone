@@ -183,9 +183,13 @@ void AudioStreamBase::Process(float* out, uint32 numSamples)
 	}
 
 	// Store timing info
-	if(m_samplePos > 0)
+	if (m_samplePos > 0)
 	{
 		m_samplePos = GetStreamPosition_Internal() - (int64)m_remainingBufferData;
+	}
+
+	if(m_samplePos > 0)
+	{
 		if(m_samplePos >= m_samplesTotal)
 		{
 			if(!m_ended)
