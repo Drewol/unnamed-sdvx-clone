@@ -138,6 +138,8 @@ String Path::Normalize(const String& path)
 	{
 		if(out[i] == '\\')
 			out[i] = sep;
+		if (out[i] == '\0')
+			return out;
 	}
 	return out;
 }
