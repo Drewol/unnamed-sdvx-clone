@@ -1064,7 +1064,7 @@ void SkinSettingsScreen::Render(float deltaTime)
 			}
 			else if (s.type == SkinSetting::Type::Label)
 			{
-				nk_labelf(m_nctx, nk_text_alignment::NK_TEXT_LEFT, *s.key);
+				nk_label(m_nctx, *s.key, nk_text_alignment::NK_TEXT_LEFT);
 			}
 			else if (s.type == SkinSetting::Type::Separator)
 			{

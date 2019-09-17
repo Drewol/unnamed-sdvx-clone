@@ -387,7 +387,7 @@ bool Application::m_Init()
 
 	if(!m_LoadConfig())
 	{
-		Logf("Failed to load config file", Logger::Warning);
+		Log("Failed to load config file", Logger::Warning);
 	}
 
 	// Job sheduler
@@ -568,7 +568,7 @@ void Application::m_MainLoop()
 				assert(ch.tickable);
 				if(!ch.tickable->DoInit())
 				{
-					Logf("Failed to add IApplicationTickable", Logger::Error);
+					Log("Failed to add IApplicationTickable", Logger::Error);
 					delete ch.tickable;
 					continue;
 				}
@@ -608,7 +608,7 @@ void Application::m_MainLoop()
 		// Application should end, no more active screens
 		if(!g_tickableChanges.empty() && g_tickables.empty())
 		{
-			Logf("No more IApplicationTickables, shutting down", Logger::Warning);
+			Log("No more IApplicationTickables, shutting down", Logger::Warning);
 			return;
 		}
 		g_tickableChanges.clear();

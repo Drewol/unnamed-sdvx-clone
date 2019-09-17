@@ -44,7 +44,7 @@ bool Path::Rename(const String& srcFile, const String& dstFile, bool overwrite)
 			return false;
 		if(Delete(*dstFile))
 		{
-			Logf("Failed to rename file, overwrite was true but the destination could not be removed", Logger::Warning);
+			Log("Failed to rename file, overwrite was true but the destination could not be removed", Logger::Warning);
 			return false;
 		}
 	}

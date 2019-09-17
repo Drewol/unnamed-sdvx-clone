@@ -231,7 +231,7 @@ public:
 		// Check failure of above loading attempts
 		if(!m_beatmap)
 		{
-			Logf("Failed to load map", Logger::Warning);
+			Log("Failed to load map", Logger::Warning);
 			return false;
 		}
 
@@ -428,7 +428,7 @@ public:
 			if (m_multiplayer != nullptr)
 			{
 				pushStringToTable("user_id", m_multiplayer->GetUserId());
-				Logf("[Multiplayer] Started game in multiplayer mode!", Logger::Info);
+				Log("[Multiplayer] Started game in multiplayer mode!", Logger::Info);
 			}
 			lua_setglobal(m_lua, "gameplay");
 		}

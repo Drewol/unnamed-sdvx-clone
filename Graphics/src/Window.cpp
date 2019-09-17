@@ -63,7 +63,7 @@ namespace Graphics
 			uint32 numJoysticks = SDL_NumJoysticks();
 			if(numJoysticks == 0)
 			{
-				Logf("No joysticks found", Logger::Warning);
+				Log("No joysticks found", Logger::Warning);
 			}
 			else
 			{

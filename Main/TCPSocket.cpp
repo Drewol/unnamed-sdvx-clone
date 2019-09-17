@@ -188,7 +188,7 @@ void TCPSocket::Close()
 	m_amountRead = 0;
 	m_readingMode = TCPPacketMode::NOT_READING;
 
-	Logf("[Socket] Socket closed", Logger::Info);
+	Log("[Socket] Socket closed", Logger::Info);
 
 	if (m_closeCallback != nullptr)
 	{

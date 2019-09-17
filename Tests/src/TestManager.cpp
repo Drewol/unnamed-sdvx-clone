@@ -135,7 +135,7 @@ int32 TestManager::m_RunTest(TestEntry* test)
 			Logger::Get().Write("Failed\n");
 			if(!tf.expression.empty())
 				Logf("The test expression failed:\n\t%s", Logger::Error, tf.expression);
-			Logf("Stack Trace:", Logger::Error);
+			Log("Stack Trace:", Logger::Error);
 
 			size_t i = 0;
 			for(; i < tf.trace.size(); i++)

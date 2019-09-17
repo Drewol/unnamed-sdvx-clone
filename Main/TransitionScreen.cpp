@@ -75,7 +75,7 @@ public:
 			g_application->RemoveTickable(this);
 			if (m_tickableToLoad)
 			{
-				Logf("[Transition] Finished loading tickable", Logger::Info);
+				Log("[Transition] Finished loading tickable", Logger::Info);
 				g_application->AddTickable(m_tickableToLoad, this);
 			}
 		}
@@ -235,20 +235,20 @@ public:
 		{
 			if(loadable && !loadable->AsyncFinalize())
 			{
-				Logf("[Transition] Failed to finalize loading of tickable", Logger::Error);
+				Log("[Transition] Failed to finalize loading of tickable", Logger::Error);
 				delete m_tickableToLoad;
 				m_tickableToLoad = nullptr;
 			}
 			if (m_tickableToLoad && !m_tickableToLoad->Init()) //if it isn't null and init fails
 			{
-				Logf("[Transition] Failed to initialize tickable", Logger::Error);
+				Log("[Transition] Failed to initialize tickable", Logger::Error);
 				delete m_tickableToLoad;
 				m_tickableToLoad = nullptr;
 			}
 		}
 		else
 		{
-			Logf("[Transition] Failed to load tickable", Logger::Error);
+			Log("[Transition] Failed to load tickable", Logger::Error);
 			delete m_tickableToLoad;
 			m_tickableToLoad = nullptr;
 		}
@@ -268,7 +268,7 @@ public:
 		{
 			if(!loadable->AsyncLoad())
 			{
-				Logf("[Transition] Failed to load tickable", Logger::Error);
+				Log("[Transition] Failed to load tickable", Logger::Error);
 				return false;
 			}
 		}

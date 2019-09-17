@@ -1240,7 +1240,7 @@ public:
 					Game* game = Game::Create(*diff, m_settingsWheel->GetGameFlags());
 					if (!game)
 					{
-						Logf("Failed to start game", Logger::Error);
+						Log("Failed to start game", Logger::Error);
 						return;
 					}
 					game->GetScoring().autoplay = autoplay;
@@ -1438,7 +1438,7 @@ public:
 				Game* game = Game::Create(*diff, m_settingsWheel->GetGameFlags());
 				if (!game)
 				{
-					Logf("Failed to start game", Logger::Error);
+					Log("Failed to start game", Logger::Error);
 					return;
 				}
 				game->GetScoring().autoplay = true;

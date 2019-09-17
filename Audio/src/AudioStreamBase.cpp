@@ -175,7 +175,7 @@ void AudioStreamBase::Process(float* out, uint32 numSamples)
 		if(DecodeData_Internal() <= 0)
 		{
 			// Ended
-			Logf("Audio stream ended", Logger::Info);
+			Log("Audio stream ended", Logger::Info);
 			m_ended = true;
 			m_playing = false;
 			break;
@@ -195,7 +195,7 @@ void AudioStreamBase::Process(float* out, uint32 numSamples)
 			if(!m_ended)
 			{
 				// Ended
-				Logf("Audio stream ended", Logger::Info);
+				Log("Audio stream ended", Logger::Info);
 				m_ended = true;
 			}
 		}

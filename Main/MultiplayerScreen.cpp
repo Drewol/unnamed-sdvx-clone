@@ -365,7 +365,7 @@ bool MultiplayerScreen::m_handleStartPacket(nlohmann::json& packet)
 	Game* game = Game::Create(this, *(diff), flags);
 	if (!game)
 	{
-		Logf("Failed to start game", Logger::Error);
+		Log("Failed to start game", Logger::Error);
 		return 0;
 	}
 
@@ -422,7 +422,7 @@ DifficultyIndex* MultiplayerScreen::m_getMapByHash(const String& hash, const Str
 			return newDiff;
 		}
 	}
-	Logf("[Multiplayer] Could not find song by hash, falling back to foldername", Logger::Warning);
+	Log("[Multiplayer] Could not find song by hash, falling back to foldername", Logger::Warning);
 	return m_getMapByShortPath(path, diffIndex, level, true);
 }
 
@@ -477,7 +477,7 @@ DifficultyIndex* MultiplayerScreen::m_getMapByShortPath(const String& path, uint
 		return m_getMapByShortPath(path, diffIndex, level, false);
 	}
 
-	Logf("[Multiplayer] Could not find song", Logger::Warning);
+	Log("[Multiplayer] Could not find song", Logger::Warning);
 	return nullptr;
 }
 
@@ -1112,7 +1112,7 @@ int MultiplayerScreen::lJoinWithPassword(lua_State* L)
 {
 	if (m_screenState == MultiplayerScreenState::ROOM_LIST)
 	{
-		Logf("In screen", Logger::Error);
+		Log("In screen", Logger::Error);
 		m_roomToJoin = luaL_checkstring(L, 2);
 		m_textInput->Reset();
 		m_textInput->SetActive(true);
