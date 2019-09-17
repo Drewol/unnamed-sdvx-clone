@@ -33,7 +33,6 @@ Ref<AudioStreamRes> AudioStreamRes::Create(class Audio* audio, const String& pat
 
 	for(uint32 i = 0; i < 3; i++)
 	{
-		//impl = CreateAudioStream_ma(audio, path, preload);
 		impl = TryCreateType(pref);
 		if(impl)
 			break;
