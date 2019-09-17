@@ -226,7 +226,7 @@ void DownloadScreen::m_ProcessArchiveResponses()
 			lua_settable(m_lua, -3);
 			archive_read_data_skip(ar.a);
 		}
-		archive_read_finish(ar.a);
+		archive_read_free(ar.a);
 		lua_pushstring(m_lua, ar.id.c_str());
 		
 		if (lua_pcall(m_lua, 2, 1, 0) != 0)
