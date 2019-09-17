@@ -122,9 +122,6 @@ Test("Audio.Music.LPF")
 			const float filterSweepQStart = 1.0f;
 			const float filterSweepQEnd = 1.0f;
 
-			for(int32 i = 0; i < 64; i++)
-				printf("\b\0\b");
-
 			// Increment filter
 			filterSetting += dt * 0.25f * sweepDir;
 			filterSetting = Math::Clamp(filterSetting, 0.0f, 1.0f);
@@ -175,9 +172,6 @@ Test("Audio.Music.LPFMix")
 			const float filterSweepQStart = 1.0f;
 			const float filterSweepQEnd = 1.0f;
 
-			for(int32 i = 0; i < 64; i++)
-				printf("\b\0\b");
-
 			// Increment filter
 			filterSetting += dt * 0.2f * sweepDir;
 			filterSetting = Math::Clamp(filterSetting, 0.0f, 1.0f);
@@ -190,7 +184,7 @@ Test("Audio.Music.LPFMix")
 			float freq = 400.0f;
 			float q = 4.0f;
 			float mix = filterSetting;
-			printf("%08d > mix:%f f:%f", playbackTime, mix, freq, q);
+			printf("%08d > mix:%f %f:%f", playbackTime, mix, freq, q);
 
 			filter->mix = mix;
 			filter->SetLowPass(q, freq);
@@ -229,9 +223,6 @@ Test("Audio.Music.Peaking")
 			const float filterSweepBwEnd = 3.0f;
 			const float filterSweepAmpStart = 30.0f;
 			const float filterSweepAmpEnd = 20.0f;
-
-			for(int32 i = 0; i < 64; i++)
-				printf("\b\0\b");
 
 			// Increment filter
 			filterSetting += dt * 0.5f * sweepDir;
