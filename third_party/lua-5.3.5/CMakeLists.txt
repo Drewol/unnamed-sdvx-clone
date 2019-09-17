@@ -40,3 +40,7 @@ add_library(lua src/lua.c
     src/lzio.c
 )
 target_include_directories(lua PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+if(UNIX)
+    target_compile_definitions(lua PUBLIC LUA_USE_POSIX)
+endif()
