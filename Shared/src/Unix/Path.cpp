@@ -107,14 +107,14 @@ String Path::GetTemporaryPath()
 	char out[MAX_PATH];
 	String curr = GetCurrentPath();
 	sprintf(out, "%s/tempXXXXXX", *curr);
-	mktemp(out);
+	mkstemp(out);
 	return out;
 }
 String Path::GetTemporaryFileName(const String& path, const String& prefix)
 {
 	char out[MAX_PATH];
 	sprintf(out, "%s/%sXXXXXX", *path, *prefix);
-	mktemp(out);
+	mkstemp(out);
 	return out;
 }
 
