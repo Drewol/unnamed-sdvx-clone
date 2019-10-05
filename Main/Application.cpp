@@ -450,6 +450,12 @@ bool Application::m_Init()
 
 	// Set skin variable
 	m_skin = g_gameConfig.GetString(GameConfigKeys::Skin);
+
+	// Fallback to default if not found
+	if (!Path::FileExists(Path::Absolute("skins/" + m_skin))) {
+		m_skin = "Default";
+	}
+
 	g_skinConfig = new SkinConfig(m_skin);
 	// Window cursor
 	Image cursorImg = ImageRes::Create(Path::Absolute("skins/" + m_skin + "/textures/cursor.png"));
