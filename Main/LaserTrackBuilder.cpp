@@ -18,7 +18,7 @@ LaserTrackBuilder::LaserTrackBuilder(class OpenGL* gl, class Track* track, uint3
 	m_laserWidth = track->laserWidth;
 	laserTextureSize = track->laserTextures[0]->GetSize(); // NOTE: expects left/right textures to be the same size!
 	laserEntryTextureSize = track->laserTailTextures[0]->GetSize();
-	laserExitTextureSize = track->laserTailTextures[1]->GetSize();
+	laserExitTextureSize = track->laserTailTextures[2]->GetSize();
 }
 Mesh LaserTrackBuilder::GenerateTrackMesh(class BeatmapPlayback& playback, LaserObjectState* laser)
 {
