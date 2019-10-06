@@ -1740,7 +1740,7 @@ public:
 	{
 		if (buttonCode == Input::Button::BT_S)
 		{
-			if (g_input.Are3BTsHeld())
+			if (g_input.Are3BTsHeld() && IsSuccessfullyInitialized())
 			{
 				ObjectState *const* lastObj = &m_beatmap->GetLinearObjects().back();
 				MapTime timePastEnd = m_lastMapTime - (*lastObj)->time;
