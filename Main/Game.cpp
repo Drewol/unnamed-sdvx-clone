@@ -365,7 +365,7 @@ public:
 		g_gameWindow->SetCursorVisible(false);
 
 		//Lua
-		m_lua = g_application->LoadScript("gameplay");
+		m_lua = g_application->LoadScript("game/gameplay");
 		if (!m_lua)
 			return false;
 

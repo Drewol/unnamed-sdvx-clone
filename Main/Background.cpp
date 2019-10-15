@@ -16,7 +16,7 @@ public:
 	{
 		fullscreenMesh = MeshGenerators::Quad(g_gl, Vector2(-1.0f), Vector2(2.0f));
 		this->foreground = foreground;
-		CheckedLoad(m_lua = g_application->LoadScript("gameplay"));
+		CheckedLoad(m_lua = g_application->LoadScript("game/background"));
 		return true;
 	}
 	void UpdateRenderState(float deltaTime)
