@@ -13,5 +13,7 @@ public:
 	class Game* game;
 };
 
+typedef struct MaterialPaths { String texture; String shader; };
+
 // Creates the default game background
 Background* CreateBackground(class Game* game, bool foreground = false);

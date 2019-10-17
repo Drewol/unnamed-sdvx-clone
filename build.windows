@@ -5,3 +5,4 @@ sdl2:x64-windows
 libjpeg-turbo:x64-windows
 libvorbis:x64-windows
 libarchive[core,bzip2,libxml2,lz4,lzma,lzo]:x64-windows
+giflib:x64-windows

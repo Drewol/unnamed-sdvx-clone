@@ -10,6 +10,7 @@ Download/install the following libraries/tools:
 - Install libPNG (1.6, http://download.sourceforge.net/libpng/libpng-1.6.24.tar.gz )
 - Install libjpeg (9b, http://ijg.org/files/jpegsrc.v9b.tar.gz )
 - Install libarchive (3.3.3, https://www.libarchive.org/downloads/libarchive-3.3.3.tar.gz )
+- Install giflib (https://sourceforge.net/projects/giflib/files/ or sth)
 - Get libgl1-mesa-dev (from package manager)
 - Get OpenSSL (from package manager)
 

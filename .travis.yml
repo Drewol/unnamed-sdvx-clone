@@ -24,6 +24,7 @@ matrix:
         #- "sudo apt-get install -y libarchive-dev"
         - "sudo apt-get install -y zlib1g-dev --reinstall"
         - "sudo apt-get install -y libjpeg-dev --reinstall"
+        - "sudo apt-get install -y giflib-dev"
       install:
         - CMAKE_URL="https://cmake.org/files/v3.14/cmake-3.14.0-Linux-x86_64.tar.gz"
         - mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake

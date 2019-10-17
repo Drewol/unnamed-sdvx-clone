@@ -12,6 +12,8 @@
 #pragma warning(disable:4005)
 #include "jpeglib.h"
 
+#include "gif_lib.h"
+
 namespace Graphics
 {
 	class ImageLoader_Impl
@@ -125,6 +127,25 @@ namespace Graphics
 			png_image_free(&image);
 			return true;
 		}
+		bool LoadGIF(ImageRes* pImage, const String& fullPath)
+		{
+			int* err;
+			GifFileType* gif = DGifOpenFileName(fullPath.c_str(), err);
+			
+			if (&err != D_GIF_SUCCEEDED)
+				return false;
+			
+			pImage->SetSize(Vector2i(gif->SWidth, gif->SHeight));
+			Colori* pBits = pImage->GetBits();
+			
+			int pixelSize = gif->SColorMap->BitsPerPixel;
+			// char pixelType = gif->pixe
+			
+			
+			
+			
+			return true;
+		}
 		bool Load(ImageRes* pImage, const String& fullPath)
 		{
 			File f;
@@ -133,8 +154,12 @@ namespace Graphics
 
 			Buffer b(f.GetSize());
 			f.Read(b.data(), b.size());
+
 			if(b.size() < 4)
 				return false;
+
+			if (b[0]=='G' && b[1]=='I' && b[2]=='F')
+				return LoadGIF(pImage, fullPath);
 
 			return Load(pImage, b);
 		}

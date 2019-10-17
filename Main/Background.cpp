@@ -50,6 +50,7 @@ class TestBackground : public FullscreenBackground
 {
 	virtual bool Init(bool foreground) override
 	{
+		using namespace std;
 		if (!FullscreenBackground::Init(foreground))
 			return false;
 
@@ -69,9 +70,9 @@ class TestBackground : public FullscreenBackground
 			}
 			else
 			{
-				matPath = "skins/" + skin + "/shaders/foreground.fs";
-				String texPath = GetTexturePath(m_lua, false);
-				CheckedLoad(backgroundTexture = g_application->LoadTexture(texPath));
+				auto materialPaths = GetMaterialPaths(m_lua, true, matPath);
+				CheckedLoad(backgroundTexture = g_application->LoadTexture(materialPaths.texture));
+				matPath = "skins/" + skin + "/shaders/" + materialPaths.shader;
 			}
 		}
 		else
@@ -85,9 +86,9 @@ class TestBackground : public FullscreenBackground
 			}
 			else
 			{
-				matPath = "skins/" + skin + "/shaders/background.fs";
-				String texPath = GetTexturePath(m_lua, false);
-				CheckedLoad(backgroundTexture = g_application->LoadTexture(texPath));
+				auto materialPaths = GetMaterialPaths(m_lua, false, matPath);
+				CheckedLoad(backgroundTexture = g_application->LoadTexture(materialPaths.texture));
+				matPath = "skins/" + skin + "/shaders/" + materialPaths.shader;
 			}
 		}
 
@@ -141,6 +142,11 @@ class TestBackground : public FullscreenBackground
 			frameBufferTexture->SetFromFrameBuffer();
 			fullscreenMaterialParams.SetParameter("fb_tex", frameBufferTexture);
 		}
+		if (foreground)
+		{
+			float width = backgroundTexture->GetSize().x;
+			fullscreenMaterialParams.SetParameter("framesCount", floor(width / 600));
+		}
 
 		FullscreenBackground::Render(deltaTime);
 	}
@@ -170,24 +176,29 @@ class TestBackground : public FullscreenBackground
 		return ret;
 	}
 
-	String GetTexturePath(lua_State* m_lua, bool foreground)
+	MaterialPaths GetMaterialPaths(lua_State* m_lua, bool foreground, String textureName)
 	{
-		char* textureGetCommand = foreground ? "get_fg_file" : "get_bg_file";
+		char* textureGetCommand = foreground ? "get_fg_file"    : "get_bg_file";
+		String texture          = foreground ? "fg_texture.png" : "bg_texture.png";
+		String shader           = foreground ? "foreground.fs"  : "background.fs";
+		
 		lua_getglobal(m_lua, textureGetCommand);
 		if (lua_isfunction(m_lua, -1))
 		{
-			if (lua_pcall(m_lua, 0, 1, 0) != 0) {
+			lua_pushstring(m_lua, *textureName);
+			if (lua_pcall(m_lua, 1, 2, 0) != 0)
+			{
 				Logf("Lua error on %s: %s", Logger::Error, textureGetCommand, lua_tostring(m_lua, -1));
 				g_gameWindow->ShowMessageBox("Lua Error on " + String(textureGetCommand), lua_tostring(m_lua, -1), 0);
 			}
-			else {
-				String bg = lua_tostring(m_lua, -1);
-				lua_settop(m_lua, 0);
-				return bg;
+			else if (lua_isstring(m_lua, -2) && lua_isstring(m_lua, -1))
+			{
+				texture = lua_tostring(m_lua, -2);
+				shader = lua_tostring(m_lua, -1);
 			}
 		}
 		lua_settop(m_lua, 0);
-		return foreground ? "fg_texture.png" : "bg_texture.png";
+		return MaterialPaths{texture, shader};
 	}
 };
 

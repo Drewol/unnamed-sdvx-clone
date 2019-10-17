@@ -7,6 +7,7 @@ find_package(JPEG REQUIRED)
 find_package(Vorbis REQUIRED)
 find_package(OGG REQUIRED)
 find_package(LibArchive REQUIRED)
+find_package(GIF REQUIRED)
 
 # Linux include directories
 include_directories(

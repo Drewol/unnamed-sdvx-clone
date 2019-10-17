@@ -7,6 +7,7 @@ namespace Graphics
 		Supports the following formats:
 			- PNG (RGB8, RGBA8)
 			- JPEG
+			- GIF
 	 */
 	class ImageRes;
 	class ImageLoader

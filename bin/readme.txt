@@ -23,6 +23,8 @@ libvorbis - Copyright (c) 2002-2015 Xiph.org Foundation
 
 libpng - Copyright (c) 2000-2002, 2004, 2006-2016 Glenn Randers-Pehrson
 
+giflib - ???
+
 Lua - Copyright (c) 1994?2017 Lua.org, PUC-Rio.
 
 nanovg - Copyright (c) 2013 Mikko Mononen memon@inside.org
