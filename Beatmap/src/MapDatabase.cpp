@@ -146,7 +146,8 @@ public:
 
 		if(m_thread.joinable())
 			m_thread.join();
-
+		// Apply previous diff to prevent duplicated entry 
+		Update();
 		// Create initial data set to compare to when evaluating if a file is added/removed/updated
 		m_LoadInitialData();
 		m_interruptSearch = false;
