@@ -1,7 +1,5 @@
 #pragma once
 
-using Utility::Sprintf;
-
 struct KShootTickSetting
 {
 	String first;

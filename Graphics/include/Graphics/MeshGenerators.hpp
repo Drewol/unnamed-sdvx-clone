@@ -11,9 +11,6 @@ namespace Graphics
 	//	- Normal
 	namespace MeshGenerators
 	{
-		using Shared::Rect3D;
-		using Shared::Rect;
-
 		struct SimpleVertex : public VertexFormat<Vector3, Vector2>
 		{
 			SimpleVertex() = default;
@@ -28,8 +25,8 @@ namespace Graphics
 		// the position top = +y
 		// the uv has bottom = +y
 		// Triangle List
-		void GenerateSimpleXYQuad(Rect3D r, Rect uv, Vector<MeshGenerators::SimpleVertex>& out);
+		void GenerateSimpleXYQuad(Shared::Rect3D r, Shared::Rect uv, Vector<MeshGenerators::SimpleVertex>& out);
 
-		void GenerateSimpleXZQuad(Rect3D r, Rect uv, Vector<MeshGenerators::SimpleVertex>& out);
+		void GenerateSimpleXZQuad(Shared::Rect3D r, Shared::Rect uv, Vector<MeshGenerators::SimpleVertex>& out);
 	}
 }

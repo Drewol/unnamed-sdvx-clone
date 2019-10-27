@@ -49,7 +49,6 @@ namespace Graphics
 	class MaterialParameterSet : public Map<String, MaterialParameter>
 	{
 	public:
-		using Map<String, MaterialParameter>::Map;
 		void SetParameter(const String& name, int sc);
 		void SetParameter(const String& name, float sc);
 		void SetParameter(const String& name, const Vector4& vec);

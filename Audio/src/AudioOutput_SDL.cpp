@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "AudioOutput.hpp"
 #include <thread>
-using std::this_thread::yield;
 
 // This audio driver is an alternative for linux
 #ifndef _WIN32

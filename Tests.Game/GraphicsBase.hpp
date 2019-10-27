@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Graphics/Graphics.hpp>
-using namespace Graphics;
 
 class GraphicsTest : public Unique
 {

@@ -13,7 +13,7 @@ bool GraphicsTest::Run()
 {
 	m_window = new Graphics::Window();
 
-	m_gl = new OpenGL();
+	m_gl = new Graphics::OpenGL();
 	if(!m_gl->Init(*m_window, 0))
 	{
 		delete m_gl;

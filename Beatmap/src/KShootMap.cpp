@@ -4,7 +4,7 @@
 
 String KShootTick::ToString() const
 {
-	return Sprintf("%s|%s|%s", *buttons, *fx, *laser);
+	return Utility::Sprintf("%s|%s|%s", *buttons, *fx, *laser);
 }
 void KShootTick::Clear()
 {

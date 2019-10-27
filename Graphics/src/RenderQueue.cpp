@@ -211,7 +211,7 @@ namespace Graphics
 		m_orderedCommands.push_back(sdc);
 	}
 
-	void RenderQueue::DrawScissored(Rect scissor, Transform worldTransform, Mesh m, Material mat, const MaterialParameterSet& params /*= MaterialParameterSet()*/)
+	void RenderQueue::DrawScissored(Shared::Rect scissor, Transform worldTransform, Mesh m, Material mat, const MaterialParameterSet& params /*= MaterialParameterSet()*/)
 	{
 		SimpleDrawCall* sdc = new SimpleDrawCall();
 		sdc->mat = mat;
@@ -221,7 +221,7 @@ namespace Graphics
 		sdc->scissorRect = scissor;
 		m_orderedCommands.push_back(sdc);
 	}
-	void RenderQueue::DrawScissored(Rect scissor, Transform worldTransform, Ref<class TextRes> text, Material mat, const MaterialParameterSet& params /*= MaterialParameterSet()*/)
+	void RenderQueue::DrawScissored(Shared::Rect scissor, Transform worldTransform, Ref<class TextRes> text, Material mat, const MaterialParameterSet& params /*= MaterialParameterSet()*/)
 	{
 		SimpleDrawCall* sdc = new SimpleDrawCall();
 		sdc->mat = mat;

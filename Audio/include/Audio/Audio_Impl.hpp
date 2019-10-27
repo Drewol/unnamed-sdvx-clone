@@ -5,8 +5,6 @@
 // Threading
 #include <thread>
 #include <mutex>
-using std::thread;
-using std::mutex;
 
 class Audio_Impl : public IMixer
 {
@@ -25,7 +23,7 @@ public:
 
 	float globalVolume = 1.0f;
 
-	mutex lock;
+	std::mutex lock;
 	Vector<AudioBase*> itemsToRender;
 	Vector<DSP*> globalDSPs;
 
@@ -36,7 +34,7 @@ public:
 	uint32 m_sampleBufferLength = 384;
 	uint32 m_remainingSamples = 0;
 
-	thread audioThread;
+	std::thread audioThread;
 	bool runAudioThread = false;
 	AudioOutput* output = nullptr;
 };

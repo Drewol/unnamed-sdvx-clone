@@ -131,9 +131,9 @@ namespace Graphics
 	}
 
 
-	Recti OpenGL::GetViewport() const
+	Shared::Recti OpenGL::GetViewport() const
 	{
-		Recti vp;
+		Shared::Recti vp;
 		glGetIntegerv(GL_VIEWPORT, &vp.pos.x);
 		return vp;
 	}
@@ -142,7 +142,7 @@ namespace Graphics
 		return GL_BACK;
 	}
 
-	void OpenGL::SetViewport(Recti vp)
+	void OpenGL::SetViewport(Shared::Recti vp)
 	{
 		glViewport(vp.pos.x, vp.pos.y, vp.size.x, vp.size.y);
 	}

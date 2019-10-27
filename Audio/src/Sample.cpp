@@ -18,7 +18,7 @@ public:
 	Audio* m_audio;
 	float* m_pcm = nullptr;
 
-	mutex m_lock;
+	std::mutex m_lock;
 
 	uint64 m_playbackPointer = 0;
 	uint64 m_length = 0;

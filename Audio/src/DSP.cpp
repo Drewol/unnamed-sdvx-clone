@@ -591,7 +591,6 @@ void CombinedFilterDSP::Process(float* out, uint32 numSamples)
 }
 
 #include "SoundTouch.h"
-using namespace soundtouch;
 
 class PitchShiftDSP_Impl
 {
@@ -600,7 +599,7 @@ public:
 	bool init = false;
 
 private:
-	SoundTouch m_soundtouch;
+	soundtouch::SoundTouch m_soundtouch;
 	Vector<float> m_receiveBuffer;
 
 public:

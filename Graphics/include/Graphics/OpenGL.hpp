@@ -13,7 +13,6 @@ namespace Graphics
 	/*
 		OpenGL context wrapper with common functionality
 	*/
-	using Shared::Recti;
 	class OpenGL
 	{
 		class ShaderRes* m_activeShaders[3] = { 0 };
@@ -33,10 +32,10 @@ namespace Graphics
 		void InitResourceManagers();
 		bool Init(Window& window, uint32 antialiasing);
 
-		Recti GetViewport() const;
+		Shared::Recti GetViewport() const;
 		uint32 GetFramebufferHandle();
 		void SetViewport(Vector2i size);
-		void SetViewport(Recti vp);
+		void SetViewport(Shared::Recti vp);
 
 		// Check if the calling thread is the thread that runs this OpenGL context
 		bool IsOpenGLThread() const;

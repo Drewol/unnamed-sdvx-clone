@@ -17,7 +17,7 @@ protected:
 	bool m_preloaded = false;
 	BinaryStream& Reader();
 
-	mutex m_lock;
+	std::mutex m_lock;
 
 	float** m_readBuffer = nullptr;
 	uint32 m_bufferSize = 4096;

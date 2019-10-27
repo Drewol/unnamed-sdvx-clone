@@ -706,7 +706,7 @@ void Application::m_Tick()
 		else
 			g_guiState.scissorOffset = 0;
 
-		g_guiState.scissor = Rect(0,0,-1,-1);
+		g_guiState.scissor = Shared::Rect(0,0,-1,-1);
 		g_guiState.imageTint = nvgRGB(255, 255, 255);
 		// Render all items
 		assert(!g_tickables.empty());
@@ -1282,7 +1282,7 @@ void Application::m_OnWindowResized(const Vector2i& newSize)
 		float top = 0;
 		float right = left + g_resolution.x;
 		float bottom = g_resolution.y;
-		g_gl->SetViewport(Rect(left, top, right, bottom));
+		g_gl->SetViewport(Shared::Rect(left, top, right, bottom));
 		glScissor(0, 0, g_resolution.x, g_resolution.y);
 
 		// Set in config

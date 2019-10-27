@@ -27,7 +27,7 @@ namespace Graphics
 		return mesh;
 	}
 
-	void MeshGenerators::GenerateSimpleXYQuad(Rect3D r, Rect uv, Vector<SimpleVertex>& out)
+	void MeshGenerators::GenerateSimpleXYQuad(Shared::Rect3D r, Shared::Rect uv, Vector<SimpleVertex>& out)
 	{
 		Vector<MeshGenerators::SimpleVertex> verts =
 		{
@@ -42,7 +42,7 @@ namespace Graphics
 		for(auto& v : verts)
 			out.Add(v);
 	}
-	void MeshGenerators::GenerateSimpleXZQuad(Rect3D r, Rect uv, Vector<MeshGenerators::SimpleVertex>& out)
+	void MeshGenerators::GenerateSimpleXZQuad(Shared::Rect3D r, Shared::Rect uv, Vector<MeshGenerators::SimpleVertex>& out)
 	{
 		Vector<MeshGenerators::SimpleVertex> verts =
 		{

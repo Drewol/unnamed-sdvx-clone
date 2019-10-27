@@ -56,7 +56,7 @@ struct GUIState
 	NVGcolor otrColor; //outer color
 	NVGcolor inrColor; //inner color
 	NVGcolor imageTint;
-	Rect scissor;
+	Shared::Rect scissor;
 	Vector2i resolution;
 	Map<int, ImageAnimation*> animations;
 	int scissorOffset;
@@ -868,7 +868,7 @@ static int lScissor(lua_State* L /* float x, float y, float w, float h */)
 	Vector2 size = Vector2(w, h) * scale.xy();
 
 
-	g_guiState.scissor = Rect(topLeft, size);
+	g_guiState.scissor = Shared::Rect(topLeft, size);
 	
 	nvgScissor(g_guiState.vg, x, y, w, h);
 	return 0;
@@ -887,7 +887,7 @@ static int lIntersectScissor(lua_State* L /* float x, float y, float w, float h 
 static int lResetScissor(lua_State* L /*  */)
 {
 	nvgResetScissor(g_guiState.vg);
-	g_guiState.scissor = Rect(0, 0, -1, -1);
+	g_guiState.scissor = Shared::Rect(0, 0, -1, -1);
 	return 0;
 }
 
