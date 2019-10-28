@@ -244,7 +244,6 @@ public:
 
 		const BeatmapSettings& mapSettings = m_beatmap->GetMapSettings();
 
-		m_gaugeSamples[256] = { 0.0f };
 		MapTime firstObjectTime = m_beatmap->GetLinearObjects().front()->time;
 		ObjectState *const* lastObj = &m_beatmap->GetLinearObjects().back();
 		while ((*lastObj)->type == ObjectType::Event && lastObj != &m_beatmap->GetLinearObjects().front())
