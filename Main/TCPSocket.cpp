@@ -466,7 +466,10 @@ void TCPSocket::m_eraseBuffer(size_t end)
 	for (m_dataLength = 4096; m_dataLength < m_amountRead; m_dataLength *= 2);
 
 	// Resize buffer to new buffer size
-	m_dataBuff = (char*)realloc(m_dataBuff, m_dataLength + 1);
+	char* new_dataBuff = static_cast<char*>(realloc(m_dataBuff, m_dataLength + 1));
+	if (!new_dataBuff)
+		free(m_dataBuff);
+	m_dataBuff = new_dataBuff;
 }
 
 void TCPSocket::PushFunctions(lua_State* L)
