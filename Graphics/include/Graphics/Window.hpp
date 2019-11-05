@@ -23,7 +23,7 @@ namespace Graphics
 		Simple window class that manages window messages, window style and input
 		Renamed from Window to DesktopWindow to avoid conflicts with libX11 on Linux
 	*/
-	class Window : Unique
+	class Window : NonCopyable
 	{
 	public:
 		Window(Vector2i size = Vector2i(800, 600), uint8 samplecount = 0);

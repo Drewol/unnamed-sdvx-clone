@@ -60,7 +60,7 @@ struct MapTotals
 	Calculates game score and checks which objects are hit
 	also keeps track of laser positions
 */
-class Scoring : public Unique
+class Scoring : public NonCopyable
 {
 public:
 	Scoring();

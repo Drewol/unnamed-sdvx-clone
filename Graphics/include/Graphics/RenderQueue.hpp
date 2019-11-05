@@ -50,7 +50,7 @@ namespace Graphics
 
 		When Process is called, the commands are sorted and grouped, then sent to the graphics pipeline.
 	*/
-	class RenderQueue : public Unique
+	class RenderQueue : public NonCopyable
 	{
 	public:
 		RenderQueue() = default;

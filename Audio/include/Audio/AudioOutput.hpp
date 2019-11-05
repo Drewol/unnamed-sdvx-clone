@@ -9,7 +9,7 @@ public:
 /*
 	Low level audio output
 */
-class AudioOutput : public Unique
+class AudioOutput : public NonCopyable
 {
 public:
 	AudioOutput();

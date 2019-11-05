@@ -11,7 +11,7 @@ typedef Ref<int32> MouseLockHandle;
 /*
 	Class that handles game keyboard (and soon controller input)
 */
-class Input : Unique
+class Input : NonCopyable
 {
 public:
 	DefineEnum(Button,

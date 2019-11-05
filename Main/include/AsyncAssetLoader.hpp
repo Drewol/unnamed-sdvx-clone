@@ -5,7 +5,7 @@
 	Loads assets and IAsyncLoadables 
 	Acts like a queue that stores loading commands
 */
-class AsyncAssetLoader : public Unique
+class AsyncAssetLoader : public NonCopyable
 {
 public:
 	AsyncAssetLoader();

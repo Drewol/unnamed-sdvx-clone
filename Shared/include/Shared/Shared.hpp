@@ -4,7 +4,7 @@
 #include "Types.hpp"
 
 // Random Utility classes
-#include "Unique.hpp"
+#include "NonCopyable.hpp"
 #include "Utility.hpp"
 #include "Delegate.hpp"
 #include "Timer.hpp"

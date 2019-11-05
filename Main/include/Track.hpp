@@ -5,7 +5,7 @@
 /*
 	The object responsible for drawing the track.
 */
-class Track : Unique, public IAsyncLoadable
+class Track : NonCopyable, public IAsyncLoadable
 {
 public:
 	// Size constants of various elements

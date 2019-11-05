@@ -165,7 +165,7 @@ private:
 	// TODO(itszn) have the server adjust this
 	int32 m_scoreInterval = 200;
 
-	// Unique id given to by the server on auth
+	// NonCopyable id given to by the server on auth
 	String m_userId;
 	String m_roomId;
 
