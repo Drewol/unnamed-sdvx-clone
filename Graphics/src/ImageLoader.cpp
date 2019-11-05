@@ -142,7 +142,7 @@ namespace Graphics
 		bool Load(ImageRes* pImage, Buffer& b)
 		{
 			// Check for PNG based on first 4 bytes
-			if (*(uint32*)b.data() == (uint32&)"‰PNG")
+			if (*(uint32*)b.data() == (uint32&)"\x89PNG")
 				return LoadPNG(pImage, b);
 			else // jay-PEG ?
 				return LoadJPEG(pImage, b);
