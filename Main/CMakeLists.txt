@@ -38,7 +38,12 @@ if(MSVC)
    set_target_properties(usc-game PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS")
    set_target_properties(usc-game PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 endif(MSVC)
-	
+
+# Defines
+target_compile_definitions(usc-game PUBLIC VERSION_MAJOR=${PROJECT_VERSION_MAJOR})
+target_compile_definitions(usc-game PUBLIC VERSION_MINOR=${PROJECT_VERSION_MINOR})
+target_compile_definitions(usc-game PUBLIC VERSION_PATCH=${PROJECT_VERSION_PATCH})
+
 # Dependencies
 target_link_libraries(usc-game Shared)
 target_link_libraries(usc-game Graphics)

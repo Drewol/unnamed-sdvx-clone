@@ -3,7 +3,9 @@
 #include <Shared/Jobs.hpp>
 #include <Shared/Thread.hpp>
 #include "SkinHttp.hpp"
+
 #define DISCORD_APPLICATION_ID "514489760568573952"
+
 extern class OpenGL* g_gl;
 extern class GUIState g_guiState;
 extern class Graphics::Window* g_gameWindow;
@@ -13,11 +15,6 @@ extern class Application* g_application;
 extern class JobSheduler* g_jobSheduler;
 extern class Input g_input;
 extern class SkinConfig* g_skinConfig;
-
-
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 3
-#define VERSION_PATCH 1
 
 class Application
 {
