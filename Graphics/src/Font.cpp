@@ -194,7 +194,7 @@ namespace Graphics
 
 		friend class TextRes;
 	public:
-		Font_Impl(class OpenGL* gl) : m_gl(gl)
+		Font_Impl(class OpenGL* gl) : m_gl(gl) , m_face(nullptr)
 		{
 
 		}
@@ -205,7 +205,8 @@ namespace Graphics
 				delete s.second;
 			}
 			m_sizes.clear();
-			FT_Done_Face(m_face);
+			if (m_face)
+				FT_Done_Face(m_face);
 		}
 		bool Init(const String& assetPath)
 		{
