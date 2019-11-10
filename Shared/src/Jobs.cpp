@@ -239,8 +239,8 @@ void JobBase::Terminate()
 		if(*it == this)
 		{
 			sheduler->m_jobQueue.erase(it);
-			m_sheduler = nullptr;
 			m_sheduler->m_lock.unlock();
+			m_sheduler = nullptr;
 			return; // Ok
 		}
 	}
