@@ -15,7 +15,6 @@ add_library(Beatmap ${Beatmap_src})
 
 # Public include paths for library
 target_include_directories(Beatmap PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_include_directories(Beatmap PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(Beatmap PUBLIC SYSTEM ${SQLITE3_ROOT})
 
 # Dependencies
