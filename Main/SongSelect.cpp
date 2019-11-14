@@ -95,6 +95,7 @@ public:
 	{
 		backspaceCount = 0;
 		input.clear();
+		OnTextChanged.Call(input);
 	}
 	void Tick()
 	{
@@ -219,6 +220,9 @@ class SelectionWheel
 	// current lua map index
 	uint32 m_currentlySelectedLuaMapIndex = 0;
 
+	// previous lua map index 
+	std::stack<int32> m_previousRandomMapIds;
+
 	// Style to use for everything song select related
 	lua_State* m_lua = nullptr;
 	String m_lastStatus = "";
@@ -325,12 +329,24 @@ public:
 	}
 	void SelectRandom()
 	{
-		if(m_SourceCollection().empty())
+		auto& srcCollection = m_SourceCollection();
+		if (srcCollection.empty())
 			return;
-		uint32 selection = Random::IntRange(0, (int32)m_SourceCollection().size() - 1);
-		auto it = m_SourceCollection().begin();
+		if (m_previousRandomMapIds.size() == 0 || (m_previousRandomMapIds.size() > 0 && m_previousRandomMapIds.top() != m_currentlySelectedId))
+			m_previousRandomMapIds.push(m_currentlySelectedId);
+
+		uint32 selection = Random::IntRange(0, (int32)srcCollection.size() - 1);
+		auto it = srcCollection.begin();
 		std::advance(it, selection);
 		SelectMap(it->first);
+	}
+	void SelectPreviousRandom()
+	{
+		if (m_SourceCollection().empty() || m_previousRandomMapIds.size() < 1 )
+			return;
+
+		SelectMap(m_previousRandomMapIds.top());
+		m_previousRandomMapIds.pop();
 	}
 	void SelectByMapId(uint32 id)
 	{
@@ -1434,7 +1450,11 @@ public:
 			}
 			else if (key == SDLK_F2)
 			{
-				m_selectionWheel->SelectRandom();
+				bool undoRandom = (g_gameWindow->GetModifierKeys() & ModifierKeys::Shift) == ModifierKeys::Shift;
+				if (undoRandom)
+					m_selectionWheel->SelectPreviousRandom();
+				else
+					m_selectionWheel->SelectRandom();
 			}
 			else if (key == SDLK_F8) // start demo mode
 			{
@@ -1476,8 +1496,16 @@ public:
 			}
 			else if (key == SDLK_ESCAPE)
 			{
-				m_suspended = true;
-				g_application->RemoveTickable(this);
+				if (m_searchInput->active)
+				{
+					m_searchInput->Reset();
+					m_searchInput->SetActive(false);
+				}
+				else
+				{
+					m_suspended = true;
+					g_application->RemoveTickable(this);
+				}
 			}
 			else if (key == SDLK_TAB)
 			{
