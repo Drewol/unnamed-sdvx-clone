@@ -123,7 +123,6 @@ namespace Graphics
 		glBindProgramPipeline(m_mainProgramPipeline);
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
-		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_MULTISAMPLE);
 		glEnable(GL_BLEND);
 		glEnable(GL_STENCIL_TEST);
