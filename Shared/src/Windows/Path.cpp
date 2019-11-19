@@ -78,7 +78,8 @@ String Path::GetTemporaryFileName(const String& path, const String& prefix)
 }
 bool Path::IsDirectory(const String& path)
 {
-	DWORD attribs = GetFileAttributesA(*path);
+	WString wpath = Utility::ConvertToWString(path);
+	DWORD attribs = GetFileAttributesW(*wpath);
 	return (attribs != INVALID_FILE_ATTRIBUTES) && (attribs & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
 }
 bool Path::FileExists(const String& path)
