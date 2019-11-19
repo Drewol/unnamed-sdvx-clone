@@ -12,7 +12,7 @@ namespace Math
 
 	// Templated min
 	template<typename T>
-	static T Min(T a, T b)
+	T Min(T a, T b)
 	{
 		if(a < b)
 			return a;
@@ -22,7 +22,7 @@ namespace Math
 
 	// Templated max
 	template<typename T>
-	static T Max(T a, T b)
+	T Max(T a, T b)
 	{
 		if(a > b)
 			return a;
@@ -31,7 +31,7 @@ namespace Math
 	}
 
 	template<typename T>
-	static T Clamp(T v, T min, T max)
+	T Clamp(T v, T min, T max)
 	{
 		if(v < min)
 			return min;
@@ -42,7 +42,7 @@ namespace Math
 
 	// Templated Greatest common divisor
 	template<typename T>
-	static T GCD(T a, T b)
+	T GCD(T a, T b)
 	{
 		return b == 0 ? a : gcd(b, a % b);
 	}

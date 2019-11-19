@@ -20,7 +20,7 @@
 // Convenience
 #define MAX_PATH PATH_MAX
 
-char Path::sep = '/';
+const char Path::sep = '/';
 
 bool Path::CreateDir(const String& path)
 {
