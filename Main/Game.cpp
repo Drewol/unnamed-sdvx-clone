@@ -213,7 +213,7 @@ public:
 
 		//g_rootCanvas->Remove(m_canvas.As<GUIElementBase>()); 
 
-		// In case the cursor was still hid§n
+		// In case the cursor was still hidden
 		g_gameWindow->SetCursorVisible(true); 
 		g_input.OnButtonPressed.RemoveAll(this);
 	}
