@@ -30,7 +30,7 @@ A song contains the following fields:
     difficulty[] difficulties //array of all difficulties for this song
     string searchText //current string used by the song search
     bool searchInputActive //true when the user is currently inputting search text
-    
+
 Difficulty
 **********
 A difficulty contains the following fields:
@@ -45,8 +45,8 @@ A difficulty contains the following fields:
     string effector
     int bestBadge //top badge for this difficulty
     difficulty[] scores //array of all scores on this diff
-    
-    
+
+
 Score
 *****
 A score contains the following fields:
@@ -62,11 +62,11 @@ A score contains the following fields:
     int misses
     int badge
     int timestamp //timestamp in POSIX time (seconds since Jan 1 1970 00:00:00 UTC)
-    
+
 Badge
 *****
 Values::
-    
+
     0 = No badge/Never played
     1 = Played but not cleared
     2 = Cleared

@@ -144,7 +144,7 @@ public:
 		g_input.OnButtonPressed.Add(this, &TitleScreen_Impl::m_OnButtonPressed);
 		return true;
 	}
-	
+
 	TitleScreen_Impl()
 	{
 		g_gameWindow->OnMousePressed.RemoveAll(this);

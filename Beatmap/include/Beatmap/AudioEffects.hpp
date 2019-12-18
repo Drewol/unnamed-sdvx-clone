@@ -97,7 +97,7 @@ public:
 	}
 
 	// Sample based on laser input, or without parameters for just the actual value
-	T Sample(float t = 0.0f) const 
+	T Sample(float t = 0.0f) const
 	{
 		t = Math::Clamp(timeFunction(t), 0.0f, 1.0f);
 		return isRange ? InterpolateEffectParamValue(values[0], values[1], t) : values[0];
@@ -186,12 +186,12 @@ struct AudioEffect
 			// Ammount of echo (0-1)
 			EffectParam<float> feedback;
 		} echo;
-		struct  
+		struct
 		{
 			// Panning position, 0 is center (-1-1)
 			EffectParam<float> panning;
 		} panning;
-		struct  
+		struct
 		{
 			// Pitch shift amount, in semitones
 			EffectParam<float> amount;

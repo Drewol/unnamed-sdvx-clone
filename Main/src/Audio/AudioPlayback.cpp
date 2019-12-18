@@ -70,7 +70,7 @@ bool AudioPlayback::Init(class BeatmapPlayback& playback, const String& mapRootP
 			}
 		}
 	}
-	
+
 	if (m_fxtrack.IsValid()) {
 		// Prevent loading switchables if fx track is in use.
 		return true;
@@ -201,7 +201,7 @@ void AudioPlayback::SetEffectEnabled(uint32 index, bool enabled)
 {
 	assert(index >= 0 && index <= 1);
 	m_effectMix[index] = enabled ? 1.0f : 0.0f;
-	
+
 	if (m_buttonEffects[index].type == EffectType::SwitchAudio) {
 		SetSwitchableTrackEnabled(m_buttonEffects[index].switchaudio.index.Sample(), enabled);
 		return;
@@ -239,7 +239,7 @@ void AudioPlayback::SetLaserFilterInput(float input, bool active)
 			SetSwitchableTrackEnabled(m_laserSwitchable, true);
 			return;
 		}
-		
+
 		// SwitchAudio transition into other filters
 		if (m_laserSwitchable > 0)
 		{

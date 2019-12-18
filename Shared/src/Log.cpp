@@ -21,7 +21,7 @@ public:
 	{
 		// Store the name of the executable
 		moduleName = Path::GetModuleName();
-		
+
 #ifdef _WIN32
 		// Store console output handle
 		consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);

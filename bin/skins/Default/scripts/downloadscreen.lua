@@ -55,12 +55,12 @@ function encodeURI(str)
     if (str) then
         str = string.gsub(str, "\n", "\r\n")
         str = string.gsub(str, "([^%w ])",
-            function (c) 
+            function (c)
                 local dontChange = "-/_:."
                 for i = 1, #dontChange do
                     if c == dontChange:sub(i,i) then return c end
                 end
-                return string.format ("%%%02X", string.byte(c)) 
+                return string.format ("%%%02X", string.byte(c))
             end)
         str = string.gsub(str, " ", "%%20")
    end
@@ -70,9 +70,9 @@ end
 
 
 function gotSongsCallback(response)
-    if response.status ~= 200 then 
-        error() 
-        return 
+    if response.status ~= 200 then
+        error()
+        return
     end
     local jsondata = json.decode(response.text)
     for i,song in ipairs(jsondata.data) do
@@ -86,7 +86,7 @@ Http.GetAsync(nextUrl, header, gotSongsCallback)
 
 
 function render_song(song, x,y)
-    gfx.Save()    
+    gfx.Save()
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
     gfx.Translate(x,y)
     gfx.Scissor(0,0,750,300)
@@ -112,7 +112,7 @@ function render_song(song, x,y)
         local col = diffColors[diff.difficulty]
         local diffY = 50 + 250/4 * (diff.difficulty - 1)
         gfx.BeginPath()
-        
+
         gfx.Rect(250,diffY, 500, 250 / 4)
         gfx.FillColor(col[1], col[2], col[3])
         gfx.Fill()
@@ -255,7 +255,7 @@ function archive_callback(entries, id)
         game.Log(entry, 0)
         res[entry] = songsfolder .. "/nautica/" .. entry
     end
-    
+
     if not hasFolder then
         for i, entry in ipairs(entries) do
             res[entry] = songsfolder .. "/nautica/" .. id .. "/" .. entry
@@ -272,9 +272,9 @@ function reload_songs()
     if loading then return end
     local useLevels = false
     local levelarr = {}
-    
+
     for i,value in ipairs(selectedLevels) do
-        if value then 
+        if value then
             useLevels = true
             table.insert(levelarr, i)
         end
@@ -292,7 +292,7 @@ function reload_songs()
     load_more()
     game.Log(nextUrl, 0)
     needsReload = false
-    
+
 end
 
 function button_pressed(button)
@@ -303,7 +303,7 @@ function button_pressed(button)
             dlScreen.DownloadArchive(encodeURI(song.cdn_download_url), header, song.id, archive_callback)
             downloaded[song.id] = "Downloading..."
         elseif screenState == 1 then
-            if selectedLevels[levelcursor + 1] then 
+            if selectedLevels[levelcursor + 1] then
                 selectedLevels[levelcursor + 1] = false
             else
                 selectedLevels[levelcursor + 1] = true
@@ -313,7 +313,7 @@ function button_pressed(button)
             selectedSorting = sortingOptions[sortingcursor + 1]
             reload_songs()
         end
-        
+
     elseif button == game.BUTTON_FXL then
         if screenState ~= 1 then
             screenState = 1
@@ -334,7 +334,7 @@ function key_pressed(key)
         dlcache = io.open(cachepath, "w")
         dlcache:write(json.encode(downloaded))
         dlcache:close()
-        dlScreen.Exit() 
+        dlScreen.Exit()
     end
 end
 

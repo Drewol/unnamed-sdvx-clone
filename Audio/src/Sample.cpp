@@ -40,7 +40,7 @@ public:
 		m_playing = true;
 		m_playbackPointer = 0;
 		m_looping = looping;
-		m_lock.unlock();	
+		m_lock.unlock();
 	}
 	virtual void Stop() override
 	{

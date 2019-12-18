@@ -1,4 +1,4 @@
-/* 
+/*
 	Provides typedefs for basic types such as int8, uint32, etc.
 	Also includes most used c headers such as stdlib,cinsttypes,assert.
 */

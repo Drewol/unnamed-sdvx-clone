@@ -428,7 +428,7 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 	}
 	else if(obj->type == ObjectType::Laser) // Draw laser
 	{
-		
+
 
 		position = playback.TimeToViewDistance(obj->time);
 		float posmult = trackLength / (m_viewRange * laserSpeedOffset);

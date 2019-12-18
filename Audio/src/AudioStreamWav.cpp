@@ -188,7 +188,7 @@ bool AudioStreamWav::Init(Audio* audio, const String& path, bool preload)
 					int decoded = 0;
 					Buffer decodedBuffer;
 					decodedBuffer.resize(m_format.nBlockAlign * m_format.nChannels * sizeof(short));
-					
+
 					while (pos < m_samplesTotal)
 					{
 						int newDecoded = m_decode_ms_adpcm(m_Internaldata, &decodedBuffer, pos);
@@ -430,7 +430,7 @@ float* AudioStreamWav::GetPCM_Internal()
 {
 	if (m_preloaded)
 		return &m_pcm.front();
-	
+
 	return nullptr;
 }
 uint32 AudioStreamWav::GetSampleRate_Internal() const

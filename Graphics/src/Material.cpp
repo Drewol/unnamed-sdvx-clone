@@ -200,7 +200,7 @@ namespace Graphics
 			Transform billboard = CameraMatrix::BillboardMatrix(rs.cameraTransform);
 			BindAll(SV_BillboardMatrix, billboard);
 			BindAll(SV_Time, rs.time);
-			
+
 			// Bind parameters
 			BindParameters(params, rs.worldTransform);
 
@@ -320,7 +320,7 @@ namespace Graphics
 			static_assert(sizeof(T) != 0, "Incompatible shader uniform type");
 		}
 	};
-	
+
 	template<> void Material_Impl::BindShaderVar<Vector4>(uint32 shader, uint32 loc, const Vector4& obj)
 	{
 		glProgramUniform4fv(shader, loc, 1, &obj.x);

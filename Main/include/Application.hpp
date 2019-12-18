@@ -32,7 +32,7 @@ public:
 	void ApplySettings();
 	// Runs the application
 	int32 Run();
-	
+
 	void SetCommandLine(int32 argc, char** argv);
 	void SetCommandLine(const char* cmdLine);
 

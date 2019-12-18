@@ -30,7 +30,7 @@ public:
 	virtual ~AudioBase();
 	// Process <numSamples> amount of samples in stereo float format
 	virtual void Process(float* out, uint32 numSamples) = 0;
-	
+
 	// Gets the playback position in millisecond
 	virtual int32 GetPosition() const = 0;
 

@@ -14,9 +14,9 @@ Calls made to lua
 This screen makes two calls to lua:
 
 .. code-block:: c#
-    
+
     //called whenever the user switches between selecting folder filters and level filters
-    void set_mode(bool selectingFolders) 
+    void set_mode(bool selectingFolders)
 
     //called whenever the user scrolls, selectingFolders tells which arrays index to update
     void set_selection(int index, bool selectingFolders)

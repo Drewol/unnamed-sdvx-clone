@@ -49,7 +49,7 @@ namespace Graphics
 			{ { r.Left(),  0.0f, r.Top(),    },{ uv.Left(), uv.Top() } },
 			{ { r.Right(), 0.0f, r.Bottom(), },{ uv.Right(), uv.Bottom() } },
 			{ { r.Right(), 0.0f, r.Top(),    },{ uv.Right(), uv.Top() } },
-						   
+
 			{ { r.Left(),  0.0f, r.Top(),    },{ uv.Left(), uv.Top() } },
 			{ { r.Left(),  0.0f, r.Bottom(), },{ uv.Left(), uv.Bottom() } },
 			{ { r.Right(), 0.0f, r.Bottom(), },{ uv.Right(), uv.Bottom() } },

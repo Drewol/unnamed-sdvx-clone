@@ -47,7 +47,7 @@ bool AudioStreamMa::Init(Audio* audio, const String& path, bool preload)
 		result = ma_decode_memory((void*)m_data.data(), m_file.GetSize(), &config, &m_samplesTotal, (void**)&m_pcm);
 	}
 	else
-	{			
+	{
 		result = ma_decoder_init_file(*path, &config, &m_decoder);
 	}
 

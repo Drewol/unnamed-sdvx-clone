@@ -28,7 +28,7 @@ A game based on [KShootMania](http://www.kshootmania.com/) and [SDVX](https://re
 ### Features currently on hold / in progress:
 - Song select UI/Controls to change HiSpeed and other game settings
 
-The folder that is scanned for songs can be changed in the "Main.cfg" file (`songfolder = "path to song folder"`).  
+The folder that is scanned for songs can be changed in the "Main.cfg" file (`songfolder = "path to song folder"`).
 Make sure you use a *plain* text editor like Notepad, Notepad++ or gedit; NOT a *rich* text editor like Wordpad or Word!
 
 If something breaks in the song database, delete "maps.db". **Please note this will also wipe saved scores.**
@@ -57,7 +57,7 @@ If something breaks in the song database, delete "maps.db". **Please note this w
 - Press \[TAB\] to open the Search bar on the top to search for songs
 
 ## How to run:
-Just run 'usc-game' or 'usc-game_Debug' from within the 'bin' folder. Or, to play a chart immediately:  
+Just run 'usc-game' or 'usc-game_Debug' from within the 'bin' folder. Or, to play a chart immediately:
 #### `{Download Location}/bin> usc-game {path to *.ksh chart} [flags]`
 
 #### Command line flags (all are optional):

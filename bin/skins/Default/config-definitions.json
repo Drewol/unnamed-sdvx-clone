@@ -1,6 +1,6 @@
 {
 	"Gameplay:" : { "type" : "label" },
-	
+
 	"earlate_position": {
 		"type": "selection",
 		"label": "Early/Late display position",
@@ -12,7 +12,7 @@
 		"label" : "Display name",
 		"default" : "Guest"
 	},
-	
+
 	"separator_a" : {},
 	"Song select:" : { "type" : "label" },
 	"show_guide": {
@@ -29,7 +29,7 @@
 		"max": 100.0,
 		"min": -100.0
 	},
-	
+
 	"Ineger_test" : {
 		"type": "int",
 		"label": "Ineger Test with range -100<->100",
@@ -37,7 +37,7 @@
 		"max": 100,
 		"min": -100
 	},
-	
+
 	"col_test" : {
 		"type": "color",
 		"label": "Color Test",

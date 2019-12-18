@@ -288,7 +288,7 @@ namespace VectorMath
 
 	// Dot product implementations
 	template<typename T, size_t Num>
-	static T Dot(const VectorBase<T, Num>& lhs, const VectorBase<T, Num>& rhs) 
+	static T Dot(const VectorBase<T, Num>& lhs, const VectorBase<T, Num>& rhs)
 	{
 		static_assert(sizeof(T) == 0, "Invalid vector types for dot product");
 	};

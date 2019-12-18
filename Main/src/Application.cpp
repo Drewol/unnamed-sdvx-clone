@@ -80,7 +80,7 @@ Application::~Application()
 void Application::SetCommandLine(int32 argc, char** argv)
 {
 	m_commandLine.clear();
-	
+
 	// Split up command line parameters
 	for(int32 i = 0 ; i < argc; i++)
 	{
@@ -90,7 +90,7 @@ void Application::SetCommandLine(int32 argc, char** argv)
 void Application::SetCommandLine(const char* cmdLine)
 {
 	m_commandLine.clear();
-	
+
 	// Split up command line parameters
 	m_commandLine = Path::SplitCommandLine(cmdLine);
 }
@@ -113,7 +113,7 @@ int32 Application::Run()
 	if(!m_Init())
 		return 1;
 
-	if(m_commandLine.Contains("-test")) 
+	if(m_commandLine.Contains("-test"))
 	{
 		// Create test scene
 		AddTickable(Test::Create());
@@ -201,7 +201,7 @@ Vector<String> Application::GetUpdateAvailable()
 		return Vector<String> {m_updateUrl, m_updateVersion};
 	}
 
-	return Vector<String>();	
+	return Vector<String>();
 }
 
 bool Application::m_LoadConfig()
@@ -321,7 +321,7 @@ void __updateChecker()
 		auto commits = nlohmann::json::parse(response.text);
 		String current_hash;
 		String(GIT_COMMIT).Split("_", nullptr, &current_hash);
-		
+
 		if (commits.contains("message"))
 		{
 			//some error message was sent
@@ -536,7 +536,7 @@ bool Application::m_Init()
 	m_InitDiscord();
 
 	CheckedLoad(m_fontMaterial = LoadMaterial("font"));
-	m_fontMaterial->opaque = false;	
+	m_fontMaterial->opaque = false;
 	CheckedLoad(m_fillMaterial = LoadMaterial("guiColor"));
 	m_fillMaterial->opaque = false;
 	CheckedLoad(m_guiTex = LoadMaterial("guiTex"));
@@ -594,7 +594,7 @@ void Application::m_MainLoop()
 					}
 				}
 				g_tickables.insert(insertionPoint, ch.tickable);
-				
+
 				restoreTop = true;
 			}
 			else if(ch.mode == TickableChange::Removed)
@@ -633,7 +633,7 @@ void Application::m_MainLoop()
 		}
 		if(targetFPS > 0)
 			targetRenderTime = 1.0f / (float)targetFPS;
-			
+
 
 		// Main loop
 		float currentTime = appTimer.SecondsAsFloat();
@@ -1094,7 +1094,7 @@ void Application::DiscordPresenceMulti(String secret, int partySize, int partyMa
 {
 	DiscordRichPresence discordPresence;
 	memset(&discordPresence, 0, sizeof(discordPresence));
-	
+
 	m_multiRoomCount = partySize;
 	m_multiRoomSize = partyMax;
 	m_multiRoomSecret = secret;

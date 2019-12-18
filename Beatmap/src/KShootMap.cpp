@@ -20,8 +20,8 @@ KShootTime::KShootTime(uint32_t block, uint32_t tick) : block(block), tick(tick)
 {
 }
 KShootTime::operator bool() const
-{ 
-	return block != -1; 
+{
+	return block != -1;
 }
 
 KShootMap::TickIterator::TickIterator(KShootMap& map, KShootTime start /*= KShootTime(0, 0)*/) : m_time(start), m_map(map)
@@ -187,7 +187,7 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 			}
 			else
 			{
-				// Parse tick content string 
+				// Parse tick content string
 				// The format looks like:
 				// buttons*4|fx buttons*2|lasers*2 + additional things?
 				// (fx) buttons are either '1' for normal '2' for hold, '0' for nothing

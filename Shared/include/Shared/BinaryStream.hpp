@@ -108,7 +108,7 @@ public:
 		return *this;
 	}
 
-	bool IsReading() const 
+	bool IsReading() const
 	{
 		return m_isReading;
 	}
@@ -127,7 +127,7 @@ bool BinaryStream::SerializeObject(Vector<T>& obj)
 	{
 		obj.clear();
 		uint32 len;
-		*this << len; 
+		*this << len;
 		for(uint32 i = 0; i < len; i++)
 		{
 			T v;

@@ -71,8 +71,8 @@ private:
 	IFunctionBinding<R, A...>* m_binding = nullptr;
 };
 
-/* 
-	Bindable property 
+/*
+	Bindable property
 	This field either acts just as a normal variable or acts a a property using Get/Set methods to interface with the underlying value
 */
 template<typename T>

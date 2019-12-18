@@ -20,13 +20,13 @@ uniform float suddenFadeWindow;
 uniform int hitState;
 
 void main()
-{    
+{
     vec4 mainColor = texture(mainTex, fsTex.xy);
 
     target = mainColor;
 
     float off = trackPos + position.y * trackScale;
-    
+
     if(hiddenCutoff < suddenCutoff)
     {
         float hiddenCutoffFade = hiddenCutoff - hiddenFadeWindow;

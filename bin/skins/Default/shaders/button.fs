@@ -17,7 +17,7 @@ uniform float suddenCutoff;
 uniform float suddenFadeWindow;
 
 void main()
-{	
+{
 	vec4 mainColor = texture(mainTex, fsTex.xy);
     if(hasSample)
     {
@@ -29,9 +29,9 @@ void main()
     }
 
     target = mainColor;
-    
+
     float off = trackPos + position.y * trackScale;
-    
+
     if(hiddenCutoff < suddenCutoff)
     {
         float hiddenCutoffFade = hiddenCutoff - hiddenFadeWindow;

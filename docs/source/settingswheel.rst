@@ -19,4 +19,3 @@ Contains the following fields:
 
     string name
     bool value
-    

@@ -20,7 +20,7 @@ Example::
     header = {}
     header["user-agent"] = "usc v0.3.1"
     Http.GetAsync("https://httpbin.org/get", header, gotResponse)
-	
+
 response
 ********
 A response object contains the following
@@ -34,8 +34,8 @@ A response object contains the following
     string error
     string cookies
     map<string, string> header
-	
-	
+
+
 Get(string url, map<string,string> header)
 ******************************************
 Executes a blocking HTTP GET request and returns a ``response``.

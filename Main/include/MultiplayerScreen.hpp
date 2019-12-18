@@ -96,7 +96,7 @@ public:
 	void Fail() {
 		m_failed = true;
 	}
-	
+
 	bool HasFailed() {
 		return m_failed;
 	}

@@ -8,7 +8,7 @@ uniform float progress;
 
 
 void main()
-{	
+{
     target = vec4(0.);
     if(fsTex.y < 0.1)
     {

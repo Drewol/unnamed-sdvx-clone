@@ -41,7 +41,7 @@ struct AsyncMeshLoadOperation : public AsyncLoadOperation
 		/// TODO: No mesh loading yet
 		return false;
 	}
-}; 
+};
 struct AsyncMaterialLoadOperation : public AsyncLoadOperation
 {
 	Material& target;

@@ -57,7 +57,7 @@ Logs a message to the game's log file.
 Example::
 
     game.Log("Something went wrong!", game.LOGGER_ERROR)
-    
+
 
 LoadSkinSample(char* name)
 ********************************

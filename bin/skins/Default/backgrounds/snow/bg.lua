@@ -1,7 +1,7 @@
 background.LoadTexture("mainTex", "bg.png")
 resx, resy = game.GetResolution()
 portrait = resy > resx
-desw = portrait and 720 or 1280 
+desw = portrait and 720 or 1280
 desh = desw * (resy / resx)
 scale = resx / desw
 tex = gfx.CreateImage(background.GetPath() .. "petal.png", 0)
@@ -11,7 +11,7 @@ particles = {}
 psize = 30
 
 gradients = {}
-for i=1,64 do 
+for i=1,64 do
 	local v = i * 4 - 1
 	local v2 = math.floor(5 * i / 64)
 	gfx.GradientColors(255 - v2, 255 - v2, 255, 255,
@@ -51,12 +51,12 @@ function render_bg(deltaTime)
 		p.y = p.y + p.yv * deltaTime
 		p.r = p.r + p.rv * deltaTime
 		p.p = (p.p + deltaTime) % (math.pi * 2)
-		
+
 		p.xv = 0.5 - ((p.x * 2) % 1) + (0.5 * sign(p.x - 0.5))
 		p.xv = math.max(math.abs(p.xv * 2) - 1, 0) * sign(p.xv)
 		p.xv = p.xv * p.y
 		p.xv = p.xv + math.sin(p.p) * 0.01
-		
+
 		gfx.Save()
 		gfx.ResetTransform()
 		gfx.Translate(p.x * resx, p.y * resy)
@@ -67,7 +67,7 @@ function render_bg(deltaTime)
 		gfx.FillPaint(grad);
 		gfx.Fill()
 		gfx.Restore()
-		if p.y > 1.1 then 
+		if p.y > 1.1 then
 			particles[i] = initializeParticle(false)
 		end
 	end

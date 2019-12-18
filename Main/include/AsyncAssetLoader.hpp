@@ -2,7 +2,7 @@
 #include "AsyncLoadable.hpp"
 
 /*
-	Loads assets and IAsyncLoadables 
+	Loads assets and IAsyncLoadables
 	Acts like a queue that stores loading commands
 */
 class AsyncAssetLoader : public Unique

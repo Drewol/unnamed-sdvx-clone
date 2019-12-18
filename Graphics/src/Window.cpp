@@ -165,8 +165,8 @@ namespace Graphics
 				(uint8&)m_modKeys |= (uint8)ModifierKeys::Shift;
 			}
 
-			
-		
+
+
 
 			uint8& currentState = m_keyStates[code];
 			if(currentState != newState)

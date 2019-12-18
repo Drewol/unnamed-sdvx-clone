@@ -164,7 +164,7 @@ private:
 	// How much the track is hidden. 1.0 = fully hidden, 0.0 = fully visible
 	float m_trackHide = 0.0f;
 	float m_trackHideSpeed = 0.0f;
-}; 
+};
 
 // Base class for sprite effects on the track
 struct TimedEffect

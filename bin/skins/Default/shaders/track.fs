@@ -10,7 +10,7 @@ uniform vec4 rCol;
 uniform float hidden;
 
 void main()
-{	
+{
 	vec4 mainColor = texture(mainTex, fsTex.xy);
     vec4 col = mainColor;
 

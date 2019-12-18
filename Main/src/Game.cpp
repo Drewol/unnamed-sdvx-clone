@@ -51,7 +51,7 @@ Ref<Beatmap> TryLoadMap(const String& path)
 	return Ref<Beatmap>(newMap);
 }
 
-/* 
+/*
 	Game implementation class
 */
 class Game_Impl : public Game
@@ -209,10 +209,10 @@ public:
 		// Save hispeed
 		g_gameConfig.Set(GameConfigKeys::HiSpeed, m_hispeed);
 
-		//g_rootCanvas->Remove(m_canvas.As<GUIElementBase>()); 
+		//g_rootCanvas->Remove(m_canvas.As<GUIElementBase>());
 
 		// In case the cursor was still hidden
-		g_gameWindow->SetCursorVisible(true); 
+		g_gameWindow->SetCursorVisible(true);
 		g_input.OnButtonPressed.RemoveAll(this);
 	}
 
@@ -263,7 +263,7 @@ public:
 			LaserObjectState* lastHold = (LaserObjectState*)(*lastObj);
 			lastObjectTime += lastHold->duration;
 		}
-		
+
 		m_endTime = lastObjectTime;
 		m_gaugeSampleRate = lastObjectTime / 256;
 
@@ -302,7 +302,7 @@ public:
 				useBPM = lastBPM;
 			}
 
-			m_hispeed = m_modSpeed / useBPM; 
+			m_hispeed = m_modSpeed / useBPM;
 		}
 		else if (m_speedMod == SpeedMods::CMod)
 		{
@@ -393,7 +393,7 @@ public:
 		if (m_multiplayer != nullptr)
 			m_multiplayer->GetTCP().PushFunctions(m_lua);
 
-		// Background 
+		// Background
 		/// TODO: Load this async
 		m_background = CreateBackground(this);
 		m_foreground = CreateBackground(this, true);
@@ -413,7 +413,7 @@ public:
 		{
 			//Randomize
 			std::array<int,4> swaps = { 0,1,2,3 };
-			
+
 			std::shuffle(swaps.begin(), swaps.end(), std::default_random_engine((int)(1000 * g_application->GetAppTime())));
 
 			bool unchanged = true;
@@ -616,7 +616,7 @@ public:
 		if (m_speedMod == SpeedMods::CMod)
 			m_track->SetViewRange(1.0 / m_playback.cModSpeed);
 		else
-			m_track->SetViewRange(8.0f / (m_hispeed)); 
+			m_track->SetViewRange(8.0f / (m_hispeed));
 
 
 		// Get render state from the camera
@@ -838,7 +838,7 @@ public:
 			{
 				m_introCompleted = true;
 			}
-			
+
 			lua_settop(m_lua, 0);
 		}
 		if (m_ended)
@@ -1076,7 +1076,7 @@ public:
 
 		m_lastMapTime = playbackPositionMs;
 		SetGameplayLua(m_lua);
-		
+
 		if(m_audioPlayback.HasEnded())
 		{
 			FinishGame();
@@ -1173,7 +1173,7 @@ public:
 		// Render particle effects
 		m_particleSystem->Render(rs, deltaTime);
 	}
-	
+
 	Ref<ParticleEmitter> CreateTrailEmitter(const Color& color)
 	{
 		Ref<ParticleEmitter> emitter = m_particleSystem->AddEmitter();
@@ -1296,7 +1296,7 @@ public:
 		textPos.y += RenderText(Utility::Sprintf("Laser Filter Input: %f", m_scoring.GetLaserOutput()), textPos).y;
 
 		textPos.y += RenderText(Utility::Sprintf("Score: %d (Max: %d)", m_scoring.currentHitScore, m_scoring.mapTotals.maxScore), textPos).y;
-		
+
 		textPos.y += RenderText(Utility::Sprintf("Actual Score: %d", m_scoring.CalculateCurrentScore()), textPos).y;
 
 		textPos.y += RenderText(Utility::Sprintf("Health Gauge: %f", m_scoring.currentGauge), textPos).y;
@@ -1542,7 +1542,7 @@ public:
 
 	void OnTimingPointChanged(TimingPoint* tp)
 	{
-	   m_hispeed = m_modSpeed / tp->GetBPM(); 
+	   m_hispeed = m_modSpeed / tp->GetBPM();
 	}
 
 	void OnLaneToggleChanged(LaneHideTogglePoint* tp)
@@ -1797,7 +1797,7 @@ public:
 	{
 		return m_flags;
 	}
-	virtual lua_State* GetLuaState() override 
+	virtual lua_State* GetLuaState() override
 	{
 		return m_lua;
 	}

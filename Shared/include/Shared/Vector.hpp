@@ -8,7 +8,7 @@ class Vector : public std::vector<I>
 {
 public:
 	using std::vector<I>::vector;
-	
+
 	// These are for allowing function to be called on the base class when compiling on GCC
 	using std::vector<I>::back;
 	using std::vector<I>::front;
@@ -16,7 +16,7 @@ public:
 	using std::vector<I>::end;
 	using std::vector<I>::erase;
 	using std::vector<I>::push_back;
-	
+
 	// Adds a new element and returns it
 	I& Add(const I& obj = I()) { push_back(obj); return back(); };
 	I& AddZeroed() { push_back(I()); memset(&back(), 0, sizeof(I)); return back(); };
@@ -25,7 +25,7 @@ public:
 		if(!Contains(obj))
 			Add(obj);
 	}
-	
+
 	// Removes the first or all entries of <obj>
 	void Remove(const I& obj, bool all = true)
 	{
@@ -43,7 +43,7 @@ public:
 	}
 
 	// O(N) lookup to check if object is in array
-	bool Contains(const I& obj) const 
+	bool Contains(const I& obj) const
 	{
 		for(auto& i : *this)
 		{

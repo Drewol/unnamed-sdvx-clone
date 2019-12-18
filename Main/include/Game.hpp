@@ -70,7 +70,7 @@ public:
 	// Get lua state
 	virtual struct lua_State* GetLuaState() = 0;
 	// Set demo mode
-	virtual void SetDemoMode(bool value) = 0; 
+	virtual void SetDemoMode(bool value) = 0;
 	// Set song db so a random song can be selected
 	virtual void SetSongDB(class MapDatabase* db) = 0;
 	// The folder that contians the map

@@ -4,7 +4,7 @@
 
 namespace Utility
 {
-	/* 
+	/*
 		Template struct that contains type information such as name/type hash/etc.
 		Information is aquired using RTTI
 	*/

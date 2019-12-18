@@ -93,7 +93,7 @@ namespace Graphics
 		float scale;
 		float fade;
 		float drag;
-		
+
 
 		bool IsAlive() const
 		{
@@ -286,7 +286,7 @@ namespace Graphics
 			break;
 		}
 
-		m_mesh->SetData(verts);	
+		m_mesh->SetData(verts);
 		m_mesh->Draw();
 	}
 

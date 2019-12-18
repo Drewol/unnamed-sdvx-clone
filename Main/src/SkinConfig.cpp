@@ -38,7 +38,7 @@ SkinConfig::SkinConfig(String skin)
 		{
 			g_gameWindow->ShowMessageBox("Skin config parser error.", message, 0);
 		};
-		
+
 
 		Buffer buf(defFile.GetSize());
 		defFile.Read(buf.data(), buf.size());
@@ -74,7 +74,7 @@ SkinConfig::SkinConfig(String skin)
 				showError(Utility::Sprintf("No type specified for: \"%s\"", key));
 				continue;
 			}
-			
+
 			values.at("type").get_to(type);
 
 			if (!inputModeMap.Contains(type))

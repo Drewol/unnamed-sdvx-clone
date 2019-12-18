@@ -252,7 +252,7 @@ Mesh LaserTrackBuilder::GenerateTrackExit(class BeatmapPlayback& playback, Laser
 
 	Mesh newMesh = MeshRes::Create(m_gl);
 
-	// Ending point of laser 
+	// Ending point of laser
 	float startingX = laser->points[1] * effectiveWidth - effectiveWidth * 0.5f;
 	if ((laser->flags & LaserObjectState::flag_Extended) != 0)
 		startingX = (laser->points[1] * 2.0f - 0.5f) * effectiveWidth - effectiveWidth * 0.5f;

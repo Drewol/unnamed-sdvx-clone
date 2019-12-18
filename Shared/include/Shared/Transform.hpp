@@ -14,7 +14,7 @@
 //                                                                                                           //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Modified version of 
+// Modified version of
 //	(http://jlib.nl/index.php?file=./code/include/jlib/transform) and
 //	(http://jlib.nl/index.php?file=./code/include/jlib/matrix)
 

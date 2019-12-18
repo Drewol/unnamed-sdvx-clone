@@ -24,7 +24,7 @@ uniform int hitState;
 uniform int laserPart;
 
 void main()
-{    
+{
     float x = fsTex.x;
     if (x < 0.0 || x > 1.0)
     {
@@ -40,7 +40,7 @@ void main()
     target = mainColor * color;
 
     float off = trackPos + position.y * trackScale;
-    
+
     if(hiddenCutoff < suddenCutoff)
     {
         float hiddenCutoffFade = hiddenCutoff - hiddenFadeWindow;

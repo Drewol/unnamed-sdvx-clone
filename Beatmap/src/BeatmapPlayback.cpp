@@ -465,8 +465,8 @@ float BeatmapPlayback::DurationToViewDistanceAtTime(MapTime time, MapTime durati
 	double stopTime = 0.;
 	for (auto cs : m_SelectChartStops(startTime, endTime - startTime))
 	{
-		MapTime overlap = Math::Min(abs(endTime - startTime), 
-			Math::Min(abs(endTime - cs->time), 
+		MapTime overlap = Math::Min(abs(endTime - startTime),
+			Math::Min(abs(endTime - cs->time),
 				Math::Min(abs((cs->time + cs->duration) - startTime), abs((cs->time + cs->duration) - cs->time))));
 
 		stopTime += DurationToViewDistanceAtTimeNoStops(Math::Max(cs->time, startTime), overlap);

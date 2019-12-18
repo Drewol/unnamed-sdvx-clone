@@ -127,7 +127,7 @@ check_or_create_cache = function(song, loadJacket)
     if not songCache[song.id]["bpm"] then
         songCache[song.id]["bpm"] = gfx.CreateLabel(string.format("BPM: %s",song.bpm), 20, 0)
     end
-	
+
 	if not songCache[song.id]["effector"] then
         songCache[song.id]["effector"] = gfx.CreateLabel(string.format("BPM: %s",song.bpm), 20, 0)
     end

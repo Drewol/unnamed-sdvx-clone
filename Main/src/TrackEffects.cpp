@@ -8,7 +8,7 @@ TimedEffect::TimedEffect(float duration)
 }
 void TimedEffect::Reset(float duration)
 {
-	this->duration = duration; 
+	this->duration = duration;
 	time = duration;
 }
 void TimedEffect::Tick(float deltaTime)

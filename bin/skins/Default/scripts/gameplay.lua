@@ -138,7 +138,7 @@ local consoleAnimImages = {
     gfx.CreateSkinImage("console/glow_btb.png", 0),
     gfx.CreateSkinImage("console/glow_btc.png", 0),
     gfx.CreateSkinImage("console/glow_btd.png", 0),
-    
+
     gfx.CreateSkinImage("console/glow_fxl.png", 0),
     gfx.CreateSkinImage("console/glow_fxr.png", 0),
 
@@ -174,7 +174,7 @@ local clearTexts = {"TRACK FAILED", "TRACK COMPLETE", "TRACK COMPLETE", "FULL CO
 function ResetLayoutInformation()
     resx, resy = game.GetResolution()
     portrait = resy > resx
-    desw = portrait and 720 or 1280 
+    desw = portrait and 720 or 1280
     desh = desw * (resy / resx)
     scale = resx / desw
 end
@@ -187,7 +187,7 @@ function render(deltaTime)
     -- make sure that our transform is cleared, clean working space
     -- TODO: this shouldn't be necessary!!!
     gfx.ResetTransform()
-    
+
     gfx.Scale(scale, scale)
     local yshift = 0
 
@@ -206,7 +206,7 @@ function render(deltaTime)
 	end
     draw_combo(deltaTime)
     draw_alerts(deltaTime)
-	
+
 	if gameplay.autoplay then
 		gfx.LoadSkinFont("NotoSans-Regular.ttf")
 		gfx.FontSize(30)
@@ -254,12 +254,12 @@ function render_crit_base(deltaTime)
 
     critAnimTimer = critAnimTimer + deltaTime
     SetUpCritTransform()
-    
+
     -- Figure out how to offset the center of the crit line to remain
     --  centered on the players screen
     local xOffset = GetCritLineCenteringOffset()
     gfx.Translate(xOffset, 0)
-    
+
     -- Draw a transparent black overlay below the crit line
     -- This darkens the play area as it passes
     gfx.FillColor(0, 0, 0, 200)
@@ -269,7 +269,7 @@ function render_crit_base(deltaTime)
     -- we check to see if we're playing in portrait mode and
     --  change the width accordingly
     local critWidth = resx * (portrait and 1 or 0.8)
-    
+
     -- get the scaled dimensions of the crit line pieces
     local clw, clh = gfx.ImageSize(critAnimImg)
     local critAnimHeight = 15 * scale
@@ -298,7 +298,7 @@ function render_crit_base(deltaTime)
 
         -- left side
         -- Use a scissor to limit the drawable area to only what should be visible
-        gfx.UpdateImagePattern(critAnim, 
+        gfx.UpdateImagePattern(critAnim,
             -startOffset, -critAnimHeight/2, critAnimWidth, critAnimHeight, 0, 1)
         gfx.Scissor(-critWidth / 2, -critAnimHeight / 2, critWidth / 2, critAnimHeight)
         gfx.BeginPath()
@@ -306,11 +306,11 @@ function render_crit_base(deltaTime)
         gfx.FillPaint(critAnim)
         gfx.Fill()
         gfx.ResetScissor()
-        
+
 
         -- right side
         -- exactly the same, but in reverse
-        gfx.UpdateImagePattern(critAnim, 
+        gfx.UpdateImagePattern(critAnim,
             startOffset, -critAnimHeight/2, critAnimWidth, critAnimHeight, 0, 1)
         gfx.Scissor(0, -critAnimHeight / 2, critWidth / 2, critAnimHeight)
         gfx.BeginPath()
@@ -386,7 +386,7 @@ function render_crit_overlay(deltaTime)
             -- If not held, that timer is set back to 0
             if game.GetButton(buttonsInOrder[i]) then
                 consoleAnimTimers[i] = consoleAnimTimers[i] + deltaTime * consoleAnimSpeed * 3.14 * 2
-            else 
+            else
                 consoleAnimTimers[i] = 0
             end
 
@@ -400,7 +400,7 @@ function render_crit_overlay(deltaTime)
             end
         end
         gfx.GlobalCompositeOperation(gfx.BLEND_OP_SOURCE_OVER)
-        
+
         -- Undo those modifications
         gfx.Restore();
     end
@@ -468,7 +468,7 @@ function draw_stat(x, y, w, h, name, value, format, r, g, b)
     gfx.LineTo(w, h) -- only defines the line, does NOT draw it yet
 
     -- If a color is provided, set it
-    if r then gfx.StrokeColor(r, g, b) 
+    if r then gfx.StrokeColor(r, g, b)
     -- otherwise, default to a light grey
     else gfx.StrokeColor(200, 200, 200) end
 
@@ -519,14 +519,14 @@ function draw_song_info(deltaTime)
     -- Reset some text related stuff that was changed in draw_state
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT)
     gfx.FontSize(30)
-    
+
     gfx.FillColor(255, 255, 255)
 
     local textX = jacketWidth + 10
     local titleWidth = songInfoWidth - jacketWidth - 20
     local x1, y1, x2, y2 = gfx.TextBounds(0, 0, gameplay.title)
     local textscale = math.min(titleWidth / x2, 1)
-    
+
     gfx.Save()
     do  -- Draw the song title, scaled to fit as best as possible
         gfx.Translate(textX, 30)
@@ -561,12 +561,12 @@ function draw_song_info(deltaTime)
 		gfx.DrawRect(RECT_FILL, 100, 100, songInfoWidth - 100, 20)
 		gfx.FillColor(255, 255, 255)
 		if game.GetButton(game.BUTTON_BTB) then
-			gfx.Text(string.format("Hid/Sud Cutoff: %.1f%% / %.1f%%", 
+			gfx.Text(string.format("Hid/Sud Cutoff: %.1f%% / %.1f%%",
 					gameplay.hiddenCutoff * 100, gameplay.suddenCutoff * 100),
 					textX, 115)
-		
+
 		elseif game.GetButton(game.BUTTON_BTC) then
-			gfx.Text(string.format("Hid/Sud Fade: %.1f%% / %.1f%%", 
+			gfx.Text(string.format("Hid/Sud Fade: %.1f%% / %.1f%%",
 					gameplay.hiddenFade * 100, gameplay.suddenFade * 100),
 					textX, 115)
 		else
@@ -643,7 +643,7 @@ function draw_gauge(deltaTime)
 
 	--draw gauge % label
 	posx = posx / scale
-	posx = posx + (100 * 0.35) 
+	posx = posx + (100 * 0.35)
 	height = 880 * 0.35
 	posy = posy / scale
 	if portrait then
@@ -716,8 +716,8 @@ function draw_alerts(deltaTime)
         gfx.Save()
         local posx = desw / 2 - 350
         local posy = desh * critLinePos[1] - 135
-        if portrait then 
-            posy = desh * critLinePos[2] - 135 
+        if portrait then
+            posy = desh * critLinePos[2] - 135
             posx = 65
         end
         gfx.Translate(posx,posy)
@@ -743,8 +743,8 @@ function draw_alerts(deltaTime)
         gfx.Save()
         local posx = desw / 2 + 350
         local posy = desh * critLinePos[1] - 135
-        if portrait then 
-            posy = desh * critLinePos[2] - 135 
+        if portrait then
+            posy = desh * critLinePos[2] - 135
             posx = desw - 65
         end
         gfx.Translate(posx,posy)
@@ -800,7 +800,7 @@ function render_intro(deltaTime)
 	end
 	bta_last = game.GetButton(game.BUTTON_BTA)
     introTimer = math.max(introTimer, 0)
-	
+
     return introTimer <= 0
 end
 -- -------------------------------------------------------------------------- --
@@ -889,9 +889,9 @@ end
 
 -- Update the users in the scoreboard
 function score_callback(response)
-    if response.status ~= 200 then 
-        error() 
-        return 
+    if response.status ~= 200 then
+        error()
+        return
     end
     local jsondata = json.decode(response.text)
     users = {}
@@ -961,7 +961,7 @@ function draw_users(detaTime)
         if u.id == gameplay.user_id then
             gfx.FillColor(237, 240, 144)
         end
-        
+
         gfx.LoadSkinFont(normal_font)
         gfx.FontSize(size_name)
         gfx.Text(user_text, xmax, yoff)

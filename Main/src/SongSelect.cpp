@@ -129,7 +129,7 @@ public:
 
 			// Is the delay time over?
 			if (m_fadeDelayTimer >= m_fadeDelayDuration) {
-				// Start playing the next stream.				
+				// Start playing the next stream.
 				m_fadeInTimer = 0.0f;
 				if (m_nextStream) {
 					m_nextStream->SetVolume(0.0f);

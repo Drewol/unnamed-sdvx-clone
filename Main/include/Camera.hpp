@@ -1,7 +1,7 @@
 #pragma once
 
 /*
-	Camera shake effect 
+	Camera shake effect
 */
 struct CameraShake
 {

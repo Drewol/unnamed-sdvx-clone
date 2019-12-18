@@ -4,7 +4,7 @@ How to use backgrounds and foregrounds and the functions available in the lua ta
 background and foreground scritps.
 
 Backgrounds and foregrounds work exactly the same with the exception that the foreground shader gets
-access to a texture built from the current framebuffer in the ``fb_tex`` uniform. The ``background`` and 
+access to a texture built from the current framebuffer in the ``fb_tex`` uniform. The ``background`` and
 ``foreground`` scripts access their functions in the tables named as such but the functions are identical
 for both tables.
 
@@ -17,7 +17,7 @@ For a foreground you need to create the following files in the same folder::
 
     fg.fs
     fg.lua
-    
+
 The ``.fs`` files do not need to do anything but they need to exist and they need to be valid glsl
 fragment shaders.
 
@@ -33,7 +33,7 @@ The backgrounds that are available in ksh are::
     techno
     wave
     hidden
-    
+
 You should have all these in your skin (excluding hidden) so that all backgrounds that can appear in ksh
 has something that will be displayed.
 

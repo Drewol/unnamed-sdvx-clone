@@ -48,7 +48,7 @@ namespace Math
 	}
 
 	// Gets the sign of a value
-	template <typename T> T Sign(T val) 
+	template <typename T> T Sign(T val)
 	{
 		return (T)((T(0) < val) - (val < T(0)));
 	}

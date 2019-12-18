@@ -154,7 +154,7 @@ private:
 
 // Referenced http://www.musicdsp.org/files/phaser.cpp
 class PhaserDSP : public DSP
-{ 
+{
 public:
 	uint32 time = 0;
 

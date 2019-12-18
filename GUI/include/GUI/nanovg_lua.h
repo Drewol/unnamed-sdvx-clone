@@ -421,7 +421,7 @@ static int lCreateLabel(lua_State* L /*const char* text, int size, bool monospac
 	int monospace = luaL_checkinteger(L, 3);
 
 	Label newLabel;
-	newLabel.text = (*g_guiState.currentFont)->CreateText(Utility::ConvertToWString(text), 
+	newLabel.text = (*g_guiState.currentFont)->CreateText(Utility::ConvertToWString(text),
 		size * g_guiState.t.GetScale().y,
 		(FontRes::TextOptions)monospace);
 	newLabel.scale = g_guiState.t.GetScale().y;
@@ -873,7 +873,7 @@ static int lScissor(lua_State* L /* float x, float y, float w, float h */)
 	float y = luaL_checknumber(L, 2);
 	float w = luaL_checknumber(L, 3);
 	float h = luaL_checknumber(L, 4);
-	
+
 	Vector3 scale = g_guiState.t.GetScale();
 	Vector3 pos = g_guiState.t.GetPosition();
 	Vector2 topLeft = pos.xy() + Vector2(x + g_guiState.scissorOffset, y);
@@ -881,7 +881,7 @@ static int lScissor(lua_State* L /* float x, float y, float w, float h */)
 
 
 	g_guiState.scissor = Rect(topLeft, size);
-	
+
 	nvgScissor(g_guiState.vg, x, y, w, h);
 	return 0;
 }
@@ -954,7 +954,7 @@ static int DisposeGUI(lua_State* state)
 	g_guiState.paintCache[state].clear();
 	g_guiState.paintCache.erase(state);
 
-	
+
 	for(auto&& i : g_guiState.vgImages[state])
 	{
 		nvgDeleteImage(g_guiState.vg, i);
