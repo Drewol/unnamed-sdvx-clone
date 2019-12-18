@@ -11,9 +11,9 @@ uniform float suddenCutoff;
 uniform float suddenFadeWindow;
 
 void main()
-{	
+{
 	target = texture(mainTex, vec2(fsTex.x, fsTex.y * 2.0));
-	
+
 	float off = 1.0 - (fsTex.y * 2.0);
 
     if(hiddenCutoff < suddenCutoff)
@@ -22,7 +22,7 @@ void main()
         if (off > hiddenCutoffFade && off < hiddenCutoff) {
             target.a = target.a * max(0.0f, (hiddenCutoff - off) / hiddenFadeWindow);
         }
-		
+
 		if (off < suddenCutoff && off > hiddenCutoff) {
 			target.a = 0.0f;
 		}

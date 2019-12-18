@@ -36,7 +36,7 @@ FIND_PATH(OGG_INCLUDE_DIR
     PATHS ${OGG_SEARCH_PATHS}
 )
 
-FIND_LIBRARY(OGG_LIBRARY 
+FIND_LIBRARY(OGG_LIBRARY
     NAMES ogg libogg
     HINTS ENV OGGDIR
     PATH_SUFFIXES lib lib64 win32/Dynamic_Release "Win32/${MSVC_YEAR_NAME}/x64/Release" "Win32/${MSVC_YEAR_NAME}/Win32/Release"
@@ -44,7 +44,7 @@ FIND_LIBRARY(OGG_LIBRARY
 )
 
 # First search for d-suffixed libs
-FIND_LIBRARY(OGG_LIBRARY_DEBUG 
+FIND_LIBRARY(OGG_LIBRARY_DEBUG
     NAMES oggd ogg_d liboggd libogg_d
     HINTS ENV OGGDIR
     PATH_SUFFIXES lib lib64 win32/Dynamic_Debug "Win32/${MSVC_YEAR_NAME}/x64/Debug" "Win32/${MSVC_YEAR_NAME}/Win32/Debug"
@@ -53,7 +53,7 @@ FIND_LIBRARY(OGG_LIBRARY_DEBUG
 
 IF(NOT OGG_LIBRARY_DEBUG)
     # Then search for non suffixed libs if necessary, but only in debug dirs
-    FIND_LIBRARY(OGG_LIBRARY_DEBUG 
+    FIND_LIBRARY(OGG_LIBRARY_DEBUG
         NAMES ogg libogg
         HINTS ENV OGGDIR
         PATH_SUFFIXES win32/Dynamic_Debug "Win32/${MSVC_YEAR_NAME}/x64/Debug" "Win32/${MSVC_YEAR_NAME}/Win32/Debug"

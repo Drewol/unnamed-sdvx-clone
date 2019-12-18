@@ -53,4 +53,3 @@ public:
 	static const Color Cyan;
 };
 
- 

@@ -85,7 +85,7 @@ void DownloadScreen::OnKeyPressed(int32 key)
 {
 	lua_getglobal(m_lua, "key_pressed");
 	if (lua_isfunction(m_lua, -1))
-	{	
+	{
 		lua_pushnumber(m_lua, key);
 		if (lua_pcall(m_lua, 1, 0, 0) != 0)
 		{
@@ -138,7 +138,7 @@ void DownloadScreen::m_ArchiveLoop()
 				int res = archive_read_open_memory(a, ar.data.data(), ar.data.size());
 				if (res == ARCHIVE_OK)
 				{
-				
+
 					m_archiveLock.lock();
 					m_archiveResps.push(std::move(ar));
 					m_archiveLock.unlock();
@@ -228,7 +228,7 @@ void DownloadScreen::m_ProcessArchiveResponses()
 		}
 		archive_read_free(ar.a);
 		lua_pushstring(m_lua, ar.id.c_str());
-		
+
 		if (lua_pcall(m_lua, 2, 1, 0) != 0)
 		{
 			Logf("Lua error on calling archive callback: %s", Logger::Error, lua_tostring(m_lua, -1));
@@ -269,7 +269,7 @@ void DownloadScreen::m_ProcessArchiveResponses()
 		}
 		lua_settop(m_lua, 0);
 		luaL_unref(m_lua, LUA_REGISTRYINDEX, ar.callback);
-		
+
 		//pop response
 		m_archiveLock.lock();
 		m_archiveResps.pop();
@@ -310,7 +310,7 @@ bool DownloadScreen::m_extractFile(archive * a, String path)
 		Path::CreateDir(path);
 		return true;
 	}
-	
+
 	if (!f.OpenWrite(Path::Normalize(path)))
 	{
 		return false;

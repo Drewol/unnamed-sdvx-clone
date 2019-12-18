@@ -47,14 +47,14 @@ vec4 draw_a(vec2 uv, vec2 center)
     uv.y = (uv.y + 0.6) / 2.0;
     uv.x *= thing / 3.0;
     uv.x += timing.y * 1.0;
-	
+
 	float alpha = texture(mainTex, uv).a;
     vec4 col = vec4(1.0, 0.0, 0.0, alpha);
     vec4 clear_col = vec4(1.0, 0.1, 0.9, alpha);
-    
+
     col *= (1.0 - clearTransition);
     col += clear_col * clearTransition * 1.1;
-    
+
     if (abs(uv.y) > 1.0 || uv.y < 0.0)
         col = vec4(0);
     col.a *= 1.0 - (thing * 70.0);
@@ -74,10 +74,10 @@ vec4 draw_b(vec2 uv, vec2 center)
 	float alpha = texture(backTex, uv).a;
     vec4 col = vec4(1.0, 0.2, 0.2, alpha);
     vec4 clear_col = vec4(1.0, 0.2, 1.0, alpha);
-    
+
     col *= (1.0 - clearTransition);
     col += clear_col * clearTransition * 1.1;
-    
+
     if (abs(uv.y) > 1.0 || uv.y < 0.0)
         col = vec4(0);
     col.a *= 1.0 - (thing * 70.0);
@@ -95,5 +95,5 @@ void main()
     uv = rotate_point(center, rot * 2.0 * pi, uv);
 
 	target = draw_a(uv, center) + draw_b(uv, center);
-    
+
 }

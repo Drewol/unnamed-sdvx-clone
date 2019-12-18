@@ -38,9 +38,9 @@ draw_button = function(button, x, y)
     local ty = y - (buttonHeight / 2);
     gfx.BeginPath();
     gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE);
-	
+
 	gfx.FontSize(40);
-	
+
 	if mouse_clipped(rx,ty, buttonWidth, buttonHeight) then
        hovered = button[2];
 	   b_r, b_g, b_b, b_a = game.GetSkinSetting("col_test")
@@ -84,19 +84,19 @@ local renderY = resy/2
 function draw_cursor(x,y,deltaTime)
 	gfx.Save()
 	gfx.BeginPath()
-	
+
 	local size = 8
-	
+
 	renderY = renderY - (renderY - y) * deltaTime * 30
-	
+
 	gfx.MoveTo(x-size,renderY-size)
 	gfx.LineTo(x,renderY)
 	gfx.LineTo(x-size,renderY+size)
-	
+
 	gfx.StrokeWidth(3)
 	gfx.StrokeColor(255,255,255)
 	gfx.Stroke()
-	
+
 	gfx.Restore()
 end
 
@@ -112,7 +112,7 @@ function roundToZero(x)
 end
 
 function deltaKnob(delta)
-	if math.abs(delta) > 1.5 * math.pi then 
+	if math.abs(delta) > 1.5 * math.pi then
 		return delta + 2 * math.pi * sign(delta) * -1
 	end
 	return delta
@@ -127,12 +127,12 @@ function handle_controller()
 		lastKnobs = {game.GetKnob(0), game.GetKnob(1)}
 	else
 		local newKnobs = {game.GetKnob(0), game.GetKnob(1)}
-	
+
 		knobProgress = knobProgress - deltaKnob(lastKnobs[1] - newKnobs[1]) * 1.2
 		knobProgress = knobProgress - deltaKnob(lastKnobs[2] - newKnobs[2]) * 1.2
-		
+
 		lastKnobs = newKnobs
-		
+
 		if math.abs(knobProgress) > 1 then
 			cursorIndex = (((cursorIndex - 1) + roundToZero(knobProgress)) % #buttons) + 1
 			knobProgress = knobProgress - roundToZero(knobProgress)
@@ -160,13 +160,13 @@ render = function(deltaTime)
 	gfx.ResetTransform()
 	gfx.BeginPath()
 	gfx.GlobalCompositeOperation(gfx.BLEND_OP_SOURCE_OVER)
-	
+
 	cursorGet = 1
     buttonY = resy / 2;
     hovered = nil;
-	
+
     gfx.LoadSkinFont("NotoSans-Regular.ttf");
-	
+
 	for i=1,#buttons do
 		cursorYs[i] = buttonY
 		buttonY = buttonY + draw_button(buttons[i], resx / 2, buttonY);
@@ -174,11 +174,11 @@ render = function(deltaTime)
 			cursorIndex = i
 		end
 	end
-	
+
 	handle_controller()
-	
+
 	draw_cursor(resx/2 - 100, cursorYs[cursorIndex], deltaTime)
-	
+
     gfx.BeginPath();
     gfx.FillColor(255,255,255);
     gfx.FontSize(120);
@@ -206,7 +206,7 @@ mouse_pressed = function(button)
 end
 
 function button_pressed(button)
-    if button == game.BUTTON_STA then 
+    if button == game.BUTTON_STA then
         buttons[cursorIndex][2]()
     elseif button == game.BUTTON_BCK then
         Menu.Exit()

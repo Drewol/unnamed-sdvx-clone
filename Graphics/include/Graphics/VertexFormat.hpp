@@ -18,7 +18,7 @@ namespace Graphics
 
 	/*
 		Used By VertexFormat base class
-		see below 
+		see below
 	*/
 	struct VertexFormats
 	{
@@ -79,7 +79,7 @@ namespace Graphics
 			return res;
 		}
 	private:
-		
+
 	};
-	
+
 }

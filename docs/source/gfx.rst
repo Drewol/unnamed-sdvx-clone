@@ -16,7 +16,7 @@ Example usage
     gfx.FontSize(40)
     gfx.Text(string.format("%08d", score),desw,0)
 
-    
+
 Constants
 *************************************
 Most constants are from the nanovg library.
@@ -388,7 +388,7 @@ Fast\* and Label drawing calls made before a ForceRender call under regular draw
 functions called after a ForceRender call.
 
 This function might have a more than insignificant performance impact.
-under regular 
+under regular
 
 LoadImageJob(char* path, int placeholder, int w = 0, int h = 0)
 ****************************************************************
@@ -405,12 +405,12 @@ Example:
     if not songCache[song.id][selectedDiff] or songCache[song.id][selectedDiff] == jacketFallback then
         songCache[song.id][selectedDiff] = gfx.LoadImageJob(diff.jacketPath, jacketFallback, 200,200)
     end
-    
-    
+
+
 LoadWebImageJob(char* url, int placeholder, int w = 0, int h = 0)
 *****************************************************************
 Works the same as ``LoadImageJob`` but the path is a web url instead.
-   
+
 Scissor(float x, float y, float w, float h)
 ****************************************************************
 nanovg.h:431_

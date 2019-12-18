@@ -17,20 +17,20 @@ function open()
     options = {}
     selectedIndex = 0
     resx, resy = game.GetResolution()
-    
+
     index = 1
     if #dialog.collections == 0 then
         options[index] = {"Favourites", make_option("Favourites"), {255,255,255}}
     end
-    
+
     for i,value in ipairs(dialog.collections) do
         options[i] = {value.name, make_option(value.name), {255,255,255}}
         if value.exists then options[i][3] = {255,0,0} end
-        
+
     end
     table.insert(options, {"New Collection", menu.ChangeState, {0, 255, 128}})
     table.insert(options, {"Cancel", menu.Cancel, {200,200,200}})
-    
+
     gfx.FontFace("fallback")
     gfx.FontSize(50)
     titleText = string.format("Add %s to collection:", dialog.title)
@@ -53,7 +53,7 @@ function render(deltaTime)
     gfx.Rect(-width/2, -250, width, 500)
     gfx.FillColor(50,50,50)
     gfx.Fill()
-    
+
     gfx.BeginPath()
     gfx.FillColor(255,255,255)
     gfx.FontFace("fallback")
@@ -75,7 +75,7 @@ function render(deltaTime)
         gfx.TextAlign(gfx.TEXT_ALIGN_MIDDLE + gfx.TEXT_ALIGN_LEFT)
         for i, option in ipairs(options) do
             local y = yshift + 60 * ((i-1) - selectedIndex)
-            if y > -190 and y < 220 then 
+            if y > -190 and y < 220 then
                 gfx.FillColor(option[3][1], option[3][2], option[3][3])
                 gfx.Text(option[1], 40 - width/2, y)
             end

@@ -1,7 +1,7 @@
 #pragma once
 #include "Shared/String.hpp"
 #include "Shared/Unique.hpp"
-/* 
+/*
 	Logging utility class
 	formats loggin messages with time stamps and module names
 	allows message coloring on platforms that support it
@@ -34,7 +34,7 @@ public:
 	static Logger& Get();
 	// Sets the foreground color of the output, if applicable
 	void SetColor(Color color);
-	// Log a string to the logging output, 
+	// Log a string to the logging output,
 	void Log(const String& msg, Logger::Severity severity);
 
 	// Write log message header, (timestamp, etc..)

@@ -24,11 +24,11 @@ void BQFDSP::Process(float* out, uint32 numSamples)
 			float& sample = out[i * 2 + c];
 			float src = sample;
 
-			float filtered = 
-				(b0 / a0) * src + 
-				(b1 / a0) * zb[c][0] + 
-				(b2 / a0) * zb[c][1] - 
-				(a1 / a0) * za[c][0] - 
+			float filtered =
+				(b0 / a0) * src +
+				(b1 / a0) * zb[c][0] +
+				(b2 / a0) * zb[c][1] -
+				(a1 / a0) * za[c][0] -
 				(a2 / a0) * za[c][1];
 
 			// Shift delay buffers
@@ -118,11 +118,11 @@ void LimiterDSP::Process(float* out, uint32 numSamples)
 			float t = (1.0f - m_currentReleaseTimer / releaseTime);
 			currentGain = (1.0f / m_currentMaxVolume) * t + (1.0f - t);
 		}
-	
+
 		float maxVolume = Math::Max(abs(out[i*2]), abs(out[i * 2 + 1]));
 		out[i * 2] *= currentGain * 0.9f;
 		out[i * 2 + 1] *= currentGain * 0.9f;
-	
+
 		float currentMax = 1.0f / currentGain;
 		if(maxVolume > currentMax)
 		{
@@ -327,7 +327,7 @@ void RetriggerDSP::Process(float* out, uint32 numSamples)
 		// Sample from buffer
 		out[i * 2] = gating * pcmSource[pcmSample * 2] * mix + out[i * 2] * (1 - mix);
 		out[i * 2 + 1] = gating * pcmSource[pcmSample * 2 + 1] * mix + out[i * 2 + 1] * (1 - mix);
-		
+
 		// Increase index
 		m_currentSample = (m_currentSample + 1) % m_length;
 

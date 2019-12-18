@@ -6,7 +6,7 @@
 void SkinHttp::m_requestLoop()
 {
 	while (m_running)
-	{		
+	{
 		m_mutex.lock(); ///TODO: use semaphore?
 		if (m_requests.size() > 0)
 		{
@@ -87,7 +87,7 @@ void SkinHttp::m_PushResponse(lua_State * L, const cpr::Response & r)
 		pushString(i.first, i.second);
 	}
 	lua_settable(L, -3);
-	
+
 }
 
 SkinHttp::SkinHttp()

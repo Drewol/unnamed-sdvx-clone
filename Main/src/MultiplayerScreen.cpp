@@ -244,7 +244,7 @@ bool MultiplayerScreen::m_handleJoinRoom(nlohmann::json& packet)
 bool MultiplayerScreen::m_handleError(nlohmann::json& packet)
 {
 	g_gameWindow->ShowMessageBox("Multiplayer server closed", packet.value("error", ""), 0);
-	
+
 	// Fatal error, so leave this view
 	m_suspended = true;
 	g_application->RemoveTickable(this);
@@ -399,7 +399,7 @@ DifficultyIndex* MultiplayerScreen::m_getMapByHash(const String& hash, const Str
 	// Fallback on an empty hash
 	if (hash.length() == 0)
 		return m_getMapByShortPath(path, diffIndex, level, true);
-	
+
 	Logf("[Multiplayer] looking up song hash '%s' level %u", Logger::Info, *hash, level);
 	for (auto map : m_mapDatabase.FindMapsByHash(hash))
 	{
@@ -532,7 +532,7 @@ void MultiplayerScreen::m_changeSelectedRoom(int offset)
 		}
 	}
 	lua_settop(m_lua, 0);
-	
+
 }
 
 void MultiplayerScreen::m_changeDifficulty(int offset)
@@ -560,7 +560,7 @@ void MultiplayerScreen::m_changeDifficulty(int offset)
 		}
 	}
 	lua_settop(m_lua, 0);
-	
+
 
 }
 
@@ -760,7 +760,7 @@ void MultiplayerScreen::m_updateSelectedMap(int32 mapid, int32 diff_ind, bool is
 	// If we selected this song ourselves, we have to tell the server about it
 	if (isNew)
 	{
-		
+
 		nlohmann::json packet;
 		packet["topic"] = "room.setsong";
 		packet["song"] = shortPath;
@@ -826,7 +826,7 @@ void MultiplayerScreen::Tick(float deltaTime)
 		return;
 
 	// Lock mouse to screen when active
-	if (m_screenState == MultiplayerScreenState::ROOM_LIST && 
+	if (m_screenState == MultiplayerScreenState::ROOM_LIST &&
 		g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::LaserInputDevice) == InputDevice::Mouse && g_gameWindow->IsActive())
 	{
 		if (!m_lockMouse)
@@ -1044,7 +1044,7 @@ void MultiplayerScreen::OnKeyPressed(int32 key)
 	}
 	else if (key == SDLK_RETURN)
 	{
-		if (m_screenState == MultiplayerScreenState::JOIN_PASSWORD) 
+		if (m_screenState == MultiplayerScreenState::JOIN_PASSWORD)
 		{
 			lJoinWithPassword(NULL);
 		}
@@ -1323,7 +1323,7 @@ int MultiplayerScreen::lJoinWithPassword(lua_State* L)
 		m_roomToJoin = luaL_checkstring(L, 2);
 		m_textInput->Reset();
 		m_textInput->SetActive(true);
-		
+
 
 		m_screenState = MultiplayerScreenState::JOIN_PASSWORD;
 		lua_pushstring(m_lua, "passwordScreen");

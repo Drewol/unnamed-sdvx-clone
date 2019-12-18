@@ -45,7 +45,7 @@ bool File::OpenRead(const String& path)
 }
 bool File::OpenWrite(const String& path, bool append /*= false*/, bool noLog /*= false*/)
 {
-	Close(); 
+	Close();
 	WString wstringPath = Utility::ConvertToWString(path);
 	HANDLE h = CreateFileW(*wstringPath,
 		GENERIC_WRITE, // Desired Access

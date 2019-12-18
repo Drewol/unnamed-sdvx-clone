@@ -28,7 +28,7 @@ namespace Graphics
 		Material mat;
 		MaterialParameterSet params;
 		// The world transform
-		Transform worldTransform; 
+		Transform worldTransform;
 		// Scissor rectangle
 		Rect scissorRect;
 	};

@@ -3,9 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. code blocks use C# sometimes for syntax highligiting though it's just 
+.. code blocks use C# sometimes for syntax highligiting though it's just
    lists or pseudo code.
-   
+
 Welcome to usc's documentation!
 ===============================
 
@@ -13,7 +13,7 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-   
+
    game
    gfx
    gameplay

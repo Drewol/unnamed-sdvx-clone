@@ -40,7 +40,7 @@ public:
 	{
 		return m_time;
 	}
-	
+
 private:
 	std::tm* m_tm;
 	time_t m_time;

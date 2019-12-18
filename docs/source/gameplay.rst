@@ -14,13 +14,13 @@ The following fields are available under the ``gameplay`` table:
     float hispeed
     float bpm
     float gauge
-	
+
 	//the following are all in the range 0.0 - 1.0
     float hiddenCutoff
     float suddenCutoff
     float hiddenFade
     float suddenFade
-	
+
     bool autoplay
     int gaugeType // 1 = hard, 0 = normal
     int comboState // 2 = puc, 1 = uc, 0 = normal
@@ -28,8 +28,8 @@ The following fields are available under the ``gameplay`` table:
     bool[2] laserActive // Array indicating if the laser cursor is on a laser, in order: LR
     ScoreReplay[] scoreReplays //Array of previous scores for the current song
     CritLine critLine // info about crit line and everything attached to it
-    
-Example:    
+
+Example:
 
 .. code-block:: lua
 
@@ -48,21 +48,21 @@ Example:
     comboScale = comboScale - deltaTime * 3
     gfx.Text(tostring(combo), posx, posy)
 
-    
+
 ScoreReplay
 ***********
 A ``ScoreReplay`` contains the following fields:
-    
+
 .. code-block:: c
 
     int maxScore //the final score of this replay
     int currentScore //the current score of this replay
 
-    
+
 CritLine
 ********
 A ``CritLine`` contains the following fields:
-    
+
 .. code-block:: c
 
     int x //the x screen coordinate of the center of the critical line
@@ -71,23 +71,23 @@ A ``CritLine`` contains the following fields:
     Cursor[] cursors //the laser cursors, indexed 0 and 1 for left and right
     Line line // Line going from the left corner of the track to the right
 
-    
+
 Cursor
 ******
 A ``Cursor`` contains the following fields:
-    
+
 .. code-block:: c
 
     float pos //the x position relative to the center of the crit line
     float alpha //the transparency of this cursor. 0 is transparent, 1 is opaque
     float skew //the x skew of this cursor to simulate a more 3d look
-    
+
 Line
 ****
 A ``Line`` contains the following fields:
 
 .. code-block:: c
-    
+
     float x1 // start x coordinate
     float y1 // start y coordinate
     float x2 // end x coordinate
@@ -141,11 +141,11 @@ For starting laser alert animations::
 
     if isRight == true then restart right alert animation
     else restart left alert animation
-    
+
 render(deltaTime)
 ^^^^^^^^^^^^^^^^^
 The GUI render call. This is called last and will draw over everything else.
-    
+
 render_crit_base(deltaTime)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Function to render the base of the critical line. This function will be called
@@ -154,7 +154,7 @@ effects. Use this to draw the critical line itself as well as the darkening effe
 placed over the playable objects.
 
 See the default skin for an example.
-    
+
 render_crit_overlay(deltaTime)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Function to render the rest of the critical line, this is the last thing to be called
@@ -162,7 +162,7 @@ before ``render`` so anything else which belongs above the built-in particle eff
 This is the place to draw the laser cursors.
 
 See the default skin for an example.
-    
+
 render_intro(deltaTime)
 ^^^^^^^^^^^^^^^^^^^^^^^
 Function for rendering an intro or keeping an intro timer. This function will be
@@ -189,7 +189,7 @@ when the outro has completed and the second must be a number that sets the playb
 speed, like so:
 
 .. code-block:: lua
-    
+
     local outroTimer = 0
     --Slows the playback to a stop for the first second
     --and then goes to the result screen after another second

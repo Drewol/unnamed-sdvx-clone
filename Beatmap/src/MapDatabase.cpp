@@ -92,7 +92,7 @@ public:
 		}
 		else
 		{
-			// Create DB 
+			// Create DB
 			m_database.Exec("DROP TABLE IF EXISTS Database");
 			m_database.Exec("CREATE TABLE Database(version INTEGER)");
 			m_database.Exec(Utility::Sprintf("INSERT OR REPLACE INTO Database(rowid, version) VALUES(1, %d)", m_version));
@@ -162,7 +162,7 @@ public:
 
 		if(m_thread.joinable())
 			m_thread.join();
-		// Apply previous diff to prevent duplicated entry 
+		// Apply previous diff to prevent duplicated entry
 		Update();
 		// Create initial data set to compare to when evaluating if a file is added/removed/updated
 		m_LoadInitialData();
@@ -246,7 +246,7 @@ public:
 
 		return res;
 	}
-	
+
 	Map<int32, MapIndex*> FindMaps(const String& searchString)
 	{
 		WString test = Utility::ConvertToWString(searchString);
@@ -259,7 +259,7 @@ public:
 		{
 			if(i > 0)
 				stmt += " AND";
-			stmt += " (artist LIKE \"%" + term + "%\"" + 
+			stmt += " (artist LIKE \"%" + term + "%\"" +
 				" OR title LIKE \"%" + term + "%\"" +
 				" OR path LIKE \"%" + term + "%\"" +
 				" OR tags LIKE \"%" + term + "%\")";
@@ -450,7 +450,7 @@ public:
 				update.BindInt(4, e.id);
 				update.Step();
 				update.Rewind();
-				
+
 				auto itDiff = m_difficulties.find(e.id);
 				assert(itDiff != m_difficulties.end());
 
@@ -707,7 +707,7 @@ private:
 
 		// Select Scores
 		DBStatement scoreScan = m_database.Query("SELECT rowid,score,crit,near,miss,gauge,gameflags,hitstats,timestamp,diffid FROM Scores");
-		
+
 		while (scoreScan.StepRow())
 		{
 			ScoreIndex* score = new ScoreIndex();
@@ -875,7 +875,7 @@ private:
 							amount_read += read_size;
 						}
 						while (amount_read < sizeof(data_buffer) && read_size != 0);
-						
+
 						s.processBytes(data_buffer, amount_read);
 						s.getDigest(digest);
 

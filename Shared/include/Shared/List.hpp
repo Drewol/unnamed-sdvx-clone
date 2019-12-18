@@ -1,7 +1,7 @@
 #pragma once
 #include <list>
 
-/* 
+/*
 	Doubly linked list
 	wrapper around std::list
 */

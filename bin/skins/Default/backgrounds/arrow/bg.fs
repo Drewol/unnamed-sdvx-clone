@@ -60,17 +60,17 @@ void main()
     uv.y = (uv.y + 1.0) / 2.0;
     uv.x *= thing / 3.0;
     uv.x += timing.y * 1.0;
-	
+
     vec4 col = texture(mainTex, uv) * 0.75;
     vec4 clear_col = texture(mainTexClear, uv);
-    
+
     col *= (1.0 - clearTransition);
     col += clear_col * clearTransition * 1.3;
-    
+
     if (abs(uv.y) > 1.0 || uv.y < 0.0)
         col = vec4(0);
     col.a *= 1.0 - (thing * 70.0);
 
 	target = col;
-    
+
 }

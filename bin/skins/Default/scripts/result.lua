@@ -64,7 +64,7 @@ draw_stat = function(x,y,w,h, name, value, format,r,g,b)
     gfx.BeginPath()
     gfx.MoveTo(0,h)
     gfx.LineTo(w,h)
-    if r then gfx.StrokeColor(r,g,b) 
+    if r then gfx.StrokeColor(r,g,b)
     else gfx.StrokeColor(200,200,200) end
     gfx.StrokeWidth(1)
     gfx.Stroke()
@@ -118,7 +118,7 @@ draw_highscores = function()
             gfx.Text(os.date("%Y-%m-%d %H:%M:%S", s.timestamp), 650, ypos + 45)
         end
         if s.name ~= nil then
-            gfx.Text(s.name, 650, ypos + 45) 
+            gfx.Text(s.name, 650, ypos + 45)
         end
     end
 end
@@ -127,7 +127,7 @@ draw_graph = function(x,y,w,h)
     gfx.BeginPath()
     gfx.Rect(x,y,w,h)
     gfx.FillColor(0,0,0,210)
-    gfx.Fill()    
+    gfx.Fill()
     gfx.BeginPath()
     gfx.MoveTo(x,y + h - h * result.gaugeSamples[1])
     for i = 2, #result.gaugeSamples do
@@ -166,13 +166,13 @@ render = function(deltaTime, showStats)
         gradeImg = gfx.CreateSkinImage(string.format("score/%s.png", result.grade),0)
         local gradew,gradeh = gfx.ImageSize(gradeImg)
         gradear = gradew/gradeh
-        lastGrade = result.grade 
+        lastGrade = result.grade
     end
     gfx.BeginPath()
     gfx.Rect(0,0,500,800)
     gfx.FillColor(30,30,30)
     gfx.Fill()
-    
+
     --Title and jacket
     gfx.LoadSkinFont("NotoSans-Regular.ttf")
     gfx.BeginPath()
@@ -199,13 +199,13 @@ render = function(deltaTime, showStats)
     gfx.FontSize(20)
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_MIDDLE)
     gfx.Text(string.format("%d%%", math.floor(result.gauge * 100)),410,390 - 90 * result.gauge)
-	
+
 	if result.autoplay then
 	    gfx.FontSize(50)
 		gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
 		gfx.Text("Autoplay", 250, 345)
 	end
-	
+
     --Score data
     gfx.BeginPath()
     gfx.RoundedRect(120,400,500 - 240,60,30);
@@ -236,7 +236,7 @@ render = function(deltaTime, showStats)
     draw_line(10,505,480,505, 1.5, 255,150,0)
     draw_line(10,545,480,545, 1.5, 255,0,200)
     draw_line(10,585,480,585, 1.5, 255,0,0)
-    
+
     local staty = 620
     staty = draw_stat(10,staty,470,30,"MAX COMBO", result.maxCombo, "%d")
     staty = staty + 10
@@ -248,11 +248,11 @@ render = function(deltaTime, showStats)
 
 
     draw_highscores()
-    
+
     gfx.LoadSkinFont("NotoSans-Regular.ttf")
     shotTimer = math.max(shotTimer - deltaTime, 0)
     if shotTimer > 1 then
         draw_shotnotif(505,755);
     end
-    
+
 end

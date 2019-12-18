@@ -7,7 +7,7 @@ layout(location=0) out vec4 target;
 uniform sampler2D mainTex;
 
 void main()
-{	
+{
     float x = fsTex.x;
     if (x < 0.0 || x > 1.0)
     {

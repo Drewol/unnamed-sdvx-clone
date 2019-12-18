@@ -61,7 +61,7 @@ public:
 	virtual void Tick(float deltaTime)
 	{
 		m_transitionTimer += deltaTime;
-		
+
 		if(m_transition == Wait && m_lastComplete)
 		{
 			m_transition = Out;
@@ -166,7 +166,7 @@ public:
 			}
 
 			g_application->ForceRender();
-			
+
 			//draw lua
 			lua_getglobal(m_lua, "render_out");
 			lua_pushnumber(m_lua, deltaTime);

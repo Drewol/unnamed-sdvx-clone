@@ -108,5 +108,5 @@ private:
 	Vector<String> m_samplePaths;
 	Vector<String> m_switchablePaths;
 	BeatmapSettings m_settings;
-	
+
 };

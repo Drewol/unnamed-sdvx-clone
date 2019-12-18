@@ -206,7 +206,7 @@ public:
 #if _DEBUG
 	~IRefCounted()
 	{
-		// Should never happen, object will always 
+		// Should never happen, object will always
 		assert(!m_refCount || m_refCount[0] <= 0);
 	}
 #endif

@@ -45,7 +45,7 @@ struct SkinSetting
 			char* def;
 			bool secret;
 		} textSetting;
-		
+
 		struct {
 			Color* def;
 			bool hsv;

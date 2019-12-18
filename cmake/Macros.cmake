@@ -22,7 +22,7 @@ endmacro(precompiled_header_exclude)
 
 # Set output binary postfixes so that they will be named <project>_<configuration>.exe/dll
 macro(set_output_postfixes projectName)
-    set_target_properties(${projectName} PROPERTIES 
+    set_target_properties(${projectName} PROPERTIES
         OUTPUT_NAME_DEBUG ${projectName}_Debug
         OUTPUT_NAME_RELEASE ${projectName})
 endmacro(set_output_postfixes)

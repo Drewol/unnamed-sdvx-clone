@@ -39,7 +39,7 @@ bool AudioStreamMp3::Init(Audio* audio, const String& path, bool preload)
 	///TODO: Write non-preload functions
 	if(!AudioStreamBase::Init(audio, path, true)) // Always preload for now
 		return false;
-	
+
 
 	// Always use preloaded data
 	m_mp3dataLength = m_reader().GetSize();
@@ -105,7 +105,7 @@ bool AudioStreamMp3::Init(Audio* audio, const String& path, bool preload)
 					i++;
 					continue;
 				}
-				
+
 				i += frameLength;
 				uint32 frameSamples = (linearVersion == 0) ? 1152 : 576;
 				m_frameIndices.Add((int32)sampleOffset, i);
@@ -142,7 +142,7 @@ bool AudioStreamMp3::Init(Audio* audio, const String& path, bool preload)
 			for (size_t i = 0; i < r; i++)
 			{
 				m_pcm.Add(m_readBuffer[0][i]);
-				m_pcm.Add(m_readBuffer[1][i]);	
+				m_pcm.Add(m_readBuffer[1][i]);
 			}
 			totalSamples += r;
 			r = DecodeData_Internal();

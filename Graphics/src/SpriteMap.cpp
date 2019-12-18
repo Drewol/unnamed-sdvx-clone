@@ -132,7 +132,7 @@ namespace Graphics
 					break;
 				}
 			}
-			
+
 			return *dstCat;
 		}
 		virtual uint32 AddSegment(Image image)

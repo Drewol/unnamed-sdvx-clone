@@ -142,9 +142,9 @@ public:
 
 		// Select default device
 		IMMDevice* defaultDevice = nullptr;
-		m_deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &defaultDevice);		
+		m_deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &defaultDevice);
 		return OpenDevice(defaultDevice);
-	}	
+	}
 	void CloseDevice()
 	{
 		if(m_audioClient)
@@ -205,7 +205,7 @@ public:
 
 				int numDepths = 3;
 				int bitDepths[3] = {32, 24, 16 };
-				
+
 				Vector<WAVEFORMATEX> allFormats;
 				for (size_t f = 0; f < numFormats; f++)
 				{

@@ -73,7 +73,7 @@ namespace Graphics
 		bool IsFullscreen() const;
 
 		int GetDisplayIndex() const;
-		
+
 		// Checks if a key is pressed
 		bool IsKeyPressed(int32 key) const;
 
@@ -106,7 +106,7 @@ namespace Graphics
 		Delegate<MouseButton> OnMouseReleased;
 		Delegate<int32, int32> OnMouseMotion;
 		Delegate<SDL_Event> OnAnyEvent;
-		// Mouse scroll wheel 
+		// Mouse scroll wheel
 		//	Positive for scroll down
 		//	Negative for scroll up
 		Delegate<int32> OnMouseScroll;

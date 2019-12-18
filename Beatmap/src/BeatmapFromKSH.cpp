@@ -936,7 +936,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 				else
 				{
 					ButtonObjectState* obj = new ButtonObjectState();
-					
+
 					obj->time = state->startTime;
 					obj->index = i;
 					obj->hasSample = state->usingSample;
@@ -945,7 +945,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 					m_objectStates.Add(*obj);
 				}
 
-				// Reset 
+				// Reset
 				delete state;
 				state = nullptr;
 			};
@@ -988,7 +988,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 				{
 					// FX object '2' is always individual
 					state->fineSnap = c != '2';
-					
+
 					// Set effect
 					if (c == 'B')
 					{

@@ -8,7 +8,7 @@ enum class FileType
 	Folder
 };
 
-/* 
+/*
 	Result of file finding operations
 */
 struct FileInfo

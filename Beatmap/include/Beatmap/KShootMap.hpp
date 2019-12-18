@@ -23,8 +23,8 @@ public:
 	String buttons, fx, laser, add;
 };
 
-/* 
-	A single bar in the map file 
+/*
+	A single bar in the map file
 */
 class KShootBlock
 {
@@ -49,7 +49,7 @@ struct KShootEffectDefinition
 	Map<String, String> parameters;
 };
 
-/* 
+/*
 	Map class for that splits up maps in the ksh format into Ticks and Blocks
 */
 class KShootMap

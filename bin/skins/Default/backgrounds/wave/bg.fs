@@ -69,7 +69,7 @@ float GetDistanceShape(vec2 st, int N){
   int N = 4;
 
   // "Stretch" | lower = "Stretchier"
-  float Stretch = .3; 
+  float Stretch = .3;
 
   // Speed
   float speed = 1;
@@ -79,20 +79,20 @@ float GetDistanceShape(vec2 st, int N){
 
   // Rotation of texture for alignment, in radians
   float BaseTexRotation = 0.0;
-  
+
   // Scale
   vec2 Scale = vec2(1.0, 0.6);
 
 void main()
 {
     float ar = float(viewport.x) / viewport.y;
-    
+
 	vec2 uv = vec2(texVp.x / viewport.x, texVp.y / viewport.y);
     uv.x *= ar;
-    
+
     vec2 center = vec2(screenCenter) / vec2(viewport);
     center.x *= ar;
-    
+
     vec2 point = uv;
 	float bgrot =  dot(tilt, vec2(0.5, 1.0));
     point = rotate_point(center, BaseRotation + (bgrot * TWO_PI), point);
@@ -105,7 +105,7 @@ void main()
     float texY = thing2;
     texY += timing.y * speed;
 
-    
+
     float rot = (atan(point_diff.x,point_diff.y) + BaseTexRotation) / TWO_PI;
 
     vec4 col = texture(mainTex, vec2(rot,texY));

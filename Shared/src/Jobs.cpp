@@ -47,7 +47,7 @@ public:
 	List<Job> m_jobQueue;
 	// Contains tasks that are done
 	List<Job> m_finishedJobs;
-	
+
 	Mutex m_lock;
 	Vector<JobThread*> m_threadPool;
 

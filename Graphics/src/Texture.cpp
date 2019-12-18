@@ -79,7 +79,7 @@ namespace Graphics
 			GLenum err;
 			bool errored = false;
 			while ((err = glGetError()) != GL_NO_ERROR)
-			{			
+			{
 				Logf("OpenGL Error: 0x%p", Logger::Severity::Error, err);
 				errored = true;
 			}

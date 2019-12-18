@@ -96,7 +96,7 @@ namespace Graphics
 				jpeg_destroy_decompress(&cinfo);
 				return true;
 			}
-			
+
 			// If we get here, the loading of the jpeg failed
 			return false;
 		}

@@ -13,9 +13,9 @@ The structure of the json looks like this:
 			"default" : "default_value",
 			"label" : "not required, key will be used as label if missing"
 		},
-		
+
 		"separator_XXX" : {},
-		
+
 		"Label Text" : { "type" : "label" }
 	}
 
@@ -100,7 +100,7 @@ It looks like this
 
 	{
 		"Gameplay:" : { "type" : "label" },
-		
+
 		"earlate_position": {
 			"type": "selection",
 			"label": "Early/Late display position",
@@ -112,7 +112,7 @@ It looks like this
 			"label" : "Display name",
 			"default" : "Guest"
 		},
-		
+
 		"separator_a" : {},
 		"Song select:" : { "type" : "label" },
 		"show_guide": {
@@ -129,7 +129,7 @@ It looks like this
 			"max": 100.0,
 			"min": -100.0
 		},
-		
+
 		"Ineger_test" : {
 			"type": "int",
 			"label": "Ineger Test with range -100<->100",
@@ -137,7 +137,7 @@ It looks like this
 			"max": 100,
 			"min": -100
 		},
-		
+
 		"col_test" : {
 			"type": "color",
 			"label": "Color Test",

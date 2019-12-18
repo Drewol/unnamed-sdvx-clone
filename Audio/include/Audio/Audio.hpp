@@ -10,7 +10,7 @@ extern class Audio* g_audio;
 	also handles mixing and DSP's on playing items
 */
 class Audio : Unique
-{ 
+{
 public:
 	Audio();
 	~Audio();

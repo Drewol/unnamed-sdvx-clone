@@ -229,7 +229,7 @@ private:
 	template<typename EnumClass>
 	typename EnumClass::EnumType EnumSetting(GameConfigKeys key, String label)
 	{
-		
+
 		EnumStringMap<typename EnumClass::EnumType> nameMap = EnumClass::GetMap();
 		Vector<const char*> names;
 		int value = (int)g_gameConfig.GetEnum<EnumClass>(key);
@@ -297,7 +297,7 @@ public:
 	//TODO: Controller support and the rest of the options and better layout
 	bool Init()
 	{
-		m_gamePads = g_gameWindow->GetGamepadDeviceNames();	
+		m_gamePads = g_gameWindow->GetGamepadDeviceNames();
 		m_skins = Path::GetSubDirs("./skins/");
 		m_nctx = nk_sdl_init((SDL_Window*)g_gameWindow->Handle());
 		g_gameWindow->OnAnyEvent.Add(this, &SettingsScreen_Impl::UpdateNuklearInput);
@@ -348,7 +348,7 @@ public:
 			{
 				nk_font_atlas_add_from_file(atlas, Path::Normalize(Path::Absolute("fonts/settings/DroidSansFallback.ttf")).c_str(), 24, &cfg_cjk);
 			}
-			
+
 			nk_sdl_font_stash_end();
 			nk_font_atlas_cleanup(atlas);
 			//nk_style_load_all_cursors(m_nctx, atlas->cursors);
@@ -665,7 +665,7 @@ public:
 		m_gamepadIndex = controllerindex;
 		m_isGamepad = gamepad;
 		m_knobs = (key == GameConfigKeys::Controller_Laser0Axis || key == GameConfigKeys::Controller_Laser1Axis);
-			
+
 	}
 
 	bool Init()
@@ -866,7 +866,7 @@ public:
 		if (m_state)
 		{
 			float sens = 6.0 / (m_delta / m_currentSetting);
-			
+
 			g_application->FastText("Turn left knob one revolution clockwise", g_resolution.x / 2, g_resolution.y / 2, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 			g_application->FastText("then press start.", g_resolution.x / 2, g_resolution.y / 2 + 45, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 			g_application->FastText(Utility::Sprintf("Current Sens: %.2f", sens), g_resolution.x / 2, g_resolution.y / 2 + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);

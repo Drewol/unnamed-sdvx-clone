@@ -24,7 +24,7 @@ struct SwitchableAudio {
 	Ref<AudioStream> m_audio;
 };
 
-/* 
+/*
 	Handles playback of map audio
 	keeps track of the state of sound effects
 */
@@ -71,7 +71,7 @@ public:
 	// Toggle FX track or normal track
 	// this is just to support maps that do actually have an FX track
 	void SetFXTrackEnabled(bool enabled);
-	
+
 	// Switch audio track
 	void SetSwitchableTrackEnabled(int index, bool enabled);
 	void ResetSwitchableTracks();
@@ -100,7 +100,7 @@ private:
 	Vector<SwitchableAudio> m_switchables;
 	Vector<int32> m_enabledSwitchables;
 	int32 m_laserSwitchable = -1;
-	
+
 
 	float m_musicVolume = 1.0f;
 

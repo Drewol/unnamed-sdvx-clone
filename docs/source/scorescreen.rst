@@ -26,7 +26,7 @@ The following fields are available under the ``result`` table:
     int badge //same as song wheel badge (except 0 which means the user manually exited)
     float gaugeSamples[256] //gauge values sampled throughout the song
     string grade // "S", "AAA+", "AAA", etc.
-    score[] highScores // Same as song wheel scores 
+    score[] highScores // Same as song wheel scores
 
 Calls made to lua
 *****************

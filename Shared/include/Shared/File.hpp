@@ -32,8 +32,8 @@ public:
 	static uint64 GetLastWriteTime(const String& path);
 };
 
-/* 
-	Functions for resources compiled with the executable 
+/*
+	Functions for resources compiled with the executable
 	WINDOWS ONLY
 */
 namespace EmbeddedResource

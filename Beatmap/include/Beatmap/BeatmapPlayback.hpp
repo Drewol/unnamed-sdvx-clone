@@ -41,7 +41,7 @@ public:
 	const TimingPoint& GetCurrentTimingPoint() const;
 	// Get the timing point at a given time
 	const TimingPoint* GetTimingPointAt(MapTime time) const;
-	
+
 	// The beatmap this player is using
 	const Beatmap& GetBeatmap() { return *m_beatmap; }
 
@@ -91,7 +91,7 @@ public:
 	Delegate<HoldObjectState*> OnFXBegin;
 	// Called when an FX button with effect leaves
 	Delegate<HoldObjectState*> OnFXEnd;
-	
+
 	// Called when a new timing point becomes active
 	Delegate<TimingPoint*> OnTimingPointChanged;
 

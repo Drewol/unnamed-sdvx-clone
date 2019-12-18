@@ -465,13 +465,13 @@ void Scoring::m_CalculateHoldTicks(HoldObjectState* hold, Vector<MapTime>& ticks
 	const TimingPoint* tp = m_playback->GetTimingPointAt(hold->time);
 
 	// Tick rate based on BPM
-	double tickInterval = m_CalculateTicks(tp); 
+	double tickInterval = m_CalculateTicks(tp);
 
 	double tickpos = hold->time;
 	if (!hold->prev) // no tick at the very start of a hold
 	{
 		tickpos += tickInterval;
-	}	
+	}
 	while (tickpos < hold->time + hold->duration - tickInterval)
 	{
 		ticks.Add((MapTime)tickpos);
@@ -505,7 +505,7 @@ void Scoring::m_CalculateLaserTicks(LaserObjectState* laserRoot, Vector<ScoreTic
 			ScoreTick& t = ticks.Add(ScoreTick(*sectionStart));
 			t.time = sectionStartTime + (MapTime)(tickInterval*(double)i);
 			t.flags = TickFlags::Laser;
-			
+
 			// Link this tick to the correct segment
 			if(sectionStart->next && (sectionStart->time + sectionStart->duration) <= t.time)
 			{
@@ -540,7 +540,7 @@ void Scoring::m_CalculateLaserTicks(LaserObjectState* laserRoot, Vector<ScoreTic
 			{
 				sectionStart = nullptr;
 				sectionStartTime = it->time;
-			}		  
+			}
 		}
 		else
 		{
@@ -572,7 +572,7 @@ void Scoring::m_OnObjectEntered(ObjectState* obj)
 	{
 		const TimingPoint* tp = m_playback->GetTimingPointAt(obj->time);
 		HoldObjectState* hold = (HoldObjectState*)obj;
-		
+
 		// Add all hold ticks
 		Vector<MapTime> holdTicks;
 		m_CalculateHoldTicks(hold, holdTicks);
@@ -670,7 +670,7 @@ void Scoring::m_UpdateTicks()
 
 					// Check buttons here for holds
 					if((m_input && m_input->GetButton(button) && holdStart - holdHitTime < m_buttonHitTime[(uint8)button]) || autoplay || autoplayButtons)
-					{							
+					{
 						m_TickHit(tick, buttonCode);
 						HitStat* stat = new HitStat(tick->object);
 						stat->time = currentTime;
@@ -828,7 +828,7 @@ void Scoring::m_TickHit(ScoreTick* tick, uint32 index, MapTime delta /*= 0*/)
 				timedHits[0]++;
 			else
 				timedHits[1]++;
-			
+
 			currentGauge += shortGaugeGain / 3.0f;
 		}
 		m_AddScore((uint32)stat->rating);
@@ -881,7 +881,7 @@ void Scoring::m_TickMiss(ScoreTick* tick, uint32 index, MapTime delta)
 	}
 	if(tick->HasFlag(TickFlags::Button))
 	{
-		OnButtonMiss.Call((Input::Button)index, delta < 0 && abs(delta) > goodHitTime, tick->object); 
+		OnButtonMiss.Call((Input::Button)index, delta < 0 && abs(delta) > goodHitTime, tick->object);
 		stat->rating = ScoreHitRating::Miss;
 		stat->delta = delta;
 		currentGauge -= shortMissDrain;
@@ -895,7 +895,7 @@ void Scoring::m_TickMiss(ScoreTick* tick, uint32 index, MapTime delta)
 	else if(tick->HasFlag(TickFlags::Laser))
 	{
 		LaserObjectState* obj = (LaserObjectState*)tick->object;
-		
+
 		if (tick->HasFlag(TickFlags::Slam))
 		{
 			currentGauge -= shortMissDrain;
@@ -1007,7 +1007,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 			}
 			it++;
 		}
-		
+
 		LaserObjectState* currentSegment = m_currentLaserSegments[i];
 		if(currentSegment)
 		{
@@ -1079,9 +1079,9 @@ void Scoring::m_UpdateLasers(float deltaTime)
 						laserPositions[i] = Math::Max(laserPositions[i] + input, laserTargetPositions[i]);
 				}
 
-				
+
 				notAffectingGameplay = false;
-				
+
 				float punishMult = 1.0f;
 				//if next segment is the opposite direction then allow for some extra wrong turning
 				if(currentSegment->next && currentSegment->next->GetDirection() != laserDir && currentSegment->next->GetDirection() != 0.0f)
@@ -1142,7 +1142,7 @@ void Scoring::m_OnButtonPressed(Input::Button buttonCode)
 			//Logf("Button %d press bounce guard hit at %dms", Logger::Info, buttonCode, m_playback->GetLastTime());
 			return;
 		}
-		
+
 		//Logf("Button %d pressed at %dms", Logger::Info, buttonCode, m_playback->GetLastTime());
 		m_buttonHitTime[(uint32)buttonCode] = m_playback->GetLastTime();
 		m_buttonGuardTime[(uint32)buttonCode] = m_playback->GetLastTime();

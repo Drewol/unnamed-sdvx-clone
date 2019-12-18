@@ -306,7 +306,7 @@ void TCPSocket::m_pushJsonObject(lua_State* L, const nlohmann::json& packet)
 	{
 		const String& key = el.key();
 		auto& val = el.value();
-		
+
 		lua_pushstring(L, key.c_str());
 		m_pushJsonValue(L, val);
 		lua_settable(L, -3);
@@ -332,7 +332,7 @@ void TCPSocket::ProcessSocket()
 
 		if (!m_readyToRead())
 			return;
-		
+
 		// Get a byte to indicate the packet type
 		unsigned char mode;
 		if (recv(m_socket, (char*)&mode, 1, 0) <= 0)
@@ -382,7 +382,7 @@ void TCPSocket::ProcessSocket()
 
 		// Update total amount read
 		m_amountRead += newRead;
-		
+
 		// Parse out any packets in the buffer currently
 		while (m_readingMode != TCPPacketMode::NOT_READING)
 		{
@@ -433,7 +433,7 @@ void TCPSocket::ProcessSocket()
 				Close();
 				return;
 			}
-			
+
 		}
 
 		// Check if we need to expand the buffer
