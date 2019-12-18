@@ -5,7 +5,7 @@
 	Action is an objects that holds the neccesary information to call a single static function / member function / lambda
 */
 template<typename R = void, typename... A>
-class Action : public Unique
+class Action : public NonCopyable
 {
 public:
 	Action() = default;

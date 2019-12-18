@@ -1,12 +1,12 @@
 #pragma once
 #include "Shared/String.hpp"
-#include "Shared/Unique.hpp"
+#include "Shared/NonCopyable.hpp"
 /* 
 	Logging utility class
 	formats loggin messages with time stamps and module names
 	allows message coloring on platforms that support it
 */
-class Logger : Unique
+class Logger : NonCopyable
 {
 public:
 	enum Color

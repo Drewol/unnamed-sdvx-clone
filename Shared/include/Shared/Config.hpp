@@ -2,7 +2,7 @@
 #include "Shared/ConfigEntry.hpp"
 #include "Shared/Map.hpp"
 #include "Shared/Enum.hpp"
-#include "Shared/Unique.hpp"
+#include "Shared/NonCopyable.hpp"
 #include "Shared/BinaryStream.hpp"
 
 /*
@@ -10,7 +10,7 @@
 	Used to save and load data to a text file format
 	The config file uses an enum key to index the config file members
 */
-class ConfigBase : public Unique
+class ConfigBase : public NonCopyable
 {
 public:
 	virtual ~ConfigBase();

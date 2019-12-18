@@ -2,7 +2,7 @@
 	Systems for performing asynchronous tasks and waiting for them, etc.
 */
 #pragma once
-#include "Shared/Unique.hpp"
+#include "Shared/NonCopyable.hpp"
 #include "Shared/Ref.hpp"
 #include "Shared/Delegate.hpp"
 
@@ -23,7 +23,7 @@ JobFlags operator&(JobFlags a, JobFlags b);
 	abstract
 	override this class or use a LambdaJob to create a runnable task
 */
-class JobBase : public Unique
+class JobBase : public NonCopyable
 {
 public:
 	virtual ~JobBase() = default;
@@ -97,7 +97,7 @@ Job JobBase::CreateLambda(Lambda&& obj, Args... args)
 	The manager for performing asynchronous tasks
 	you should only have one of these
 */
-class JobSheduler : public Unique
+class JobSheduler : public NonCopyable
 {
 public:
 	JobSheduler();

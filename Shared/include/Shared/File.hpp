@@ -1,9 +1,9 @@
 #pragma once
-#include "Shared/Unique.hpp"
+#include "Shared/NonCopyable.hpp"
 #include "Shared/String.hpp"
 #include "Shared/Buffer.hpp"
 
-class File : Unique
+class File : NonCopyable
 {
 private:
 	class File_Impl* m_impl = nullptr;

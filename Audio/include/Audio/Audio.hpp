@@ -9,7 +9,7 @@ extern class Audio* g_audio;
 	keeps track of active samples and audio streams
 	also handles mixing and DSP's on playing items
 */
-class Audio : Unique
+class Audio : NonCopyable
 { 
 public:
 	Audio();

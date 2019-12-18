@@ -3,7 +3,7 @@
 #include "Shared/Vector.hpp"
 #include "Shared/Ref.hpp"
 #include "Shared/TypeInfo.hpp"
-#include "Shared/Unique.hpp"
+#include "Shared/NonCopyable.hpp"
 #include "Shared/Log.hpp"
 #include "Shared/Thread.hpp"
 
@@ -22,7 +22,7 @@ public:
 	the GarbageCollect function checks these and cleans up unused ones
 */
 template<typename T>
-class ResourceManager : public IResourceManager, Unique
+class ResourceManager : public IResourceManager, NonCopyable
 {
 	// List of managed object
 	Vector<Ref<T>> m_objects;

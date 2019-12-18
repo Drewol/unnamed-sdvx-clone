@@ -1,12 +1,12 @@
 #pragma once
 #include "Shared/Vector.hpp"
-#include "Shared/Unique.hpp"
+#include "Shared/NonCopyable.hpp"
 #include <initializer_list>
 
 /*
 	Simple buffer class, extends a byte vector (uint8)
 */
-class Buffer : public Vector<uint8>, Unique
+class Buffer : public Vector<uint8>, NonCopyable
 {
 public:
 	using Vector<uint8>::Vector;

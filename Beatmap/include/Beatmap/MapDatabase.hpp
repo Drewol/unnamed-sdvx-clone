@@ -64,7 +64,7 @@ struct MapIndex
 	Vector<DifficultyIndex*> difficulties;
 };
 
-class MapDatabase : public Unique
+class MapDatabase : public NonCopyable
 {
 public:
 	MapDatabase();

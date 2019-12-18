@@ -1,6 +1,6 @@
 #pragma once
 #include "Shared/BinaryStream.hpp"
-#include "Shared/Unique.hpp"
+#include "Shared/NonCopyable.hpp"
 #include "Shared/Buffer.hpp"
 
 class MemoryStreamBase : public BinaryStream

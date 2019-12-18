@@ -50,7 +50,7 @@ struct BeatmapSettings
 /*
 	Generic beatmap format, Can either load it's own format or KShoot maps
 */
-class Beatmap : public Unique
+class Beatmap : public NonCopyable
 {
 public:
 	virtual ~Beatmap();

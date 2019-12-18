@@ -3,7 +3,7 @@
 /*
 	Compiled operation on local database object
 */
-class DBStatement : public Unique
+class DBStatement : public NonCopyable
 {
 public:
 	DBStatement(DBStatement&& other);
@@ -39,7 +39,7 @@ private:
 /*
 	Local database object
 */
-class Database : public Unique
+class Database : public NonCopyable
 {
 public:
 	~Database();
