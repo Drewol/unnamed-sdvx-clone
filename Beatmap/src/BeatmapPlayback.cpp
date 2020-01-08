@@ -222,7 +222,7 @@ void BeatmapPlayback::Update(MapTime newTime)
 		else if (obj->type == ObjectType::Event)
 		{
 			EventObjectState* evt = (EventObjectState*)obj;
-			if (obj->time < (m_playbackTime + 2)) // Tiny offset to make sure events are triggered before they are needed
+			if (obj->time < (m_playbackTime + Math::Max(delta, 2))) // Tiny offset to make sure events are triggered before they are needed
 			{
 				// Trigger event
 				OnEventChanged.Call(evt->key, evt->data);
