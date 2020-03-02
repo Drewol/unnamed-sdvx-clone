@@ -10,7 +10,7 @@
 #include <Shlwapi.h>
 #pragma comment(lib, "Shlwapi.lib")
 
-char Path::sep = '\\';
+const char Path::sep = '\\';
 
 bool Path::CreateDir(const String& path)
 {
