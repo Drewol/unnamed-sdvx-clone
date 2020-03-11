@@ -137,4 +137,9 @@ void GameConfig::InitDefaults()
 
 	Set(GameConfigKeys::RollIgnoreDuration, 100.f);
 	Set(GameConfigKeys::LaserSlamLength, 100.f);
+
+	// Internet Ranking
+	Set(GameConfigKeys::IRBaseURL, "https://api.orchestra.fm");
+	Set(GameConfigKeys::IRUsername, "");
+	Set(GameConfigKeys::IRPassword, "");
 }

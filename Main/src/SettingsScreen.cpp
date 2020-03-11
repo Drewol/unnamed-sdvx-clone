@@ -190,6 +190,12 @@ private:
 	int m_multiplayerPasswordLen = 0;
 	char m_multiplayerUsername[1024];
 	int m_multiplayerUsernameLen = 0;
+	char m_irBaseURL[1024];
+	int m_irBaseURLLen = 0;
+	char m_irUsername[1024];
+	int m_irUsernameLen = 0;
+	char m_irPassword[1024];
+	int m_irPasswordLen = 0;
 	Vector<GameConfigKeys>* m_activeBTKeys = &m_keyboardKeys;
 	bool m_useBTGamepad = false;
 	bool m_useLaserGamepad = false;
@@ -271,6 +277,21 @@ private:
 		multiplayerUsername.TrimBack('\n');
 		multiplayerUsername.TrimBack(' ');
 		g_gameConfig.Set(GameConfigKeys::MultiplayerUsername, multiplayerUsername);
+
+		String irBaseURL = String(m_irBaseURL, m_irBaseURLLen);
+		irBaseURL.TrimBack('\n');
+		irBaseURL.TrimBack(' ');
+		g_gameConfig.Set(GameConfigKeys::IRBaseURL, irBaseURL);
+
+		String irUsername = String(m_irUsername, m_irUsernameLen);
+		irUsername.TrimBack('\n');
+		irUsername.TrimBack(' ');
+		g_gameConfig.Set(GameConfigKeys::IRUsername, irUsername);
+
+		String irPassword = String(m_irPassword, m_irPasswordLen);
+		irPassword.TrimBack('\n');
+		irPassword.TrimBack(' ');
+		g_gameConfig.Set(GameConfigKeys::IRPassword, irPassword);
 
 		if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice) == InputDevice::Mouse)
 		{
@@ -464,6 +485,18 @@ public:
 		String multiplayerUsername = g_gameConfig.GetString(GameConfigKeys::MultiplayerUsername);
 		strcpy(m_multiplayerUsername, multiplayerUsername.c_str());
 		m_multiplayerUsernameLen = multiplayerUsername.length();
+
+		String irBaseURL = g_gameConfig.GetString(GameConfigKeys::IRBaseURL);
+		strcpy(m_irBaseURL, irBaseURL.c_str());
+		m_irBaseURLLen = irBaseURL.length();
+
+		String irUsername = g_gameConfig.GetString(GameConfigKeys::IRUsername);
+		strcpy(m_irUsername, irUsername.c_str());
+		m_irUsernameLen = irUsername.length();
+
+		String irPassword = g_gameConfig.GetString(GameConfigKeys::IRPassword);
+		strcpy(m_irPassword, irPassword.c_str());
+		m_irPasswordLen = irPassword.length();
 
 		return true;
 	}	
@@ -905,6 +938,15 @@ public:
 
 				nk_label(m_nctx, "Multiplayer Server Password:", nk_text_alignment::NK_TEXT_LEFT);
 				nk_sdl_text(nk_edit_string(m_nctx, NK_EDIT_FIELD, m_multiplayerPassword, &m_multiplayerPasswordLen, 1024, nk_filter_default));
+
+				nk_label(m_nctx, "Internet Ranking URL:", nk_text_alignment::NK_TEXT_LEFT);
+				nk_sdl_text(nk_edit_string(m_nctx, NK_EDIT_FIELD, m_irBaseURL, &m_irBaseURLLen, 1024, nk_filter_default));
+
+				nk_label(m_nctx, "Account Username for Internet Ranking:", nk_text_alignment::NK_TEXT_LEFT);
+				nk_sdl_text(nk_edit_string(m_nctx, NK_EDIT_FIELD, m_irUsername, &m_irUsernameLen, 1024, nk_filter_default));
+
+				nk_label(m_nctx, "Account Password for Internet Ranking:", nk_text_alignment::NK_TEXT_LEFT);
+				nk_sdl_text(nk_edit_string(m_nctx, NK_EDIT_FIELD, m_irPassword, &m_irPasswordLen, 1024, nk_filter_default));
 				nk_tree_pop(m_nctx);
 			}
 
