@@ -187,6 +187,11 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::MultiplayerUsername, "");
 
 	Set(GameConfigKeys::EnableFancyHighwayRoll, true);
+	
+	// Internet Ranking
+	Set(GameConfigKeys::IRBaseURL, "https://api.orchestra.fm");
+	Set(GameConfigKeys::IRUsername, "");
+	Set(GameConfigKeys::IRPassword, "");
 
 	//Gameplay
 	Set(GameConfigKeys::RandomizeChart, false);

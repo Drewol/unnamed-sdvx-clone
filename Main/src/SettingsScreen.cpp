@@ -199,6 +199,12 @@ private:
 	int m_multiplayerPasswordLen = 0;
 	char m_multiplayerUsername[1024];
 	int m_multiplayerUsernameLen = 0;
+	char m_irBaseURL[1024];
+	int m_irBaseURLLen = 0;
+	char m_irUsername[1024];
+	int m_irUsernameLen = 0;
+	char m_irPassword[1024];
+	int m_irPasswordLen = 0;
 	const Vector<GameConfigKeys>* m_activeBTKeys = &m_keyboardKeys;
 	const Vector<GameConfigKeys>* m_activeLaserKeys = &m_keyboardLaserKeys;
 	bool m_useBTGamepad = false;
@@ -281,6 +287,21 @@ private:
 		multiplayerUsername.TrimBack('\n');
 		multiplayerUsername.TrimBack(' ');
 		g_gameConfig.Set(GameConfigKeys::MultiplayerUsername, multiplayerUsername);
+
+		String irBaseURL = String(m_irBaseURL, m_irBaseURLLen);
+		irBaseURL.TrimBack('\n');
+		irBaseURL.TrimBack(' ');
+		g_gameConfig.Set(GameConfigKeys::IRBaseURL, irBaseURL);
+
+		String irUsername = String(m_irUsername, m_irUsernameLen);
+		irUsername.TrimBack('\n');
+		irUsername.TrimBack(' ');
+		g_gameConfig.Set(GameConfigKeys::IRUsername, irUsername);
+
+		String irPassword = String(m_irPassword, m_irPasswordLen);
+		irPassword.TrimBack('\n');
+		irPassword.TrimBack(' ');
+		g_gameConfig.Set(GameConfigKeys::IRPassword, irPassword);
 
 		if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice) == InputDevice::Mouse)
 		{

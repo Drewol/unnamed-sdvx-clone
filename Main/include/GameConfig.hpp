@@ -149,7 +149,12 @@ DefineEnum(GameConfigKeys,
 		   // Gameplay options
 		   GaugeType,
 		   MirrorChart,
-		   RandomizeChart)
+		   RandomizeChart,
+		   
+		   // Internet Ranking
+		   IRBaseURL,
+		   IRUsername,
+		   IRPassword)
 
 DefineEnum(GaugeTypes,
 		   Normal,
