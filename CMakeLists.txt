@@ -53,6 +53,7 @@ find_package(Vorbis REQUIRED)
 find_package(OGG REQUIRED)
 find_package(LibArchive REQUIRED)
 find_package(Iconv REQUIRED)
+find_package(CryptoPP REQUIRED)
 
 # All projects use unicode define
 # this is mainly for windows functions either being defined to call A or W prefixed functions
