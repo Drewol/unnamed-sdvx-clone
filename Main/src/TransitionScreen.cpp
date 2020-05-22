@@ -200,11 +200,15 @@ public:
 		if (m_songlua)
 		{
 			ChartIndex* chart = next->GetChartIndex();
-			String path = Path::RemoveLast(chart->path);
+			
+			if (chart)
+			{
+				String path = Path::RemoveLast(chart->path);
 
-			if (m_jacketImg)
-				nvgDeleteImage(g_application->GetVGContext(), m_jacketImg);
-			m_jacketImg = nvgCreateImage(g_application->GetVGContext(), (path + Path::sep + chart->jacket_path).c_str(), 0);
+				if (m_jacketImg)
+					nvgDeleteImage(g_application->GetVGContext(), m_jacketImg);
+				m_jacketImg = nvgCreateImage(g_application->GetVGContext(), (path + Path::sep + chart->jacket_path).c_str(), 0);
+			}
 
 			auto pushStringToTable = [this](const char *name, String data) {
 				lua_pushstring(m_songlua, name);
@@ -219,6 +223,8 @@ public:
 			};
 
 			lua_newtable(m_songlua);
+
+			if(chart)
 			{
 				pushStringToTable("title", chart->title);
 				pushStringToTable("artist", chart->artist);
@@ -229,6 +235,18 @@ public:
 				pushIntToTable("difficulty", chart->diff_index);
 				pushIntToTable("jacket", m_jacketImg);
 			}
+			else
+			{
+				pushStringToTable("title", "");
+				pushStringToTable("artist", "");
+				pushStringToTable("effector", "");
+				pushStringToTable("illustrator", "");
+				pushStringToTable("bpm", "");
+				pushIntToTable("level", 1);
+				pushIntToTable("difficulty", 0);
+				pushIntToTable("jacket", m_jacketImg);
+			}
+
 			lua_setglobal(m_songlua, "song");
 			if (!m_legacy[1])
 			{
