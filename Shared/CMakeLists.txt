@@ -45,3 +45,4 @@ target_include_directories(Shared PRIVATE
 )
 
 target_link_libraries(Shared lua)
+target_link_libraries(Shared cryptopp-static)
