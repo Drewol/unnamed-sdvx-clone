@@ -43,8 +43,8 @@ protected:
 	Game() = default;
 public:
 	virtual ~Game() = default;
-	static Game* Create(ChartIndex* mapPath, GameFlags flags);
-	static Game* Create(MultiplayerScreen*, ChartIndex* mapPath, GameFlags flags);
+	static Game* Create(ChartIndex* chart, GameFlags flags);
+	static Game* Create(MultiplayerScreen*, ChartIndex* chart, GameFlags flags);
 	static Game* Create(const String& mapPath, GameFlags flags);
 	static GameFlags FlagsFromSettings();
 
