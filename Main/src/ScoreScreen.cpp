@@ -12,6 +12,13 @@
 #include "Shared/Time.hpp"
 #include "json.hpp"
 #include "CollectionDialog.hpp"
+#include <cpr/cpr.h>
+#include "cryptopp/cryptlib.h"
+#include "cryptopp/hex.h"
+#include "cryptopp/sha3.h"
+#include <cryptopp/filters.h>
+#include <cryptopp/files.h>
+
 
 class ScoreScreen_Impl : public ScoreScreen
 {
@@ -209,7 +216,49 @@ public:
 		m_graphTex->SetWrap(Graphics::TextureWrap::Clamp, Graphics::TextureWrap::Clamp);
 
 		m_numPlayersSeen = m_stats->size();
-		m_displayId = static_cast<String>((*m_stats)[m_displayIndex].value("uid",""));
+		m_displayId = static_cast<String>((*m_stats)[m_displayIndex].value("uid", ""));
+
+	}
+
+	void SubmitScoreToIR(class Game* game) {
+		Scoring& m_scoring = game->GetScoring();
+
+		// check if we can login
+		String url = g_gameConfig.GetString(GameConfigKeys::IRBaseURL);
+
+		// hash the file of the chart we played
+		CryptoPP::SHA3_512 hash;
+		String digest;
+		CryptoPP::FileSource f(
+			std::istringstream(game->GetDifficultyIndex().path),
+			true,
+			new CryptoPP::HashFilter(
+				hash,
+				new CryptoPP::HexEncoder(
+					new CryptoPP::StringSink(digest))));
+
+		// get the ids from the file hash
+		auto res = nlohmann::json::parse(cpr::Get(cpr::Url{ url + "/api/v0/board/sha3/" + digest }).text);
+
+		uint64 track_id = res["track_id"];
+		uint64 board_id = res["id"];
+
+		// post the score
+		nlohmann::json score_info = {
+			{"track", track_id, },
+			{"board", board_id, },
+			{"score", m_scoring.CalculateCurrentScore(), },
+			{"combo", m_scoring.maxComboCounter, },
+			{"rate", m_scoring.currentGauge, },
+			{"criticals", m_scoring.categorizedHits[2], },
+			{"nears", m_scoring.categorizedHits[1] , },
+			{"errors", m_scoring.categorizedHits[0], },
+			{"mods", m_flags, },
+			//{"replaydata", 0, }, does usc have replays?
+		};
+		cpr::Post(cpr::Url{ url + "/api/v0/score" },
+			cpr::Body{ score_info.dump() },
+			cpr::Header{ {"Content-Type", "application/json"} });
 
 	}
 
@@ -250,6 +299,9 @@ public:
 		{
 			loadScoresFromGame(game);
 		}
+
+		// TODO: check if Internet Ranking is enabled
+		SubmitScoreToIR(game);
 
 		for (HitStat* stat : scoring.hitStats)
 		{
