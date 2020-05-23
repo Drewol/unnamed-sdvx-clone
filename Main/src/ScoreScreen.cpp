@@ -220,9 +220,13 @@ public:
 		m_displayIndex = 0;
 		Scoring& scoring = game->GetScoring();
 		m_autoplay = scoring.autoplay;
-		m_highScores = game->GetChartIndex()->scores;
 		m_autoButtons = scoring.autoplayButtons;
-		m_chartIndex = game->GetChartIndex();
+
+		if (ChartIndex* chart = game->GetChartIndex())
+		{
+			m_chartIndex = chart;
+			m_highScores = chart->scores;
+		}
 
 		// XXX add data for multi
 		m_gaugeSamples = game->GetGaugeSamples();
