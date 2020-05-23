@@ -959,8 +959,9 @@ public:
 		{
 			// Set start time
 			m_lastMapTime = firstObjectTime - 5000;
-			m_audioPlayback.SetPosition(m_lastMapTime);
 		}
+
+		m_audioPlayback.SetPosition(m_lastMapTime);
 
 		// Reset playback
 		m_playback.Reset(m_lastMapTime);
