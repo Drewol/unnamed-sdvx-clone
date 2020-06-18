@@ -13,7 +13,10 @@ maps.db
 bin/Main.cfg
 bin/screenshots
 bin/log*
+bin/skins/*
+!bin/skins/Default
 bin/skins/Default/skin.cfg
+bin/replays
 
 # Intermediate Files
 x64
