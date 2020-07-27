@@ -4,11 +4,7 @@
 #include <math.h>
 #include "GameConfig.hpp"
 
-const MapTime Scoring::missHitTime = 250;
-const MapTime Scoring::holdHitTime = 138;
-const MapTime Scoring::goodHitTime = 92;
-const MapTime Scoring::perfectHitTime = 46;
-const float Scoring::idleLaserSpeed = 1.0f;
+
 
 Scoring::Scoring()
 {
@@ -663,7 +659,6 @@ void Scoring::m_UpdateTicks()
 		{
 			ScoreTick* tick = ticks[i];
 			MapTime delta = currentTime - ticks[i]->time + m_inputOffset;
-			bool shouldMiss = abs(delta) > tick->GetHitWindow();
 			bool processed = false;
 			if (delta >= 0)
 			{
@@ -703,10 +698,9 @@ void Scoring::m_UpdateTicks()
 						float dirSign = Math::Sign(laserObject->GetDirection());
 						float inputSign = Math::Sign(m_input->GetInputLaserDir(buttonCode - 6));
 						if (autoplay)
-						{
 							inputSign = dirSign;
-						}
-						if (dirSign == inputSign && delta > -10)
+
+						if (dirSign == inputSign && delta <= Scoring::criticalHitWindow)
 						{
 							m_TickHit(tick, buttonCode);
 							HitStat* stat = new HitStat(tick->object);
@@ -741,24 +735,24 @@ void Scoring::m_UpdateTicks()
 					}
 				}
 			}
-			else if (tick->HasFlag(TickFlags::Slam) && !shouldMiss)
-			{
-				LaserObjectState* laserObject = (LaserObjectState*)tick->object;
-				// Check if slam hit
-				float dirSign = Math::Sign(laserObject->GetDirection());
-				float inputSign = Math::Sign(m_input->GetInputLaserDir(buttonCode - 6));
-				if (dirSign == inputSign)
-				{
-					m_TickHit(tick, buttonCode);
-					HitStat* stat = new HitStat(tick->object);
-					stat->time = currentTime;
-					stat->rating = ScoreHitRating::Perfect;
-					hitStats.Add(stat);
-					processed = true;
-				}
-			}
+			//else if (tick->HasFlag(TickFlags::Slam))
+			//{
+			//	LaserObjectState* laserObject = (LaserObjectState*)tick->object;
+			//	// Check if slam hit
+			//	float dirSign = Math::Sign(laserObject->GetDirection());
+			//	float inputSign = Math::Sign(m_input->GetInputLaserDir(buttonCode - 6));
+			//	if (dirSign == inputSign)
+			//	{
+			//		m_TickHit(tick, buttonCode);
+			//		HitStat* stat = new HitStat(tick->object);
+			//		stat->time = currentTime;
+			//		stat->rating = ScoreHitRating::Perfect;
+			//		hitStats.Add(stat);
+			//		processed = true;
+			//	}
+			//}
 
-			if (delta > Scoring::goodHitTime && !processed)
+			if (delta > Scoring::nearLateHitWindow && !processed)
 			{
 				m_TickMiss(tick, buttonCode, delta);
 				processed = true;
@@ -791,18 +785,18 @@ ObjectState* Scoring::m_ConsumeTick(uint32 buttonCode)
 		ObjectState* hitObject = tick->object;
 		if (tick->HasFlag(TickFlags::Laser))
 		{
-			// Ignore laser and hold ticks
+			// Ignore laser ticks
 			return nullptr;
 		}
 		else if (tick->HasFlag(TickFlags::Hold))
 		{
 			HoldObjectState* hos = (HoldObjectState*)hitObject;
 			hos = hos->GetRoot();
-			if (hos->time - Scoring::holdHitTime <= currentTime)
+			if (hos->time - Scoring::holdHitWindow <= currentTime)
 				m_SetHoldObject(hitObject, buttonCode);
 			return nullptr;
 		}
-		if (abs(delta) <= Scoring::goodHitTime)
+		if (abs(delta) <= Scoring::nearEarlyHitWindow)
 			m_TickHit(tick, buttonCode, delta);
 		else
 			m_TickMiss(tick, buttonCode, delta);
@@ -893,7 +887,7 @@ void Scoring::m_TickMiss(ScoreTick* tick, uint32 index, MapTime delta)
 	}
 	if (tick->HasFlag(TickFlags::Button))
 	{
-		OnButtonMiss.Call((Input::Button)index, delta < 0 && abs(delta) > goodHitTime, tick->object);
+		OnButtonMiss.Call((Input::Button)index, delta < 0 && abs(delta) > Scoring::nearEarlyHitWindow, tick->object);
 		stat->rating = ScoreHitRating::Miss;
 		stat->delta = delta;
 		currentGauge -= shortMissDrain;
@@ -1025,7 +1019,7 @@ bool Scoring::m_IsBeingHold(const ScoreTick* tick) const
 	if (!m_prevHoldHit[index]) return false;
 
 	// b) The last button release happened inside the 'near window' for the end of this hold object.
-	if (obj->time + obj->duration - m_buttonReleaseTime[index] - m_inputOffset > Scoring::holdHitTime) return false;
+	if (obj->time + obj->duration - m_buttonReleaseTime[index] - m_inputOffset > Scoring::holdHitWindow) return false;
 
 	return true;
 }
@@ -1062,11 +1056,11 @@ void Scoring::m_UpdateLasers(float deltaTime)
 				}
 				// Replace the currently active segment
 				m_currentLaserSegments[(*it)->index] = *it;
-				if (m_currentLaserSegments[(*it)->index]->prev && m_currentLaserSegments[(*it)->index]->GetDirection() != m_currentLaserSegments[(*it)->index]->prev->GetDirection())
-				{
-					//Direction change
-					//m_autoLaserTime[(*it)->index] = -1;
-				}
+				//if (m_currentLaserSegments[(*it)->index]->prev && m_currentLaserSegments[(*it)->index]->GetDirection() != m_currentLaserSegments[(*it)->index]->prev->GetDirection())
+				//{
+				//	//Direction change
+				//	//m_autoLaserTime[(*it)->index] = -1;
+				//}
 
 				it = m_laserSegmentQueue.erase(it);
 				continue;
@@ -1107,15 +1101,11 @@ void Scoring::m_UpdateLasers(float deltaTime)
 			{
 				// Don't sample slams
 				if (!(currentSegment->flags & LaserObjectState::flag_Instant))
-				{
 					// Update target position
 					laserTargetPositions[i] = currentSegment->SamplePosition(mapTime);
-				}
 				// Apply slam roll instead
 				else if (!(currentSegment->flags & LaserObjectState::flag_slamProcessed) && !currentSegment->next)
-				{
 					OnLaserSlam.Call(currentSegment);
-				}
 			}
 		}
 
@@ -1166,22 +1156,22 @@ void Scoring::m_UpdateLasers(float deltaTime)
 
 
 
-				float punishMult = 1.0f;
-				//if next segment is the opposite direction then allow for some extra wrong turning
-				MapTime dirChangeTime = currentSegment->GetTimeToDirectionChange(mapTime, m_assistChangePeriod);
-				if (dirChangeTime > -1)
-				{
-					punishMult = Math::Clamp((float)dirChangeTime / m_assistChangePeriod, 0.0f, 1.0f);
-					punishMult = powf(punishMult, m_assistChangeExponent);
-				}
+				//float punishMult = 1.0f;
+				////if next segment is the opposite direction then allow for some extra wrong turning
+				//MapTime dirChangeTime = currentSegment->GetTimeToDirectionChange(mapTime, m_assistChangePeriod);
+				//if (dirChangeTime > -1)
+				//{
+				//	punishMult = Math::Clamp((float)dirChangeTime / m_assistChangePeriod, 0.0f, 1.0f);
+				//	punishMult = powf(punishMult, m_assistChangeExponent);
+				//}
 
-				if (inputDir == moveDir && fabs(positionDelta) < laserDistanceLeniency)
+				if (inputDir == moveDir && fabs(positionDelta) <= laserDistanceLeniency)
 				{
 					m_autoLaserTime[i] = m_assistTime;
 				}
 				if (inputDir != 0 && inputDir != laserDir)
 				{
-					m_autoLaserTime[i] -= deltaTime * m_assistPunish * punishMult;
+					m_autoLaserTime[i] -= deltaTime/* * m_assistPunish * punishMult*/;
 					//m_autoLaserTime[i] = Math::Min(m_autoLaserTime[i], m_assistTime * 0.2f);
 				}
 			}
@@ -1334,34 +1324,38 @@ uint32 Scoring::CalculateCurrentGrade() const
 	return 5; // D
 }
 
-MapTime ScoreTick::GetHitWindow() const
-{
-	// Hold ticks don't have a hit window, but the first ones do
-	if (HasFlag(TickFlags::Hold) && !HasFlag(TickFlags::Start))
-		return 0;
-	// Laser ticks also don't have a hit window except for the first ticks and slam segments
-	if (HasFlag(TickFlags::Laser))
-	{
-		if (!HasFlag(TickFlags::Start) && !HasFlag(TickFlags::Slam))
-			return 0;
-		return Scoring::perfectHitTime;
-	}
-	return Scoring::missHitTime;
-}
-ScoreHitRating ScoreTick::GetHitRating(MapTime currentTime) const
-{
-	MapTime delta = abs(time - currentTime);
-	return GetHitRatingFromDelta(delta);
-}
+//MapTime ScoreTick::GetHitWindow() const
+//{
+//	// Hold ticks don't have a hit window, but the first ones do
+//	if (HasFlag(TickFlags::Hold))
+//	{
+//		if (!HasFlag(TickFlags::Start))
+//			return 0;
+//		return Scoring::holdHitWindow;
+//	}
+//	// Laser ticks also don't have a hit window except for slam segments
+//	if (HasFlag(TickFlags::Laser))
+//	{
+//		if (!HasFlag(TickFlags::Slam))
+//			return 0;
+//		return Scoring::criticalHitWindow;
+//	}
+//	return Scoring::nearLateHitWindow;
+//}
+//ScoreHitRating ScoreTick::GetHitRating(MapTime currentTime) const
+//{
+//	MapTime delta = abs(time - currentTime);
+//	return GetHitRatingFromDelta(delta);
+//}
 ScoreHitRating ScoreTick::GetHitRatingFromDelta(MapTime delta) const
 {
-	delta = abs(delta);
 	if (HasFlag(TickFlags::Button))
 	{
-		// Button hit judgeing
-		if (delta <= Scoring::perfectHitTime)
+		// Button hit judging
+		if (abs(delta) <= Scoring::criticalHitWindow)
 			return ScoreHitRating::Perfect;
-		if (delta <= Scoring::goodHitTime)
+		if ((delta > 0 && abs(delta) <= Scoring::nearLateHitWindow) || 
+				(delta <= 0 && abs(delta) <= Scoring::nearEarlyHitWindow))
 			return ScoreHitRating::Good;
 		return ScoreHitRating::Miss;
 	}

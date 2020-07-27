@@ -1044,8 +1044,8 @@ public:
 		m_scoring.OnLaserSlam.Add(this, &Game_Impl::OnLaserSlam);
 		m_scoring.OnLaserExit.Add(this, &Game_Impl::OnLaserExit);
 
-		m_playback.hittableObjectEnter = Scoring::missHitTime + g_gameConfig.GetInt(GameConfigKeys::InputOffset);
-		m_playback.hittableObjectLeave = Scoring::goodHitTime;
+		m_playback.hittableObjectEnter = Scoring::antiMashWindow + g_gameConfig.GetInt(GameConfigKeys::InputOffset);
+		m_playback.hittableObjectLeave = Scoring::nearLateHitWindow;
 
 		if(g_application->GetAppCommandLine().Contains("-autobuttons"))
 		{

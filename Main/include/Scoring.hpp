@@ -29,10 +29,10 @@ public:
 	ScoreTick(ObjectState* object) : object(object) {};
 
 	// Returns the time frame in which this tick can be hit
-	MapTime GetHitWindow() const;
+	//MapTime GetHitWindow() const;
 	// Hit rating when hitting object at given time
-	ScoreHitRating GetHitRating(MapTime currentTime) const;
-	// Hit rating when hitting object give a delta 
+	//ScoreHitRating GetHitRating(MapTime currentTime) const;
+	// Hit rating when hitting object given a delta 
 	ScoreHitRating GetHitRatingFromDelta(MapTime delta) const;
 	// Check a flag
 	bool HasFlag(TickFlags flag) const;
@@ -148,11 +148,17 @@ public:
 	Delegate<uint32> OnScoreChanged;
 
 	// Object timing window
-	static const MapTime missHitTime;
-	static const MapTime holdHitTime;
-	static const MapTime goodHitTime;
-	static const MapTime perfectHitTime;
-	static const float idleLaserSpeed;
+	// This is probably the only place where actual documentation about SDVX's timing windows are
+	// All timing windows were discovered empirically
+	// Some of the timing windows have been rounded up to be nice and tidy
+	static const MapTime Scoring::antiMashWindow = 290; // Measured 148 ms wide
+	static const MapTime Scoring::holdHitWindow = 190; // Measured 190 ms from the start of the hold object (150 + 40)
+	static const MapTime Scoring::nearEarlyHitWindow = 140; // Measured 99 ms wide
+	static const MapTime Scoring::nearLateHitWindow = 90; // Measured 49 ms wide
+	static const MapTime Scoring::criticalHitWindow = 40; // Measured 80 ms wide
+	static const MapTime Scoring::missWindow = Scoring::criticalHitWindow + Scoring::nearLateHitWindow;
+	// Slams have a hit window 75 ms wide
+	//static const float Scoring::idleLaserSpeed = 1.0f;
 
 	// Map total infos
 	MapTotals mapTotals;

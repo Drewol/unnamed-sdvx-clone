@@ -261,10 +261,10 @@ void CalibrationScreen::m_OnButtonPressed(Input::Button buttonCode)
 			m_inputOffset = -m_average(m_zeroOffsetDeltas);
 		}
 
-		if (hitDelta <= Scoring::perfectHitTime) {
+		if (hitDelta <= Scoring::criticalHitWindow) {
 			m_track.AddEffect(new ButtonHitEffect((int)buttonCode, m_track.hitColors[2]));
 		}
-		else if (hitDelta <= Scoring::goodHitTime) {
+		else if (hitDelta <= Scoring::nearEarlyHitWindow) { // TODO: figure out how to handle asymmetric timing window
 			m_track.AddEffect(new ButtonHitEffect((int)buttonCode, m_track.hitColors[1]));
 		}
 		else {
