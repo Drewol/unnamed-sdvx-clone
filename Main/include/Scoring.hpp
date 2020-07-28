@@ -148,7 +148,7 @@ public:
 	Delegate<uint32> OnScoreChanged;
 
 	// Object timing window
-	// This is probably the only place where actual documentation about SDVX's timing windows are
+	// This is probably the only place where actual documentation about what SDVX's timing windows are
 	// All timing windows were discovered empirically
 	// Some of the timing windows have been rounded up to be nice and tidy
 	static const MapTime Scoring::antiMashWindow = 290; // Measured 148 ms wide
@@ -158,7 +158,7 @@ public:
 	static const MapTime Scoring::criticalHitWindow = 40; // Measured 80 ms wide
 	static const MapTime Scoring::slamHitWindow = 75; // Measured 75 ms wide. No early hit window
 	const float laserDistanceLeniency = 0.1825; // 24 / 128
-	const float autoLaserTime = 0.08f; // Auto laser input time. Unsure of actual value
+	const float autoLaserTime = 0.08f; // Auto laser input time. Unsure of actual value (5 frames)
 
 	// Map total infos
 	MapTotals mapTotals;

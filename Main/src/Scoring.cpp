@@ -1133,7 +1133,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 		{
 			timeSinceLaserUsed[i] += deltaTime;
 		}
-		if (autoplay || m_autoLaserTime[i] >= 0)
+		if (autoplay || m_autoLaserTime[i] > 0)
 			laserPositions[i] = laserTargetPositions[i];
 		// Clamp cursor between 0 and 1
 		laserPositions[i] = Math::Clamp(laserPositions[i], 0.0f, 1.0f);
@@ -1268,29 +1268,6 @@ uint32 Scoring::CalculateCurrentGrade() const
 	return 5; // D
 }
 
-//MapTime ScoreTick::GetHitWindow() const
-//{
-//	// Hold ticks don't have a hit window, but the first ones do
-//	if (HasFlag(TickFlags::Hold))
-//	{
-//		if (!HasFlag(TickFlags::Start))
-//			return 0;
-//		return Scoring::holdHitWindow;
-//	}
-//	// Laser ticks also don't have a hit window except for slam segments
-//	if (HasFlag(TickFlags::Laser))
-//	{
-//		if (!HasFlag(TickFlags::Slam))
-//			return 0;
-//		return Scoring::criticalHitWindow;
-//	}
-//	return Scoring::nearLateHitWindow;
-//}
-//ScoreHitRating ScoreTick::GetHitRating(MapTime currentTime) const
-//{
-//	MapTime delta = abs(time - currentTime);
-//	return GetHitRatingFromDelta(delta);
-//}
 ScoreHitRating ScoreTick::GetHitRatingFromDelta(MapTime delta) const
 {
 	if (HasFlag(TickFlags::Button))
