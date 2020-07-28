@@ -156,8 +156,7 @@ public:
 	static const MapTime Scoring::nearEarlyHitWindow = 140; // Measured 99 ms wide
 	static const MapTime Scoring::nearLateHitWindow = 90; // Measured 49 ms wide
 	static const MapTime Scoring::criticalHitWindow = 40; // Measured 80 ms wide
-	static const MapTime Scoring::missWindow = Scoring::criticalHitWindow + Scoring::nearLateHitWindow;
-	// Slams have a hit window 75 ms wide
+	// Slams have a hit window 75 ms wide, probably 40 ms (crit window late) + extra 35 ms of auto lasers whenever the knob is moved
 	//static const float Scoring::idleLaserSpeed = 1.0f;
 
 	// Map total infos
@@ -240,7 +239,7 @@ private:
 	ObjectState* m_ConsumeTick(uint32 buttonCode);
 	// Called whenether missed or not
 	void m_OnTickProcessed(ScoreTick* tick, uint32 index);
-	void m_TickHit(ScoreTick* tick, uint32 index, MapTime delta = 0);
+	void m_TickHit(ScoreTick* tick, uint32 index, MapTime delta);
 	void m_TickMiss(ScoreTick* tick, uint32 index, MapTime delta);
 	void m_CleanupTicks();
 

@@ -664,7 +664,7 @@ void Scoring::m_UpdateTicks()
 			{
 				if (tick->HasFlag(TickFlags::Button) && (autoplay || autoplayButtons))
 				{
-					m_TickHit(tick, buttonCode, 0);
+					m_TickHit(tick, buttonCode, delta);
 					processed = true;
 				}
 
@@ -673,7 +673,7 @@ void Scoring::m_UpdateTicks()
 					assert(buttonCode < 6);
 					if (m_IsBeingHold(tick) || autoplay || autoplayButtons)
 					{
-						m_TickHit(tick, buttonCode);
+						m_TickHit(tick, buttonCode, delta);
 						HitStat* stat = new HitStat(tick->object);
 						stat->time = currentTime;
 						stat->rating = ScoreHitRating::Perfect;
@@ -702,7 +702,7 @@ void Scoring::m_UpdateTicks()
 
 						if (dirSign == inputSign && delta <= Scoring::criticalHitWindow)
 						{
-							m_TickHit(tick, buttonCode);
+							m_TickHit(tick, buttonCode, delta);
 							HitStat* stat = new HitStat(tick->object);
 							stat->time = currentTime;
 							stat->rating = ScoreHitRating::Perfect;
@@ -721,11 +721,11 @@ void Scoring::m_UpdateTicks()
 						}
 
 						// Check laser input
-						float laserDelta = fabs(laserPositions[laserObject->index] - laserTargetPositions[laserObject->index]); \
+						float laserDelta = fabs(laserPositions[laserObject->index] - laserTargetPositions[laserObject->index]);
 
-						if (laserDelta < laserDistanceLeniency)
+						if (laserDelta <= laserDistanceLeniency)
 						{
-							m_TickHit(tick, buttonCode);
+							m_TickHit(tick, buttonCode, delta);
 							HitStat* stat = new HitStat(tick->object);
 							stat->time = currentTime;
 							stat->rating = ScoreHitRating::Perfect;
@@ -735,22 +735,6 @@ void Scoring::m_UpdateTicks()
 					}
 				}
 			}
-			//else if (tick->HasFlag(TickFlags::Slam))
-			//{
-			//	LaserObjectState* laserObject = (LaserObjectState*)tick->object;
-			//	// Check if slam hit
-			//	float dirSign = Math::Sign(laserObject->GetDirection());
-			//	float inputSign = Math::Sign(m_input->GetInputLaserDir(buttonCode - 6));
-			//	if (dirSign == inputSign)
-			//	{
-			//		m_TickHit(tick, buttonCode);
-			//		HitStat* stat = new HitStat(tick->object);
-			//		stat->time = currentTime;
-			//		stat->rating = ScoreHitRating::Perfect;
-			//		hitStats.Add(stat);
-			//		processed = true;
-			//	}
-			//}
 
 			if (delta > Scoring::nearLateHitWindow && !processed)
 			{
@@ -783,14 +767,14 @@ ObjectState* Scoring::m_ConsumeTick(uint32 buttonCode)
 
 		const MapTime delta = currentTime - tick->time;
 		ObjectState* hitObject = tick->object;
+		// Ignore laser and hold ticks
 		if (tick->HasFlag(TickFlags::Laser))
 		{
-			// Ignore laser ticks
 			return nullptr;
 		}
 		else if (tick->HasFlag(TickFlags::Hold))
 		{
-			HoldObjectState* hos = (HoldObjectState*)hitObject;
+			HoldObjectState* hos = (HoldObjectState*) hitObject;
 			hos = hos->GetRoot();
 			if (hos->time - Scoring::holdHitWindow <= currentTime)
 				m_SetHoldObject(hitObject, buttonCode);
@@ -798,7 +782,7 @@ ObjectState* Scoring::m_ConsumeTick(uint32 buttonCode)
 		}
 		if (abs(delta) <= Scoring::nearEarlyHitWindow)
 			m_TickHit(tick, buttonCode, delta);
-		else
+		else // Anti mash
 			m_TickMiss(tick, buttonCode, delta);
 		delete tick;
 		m_ticks[buttonCode].Remove(tick, false);
@@ -815,7 +799,7 @@ void Scoring::m_OnTickProcessed(ScoreTick* tick, uint32 index)
 		OnScoreChanged.Call(CalculateCurrentScore());
 	}
 }
-void Scoring::m_TickHit(ScoreTick* tick, uint32 index, MapTime delta /*= 0*/)
+void Scoring::m_TickHit(ScoreTick* tick, uint32 index, MapTime delta)
 {
 	HitStat* stat = m_AddOrUpdateHitStat(tick->object);
 	if (tick->HasFlag(TickFlags::Button))
@@ -1018,7 +1002,7 @@ bool Scoring::m_IsBeingHold(const ScoreTick* tick) const
 	if (tick->HasFlag(TickFlags::Start) || !tick->HasFlag(TickFlags::End)) return false;
 	if (!m_prevHoldHit[index]) return false;
 
-	// b) The last button release happened inside the 'near window' for the end of this hold object.
+	// b) The last button release happened inside the hold hit window for the end of this hold object.
 	if (obj->time + obj->duration - m_buttonReleaseTime[index] - m_inputOffset > Scoring::holdHitWindow) return false;
 
 	return true;
@@ -1354,8 +1338,8 @@ ScoreHitRating ScoreTick::GetHitRatingFromDelta(MapTime delta) const
 		// Button hit judging
 		if (abs(delta) <= Scoring::criticalHitWindow)
 			return ScoreHitRating::Perfect;
-		if ((delta > 0 && abs(delta) <= Scoring::nearLateHitWindow) || 
-				(delta <= 0 && abs(delta) <= Scoring::nearEarlyHitWindow))
+		if ((delta >= 0 && abs(delta) <= Scoring::nearLateHitWindow) ||
+				(delta < 0 && abs(delta) <= Scoring::nearEarlyHitWindow))
 			return ScoreHitRating::Good;
 		return ScoreHitRating::Miss;
 	}
