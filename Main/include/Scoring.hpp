@@ -236,7 +236,7 @@ private:
 	ObjectState* m_ConsumeTick(uint32 buttonCode);
 	// Called whenether missed or not
 	void m_OnTickProcessed(ScoreTick* tick, uint32 index);
-	void m_TickHit(ScoreTick* tick, uint32 index, MapTime delta);
+	void m_TickHit(ScoreTick* tick, uint32 index, MapTime delta = 0);
 	void m_TickMiss(ScoreTick* tick, uint32 index, MapTime delta);
 	void m_CleanupTicks();
 

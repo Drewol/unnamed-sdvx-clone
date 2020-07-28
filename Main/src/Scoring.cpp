@@ -656,9 +656,10 @@ void Scoring::m_UpdateTicks()
 			bool processed = false;
 			if (delta >= 0)
 			{
+				// Buttons are handled entirely by m_ConsumeTick, this is here to make sure auto doesn't get misses
 				if (tick->HasFlag(TickFlags::Button) && (autoplay || autoplayButtons))
 				{
-					m_TickHit(tick, buttonCode, delta);
+					m_TickHit(tick, buttonCode);
 					processed = true;
 				}
 
@@ -667,7 +668,7 @@ void Scoring::m_UpdateTicks()
 					assert(buttonCode < 6);
 					if (m_IsBeingHold(tick) || autoplay || autoplayButtons)
 					{
-						m_TickHit(tick, buttonCode, delta);
+						m_TickHit(tick, buttonCode);
 						HitStat* stat = new HitStat(tick->object);
 						stat->time = currentTime;
 						stat->rating = ScoreHitRating::Perfect;
@@ -691,12 +692,10 @@ void Scoring::m_UpdateTicks()
 						// Check if slam hit
 						float dirSign = Math::Sign(laserObject->GetDirection());
 						float inputSign = Math::Sign(m_input->GetInputLaserDir(buttonCode - 6));
-						if (autoplay)
-							inputSign = dirSign;
 
-						if (dirSign == inputSign && delta <= Scoring::slamHitWindow)
+						if (autoplay || (dirSign == inputSign && delta <= Scoring::slamHitWindow))
 						{
-							m_TickHit(tick, buttonCode, delta);
+							m_TickHit(tick, buttonCode);
 							HitStat* stat = new HitStat(tick->object);
 							stat->time = currentTime;
 							stat->rating = ScoreHitRating::Perfect;
@@ -719,7 +718,7 @@ void Scoring::m_UpdateTicks()
 
 						if (laserDelta <= laserDistanceLeniency)
 						{
-							m_TickHit(tick, buttonCode, delta);
+							m_TickHit(tick, buttonCode);
 							HitStat* stat = new HitStat(tick->object);
 							stat->time = currentTime;
 							stat->rating = ScoreHitRating::Perfect;
