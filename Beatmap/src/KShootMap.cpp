@@ -175,11 +175,11 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 			String k, v;
 			if(line[0] == '#')
 			{
-				Vector<String> strings = line.Explode(" ");
+				Vector<String> strings = line.Explode(" ", false);
 				String type = strings[0];
 				if(strings.size() != 3)
 				{
-					Logf("Invalid define found in ksh map @%d: %s", Logger::Severity::Warning, lineNumber, line);
+					Logf("Invalid define found in ksh file @%d: %s", Logger::Severity::Warning, lineNumber, line);
 					continue;
 				}
 

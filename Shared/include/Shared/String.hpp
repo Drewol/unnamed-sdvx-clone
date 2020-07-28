@@ -37,7 +37,7 @@ public:
 	void ToUpper();
 	bool Split(const StringBase& delim, StringBase* l, StringBase* r) const;
 	bool SplitLast(const StringBase& delim, StringBase* l, StringBase* r) const;
-	Vector<StringBase> Explode(const StringBase& delim) const;
+	Vector<StringBase> Explode(const StringBase& delim, bool keepEmpty = true) const;
 	void TrimFront(T c);
 	void TrimBack(T c);
 	void Trim(T c = ' ');
@@ -179,7 +179,7 @@ bool StringBase<T>::SplitLast(const StringBase& delim, StringBase* l, StringBase
 	return true;
 }
 template<typename T>
-Vector<StringBase<T>> StringBase<T>::Explode(const StringBase& delim) const
+Vector<StringBase<T>> StringBase<T>::Explode(const StringBase& delim, bool keepEmpty /*=true*/) const
 {
 	String a, b;
 	Vector<StringBase> res;
@@ -191,9 +191,13 @@ Vector<StringBase<T>> StringBase<T>::Explode(const StringBase& delim) const
 
 	do
 	{
-		res.Add(a);
+		if(keepEmpty || !a.empty())
+			res.Add(a);
+
 	} while(b.Split(delim, &a, &b));
-	res.Add(b);
+
+	if (keepEmpty || !b.empty())
+		res.Add(b);
 
 	return res;
 }
