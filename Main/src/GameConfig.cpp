@@ -69,10 +69,6 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::GlobalOffset, 0);
 	Set(GameConfigKeys::InputOffset, 0);
 	Set(GameConfigKeys::FPSTarget, 0);
-	Set(GameConfigKeys::LaserAssistLevel, 1.05f);
-	Set(GameConfigKeys::LaserPunish, 1.7f);
-	Set(GameConfigKeys::LaserChangeTime, 100.0f);
-	Set(GameConfigKeys::LaserChangeExponent, 1.5f);
 	Set(GameConfigKeys::GaugeDrainNormal, 180);
 	Set(GameConfigKeys::GaugeDrainHalf, 300);
 	Set(GameConfigKeys::ModSpeed, 300.0f);

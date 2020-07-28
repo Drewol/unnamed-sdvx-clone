@@ -156,8 +156,9 @@ public:
 	static const MapTime Scoring::nearEarlyHitWindow = 140; // Measured 99 ms wide
 	static const MapTime Scoring::nearLateHitWindow = 90; // Measured 49 ms wide
 	static const MapTime Scoring::criticalHitWindow = 40; // Measured 80 ms wide
-	// Slams have a hit window 75 ms wide, probably 40 ms (crit window late) + extra 35 ms of auto lasers whenever the knob is moved
-	//static const float Scoring::idleLaserSpeed = 1.0f;
+	static const MapTime Scoring::slamHitWindow = 75; // Measured 75 ms wide. No early hit window
+	const float laserDistanceLeniency = 0.1825; // 24 / 128
+	const float autoLaserTime = 0.08f; // Auto laser input time. Unsure of actual value
 
 	// Map total infos
 	MapTotals mapTotals;
@@ -179,8 +180,6 @@ public:
 	// 0 = Early
 	// 1 = Late
 	uint32 timedHits[2] = { 0 };
-
-
 
 	// Amount of gauge to gain on a short note
 	float shortGaugeGain = 0.0f;
@@ -206,14 +205,12 @@ public:
 	// Autoplay but for buttons
 	bool autoplayButtons = false;
 
-	float laserDistanceLeniency = 1.0f / 12.0f;
-
 	// Actual positions of the laser
 	float laserPositions[2];
 	// Sampled target position of the lasers in the map
 	float laserTargetPositions[2] = { 0 };
 	// Current lasers are extended
-	bool lasersAreExtend[2] = { false, false };
+	bool lasersAreExtend[2] = { false };
 	// Time since laser has been used
 	float timeSinceLaserUsed[2];
 private:
@@ -280,10 +277,8 @@ private:
 
 	// Input values for laser [-1,1]
 	float m_laserInput[2] = { 0.0f };
-	// Keeps being set to the last direction the laser was moving in to create laser intertia
-	float m_lastLaserInputDirection[2] = { 0.0f };
 	// Decides if the coming tick should be auto completed
-	float m_autoLaserTime[2] = { 0,0 };
+	float m_autoLaserTime[2] = { 0.0f };
 	
 	// Saves the time when a button was hit, used to decide if a button was held before a hold object was active
 	MapTime m_buttonHitTime[6] = { 0, 0, 0, 0, 0, 0 };
@@ -291,12 +286,6 @@ private:
 	// Saves the time when a button was hit or released for bounce guarding
 	MapTime m_buttonGuardTime[6] = { 0, 0, 0, 0, 0, 0 };
 
-	// Max number of ticks to assist
-	float m_assistLevel = 1.5f;
-	float m_assistPunish = 1.5f;
-	float m_assistChangePeriod = 50.0f;
-	float m_assistChangeExponent = 1.0f;
-	float m_assistTime = 0.0f;
 	// Offet to use for calculating judge (ms)
 	uint32 m_inputOffset = 0;
 	int32 m_bounceGuard = 0;

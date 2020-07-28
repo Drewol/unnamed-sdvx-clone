@@ -118,7 +118,6 @@ void Scoring::Reset()
 	currentComboCounter = 0;
 	maxComboCounter = 0;
 	comboState = 2;
-	m_assistTime = m_assistLevel * 0.1f;
 
 	// Reset laser positions
 	laserTargetPositions[0] = 0.0f;
@@ -137,11 +136,6 @@ void Scoring::Reset()
 	m_inputOffset = g_gameConfig.GetInt(GameConfigKeys::InputOffset);
 	// Get bounce guard duration
 	m_bounceGuard = g_gameConfig.GetInt(GameConfigKeys::InputBounceGuard);
-	// Get laser assist level
-	m_assistLevel = g_gameConfig.GetFloat(GameConfigKeys::LaserAssistLevel);
-	m_assistPunish = g_gameConfig.GetFloat(GameConfigKeys::LaserPunish);
-	m_assistChangeExponent = g_gameConfig.GetFloat(GameConfigKeys::LaserChangeExponent);
-	m_assistChangePeriod = g_gameConfig.GetFloat(GameConfigKeys::LaserChangeTime);
 	// Recalculate maximum score
 	mapTotals = CalculateMapTotals();
 
@@ -700,7 +694,7 @@ void Scoring::m_UpdateTicks()
 						if (autoplay)
 							inputSign = dirSign;
 
-						if (dirSign == inputSign && delta <= Scoring::criticalHitWindow)
+						if (dirSign == inputSign && delta <= Scoring::slamHitWindow)
 						{
 							m_TickHit(tick, buttonCode, delta);
 							HitStat* stat = new HitStat(tick->object);
@@ -717,7 +711,7 @@ void Scoring::m_UpdateTicks()
 						if (tick->HasFlag(TickFlags::Start))
 						{
 							laserPositions[laserObject->index] = laserTargetPositions[laserObject->index];
-							m_autoLaserTime[laserObject->index] = m_assistTime;
+							m_autoLaserTime[laserObject->index] = autoLaserTime;
 						}
 
 						// Check laser input
@@ -844,7 +838,7 @@ void Scoring::m_TickHit(ScoreTick* tick, uint32 index, MapTime delta)
 			// Set laser pointer position after hitting slam
 			laserTargetPositions[object->index] = object->points[1];
 			laserPositions[object->index] = object->points[1];
-			m_autoLaserTime[object->index] = m_assistTime;
+			m_autoLaserTime[object->index] = autoLaserTime;
 		}
 
 		currentGauge += tickGaugeGain;
@@ -1010,9 +1004,6 @@ bool Scoring::m_IsBeingHold(const ScoreTick* tick) const
 
 void Scoring::m_UpdateLasers(float deltaTime)
 {
-	/// TODO: Change to only re-calculate on bpm change
-	m_assistTime = m_assistLevel * 0.1f;
-
 	MapTime mapTime = m_playback->GetLastTime();
 	for (uint32 i = 0; i < 2; i++)
 	{
@@ -1040,11 +1031,6 @@ void Scoring::m_UpdateLasers(float deltaTime)
 				}
 				// Replace the currently active segment
 				m_currentLaserSegments[(*it)->index] = *it;
-				//if (m_currentLaserSegments[(*it)->index]->prev && m_currentLaserSegments[(*it)->index]->GetDirection() != m_currentLaserSegments[(*it)->index]->prev->GetDirection())
-				//{
-				//	//Direction change
-				//	//m_autoLaserTime[(*it)->index] = -1;
-				//}
 
 				it = m_laserSegmentQueue.erase(it);
 				continue;
@@ -1105,16 +1091,11 @@ void Scoring::m_UpdateLasers(float deltaTime)
 			float inputDir = Math::Sign(input);
 
 			// Always snap laser to start sections if they are completely vertical
-			if (laserDir == 0.0f && currentSegment->prev == nullptr)
-			{
-				laserPositions[i] = laserTargetPositions[i];
-				m_autoLaserTime[i] = m_assistTime;
-			}
 			// Lock lasers on straight parts
-			else if (laserDir == 0.0f && fabs(positionDelta) < laserDistanceLeniency)
+			if (laserDir == 0.0f && (fabsf(positionDelta) <= laserDistanceLeniency || currentSegment->prev == nullptr))
 			{
 				laserPositions[i] = laserTargetPositions[i];
-				m_autoLaserTime[i] = m_assistTime;
+				m_autoLaserTime[i] = autoLaserTime;
 			}
 			else if (inputDir != 0.0f)
 			{
@@ -1138,49 +1119,29 @@ void Scoring::m_UpdateLasers(float deltaTime)
 						laserPositions[i] = Math::Max(laserPositions[i] + input, laserTargetPositions[i]);
 				}
 
-
-
-				//float punishMult = 1.0f;
-				////if next segment is the opposite direction then allow for some extra wrong turning
-				//MapTime dirChangeTime = currentSegment->GetTimeToDirectionChange(mapTime, m_assistChangePeriod);
-				//if (dirChangeTime > -1)
-				//{
-				//	punishMult = Math::Clamp((float)dirChangeTime / m_assistChangePeriod, 0.0f, 1.0f);
-				//	punishMult = powf(punishMult, m_assistChangeExponent);
-				//}
-
-				if (inputDir == moveDir && fabs(positionDelta) <= laserDistanceLeniency)
-				{
-					m_autoLaserTime[i] = m_assistTime;
-				}
-				if (inputDir != 0 && inputDir != laserDir)
-				{
-					m_autoLaserTime[i] -= deltaTime/* * m_assistPunish * punishMult*/;
-					//m_autoLaserTime[i] = Math::Min(m_autoLaserTime[i], m_assistTime * 0.2f);
-				}
+				if (inputDir == moveDir && fabsf(positionDelta) <= laserDistanceLeniency)
+					m_autoLaserTime[i] = autoLaserTime;
+				if (inputDir != laserDir)
+					m_autoLaserTime[i] -= deltaTime;
+			}
+			else
+			{
+				m_autoLaserTime[i] -= deltaTime;
 			}
 			timeSinceLaserUsed[i] = 0.0f;
 		}
 		else
 		{
 			timeSinceLaserUsed[i] += deltaTime;
-			//laserPositions[i] = laserTargetPositions[i];
 		}
 		if (autoplay || m_autoLaserTime[i] >= 0)
-		{
 			laserPositions[i] = laserTargetPositions[i];
-		}
 		// Clamp cursor between 0 and 1
 		laserPositions[i] = Math::Clamp(laserPositions[i], 0.0f, 1.0f);
-		m_autoLaserTime[i] -= deltaTime;
-		if (fabsf(laserPositions[i] - laserTargetPositions[i]) < laserDistanceLeniency && currentSegment)
-		{
+		if (fabsf(laserPositions[i] - laserTargetPositions[i]) <= laserDistanceLeniency && currentSegment)
 			m_SetHoldObject(*currentSegment->GetRoot(), 6 + i);
-		}
 		else
-		{
 			m_ReleaseHoldObject(6 + i);
-		}
 	}
 
 	// Interpolate laser output
