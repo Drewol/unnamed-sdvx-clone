@@ -1010,6 +1010,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 	MapTime mapTime = m_playback->GetLastTime();
 	for (uint32 i = 0; i < 2; i++)
 	{
+		bool startingSlam = false;
 		// Check for new laser segments in laser queue
 		for (auto it = m_laserSegmentQueue.begin(); it != m_laserSegmentQueue.end();)
 		{
@@ -1023,14 +1024,15 @@ void Scoring::m_UpdateLasers(float deltaTime)
 				if (!currentTicks.empty() && current != nullptr)
 				{
 					auto tick = currentTicks.front();
-					if ((current->flags & LaserObjectState::flag_Instant) != 0)
-					{
-						if ((LaserObjectState*)tick->object == current) {
-							// Don't continue to next segment before the slam has been decided as hit or not
-							it++;
-							continue;
-						}
-					}
+					startingSlam = current->flags & LaserObjectState::flag_Instant && (LaserObjectState*) tick->object == current && tick->HasFlag(TickFlags::Start);
+					//if ((current->flags & LaserObjectState::flag_Instant) != 0)
+					//{
+					//	if ((LaserObjectState*)tick->object == current) {
+					//		// Don't continue to next segment before the slam has been decided as hit or not
+					//		it++;
+					//		continue;			
+					//	}
+					//}
 				}
 				// Replace the currently active segment
 				m_currentLaserSegments[(*it)->index] = *it;
@@ -1093,9 +1095,9 @@ void Scoring::m_UpdateLasers(float deltaTime)
 			float input = m_laserInput[i];
 			float inputDir = Math::Sign(input);
 
-			// Always snap laser to start sections if they are completely vertical
+			// Always snap laser to start sections if they are completely vertical or if after a laser segment that starts with a slam
 			// Lock lasers on straight parts
-			if (laserDir == 0.0f && (fabsf(positionDelta) < laserDistanceLeniency || currentSegment->prev == nullptr))
+			if ((laserDir == 0.0f && (fabsf(positionDelta) < laserDistanceLeniency || !currentSegment->prev)) || startingSlam)
 			{
 				laserPositions[i] = laserTargetPositions[i];
 				m_autoLaserTime[i] = autoLaserTime;
