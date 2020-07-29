@@ -1097,7 +1097,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 
 			// Always snap laser to start sections if they are completely vertical or if after a laser segment that starts with a slam
 			// Lock lasers on straight parts
-			if ((laserDir == 0.0f && (fabsf(positionDelta) < laserDistanceLeniency || !currentSegment->prev)) || startingSlam)
+			if (laserDir == 0.0f && (fabsf(positionDelta) < laserDistanceLeniency || !currentSegment->prev) || laserDir != 0 && startingSlam)
 			{
 				laserPositions[i] = laserTargetPositions[i];
 				m_autoLaserTime[i] = autoLaserTime;
