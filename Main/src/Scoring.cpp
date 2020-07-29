@@ -716,15 +716,19 @@ void Scoring::m_UpdateTicks()
 						// Check laser input
 						float laserDelta = fabs(laserPositions[laserObject->index] - laserTargetPositions[laserObject->index]);
 
-						if (laserDelta <= laserDistanceLeniency)
+						if (laserDelta < laserDistanceLeniency)
 						{
 							m_TickHit(tick, buttonCode);
 							HitStat* stat = new HitStat(tick->object);
 							stat->time = currentTime;
 							stat->rating = ScoreHitRating::Perfect;
 							hitStats.Add(stat);
-							processed = true;
 						}
+						else
+						{
+							m_TickMiss(tick, buttonCode, 0);
+						}
+						processed = true;
 					}
 				}
 			}
@@ -882,11 +886,11 @@ void Scoring::m_TickMiss(ScoreTick* tick, uint32 index, MapTime delta)
 		if (tick->HasFlag(TickFlags::Slam))
 		{
 			currentGauge -= shortMissDrain;
-			m_autoLaserTime[obj->index] = -1;
+			//m_autoLaserTime[obj->index] = -1;
 		}
 		else
 			currentGauge -= shortMissDrain / 4.f;
-		m_autoLaserTime[obj->index] = -1.f;
+		//m_autoLaserTime[obj->index] = -1.f;
 		stat->rating = ScoreHitRating::Miss;
 	}
 
@@ -1091,7 +1095,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 
 			// Always snap laser to start sections if they are completely vertical
 			// Lock lasers on straight parts
-			if (laserDir == 0.0f && (fabsf(positionDelta) <= laserDistanceLeniency || currentSegment->prev == nullptr))
+			if (laserDir == 0.0f && (fabsf(positionDelta) < laserDistanceLeniency || currentSegment->prev == nullptr))
 			{
 				laserPositions[i] = laserTargetPositions[i];
 				m_autoLaserTime[i] = autoLaserTime;
@@ -1118,7 +1122,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 						laserPositions[i] = Math::Max(laserPositions[i] + input, laserTargetPositions[i]);
 				}
 
-				if (inputDir == moveDir && fabsf(positionDelta) <= laserDistanceLeniency)
+				if (inputDir == moveDir && fabsf(positionDelta) < laserDistanceLeniency)
 					m_autoLaserTime[i] = autoLaserTime;
 				if (inputDir != laserDir)
 					m_autoLaserTime[i] -= deltaTime;
@@ -1137,7 +1141,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 			laserPositions[i] = laserTargetPositions[i];
 		// Clamp cursor between 0 and 1
 		laserPositions[i] = Math::Clamp(laserPositions[i], 0.0f, 1.0f);
-		if (fabsf(laserPositions[i] - laserTargetPositions[i]) <= laserDistanceLeniency && currentSegment)
+		if (fabsf(laserPositions[i] - laserTargetPositions[i]) < laserDistanceLeniency && currentSegment)
 			m_SetHoldObject(*currentSegment->GetRoot(), 6 + i);
 		else
 			m_ReleaseHoldObject(6 + i);

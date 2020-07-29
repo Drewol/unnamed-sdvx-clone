@@ -157,8 +157,8 @@ public:
 	static const MapTime Scoring::nearLateHitWindow = 90; // Measured 49 ms wide
 	static const MapTime Scoring::criticalHitWindow = 40; // Measured 80 ms wide
 	static const MapTime Scoring::slamHitWindow = 75; // Measured 75 ms wide. No early hit window
-	const float laserDistanceLeniency = 0.1825; // 24 / 128
-	const float autoLaserTime = 0.08f; // Auto laser input time. Unsure of actual value (5 frames)
+	const float laserDistanceLeniency = 21 / 128.f;
+	const float autoLaserTime = 5 / 60.f; // Auto laser input time. Unsure of actual value
 
 	// Map total infos
 	MapTotals mapTotals;
