@@ -706,7 +706,7 @@ void Scoring::m_UpdateTicks()
 					else
 					{
 						// Snap to first laser tick
-						/// TODO: Find better solution
+						// TODO: Find better solution
 						if (tick->HasFlag(TickFlags::Start))
 						{
 							laserPositions[laserObject->index] = laserTargetPositions[laserObject->index];
@@ -1010,7 +1010,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 	MapTime mapTime = m_playback->GetLastTime();
 	for (uint32 i = 0; i < 2; i++)
 	{
-		bool startingSlam = false;
+		bool starting = false;
 		// Check for new laser segments in laser queue
 		for (auto it = m_laserSegmentQueue.begin(); it != m_laserSegmentQueue.end();)
 		{
@@ -1024,7 +1024,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 				if (!currentTicks.empty() && current != nullptr)
 				{
 					auto tick = currentTicks.front();
-					startingSlam = current->flags & LaserObjectState::flag_Instant && (LaserObjectState*) tick->object == current && tick->HasFlag(TickFlags::Start);
+					starting = /*current->flags & LaserObjectState::flag_Instant &&*/ (LaserObjectState*) tick->object == current && tick->HasFlag(TickFlags::Start);
 					//if ((current->flags & LaserObjectState::flag_Instant) != 0)
 					//{
 					//	if ((LaserObjectState*)tick->object == current) {
@@ -1095,14 +1095,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 			float input = m_laserInput[i];
 			float inputDir = Math::Sign(input);
 
-			// Always snap laser to start sections if they are completely vertical or if after a laser segment that starts with a slam
-			// Lock lasers on straight parts
-			if (laserDir == 0.0f && (fabsf(positionDelta) < laserDistanceLeniency || !currentSegment->prev) || laserDir != 0 && startingSlam)
-			{
-				laserPositions[i] = laserTargetPositions[i];
-				m_autoLaserTime[i] = autoLaserTime;
-			}
-			else if (inputDir != 0.0f)
+			if (inputDir != 0.0f)
 			{
 				if (laserDir < 0 && positionDelta < 0)
 				{
@@ -1128,6 +1121,12 @@ void Scoring::m_UpdateLasers(float deltaTime)
 					m_autoLaserTime[i] = autoLaserTime;
 				if (inputDir != laserDir)
 					m_autoLaserTime[i] -= deltaTime;
+			}
+			else if(laserDir == 0.0f && (fabsf(positionDelta) < laserDistanceLeniency) || starting)
+			{
+				// Always snap laser to start sections if they are completely vertical or if after a laser segment that starts with a slam
+				// Lock lasers on straight parts
+				m_autoLaserTime[i] = autoLaserTime;
 			}
 			else
 			{
