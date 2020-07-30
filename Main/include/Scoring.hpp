@@ -146,13 +146,12 @@ public:
 	// Object timing window
 	// This is probably the only place where actual documentation about what SDVX's timing windows are
 	// All timing windows were discovered empirically
-	// Some of the timing windows have been rounded up to be nice and tidy
-	static const MapTime antiMashWindow = 290; // Measured 148 ms wide
-	static const MapTime holdHitWindow = 190; // Measured 190 ms from the start of the hold object (150 + 40)
-	static const MapTime nearEarlyHitWindow = 140; // Measured 99 ms wide
-	static const MapTime nearLateHitWindow = 90; // Measured 49 ms wide
-	static const MapTime criticalHitWindow = 42; // Measured 84 ms wide
-	static const MapTime slamHitWindow = 75; // Measured 75 ms wide. No early hit window
+	static const MapTime criticalHitWindow = 42; // Measured 84 ms wide. 5 frames
+	static const MapTime nearEarlyHitWindow = criticalHitWindow + 99; // Measured 99 ms wide
+	static const MapTime nearLateHitWindow = criticalHitWindow + 49; // Measured 49 ms wide
+	static const MapTime antiMashWindow = nearEarlyHitWindow + 148; // Measured 148 ms wide
+	static const MapTime holdHitWindow = 190; // Measured 190 ms from the start of the hold object. Could be ~150 ms instead
+	static const MapTime slamHitWindow = 75; // Measured 75 ms wide. No early hit window. 4.5 frames?
 	const float laserDistanceLeniency = 21 / 128.f;
 	const float autoLaserTime = 5 / 60.f; // Auto laser input time. Unsure of actual value
 
