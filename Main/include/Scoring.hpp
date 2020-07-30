@@ -151,7 +151,7 @@ public:
 	static const MapTime holdHitWindow = 190; // Measured 190 ms from the start of the hold object (150 + 40)
 	static const MapTime nearEarlyHitWindow = 140; // Measured 99 ms wide
 	static const MapTime nearLateHitWindow = 90; // Measured 49 ms wide
-	static const MapTime criticalHitWindow = 40; // Measured 80 ms wide
+	static const MapTime criticalHitWindow = 42; // Measured 84 ms wide
 	static const MapTime slamHitWindow = 75; // Measured 75 ms wide. No early hit window
 	const float laserDistanceLeniency = 21 / 128.f;
 	const float autoLaserTime = 5 / 60.f; // Auto laser input time. Unsure of actual value
