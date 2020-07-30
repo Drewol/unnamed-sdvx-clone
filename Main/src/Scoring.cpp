@@ -1105,7 +1105,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 				if (inputDir != laserDir)
 					m_autoLaserTime[i] -= deltaTime;
 			}
-			else if (laserDir == 0.0f && fabsf(positionDelta) < laserDistanceLeniency || starting)
+			else if ((laserDir == 0.0f && fabsf(positionDelta) < laserDistanceLeniency) || starting)
 			{
 				// Always snap to laser sections if they are completely straight or if after the start of a laser segment
 				m_autoLaserTime[i] = autoLaserTime;
