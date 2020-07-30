@@ -873,16 +873,7 @@ void Scoring::m_TickMiss(ScoreTick* tick, uint32 index, MapTime delta)
 	}
 	else if (tick->HasFlag(TickFlags::Laser))
 	{
-		LaserObjectState* obj = (LaserObjectState*)tick->object;
-
-		if (tick->HasFlag(TickFlags::Slam))
-		{
-			currentGauge -= shortMissDrain;
-			//m_autoLaserTime[obj->index] = -1;
-		}
-		else
-			currentGauge -= shortMissDrain / 4.f;
-		//m_autoLaserTime[obj->index] = -1.f;
+		currentGauge -= tick->HasFlag(TickFlags::Slam) ? -shortMissDrain : shortMissDrain / 4.f;
 		stat->rating = ScoreHitRating::Miss;
 	}
 
@@ -966,7 +957,7 @@ bool Scoring::m_IsBeingHold(const ScoreTick* tick) const
 	const HoldObjectState* obj = (HoldObjectState*) tick->object;
 	const uint32 index = obj->index;
 	assert(0 <= index && index < 6);
-	
+
 	// Button needs to be hold at this moment.
 	// (Unless `tick` is the end of a long note; see below)
 	if (m_input && m_input->GetButton((Input::Button) index))
@@ -1003,6 +994,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 	for (uint32 i = 0; i < 2; i++)
 	{
 		bool starting = false;
+		bool slamNextSegmentStraight = false;
 		// Check for new laser segments in laser queue
 		for (auto it = m_laserSegmentQueue.begin(); it != m_laserSegmentQueue.end();)
 		{
@@ -1019,8 +1011,14 @@ void Scoring::m_UpdateLasers(float deltaTime)
 				if (!currentTicks.empty() && current != nullptr)
 				{
 					auto tick = currentTicks.front();
-					if ((LaserObjectState*) tick->object == current && tick->HasFlag(TickFlags::Start))
-						starting = true;
+					if ((LaserObjectState*) tick->object == current)
+					{
+						if (tick->HasFlag(TickFlags::Start))
+							starting = true;
+						// Auto lasers unless current segment is a slam and the next is a straight laser
+						if (current->next && current->next->GetDirection() == 0 && tick->HasFlag(TickFlags::Slam))
+							slamNextSegmentStraight = true;
+					}
 				}
 				it = m_laserSegmentQueue.erase(it);
 				continue;
@@ -1109,8 +1107,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 			}
 			else if (laserDir == 0.0f && fabsf(positionDelta) < laserDistanceLeniency || starting)
 			{
-				// Always snap laser sections if they are completely vertical or if after the start of a laser segment
-				// Lock lasers on straight parts
+				// Always snap to laser sections if they are completely straight or if after the start of a laser segment
 				m_autoLaserTime[i] = autoLaserTime;
 			}
 			else
@@ -1123,6 +1120,8 @@ void Scoring::m_UpdateLasers(float deltaTime)
 		{
 			timeSinceLaserUsed[i] += deltaTime;
 		}
+		if (slamNextSegmentStraight)
+			m_autoLaserTime[i] = 0;
 		if (autoplay || m_autoLaserTime[i] > 0)
 			laserPositions[i] = laserTargetPositions[i];
 		// Clamp cursor between 0 and 1
