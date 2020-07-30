@@ -23,6 +23,7 @@ jobs:
                 echo "set(VCPKG_BUILD_TYPE release)" >> triplets/x64-windows.cmake
                 .\bootstrap-vcpkg.bat
                 .\vcpkg.exe integrate install
+                .\vcpkg.exe update
                 .\vcpkg.exe install '@${{ github.workspace }}/build.windows'
                 }
             - name: cmake
