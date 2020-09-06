@@ -285,4 +285,15 @@ protected:
 	CharClass GetCharClass(const uint16_t ch) const override;
 };
 
+// Umm... Let's ignore JIS X 0212 for now...
+class CP954Heuristic : public TwoByteEncodingHeuristic
+{
+public:
+	StringEncoding GetEncoding() const override { return StringEncoding::CP954; }
+
+protected:
+	bool RequiresSecondByte(const uint8_t ch) const override;
+	CharClass GetCharClass(const uint16_t ch) const override;
+};
+
 #pragma endregion

@@ -23,6 +23,8 @@ static const uint32_t numBuffers = 2;
 static const uint32_t bufferLength = 10;
 static const REFERENCE_TIME bufferDuration = (REFERENCE_TIME)(bufferLength * REFTIMES_PER_MILLISEC);
 
+static const char* GetDisplayString(HRESULT code);
+
 // Object that handles the addition/removal of audio devices
 class NotificationClient : public IMMNotificationClient
 {
@@ -203,28 +205,27 @@ public:
 
 				int numRates = 5;
 				long sampleRates[5] = {192000L, 96000L, 88200L, 48000L, 44100L};
-
-				int numDepths = 3;
-				int bitDepths[3] = {32, 24, 16 };
 				
 				Vector<WAVEFORMATEX> allFormats;
 				for (size_t f = 0; f < numFormats; f++)
 				{
-					for (size_t d = 0; d < numDepths; d++)
+					WORD bitDepth = 16;
+					if (formats[f] == WAVE_FORMAT_IEEE_FLOAT)
 					{
-						for (size_t r = 0; r < numRates; r++)
-						{
-							long avgBytesPerSec = (bitDepths[d] / 8) * sampleRates[r] * 2;
-							WAVEFORMATEX newformat;
-							newformat.wFormatTag = formats[f];
-							newformat.nChannels = 2;
-							newformat.nSamplesPerSec = sampleRates[r];
-							newformat.nAvgBytesPerSec = avgBytesPerSec;
-							newformat.nBlockAlign = 4;
-							newformat.wBitsPerSample = bitDepths[d];
-							newformat.cbSize = 0;
-							allFormats.Add(newformat);
-						}
+						bitDepth = 32;
+					}
+					for (size_t r = 0; r < numRates; r++)
+					{
+						long avgBytesPerSec = (bitDepth / 8) * sampleRates[r] * 2;
+						WAVEFORMATEX newformat;
+						newformat.wFormatTag = formats[f];
+						newformat.nChannels = 2;
+						newformat.nSamplesPerSec = sampleRates[r];
+						newformat.nAvgBytesPerSec = avgBytesPerSec;
+						newformat.nBlockAlign = 4;
+						newformat.wBitsPerSample = bitDepth;
+						newformat.cbSize = 0;
+						allFormats.Add(newformat);
 					}
 				}
 
@@ -247,10 +248,9 @@ public:
 					}
 				}
 				if (res == S_OK)
-					Log("Format successful", Logger::Severity::Info);
+					Log("Format found.", Logger::Severity::Info);
 				else
-					Log("No accepted format found", Logger::Severity::Error);
-
+					Log("No accepted format found.", Logger::Severity::Error);
 			}
 			// Init client
 			res = m_audioClient->Initialize(AUDCLNT_SHAREMODE_EXCLUSIVE, 0,
@@ -275,7 +275,7 @@ public:
 		// Check if initialization was succesfull
 		if(res != S_OK)
 		{
-			Log("Failed to initialize audio client with the selected settings", Logger::Severity::Error);
+			Logf("Failed to initialize audio client with the selected settings. (%d: %s)", Logger::Severity::Error, res, GetDisplayString(res));
 			SAFE_RELEASE(device);
 			SAFE_RELEASE(m_audioClient);
 			return false;
@@ -285,7 +285,7 @@ public:
 		res = m_audioClient->GetService(__uuidof(IAudioRenderClient), (void**)&m_audioRenderClient);
 		if(res != S_OK)
 		{
-			Log("Failed to get audio render client service.", Logger::Severity::Error);
+			Logf("Failed to get audio render client service. (%d: %s)", Logger::Severity::Error, res, GetDisplayString(res));
 			SAFE_RELEASE(device);
 			SAFE_RELEASE(m_audioClient);
 			return false;
@@ -458,5 +458,54 @@ bool AudioOutput::IsIntegerFormat() const
 {
 	///TODO: check more cases?
 	return m_impl->m_format.wFormatTag == WAVE_FORMAT_PCM && m_impl->m_format.wBitsPerSample != 32;
+}
+
+static const char* GetDisplayString(HRESULT code)
+{
+	switch (code)
+	{
+	case S_OK: return "S_OK";
+	case S_FALSE: return "S_FALSE";
+	case AUDCLNT_E_NOT_INITIALIZED: return "AUDCLNT_E_NOT_INITIALIZED";
+	case AUDCLNT_E_ALREADY_INITIALIZED: return "AUDCLNT_E_ALREADY_INITIALIZED";
+	case AUDCLNT_E_WRONG_ENDPOINT_TYPE: return "AUDCLNT_E_WRONG_ENDPOINT_TYPE";
+	case AUDCLNT_E_DEVICE_INVALIDATED: return "AUDCLNT_E_DEVICE_INVALIDATED";
+	case AUDCLNT_E_NOT_STOPPED: return "AUDCLNT_E_NOT_STOPPED";
+	case AUDCLNT_E_BUFFER_TOO_LARGE: return "AUDCLNT_E_BUFFER_TOO_LARGE";
+	case AUDCLNT_E_OUT_OF_ORDER: return "AUDCLNT_E_OUT_OF_ORDER";
+	case AUDCLNT_E_UNSUPPORTED_FORMAT: return "AUDCLNT_E_UNSUPPORTED_FORMAT";
+	case AUDCLNT_E_INVALID_SIZE: return "AUDCLNT_E_INVALID_SIZE";
+	case AUDCLNT_E_DEVICE_IN_USE: return "AUDCLNT_E_DEVICE_IN_USE";
+	case AUDCLNT_E_BUFFER_OPERATION_PENDING: return "AUDCLNT_E_BUFFER_OPERATION_PENDING";
+	case AUDCLNT_E_THREAD_NOT_REGISTERED: return "AUDCLNT_E_THREAD_NOT_REGISTERED";
+	case AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED: return "AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED";
+	case AUDCLNT_E_ENDPOINT_CREATE_FAILED: return "AUDCLNT_E_ENDPOINT_CREATE_FAILED";
+	case AUDCLNT_E_SERVICE_NOT_RUNNING: return "AUDCLNT_E_SERVICE_NOT_RUNNING";
+	case AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED: return "AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED";
+	case AUDCLNT_E_EXCLUSIVE_MODE_ONLY: return "AUDCLNT_E_EXCLUSIVE_MODE_ONLY";
+	case AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL: return "AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL";
+	case AUDCLNT_E_EVENTHANDLE_NOT_SET: return "AUDCLNT_E_EVENTHANDLE_NOT_SET";
+	case AUDCLNT_E_INCORRECT_BUFFER_SIZE: return "AUDCLNT_E_INCORRECT_BUFFER_SIZE";
+	case AUDCLNT_E_BUFFER_SIZE_ERROR: return "AUDCLNT_E_BUFFER_SIZE_ERROR";
+	case AUDCLNT_E_CPUUSAGE_EXCEEDED: return "AUDCLNT_E_CPUUSAGE_EXCEEDED";
+	case AUDCLNT_E_BUFFER_ERROR: return "AUDCLNT_E_BUFFER_ERROR";
+	case AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED: return "AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED";
+	case AUDCLNT_E_INVALID_DEVICE_PERIOD: return "AUDCLNT_E_INVALID_DEVICE_PERIOD";
+	case AUDCLNT_E_INVALID_STREAM_FLAG: return "AUDCLNT_E_INVALID_STREAM_FLAG";
+	case AUDCLNT_E_ENDPOINT_OFFLOAD_NOT_CAPABLE: return "AUDCLNT_E_ENDPOINT_OFFLOAD_NOT_CAPABLE";
+	case AUDCLNT_E_OUT_OF_OFFLOAD_RESOURCES: return "AUDCLNT_E_OUT_OF_OFFLOAD_RESOURCES";
+	case AUDCLNT_E_OFFLOAD_MODE_ONLY: return "AUDCLNT_E_OFFLOAD_MODE_ONLY";
+	case AUDCLNT_E_NONOFFLOAD_MODE_ONLY: return "AUDCLNT_E_NONOFFLOAD_MODE_ONLY";
+	case AUDCLNT_E_RESOURCES_INVALIDATED: return "AUDCLNT_E_RESOURCES_INVALIDATED";
+	case AUDCLNT_E_RAW_MODE_UNSUPPORTED: return "AUDCLNT_E_RAW_MODE_UNSUPPORTED";
+	case AUDCLNT_E_ENGINE_PERIODICITY_LOCKED: return "AUDCLNT_E_ENGINE_PERIODICITY_LOCKED";
+	case AUDCLNT_E_ENGINE_FORMAT_LOCKED: return "AUDCLNT_E_ENGINE_FORMAT_LOCKED";
+	case AUDCLNT_E_HEADTRACKING_ENABLED: return "AUDCLNT_E_HEADTRACKING_ENABLED";
+	case AUDCLNT_E_HEADTRACKING_UNSUPPORTED: return "AUDCLNT_E_HEADTRACKING_UNSUPPORTED";
+	case AUDCLNT_S_BUFFER_EMPTY: return "AUDCLNT_S_BUFFER_EMPTY";
+	case AUDCLNT_S_THREAD_ALREADY_REGISTERED: return "AUDCLNT_S_THREAD_ALREADY_REGISTERED";
+	case AUDCLNT_S_POSITION_STALLED: return "AUDCLNT_S_POSITION_STALLED";
+	default: return "UNKNOWN";
+	}
 }
 #endif

@@ -45,6 +45,7 @@ inline constexpr const char* StringEncodingConverter::GetIConvArg(const StringEn
 	case StringEncoding::CP923: return "cp923";
 	case StringEncoding::CP932: return "cp932";
 	case StringEncoding::CP949: return "cp949";
+	case StringEncoding::CP954: return "EUC-JP";
 
 	case StringEncoding::Unknown: default: return "";
 	}

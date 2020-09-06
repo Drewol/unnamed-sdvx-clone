@@ -29,11 +29,11 @@ public:
 	ScoreTick(ObjectState* object) : object(object) {};
 
 	// Returns the time frame in which this tick can be hit
-	MapTime GetHitWindow() const;
+	MapTime GetHitWindow(const HitWindow& hitWindow) const;
 	// Hit rating when hitting object at given time
-	ScoreHitRating GetHitRating(MapTime currentTime) const;
+	ScoreHitRating GetHitRating(const HitWindow& hitWindow, MapTime currentTime) const;
 	// Hit rating when hitting object give a delta 
-	ScoreHitRating GetHitRatingFromDelta(MapTime delta) const;
+	ScoreHitRating GetHitRatingFromDelta(const HitWindow& hitWindow, MapTime delta) const;
 	// Check a flag
 	bool HasFlag(TickFlags flag) const;
 	void SetFlag(TickFlags flag);
@@ -66,9 +66,8 @@ public:
 	Scoring();
 	~Scoring();
 
-	static String CalculateGrade(uint32 score);
-	static uint8 CalculateBadge(const ScoreIndex& score);
-	static uint8 CalculateBestBadge(Vector<ScoreIndex*> scores);
+	static ClearMark CalculateBadge(const ScoreIndex& score);
+	static ClearMark CalculateBestBadge(Vector<ScoreIndex*> scores);
 
 	// Needs to be set to find out which objects are active/hittable
 	void SetPlayback(BeatmapPlayback& playback);
@@ -79,9 +78,11 @@ public:
 	void SetFlags(GameFlags flags);
 	void SetEndTime(MapTime time);
 
+	inline void SetHitWindow(const HitWindow& window) { hitWindow = window; }
+
 	// Resets/Initializes the scoring system
 	// Called after SetPlayback
-	void Reset();
+	void Reset(const MapTimeRange& range = {});
 
 	void FinishGame();
 
@@ -117,9 +118,22 @@ public:
 	uint32 CalculateCurrentScore() const;
 	uint32 CalculateScore(uint32 hitScore) const;
 
-	// Calculates the grade connected to the current score
-	// Ranges from 0 to 5 (AAA,AA,A,B,C,D) in that order
-	uint32 CalculateCurrentGrade() const;
+	uint32 CalculateCurrentDisplayScore() const;
+	uint32 CalculateCurrentDisplayScore(const ScoreReplay& replay) const;
+	uint32 CalculateCurrentDisplayScore(uint32 currHit, uint32 currMaxHit) const;
+
+	// The score if the rest would be played perfectly
+	uint32 CalculateCurrentMaxPossibleScore() const;
+	uint32 CalculateCurrentMaxPossibleScore(uint32 currHit, uint32 currMaxHit) const;
+
+	// The score based on the current pace
+	uint32 CalculateCurrentAverageScore(uint32 currHit, uint32 currMaxHit) const;
+
+	inline uint32 GetMisses() const { return categorizedHits[0]; }
+	inline uint32 GetGoods() const { return categorizedHits[1]; }
+	inline uint32 GetPerfects() const { return categorizedHits[2]; }
+	inline bool IsPerfect() const { return GetMisses() == 0 && GetGoods() == 0; }
+	inline bool IsFullCombo() const { return GetMisses() == 0; }
 
 	// Called when a hit is recorded on a given button index (excluding hold notes)
 	// (Hit Button, Score, Hit Object(optional))
@@ -145,13 +159,10 @@ public:
 
 	// Called when score has changed
 	//	(New Score)
-	Delegate<uint32> OnScoreChanged;
+	Delegate<> OnScoreChanged;
 
 	// Object timing window
-	static const MapTime missHitTime;
-	static const MapTime holdHitTime;
-	static const MapTime goodHitTime;
-	static const MapTime perfectHitTime;
+	HitWindow hitWindow = HitWindow::NORMAL;
 	static const float idleLaserSpeed;
 
 	// Map total infos
@@ -250,6 +261,10 @@ private:
 	void m_ReleaseHoldObject(uint32 index);
 	bool m_IsBeingHold(const ScoreTick* tick) const;
 
+	// Check whether the laser segment is the beginning
+	bool m_IsRoot(const LaserObjectState* laser) const;
+	bool m_IsRoot(const HoldObjectState* hold) const;
+
 	// Updates the target laser positions and currently tracked laser segments for those
 	//  also updates laser input and returns lasers back to idle position when not used
 	void m_UpdateLasers(float deltaTime);
@@ -316,5 +331,6 @@ private:
 	bool m_prevHoldHit[6];
 
 	GameFlags m_flags;
+	MapTimeRange m_range;
 };
 

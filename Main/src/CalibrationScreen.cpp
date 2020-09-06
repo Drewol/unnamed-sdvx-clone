@@ -261,10 +261,13 @@ void CalibrationScreen::m_OnButtonPressed(Input::Button buttonCode)
 			m_inputOffset = -m_average(m_zeroOffsetDeltas);
 		}
 
-		if (hitDelta <= Scoring::perfectHitTime) {
+		// TODO: use HitWindow based on current setting
+		HitWindow hitWindow = HitWindow::NORMAL;
+
+		if (hitDelta <= hitWindow.perfect) {
 			m_track.AddEffect(new ButtonHitEffect((int)buttonCode, m_track.hitColors[2]));
 		}
-		else if (hitDelta <= Scoring::goodHitTime) {
+		else if (hitDelta <= hitWindow.good) {
 			m_track.AddEffect(new ButtonHitEffect((int)buttonCode, m_track.hitColors[1]));
 		}
 		else {

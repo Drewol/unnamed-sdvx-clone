@@ -4,7 +4,6 @@
 #include "cpr/cpr.h"
 #include "json.hpp"
 #include <stack>
-#include <queue>
 
 #ifdef _WIN32
 /* See http://stackoverflow.com/questions/12765743/getaddrinfo-on-win32 */

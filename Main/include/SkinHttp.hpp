@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "Shared/Thread.hpp"
 #include "cpr/cpr.h"
-#include <queue>
 
 struct AsyncRequest
 {

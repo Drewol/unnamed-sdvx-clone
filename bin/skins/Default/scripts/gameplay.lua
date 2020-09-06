@@ -70,9 +70,9 @@ local RECT_FILL_STROKE = RECT_FILL .. RECT_STROKE
 
 gfx._ImageAlpha = 1
 if gfx._FillColor == nil then
-	gfx._FillColor = gfx.FillColor
-	gfx._StrokeColor = gfx.StrokeColor
-	gfx._SetImageTint = gfx.SetImageTint
+    gfx._FillColor = gfx.FillColor
+    gfx._StrokeColor = gfx.StrokeColor
+    gfx._SetImageTint = gfx.SetImageTint
 end
 
 -- we aren't even gonna overwrite it here, it's just dead to us
@@ -208,8 +208,8 @@ local consoleAnimImages = {
 -- -------------------------------------------------------------------------- --
 -- Timers, used for animations:                                               --
 if introTimer == nil then
-	introTimer = 2
-	outroTimer = 0
+    introTimer = 2
+    outroTimer = 0
 end
 local alertTimers = {-2,-2}
 
@@ -234,6 +234,7 @@ local song_info = {}
 local gauge_info = {}
 local crit_base_info = {}
 local combo_info = {}
+local practice_info = {}
 -- -------------------------------------------------------------------------- --
 -- ResetLayoutInformation:                                                    --
 -- Resets the layout values used by the skin.                                 --
@@ -308,6 +309,10 @@ function ResetLayoutInformation()
         if portrait then combo_info.posy = desh * critLinePos[2] - 150 end
     end
 
+    do-- update practice_info
+        practice_info.posy = 120
+        practice_info.posx = 10
+    end
 end
 -- -------------------------------------------------------------------------- --
 -- render:                                                                    --
@@ -332,19 +337,35 @@ function render(deltaTime)
     draw_score(deltaTime)
     gfx.Translate(0, -yshift + 150 * math.max(introTimer - 1, 0))
     draw_gauge(deltaTime)
-	if earlatePos ~= "off" then
-		draw_earlate(deltaTime)
-	end
+    if earlatePos ~= "off" then
+        draw_earlate(deltaTime)
+    end
     draw_combo(deltaTime)
     draw_alerts(deltaTime)
-	
-	if gameplay.autoplay then
-		gfx.LoadSkinFont("NotoSans-Regular.ttf")
-		gfx.FontSize(30)
-		gfx.TextAlign(gfx.TEXT_ALIGN_TOP + gfx.TEXT_ALIGN_CENTER)
-		gfx.FillColor(255,255,255)
-		gfx.Text("Autoplay", desw/2, yshift)
-	end
+    
+    if gameplay.practice_setup ~= nil then
+        draw_practice(deltaTime);
+    end
+    
+    local play_mode = ""
+    
+    if gameplay.practice_setup
+        then play_mode = "Practice Setup"
+    elseif gameplay.autoplay
+        then play_mode = "Autoplay"
+    elseif gameplay.playbackSpeed ~= nil and gameplay.playbackSpeed < 1
+        then play_mode = string.format("Speed: x%.2f", gameplay.playbackSpeed)
+    elseif gameplay.hitWindow ~= nil and gameplay.hitWindow.type == 0
+        then play_mode = "Expand Judge"
+    end
+    
+    if play_mode ~= "" then
+        gfx.LoadSkinFont("NotoSans-Regular.ttf")
+        gfx.FontSize(30)
+        gfx.TextAlign(gfx.TEXT_ALIGN_TOP + gfx.TEXT_ALIGN_CENTER)
+        gfx.FillColor(255,255,255)
+        gfx.Text(play_mode, desw/2, yshift)
+    end
 end
 -- -------------------------------------------------------------------------- --
 -- SetUpCritTransform:                                                        --
@@ -709,23 +730,23 @@ function draw_song_info(deltaTime)
     -- When the player is holding Start, the hispeed can be changed
     -- Shows the current hispeed values
     if game.GetButton(game.BUTTON_STA) then
-		gfx.FillColor(20, 20, 20, 200);
-		gfx.DrawRect(RECT_FILL, 100, 100, song_info.songInfoWidth - 100, 20)
-		gfx.FillColor(255, 255, 255)
-		if game.GetButton(game.BUTTON_BTB) then
-			gfx.Text(string.format("Hid/Sud Cutoff: %.1f%% / %.1f%%", 
-					gameplay.hiddenCutoff * 100, gameplay.suddenCutoff * 100),
-					textX, 115)
-		
-		elseif game.GetButton(game.BUTTON_BTC) then
-			gfx.Text(string.format("Hid/Sud Fade: %.1f%% / %.1f%%", 
-					gameplay.hiddenFade * 100, gameplay.suddenFade * 100),
-					textX, 115)
-		else
-			gfx.Text(string.format("HiSpeed: %.0f x %.1f = %.0f",
-					gameplay.bpm, gameplay.hispeed, gameplay.bpm * gameplay.hispeed),
-					textX, 115)
-		end
+        gfx.FillColor(20, 20, 20, 200);
+        gfx.DrawRect(RECT_FILL, 100, 100, song_info.songInfoWidth - 100, 20)
+        gfx.FillColor(255, 255, 255)
+        if game.GetButton(game.BUTTON_BTB) then
+            gfx.Text(string.format("Hid/Sud Cutoff: %.1f%% / %.1f%%", 
+                    gameplay.hiddenCutoff * 100, gameplay.suddenCutoff * 100),
+                    textX, 115)
+        
+        elseif game.GetButton(game.BUTTON_BTC) then
+            gfx.Text(string.format("Hid/Sud Fade: %.1f%% / %.1f%%", 
+                    gameplay.hiddenFade * 100, gameplay.suddenFade * 100),
+                    textX, 115)
+        else
+            gfx.Text(string.format("HiSpeed: %.0f x %.1f = %.0f",
+                    gameplay.bpm, gameplay.hispeed, gameplay.bpm * gameplay.hispeed),
+                    textX, 115)
+        end
     end
 
     -- aaaand, scene!
@@ -791,16 +812,16 @@ function draw_gauge(deltaTime)
         gauge_info.height, 
         deltaTime)
 
-	--draw gauge % label
-	local posy = gauge_info.label_posy - gauge_info.label_height * gameplay.gauge
-	gfx.BeginPath()
-	gfx.Rect(gauge_info.label_posx-35, posy-10, 40, 20)
-	gfx.FillColor(0,0,0,200)
-	gfx.Fill()
-	gfx.FillColor(255,255,255)
-	gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_MIDDLE)
-	gfx.FontSize(20)
-	gfx.Text(string.format("%d%%", math.floor(gameplay.gauge * 100)), gauge_info.label_posx, posy )
+    --draw gauge % label
+    local posy = gauge_info.label_posy - gauge_info.label_height * gameplay.gauge
+    gfx.BeginPath()
+    gfx.Rect(gauge_info.label_posx-35, posy-10, 40, 20)
+    gfx.FillColor(0,0,0,200)
+    gfx.Fill()
+    gfx.FillColor(255,255,255)
+    gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_MIDDLE)
+    gfx.FontSize(20)
+    gfx.Text(string.format("%d%%", math.floor(gameplay.gauge * 100)), gauge_info.label_posx, posy )
 end
 -- -------------------------------------------------------------------------- --
 -- draw_combo:                                                                --
@@ -832,11 +853,11 @@ function draw_earlate(deltaTime)
     gfx.TextAlign(gfx.TEXT_ALIGN_CENTER, gfx.TEXT_ALIGN_MIDDLE)
     local ypos = desh * critLinePos[1] - 150
     if portrait then ypos = desh * critLinePos[2] - 200 end
-	if earlatePos == "middle" then
-		ypos = ypos - 200
-	elseif earlatePos == "top" then
-		ypos = ypos - 400
-	end
+    if earlatePos == "middle" then
+        ypos = ypos - 200
+    elseif earlatePos == "top" then
+        ypos = ypos - 400
+    end
 
     if late then
         gfx.FillColor(0,255,255, alpha)
@@ -908,16 +929,16 @@ function draw_alerts(deltaTime)
 end
 
 function change_earlatepos()
-	if earlatePos == "top" then
-		earlatePos = "off"
-	elseif earlatePos == "off" then
-		earlatePos = "bottom"
-	elseif earlatePos == "bottom" then
-		earlatePos = "middle"
-	elseif earlatePos == "middle" then
-		earlatePos = "top"
-	end
-	game.SetSkinSetting("earlate_position", earlatePos)
+    if earlatePos == "top" then
+        earlatePos = "off"
+    elseif earlatePos == "off" then
+        earlatePos = "bottom"
+    elseif earlatePos == "bottom" then
+        earlatePos = "middle"
+    elseif earlatePos == "middle" then
+        earlatePos = "top"
+    end
+    game.SetSkinSetting("earlate_position", earlatePos)
 end
 
 -- -------------------------------------------------------------------------- --
@@ -930,16 +951,16 @@ function render_intro(deltaTime)
     end
     if not game.GetButton(game.BUTTON_STA) then
         introTimer = introTimer - deltaTime
-		earlateTimer = 0
-	else
-		earlateTimer = 1
-		if (not bta_last) and game.GetButton(game.BUTTON_BTA) then
-			change_earlatepos()
-		end
-	end
-	bta_last = game.GetButton(game.BUTTON_BTA)
+        earlateTimer = 0
+    else
+        earlateTimer = 1
+        if (not bta_last) and game.GetButton(game.BUTTON_BTA) then
+            change_earlatepos()
+        end
+    end
+    bta_last = game.GetButton(game.BUTTON_BTA)
     introTimer = math.max(introTimer, 0)
-	
+    
     return introTimer <= 0
 end
 -- -------------------------------------------------------------------------- --
@@ -1111,5 +1132,63 @@ function draw_users(detaTime)
         yoff = ymax_big + 15
     end
 
+    gfx.Restore()
+end
+
+-- ======================== Start practice mode ========================
+local is_playing_practice = false
+local mission_str = ""
+
+local count_play = 0
+local count_success = 0
+local last_run = ""
+local last_timing = ""
+
+-- Called when the practice starts
+function practice_start(mission_type, mission_threshold, mission_description)
+    is_playing_practice = true
+    
+    mission_str = string.format("Mission: %s", mission_description)
+end
+
+-- Called when a run for the practice is finished
+function practice_end_run(playCount, successCount, isSuccessful, scoring)
+    count_play = playCount
+    count_success = successCount
+    last_run = string.format("Last run: %d (%d-%d)", scoring.score, scoring.goods, scoring.misses)
+    last_timing = string.format("Hit delta: %d±%dms", scoring.meanHitDelta, scoring.meanHitDeltaAbs)
+end
+
+-- Called when user enters the setup again
+function practice_end(playCount, successCount)
+    is_playing_practice = false
+    
+    count_play = playCount
+    count_success = successCount
+end
+
+function draw_practice(deltaTime)
+    if not is_playing_practice then
+        return
+    end
+    
+    gfx.Save()
+    gfx.Translate(practice_info.posx, practice_info.posy)
+    gfx.LoadSkinFont("NotoSans-Regular.ttf")
+    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
+    gfx.FillColor(255, 255, 255)
+    
+    gfx.FontSize(25)
+    gfx.Text(mission_str, 0, 0)
+    
+    if count_play > 0 then
+        local play_stat = string.format("Clear rate: %d/%d (%.1f%%)", count_success, count_play, (100.0 * count_success / count_play))
+        gfx.Text(play_stat, 0, 30)
+        
+        gfx.FontSize(20)
+        gfx.Text(last_run, 0, 55)
+        gfx.Text(last_timing, 0, 75)
+    end
+    
     gfx.Restore()
 end

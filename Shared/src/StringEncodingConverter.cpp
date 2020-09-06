@@ -47,7 +47,7 @@ String StringEncodingConverter::ToUTF8(StringEncoding encoding, const char* str,
 			continue;
 		}
 
-		Logf("Error in StringEncodingConverter::ToUTF8: iconv failed with %d for encoding %s", Logger::Severity::Error, err, encoding);
+		Logf("Error in StringEncodingConverter::ToUTF8: iconv failed with %d for encoding %s", Logger::Severity::Error, err, GetDisplayString(encoding));
 		iconv_close(conv_d);
 		return String(str);
 	}

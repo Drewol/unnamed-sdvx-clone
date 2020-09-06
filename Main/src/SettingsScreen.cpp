@@ -13,7 +13,6 @@
 #include "ScoreScreen.hpp"
 #include "Shared/Enum.hpp"
 #include "Input.hpp"
-#include <queue>
 #include <SDL2/SDL.h>
 #include "nanovg.h"
 #include "CalibrationScreen.hpp"
@@ -210,6 +209,8 @@ private:
 	bool m_useBTGamepad = false;
 	bool m_useLaserGamepad = false;
 	bool m_altBinds = false;
+	
+	HitWindow m_hitWindow = HitWindow::NORMAL;
 
 	String m_skinBeforeSkinSettings = "";
 
@@ -267,6 +268,9 @@ private:
 
 		g_gameConfig.Set(GameConfigKeys::Laser0Color, m_laserColors[0]);
 		g_gameConfig.Set(GameConfigKeys::Laser1Color, m_laserColors[1]);
+
+		m_hitWindow.Validate();
+		m_hitWindow.SaveConfig();
 
 		String songsPath = String(m_songsPath, m_pathlen);
 		songsPath.TrimBack('\n');
@@ -523,6 +527,8 @@ public:
 		m_laserColors[0] = g_gameConfig.GetFloat(GameConfigKeys::Laser0Color);
 		m_laserColors[1] = g_gameConfig.GetFloat(GameConfigKeys::Laser1Color);
 
+		m_hitWindow = HitWindow::FromConfig();
+
 		String songspath = g_gameConfig.GetString(GameConfigKeys::SongFolder);
 		strcpy(m_songsPath, songspath.c_str());
 		m_pathlen = songspath.length();
@@ -621,6 +627,7 @@ public:
 		{
 			RenderSettingsInput();
 			RenderSettingsGame();
+			RenderSettingsDisplay();
 			RenderSettingsSystem();
 			RenderSettingsOnline();
 
@@ -655,8 +662,10 @@ public:
 			pads.Add(s.GetData());
 		}
 
-		if (nk_tree_push(m_nctx, NK_TREE_NODE, "Input", NK_MINIMIZED))
+		int treesOpen = g_gameConfig.GetInt(GameConfigKeys::SettingsTreesOpen);
+		if (nk_tree_push(m_nctx, NK_TREE_NODE, "Input", (treesOpen & 1) ? NK_MAXIMIZED : NK_MINIMIZED))
 		{
+			g_gameConfig.Set(GameConfigKeys::SettingsTreesOpen, treesOpen | 1);
 			nk_layout_row_dynamic(m_nctx, m_buttonheight, 3);
 			if (nk_button_label(m_nctx, m_controllerLaserNames[0].c_str())) SetLL();
 			if (nk_button_label(m_nctx, m_controllerButtonNames[0].c_str())) SetBTBind((*m_activeBTKeys)[0]);
@@ -729,7 +738,7 @@ public:
 				IntSetting(GameConfigKeys::RestartPlayHoldDuration, "Restart Hold Duration (ms):", 250, 10000, 250);
 			}
 
-			EnumSetting<Enum_AbortMethod>(GameConfigKeys::ExitPlayMethod, "Exit gameplay with:");
+			EnumSetting<Enum_AbortMethod>(GameConfigKeys::ExitPlayMethod, "Exit gameplay with Back:");
 			if (g_gameConfig.GetEnum<Enum_AbortMethod>(GameConfigKeys::ExitPlayMethod) == AbortMethod::Hold)
 			{
 				IntSetting(GameConfigKeys::ExitPlayHoldDuration, "Exit Hold Duration (ms):", 250, 10000, 250);
@@ -751,18 +760,103 @@ public:
 
 			nk_tree_pop(m_nctx);
 		}
+		else
+		{
+			g_gameConfig.Set(GameConfigKeys::SettingsTreesOpen, treesOpen & (~1));
+		}
 	}
 
 	// Game settings
 	void RenderSettingsGame()
 	{
-		if (nk_tree_push(m_nctx, NK_TREE_NODE, "Game", NK_MINIMIZED))
+		int treesOpen = g_gameConfig.GetInt(GameConfigKeys::SettingsTreesOpen);
+		if (nk_tree_push(m_nctx, NK_TREE_NODE, "Game", (treesOpen & 2) ? NK_MAXIMIZED : NK_MINIMIZED))
 		{
+			g_gameConfig.Set(GameConfigKeys::SettingsTreesOpen, treesOpen | 2);
 			EnumSetting<Enum_SpeedMods>(GameConfigKeys::SpeedMod, "Speed mod:");
 			FloatSetting(GameConfigKeys::HiSpeed, "HiSpeed", 0.25f, 20, 0.05f);
 			FloatSetting(GameConfigKeys::ModSpeed, "ModSpeed", 50, 1500, 0.5f);
 			ToggleSetting(GameConfigKeys::AutoSaveSpeed, "Save hispeed changes during gameplay");
 
+			IntSetting(GameConfigKeys::LeadInTime, "Lead-in time (ms)", 250, 10000, 250);
+			IntSetting(GameConfigKeys::PracticeLeadInTime, "(for practice mode)", 250, 10000, 250);
+
+			ToggleSetting(GameConfigKeys::PracticeSetupNavEnabled, "Enable navigation inputs for the practice setup");
+			ToggleSetting(GameConfigKeys::RevertToSetupAfterScoreScreen, "Revert to the practice setup after the score screen is shown");
+
+			ToggleSetting(GameConfigKeys::SkipScore, "Skip score screen on manual exit");
+			EnumSetting<Enum_AutoScoreScreenshotSettings>(GameConfigKeys::AutoScoreScreenshot, "Automatically capture score screenshots:");
+
+			{
+				nk_label(m_nctx, "Timing Window:", nk_text_alignment::NK_TEXT_LEFT);
+				nk_layout_row_dynamic(m_nctx, 30, 3);
+
+				const int hitWindowPerfect = nk_propertyi_sdl_text(m_nctx, "Crit", 0, m_hitWindow.perfect, HitWindow::NORMAL.perfect, 1, 1);
+				if (hitWindowPerfect != m_hitWindow.perfect)
+				{
+					m_hitWindow.perfect = hitWindowPerfect;
+					if (m_hitWindow.good < m_hitWindow.perfect)
+						m_hitWindow.good = m_hitWindow.perfect;
+					if (m_hitWindow.hold < m_hitWindow.perfect)
+						m_hitWindow.hold = m_hitWindow.perfect;
+				}
+
+				const int hitWindowGood = nk_propertyi_sdl_text(m_nctx, "Near", 0, m_hitWindow.good, HitWindow::NORMAL.good, 1, 1);
+				if (hitWindowGood != m_hitWindow.good)
+				{
+					m_hitWindow.good = hitWindowGood;
+					if (m_hitWindow.good < m_hitWindow.perfect)
+						m_hitWindow.perfect = m_hitWindow.good;
+					if (m_hitWindow.hold < m_hitWindow.good)
+						m_hitWindow.hold = m_hitWindow.good;
+				}
+
+				const int hitWindowHold = nk_propertyi_sdl_text(m_nctx, "Hold", 0, m_hitWindow.hold, HitWindow::NORMAL.hold, 1, 1);
+				if (hitWindowHold != m_hitWindow.hold)
+				{
+					m_hitWindow.hold = hitWindowHold;
+					if (m_hitWindow.hold < m_hitWindow.perfect)
+						m_hitWindow.perfect = m_hitWindow.hold;
+					if (m_hitWindow.hold < m_hitWindow.good)
+						m_hitWindow.good = m_hitWindow.hold;
+				}
+
+				nk_layout_row_dynamic(m_nctx, 30, 2);
+
+				if (nk_button_label(m_nctx, "Set to NORMAL (default)"))
+				{
+					m_hitWindow = HitWindow::NORMAL;
+				}
+
+				if (nk_button_label(m_nctx, "Set to HARD"))
+				{
+					m_hitWindow = HitWindow::HARD;
+				}
+
+				nk_layout_row_dynamic(m_nctx, 30, 1);
+			}
+
+			nk_label(m_nctx, "Songs folder path:", nk_text_alignment::NK_TEXT_LEFT);
+			nk_sdl_text(nk_edit_string(m_nctx, NK_EDIT_FIELD, m_songsPath, &m_pathlen, 1024, nk_filter_default));
+
+			ToggleSetting(GameConfigKeys::TransferScoresOnChartUpdate, "Transfer scores on chart change");
+
+			nk_tree_pop(m_nctx);
+		}
+		else
+		{
+			g_gameConfig.Set(GameConfigKeys::SettingsTreesOpen, treesOpen & (~2));
+		}
+	}
+
+	// Display settings
+	void RenderSettingsDisplay()
+	{
+		int treesOpen = g_gameConfig.GetInt(GameConfigKeys::SettingsTreesOpen);
+		if (nk_tree_push(m_nctx, NK_TREE_NODE, "Display", (treesOpen & 4) ? NK_MAXIMIZED : NK_MINIMIZED))
+		{
+			g_gameConfig.Set(GameConfigKeys::SettingsTreesOpen, treesOpen | 4);
+			ToggleSetting(GameConfigKeys::EnableHiddenSudden, "Enable Hidden / Sudden Mode");
 			nk_layout_row_dynamic(m_nctx, 75, 2);
 			if (nk_group_begin(m_nctx, "Hidden", NK_WINDOW_NO_SCROLLBAR))
 			{
@@ -782,11 +876,6 @@ public:
 			ToggleSetting(GameConfigKeys::DisableBackgrounds, "Disable Song Backgrounds");
 			FloatSetting(GameConfigKeys::DistantButtonScale, "Distant Button Scale", 1.0f, 5.0f);
 			ToggleSetting(GameConfigKeys::ShowCover, "Show Track Cover");
-			ToggleSetting(GameConfigKeys::SkipScore, "Skip score screen on manual exit");
-			EnumSetting<Enum_AutoScoreScreenshotSettings>(GameConfigKeys::AutoScoreScreenshot, "Automatically capture score screenshots:");
-
-			nk_label(m_nctx, "Songs folder path:", nk_text_alignment::NK_TEXT_LEFT);
-			nk_sdl_text(nk_edit_string(m_nctx, NK_EDIT_FIELD, m_songsPath, &m_pathlen, 1024, nk_filter_default));
 
 			if (m_skins.size() > 0)
 			{
@@ -797,11 +886,17 @@ public:
 				}
 			}
 
-			ToggleSetting(GameConfigKeys::TransferScoresOnChartUpdate, "Transfer scores on chart change");
+			EnumSetting<Enum_ScoreDisplayModes>(GameConfigKeys::ScoreDisplayMode, "In-game score display is:");
 
 			RenderSettingsLaserColor();
 
+			ToggleSetting(GameConfigKeys::DisplayPracticeInfoInGame, "Show practice info during gameplay");
+
 			nk_tree_pop(m_nctx);
+		}
+		else
+		{
+			g_gameConfig.Set(GameConfigKeys::SettingsTreesOpen, treesOpen & (~4));
 		}
 	}
 
@@ -863,8 +958,10 @@ public:
 	// System (audio/visual) settings
 	void RenderSettingsSystem()
 	{
-		if (nk_tree_push(m_nctx, NK_TREE_NODE, "System", NK_MINIMIZED))
+		int treesOpen = g_gameConfig.GetInt(GameConfigKeys::SettingsTreesOpen);
+		if (nk_tree_push(m_nctx, NK_TREE_NODE, "System", (treesOpen & 8) ? NK_MAXIMIZED : NK_MINIMIZED))
 		{
+			g_gameConfig.Set(GameConfigKeys::SettingsTreesOpen, treesOpen | 8);
 			nk_layout_row_dynamic(m_nctx, 30, 1);
 			PercentSetting(GameConfigKeys::MasterVolume, "Master Volume (%.1f%%):");
 			ToggleSetting(GameConfigKeys::WindowedFullscreen, "Use windowed fullscreen");
@@ -884,12 +981,18 @@ public:
 
 			nk_tree_pop(m_nctx);
 		}
+		else
+		{
+			g_gameConfig.Set(GameConfigKeys::SettingsTreesOpen, treesOpen & (~8));
+		}
 	}
 
 	void RenderSettingsOnline()
 	{
-		if (nk_tree_push(m_nctx, NK_TREE_NODE, "Online", NK_MINIMIZED))
+		int treesOpen = g_gameConfig.GetInt(GameConfigKeys::SettingsTreesOpen);
+		if (nk_tree_push(m_nctx, NK_TREE_NODE, "Online", (treesOpen & 16) ? NK_MAXIMIZED : NK_MINIMIZED))
 		{
+			g_gameConfig.Set(GameConfigKeys::SettingsTreesOpen, treesOpen | 16);
 			nk_label(m_nctx, "Multiplayer Server:", nk_text_alignment::NK_TEXT_LEFT);
 			nk_sdl_text(nk_edit_string(m_nctx, NK_EDIT_FIELD, m_multiplayerHost, &m_multiplayerHostLen, 1024, nk_filter_default));
 
@@ -908,6 +1011,10 @@ public:
 			nk_label(m_nctx, "Account Password for Internet Ranking:", nk_text_alignment::NK_TEXT_LEFT);
 			nk_sdl_text(nk_edit_string(m_nctx, NK_EDIT_FIELD, m_irPassword, &m_irPasswordLen, 1024, nk_filter_default));
 			nk_tree_pop(m_nctx);
+		}
+		else
+		{
+			g_gameConfig.Set(GameConfigKeys::SettingsTreesOpen, treesOpen & (~16));
 		}
 	}
 

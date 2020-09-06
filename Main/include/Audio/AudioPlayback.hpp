@@ -48,6 +48,8 @@ public:
 
 	// Pause the playback
 	void TogglePause();
+	void Pause();
+
 	bool IsPaused() const { return m_paused; }
 	bool HasEnded() const;
 

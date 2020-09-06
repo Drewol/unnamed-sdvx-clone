@@ -9,13 +9,13 @@
 #include "archive.h"
 #include "archive_entry.h"
 
-// Other encodings, such as ISO 8859-15 and CP850, are disabled because they are not as frequent as others.
 class StringEncodingDetectorInternal final : public TieredStringEncodingHeuristic
 <
 	// UTF-8 always take top priority
 	StringEncodingHeuristicCollection<UTF8Heuristic>,
-	StringEncodingHeuristicCollection<CP932Heuristic>
-	// If heuristics become robust enough, re-enable these
+	// Japanese encodings take priority over others
+	StringEncodingHeuristicCollection<CP932Heuristic, CP954Heuristic>
+	// Disabled because they are not as frequent as ShiftJIS or EUC-JP
 	// StringEncodingHeuristicCollection<CP949Heuristic, CP850Heuristic, CP923Heuristic>
 >
 {};

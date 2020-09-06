@@ -74,6 +74,11 @@ namespace Math
 		return std::round(t);
 	}
 	template<typename T>
+	int RoundToInt(T t)
+	{
+		return static_cast<int>(t + 0.5);
+	}
+	template<typename T>
 	T BeatInMS(T bpm)
 	{
 		return (T)60000 / bpm;

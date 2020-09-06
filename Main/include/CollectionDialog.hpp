@@ -14,7 +14,7 @@ public:
 	bool Init(class MapDatabase* songdb);
 	void Tick(float deltaTime);
 	void Render(float deltaTime);
-	void Open(const ChartIndex& song);
+	void Open(const ChartIndex* song);
 
 	//Call to start closing the dialog
 	void Close();

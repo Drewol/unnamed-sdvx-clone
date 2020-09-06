@@ -15,7 +15,8 @@ enum class StringEncoding
 	CP850, DOS_Latin1 = CP850,
 	CP923, ISO8859_15 = CP923,
 	CP932, ShiftJIS = CP932,
-	CP949, EUC_KR = CP949
+	CP949, EUC_KR = CP949,
+	CP954, EUC_JP = CP954
 };
 
 constexpr const char* GetDisplayString(const StringEncoding encoding)
@@ -27,6 +28,7 @@ constexpr const char* GetDisplayString(const StringEncoding encoding)
 	case StringEncoding::CP923: return "CP923 (aka ISO 8859-15)";
 	case StringEncoding::CP932: return "CP932 (or ShiftJIS)";
 	case StringEncoding::CP949: return "CP949 (or EUC-KR)";
+	case StringEncoding::CP954: return "CP954 (or EUC-JP)";
 	case StringEncoding::Unknown: return "Unknown";
 	default: return "[an unknown encoding]";
 	}

@@ -5,7 +5,6 @@
 #include "Shared/Thread.hpp"
 #include "GameConfig.hpp"
 #include "cpr/cpr.h"
-#include <queue>
 #include "Beatmap/MapDatabase.hpp"
 #include "json.hpp"
 #include "TCPSocket.hpp"
@@ -72,7 +71,7 @@ public:
 	void SetSelectedMap(FolderIndex*, ChartIndex*);
 
 	void PerformScoreTick(Scoring& scoring, MapTime time);
-	void SendFinalScore(class Game* game, int clearState);
+	void SendFinalScore(class Game* game, ClearMark clearState);
 	void GetMapBPMForSpeed(const String path, struct MultiplayerBPMInfo& info);
 
 	Vector<nlohmann::json> const* GetFinalStats() const

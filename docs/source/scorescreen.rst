@@ -1,37 +1,76 @@
 Result Screen
 =============
-The following fields are available under the ``result`` table:
+The following fields are available under the ``result`` table.
+Note that, for multiplayer play every fields other than ``isSelf`` and ``uid`` may not be set to the viewer's.
 
 .. code-block:: c#
 
     int score
-    int flags //gameplay options such as gauge type, mirror, and random.
-    float gauge //value of the gauge at the end of the song
+    int flags // gameplay options such as gauge type, mirror, and random.
+    float gauge // value of the gauge at the end of the song
     int misses
     int goods
     int perfects
     int maxCombo
     int level
     int difficulty
-    string title
+    string title // With the player name in multiplayer
+    string realTitle // Always without the player name
     string artist
     string effector
+    string illustrator
     string bpm
+    int duration // Length of the chart in milliseconds
     string jacketPath
     int medianHitDelta
     float meanHitDelta
-    bool autoplay
+    int medianHitDeltaAbs
+    float meanHitDeltaAbs
     int earlies
     int lates
-    int badge //same as song wheel badge (except 0 which means the user manually exited)
-    float gaugeSamples[256] //gauge values sampled throughout the song
+    int badge // same as song wheel badge (except 0 which means the user manually exited)
+    float gaugeSamples[256] // gauge values sampled throughout the song
     string grade // "S", "AAA+", "AAA", etc.
-    score[] highScores // Same as song wheel scores 
+    score[] highScores // Same as song wheel scores
+    string playerName // Only on multiplayer
+    int displayIndex // Only on multiplayer; which player's score (not necessarily the viewer's) is being shown right not
+    string uid // Only on multiplayer; the UID of the viewer
+    HitWindow hitWindow // Same as gameplay HitWindow
+    bool autoplay
+    float playbackSpeed
+    string mission // Only on practice mode
+    int retryCount // Only on practice mode
+    bool isSelf // Whether this score is viewer's in multiplayer; always true for singleplayer
+    int speedModType // Only when isSelf is true; 0 for XMOD, 1 for MMOD, 2 for CMOD
+    int speedModValue // Only when isSelf is true; HiSpeed for XMOD, ModSpeed for MMOD and CMOD
+    HidSud hidsud // Only when isSelf is true
+    HitStat[] noteHitStats // Only when isSelf is true; contains HitStat for notes (excluding hold notes and lasers) 
+
+HitStat
+*******
+A ``HitStat`` contains the following fields:
+    
+.. code-block:: c
+
+    int rating // 0 for miss, 1 for near, 2 for crit
+    int lane
+    int time // In milliseconds
+    float timeFrac // Between 0 and 1
+    int delta
+
 
 Calls made to lua
 *****************
 Calls made from the game to the script, these need to be defined for the game
 to function properly.
+
+result_set()
+^^^^^^^^^^^^
+This is called right after ``result`` is set, either for initial display or when the player whose score is being displayed is changed.
+
+render(deltaTime)
+^^^^^^^^^^^^^^^^^
+The GUI render call.
 
 get_capture_rect()
 ^^^^^^^^^^^^^^^^^^

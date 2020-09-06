@@ -115,6 +115,8 @@ void AudioPlayback::Play()
 	for (auto it = m_switchables.begin(); it != m_switchables.end(); ++it)
 		if (it->m_audio)
 			it->m_audio->Play();
+
+	m_paused = false;
 }
 void AudioPlayback::Advance(MapTime ms)
 {
@@ -135,25 +137,22 @@ void AudioPlayback::SetPosition(MapTime time)
 }
 void AudioPlayback::TogglePause()
 {
-	if(m_paused)
-	{
-		m_music->Play();
-		if(m_fxtrack)
-			m_fxtrack->Play();
-		for (auto it = m_switchables.begin(); it != m_switchables.end(); ++it)
-			if (it->m_audio)
-				it->m_audio->Play();
-	}
-	else
-	{
-		m_music->Pause();
-		if(m_fxtrack)
-			m_fxtrack->Pause();
-		for (auto it = m_switchables.begin(); it != m_switchables.end(); ++it)
-			if (it->m_audio)
-				it->m_audio->Pause();
-	}
-	m_paused = !m_paused;
+	if(m_paused) Play();
+	else Pause();
+}
+void AudioPlayback::Pause()
+{
+	if (m_paused)
+		return;
+
+	m_music->Pause();
+	if (m_fxtrack)
+		m_fxtrack->Pause();
+	for (auto it = m_switchables.begin(); it != m_switchables.end(); ++it)
+		if (it->m_audio)
+			it->m_audio->Pause();
+
+	m_paused = true;
 }
 bool AudioPlayback::HasEnded() const
 {

@@ -947,11 +947,11 @@ void MultiplayerScreen::m_addFinalStat(nlohmann::json& data)
 		});
 }
 
-void MultiplayerScreen::SendFinalScore(class Game* game, int clearState)
+void MultiplayerScreen::SendFinalScore(class Game* game, ClearMark clearState)
 {
 	Scoring& scoring = game->GetScoring();
 
-	clearState = HasFailed() ? 1 : clearState;
+	clearState = HasFailed() ? ClearMark::Played : clearState;
 
 	uint32 flags = (uint32)game->GetFlags();
 
@@ -959,7 +959,7 @@ void MultiplayerScreen::SendFinalScore(class Game* game, int clearState)
 	packet["topic"] = "room.score.final";
 	packet["score"] = scoring.CalculateCurrentScore();
 	packet["combo"] = scoring.maxComboCounter;
-	packet["clear"] = clearState;
+	packet["clear"] = static_cast<int>(clearState);
 	packet["gauge"] = scoring.currentGauge;
 	packet["early"] = scoring.timedHits[0];
 	packet["late"] = scoring.timedHits[1];

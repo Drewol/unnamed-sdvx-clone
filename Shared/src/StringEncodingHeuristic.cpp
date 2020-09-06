@@ -213,7 +213,7 @@ CharClass CP949Heuristic::GetEUCKRCharClass(const uint16_t ch) const
 	if (0xA3B0 <= ch && ch <= 0xA3B9 || 0xA3C1 <= ch && ch <= 0xA3DA || 0xA3E1 <= ch && ch <= 0xA3FA)
 		return CharClass::ALNUM;
 
-	// Kanji (Every kanji is regarded as rare even though some are not...)
+	// Kanji (Every kanji will be regarded as rare even though some are not...)
 	if (0xCAA1 <= ch && ch <= 0xFDFE)
 		return CharClass::KANJI_KSX1001;
 
@@ -265,8 +265,54 @@ CharClass CP949Heuristic::GetCharClass(const uint16_t ch) const
 	return CharClass::INVALID;
 }
 
+bool CP954Heuristic::RequiresSecondByte(const uint8_t ch) const
+{
+	return ch == 0x8E || 0xA1 <= ch && ch <= 0xFE;
+}
+
+CharClass CP954Heuristic::GetCharClass(const uint16_t ch) const
+{
+	if (ch < 0x80) return GetAsciiCharClass(static_cast<uint8_t>(ch));
+	if (ch < 0xFF) return CharClass::INVALID;
+
+	const uint8_t hi = static_cast<uint8_t>(ch >> 8);
+	const uint8_t lo = static_cast<uint8_t>(ch & 0xFF);
+
+	// JIS X 0201-jp
+	if (hi == 0x8E)
+	{
+		if (0xA1 <= lo && lo <= 0xA5 || lo == 0xDE || lo == 0xDF) return CharClass::OTHER_CHARS;
+		if (0xA6 <= lo && lo <= 0xDD) return CharClass::KANA;
+		return CharClass::INVALID;
+	}
+
+	if (hi < 0xA1 || hi > 0xFE || lo < 0xA1 || lo > 0xFE)
+		return CharClass::INVALID;
+
+	if (0xA2AF <= ch && ch <= 0xA2B9 || 0xA2C2 <= ch && ch <= 0xA2C9 || 0xA2D1 <= ch && ch <= 0xA2DB || 0xA2EB <= ch && ch <= 0xA2F1 || 0xA2FA <= ch && ch <= 0xA2FD)
+		return CharClass::INVALID;
+
+	if (ch <= 0xA2FE)
+		return CharClass::OTHER_CHARS;
+
+	if (0xA3B0 <= ch && ch <= 0xA3B9 || 0xA3C1 <= ch && ch <= 0xA3DA || 0xA3E1 <= ch && ch <= 0xA3FA)
+		return CharClass::ALNUM;
+
+	if (0xA4A1 <= ch && ch <= 0xA4F3 || 0xA5A1 <= ch && ch <= 0xA5F6)
+		return CharClass::KANA;
+
+	if (0xA6A1 <= ch && ch <= 0xA6B8 || 0xA6C1 <= ch && ch <= 0xA6D8 || 0xA7A1 <= ch && ch <= 0xA7C1 || 0xA7D1 <= ch && ch <= 0xA7F1 || 0xA8A1 <= ch && ch <= 0xA8C0)
+		return CharClass::OTHER_CHARS;
+
+	if (0xB0A1 <= ch && ch <= 0xCFD3 || 0xD0A1 <= ch && ch <= 0xF4A6)
+		return CharClass::KANJI_LEVEL_1;
+
+	return CharClass::INVALID;
+}
+
 // For debugging
 void StringEncodingHeuristic::DebugPrint() const
 {
-	Logf("Score: [%d] / Length: [%d] / Encoding: [%s]", Logger::Severity::Info, static_cast<int>(m_score), static_cast<int>(m_count), GetDisplayString(GetEncoding()));
+	Logf("Score: [%d] / Length: [%d] / Encoding: [%s]", Logger::Severity::Info,
+		static_cast<int>(m_score), static_cast<int>(m_count), GetDisplayString(GetEncoding()));
 }

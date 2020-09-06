@@ -2,6 +2,7 @@
 #include "GameConfig.hpp"
 
 #include "Shared/Log.hpp"
+#include "HitStat.hpp"
 
 inline static void ConvertKeyCodeToScanCode(GameConfig& config, std::vector<GameConfigKeys> keys)
 {
@@ -46,8 +47,8 @@ void GameConfig::SetKeyBinding(GameConfigKeys key, Graphics::Key value)
 
 void GameConfig::InitDefaults()
 {
-	// This will be set to appropriate value in Application::m_LoadConfig.
-	// Do not set this to GameConfig::VERSION here. It will cause problems for config files with no ConfigVersion field.
+	// Do not set ConfigVersion to GameConfig::VERSION here. It will cause problems for config files with no ConfigVersion field.
+	// For a new config, ConfigVersion will be set to the appropriate value in Application::m_LoadConfig.
 	Set(GameConfigKeys::ConfigVersion, 0);
 
 	Set(GameConfigKeys::ScreenWidth, 1280);
@@ -65,6 +66,10 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::ShowFps, false);
 	Set(GameConfigKeys::ForcePortrait, false);
 	Set(GameConfigKeys::SkipScore, true);
+
+	Set(GameConfigKeys::HitWindowPerfect, HitWindow::NORMAL.perfect);
+	Set(GameConfigKeys::HitWindowGood, HitWindow::NORMAL.good);
+	Set(GameConfigKeys::HitWindowHold, HitWindow::NORMAL.hold);
 	Set(GameConfigKeys::HiSpeed, 1.0f);
 	Set(GameConfigKeys::GlobalOffset, 0);
 	Set(GameConfigKeys::InputOffset, 0);
@@ -83,6 +88,7 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::Laser1Color, 330.0f);
 	Set(GameConfigKeys::SongSelSensMult, 1.0f);
 
+	Set(GameConfigKeys::EnableHiddenSudden, false);
 	Set(GameConfigKeys::HiddenCutoff, 0.0f);
 	Set(GameConfigKeys::HiddenFade, 0.2f);
 	Set(GameConfigKeys::SuddenCutoff, 1.0f);
@@ -91,10 +97,16 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::DistantButtonScale, 1.0f);
 	Set(GameConfigKeys::BTOverFXScale, 0.8f);
 	Set(GameConfigKeys::DisableBackgrounds, false);
+	Set(GameConfigKeys::LeadInTime, 3000);
+	Set(GameConfigKeys::PracticeLeadInTime, 1500);
+	Set(GameConfigKeys::PracticeSetupNavEnabled, true);
+	Set(GameConfigKeys::RevertToSetupAfterScoreScreen, false);
+	Set(GameConfigKeys::DisplayPracticeInfoInGame, true);
 
 	SetEnum<Logger::Enum_Severity>(GameConfigKeys::LogLevel, Logger::Severity::Normal);
 
 	SetEnum<Enum_SpeedMods>(GameConfigKeys::SpeedMod, SpeedMods::MMod);
+	SetEnum<Enum_ScoreDisplayModes>(GameConfigKeys::ScoreDisplayMode, ScoreDisplayModes::Additive);
 
 	// Input settings
 	SetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice, InputDevice::Keyboard);
@@ -169,6 +181,8 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::AutoResetSettings, false);
 	Set(GameConfigKeys::AutoResetToSpeed, 400.0f);
 	Set(GameConfigKeys::SlamThicknessMultiplier, 1.0f);
+
+	Set(GameConfigKeys::SettingsTreesOpen, 1);
 
 	SetEnum<Enum_AutoScoreScreenshotSettings>(GameConfigKeys::AutoScoreScreenshot, AutoScoreScreenshotSettings::Off);
 

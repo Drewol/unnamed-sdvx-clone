@@ -20,7 +20,38 @@
 		"type": "bool",
 		"default": true
 	},
+	
 	"separator_b" : {},
+	"Result:" : { "type" : "label" },
+	"show_result_hiscore": {
+		"label": "Show hiscore on result",
+		"type": "bool",
+		"default": true
+	},
+	"hit_graph_delta_scale": {
+		"label": "Hit graph scale (y-axis)",
+		"type": "float",
+		"default": 0.8,
+		"max": 3.0,
+		"min": 0.5
+	},
+	"show_result_guide": {
+		"label": "Show control guide on result",
+		"type": "bool",
+		"default": true
+	},
+	"show_detailed_results": {
+		"label": "Show detailed results by default",
+		"type": "bool",
+		"default": false
+	},
+	"show_result_icons": {
+		"label": "Show icons related to play settings at the bottom",
+		"type": "bool",
+		"default": true
+	},
+	
+	"separator_c" : {},
 	"Test objects:" : { "type" : "label" },
 	"Testing with space" : {
 		"type": "float",

@@ -72,10 +72,15 @@ function render(deltaTime, visible)
 
     if not visible and yScale:tick(0) < 0.05 then return end
 
+    local posX = SettingsDiag.posX or 0.5
+    local posY = SettingsDiag.posY or 0.5
+    local message_1 = "Press both FXs to open/close. Use the Start button to press buttons."
+    local message_2 = "Use FX keys to navigate tabs. Use arrow keys to navigate and modify settings."
+
     resX, resY = game.GetResolution()
     local scale = resY / 1080
     gfx.ResetTransform()
-    gfx.Translate(math.floor(resX / 2), math.floor(resY / 2))
+    gfx.Translate(math.floor(diagWidth/2 + posX*(resX-diagWidth)), math.floor(diagHeight/2 + posY*(resY-diagHeight)))
     gfx.Scale(scale, scale)
     gfx.Scale(1.0, smootherstep(0, 1, yScale:tick(deltaTime)))
     gfx.BeginPath()
@@ -83,6 +88,14 @@ function render(deltaTime, visible)
     gfx.FillColor(50,50,50)
     gfx.Fill()
     gfx.FillColor(255,255,255)
+    
+    gfx.FontSize(20)
+    
+    local m_xmin, m_ymin, m_xmax, m_ymax = gfx.TextBounds(0, 0, message_1)
+    gfx.Text(message_1, diagWidth/2 - m_xmax, diagHeight/2 - m_ymax - 20)
+    
+    m_xmin, m_ymin, m_xmax, m_ymax = gfx.TextBounds(0, 0, message_2)
+    gfx.Text(message_2, diagWidth/2 - m_xmax, diagHeight/2 - m_ymax)
 
     tabStroke.start = tabStrokeAnimation.start:tick(deltaTime)
     tabStroke.stop = tabStrokeAnimation.stop:tick(deltaTime)
@@ -133,7 +146,7 @@ function render(deltaTime, visible)
     gfx.StrokeColor(255, 127, 0)
     gfx.Stroke()
 
-    local settingHeigt = 30
+    local settingHeight = 30
     local tab = SettingsDiag.tabs[SettingsDiag.currentTab]
     for si, setting in ipairs(tab.settings) do
         local disp = ""
@@ -158,14 +171,28 @@ function render(deltaTime, visible)
                 gfx.LineTo(xmax + 5 + width * setting.value, 20)
                 gfx.StrokeColor(255,127,0)
                 gfx.StrokeWidth(2)
-                gfx.Stroke()
-                
+                gfx.Stroke() 
             end
+        elseif setting.type == "button" then
+            disp = string.format("%s", setting.name)
+            local xmin, ymin, xmax,ymax = gfx.TextBounds(0, 0, disp)
+            gfx.BeginPath()
+            gfx.Rect(-2, 3, 4+xmax-xmin, 28)
+            gfx.FillColor(0, 64, 128)
+            if si == SettingsDiag.currentSetting then
+                gfx.StrokeColor(255, 127, 0)
+            else
+                gfx.StrokeColor(0,127,255)
+            end
+            gfx.StrokeWidth(2)
+            gfx.Fill()
+            gfx.Stroke()
+            gfx.FillColor(255,255,255)
         else
             disp = string.format("%s:", setting.name)
             local xmin,ymin, xmax,ymax = gfx.TextBounds(0, 0, disp)
             gfx.BeginPath()
-            gfx.Rect(xmax + 5, 7, 20,20)
+            gfx.Rect(xmax + 5, 5, 20,20)
             gfx.FillColor(255, 127, 0, setting.value and 255 or 0)
             gfx.StrokeColor(0,127,255)
             gfx.StrokeWidth(2)
@@ -175,8 +202,12 @@ function render(deltaTime, visible)
         end
         gfx.Text(disp, 0 ,0)
         if si == SettingsDiag.currentSetting then
-            local xmin,ymin, xmax,ymax = gfx.TextBounds(0, 0, setting.name .. ":")
-            ymax = ymax + settingHeigt * (si - 1)
+            local setting_name = setting.name .. ":"
+            if setting.type == "button" then
+                setting_name = setting.name
+            end
+            local xmin,ymin, xmax,ymax = gfx.TextBounds(0, 0, setting_name)
+            ymax = ymax + settingHeight * (si - 1)
             if xmax ~= prevSettingStroke.x or ymax ~= prevSettingStroke.y then
                 settingsStrokeAnimation.x:restart(settingStroke.x, xmax, 0.1)
                 settingsStrokeAnimation.y:restart(settingStroke.y, ymax, 0.1)
@@ -185,7 +216,7 @@ function render(deltaTime, visible)
             prevSettingStroke.x = xmax
             prevSettingStroke.y = ymax
         end
-        gfx.Translate(0, settingHeigt)
+        gfx.Translate(0, settingHeight)
     end
 
 

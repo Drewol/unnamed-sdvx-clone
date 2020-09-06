@@ -33,6 +33,10 @@
 #include "GUI/nanovg_lua.h"
 #ifdef _WIN32
 #include <Windows.h>
+#ifdef CRASHDUMP
+#include "exception_handler.h"
+#include "client_info.h"
+#endif
 #endif
 #include "archive.h"
 #include "archive_entry.h"
@@ -619,7 +623,8 @@ bool Application::m_Init()
 {
 	ProfilerScope $("Application Setup");
 
-	Logf("Version: %d.%d.%d", Logger::Severity::Info, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+	String version = Utility::Sprintf("%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+	Logf("Version: %s", Logger::Severity::Info, version.c_str());
 
 #ifdef EMBEDDED
 	Log("Embeedded version.");
@@ -628,6 +633,31 @@ bool Application::m_Init()
 #ifdef GIT_COMMIT
 	Logf("Git commit: %s", Logger::Severity::Info, GIT_COMMIT);
 #endif // GIT_COMMIT
+
+#ifdef _WIN32
+#ifdef CRASHDUMP
+	google_breakpad::CustomInfoEntry kCustomInfoEntries[]{
+		google_breakpad::CustomInfoEntry(L"version", std::wstring(version.begin(), version.end()).c_str()),
+#ifdef GIT_COMMIT
+		google_breakpad::CustomInfoEntry(L"git", L"" GIT_COMMIT),
+#else
+		CustomInfoEntry("git", ""),
+#endif
+	};
+	google_breakpad::CustomClientInfo custom_info = {kCustomInfoEntries, 2};
+	//CustomClientInfo custom_info
+	auto handler = new google_breakpad::ExceptionHandler(
+		L".\\crash_dumps",
+		NULL,
+		NULL,
+		NULL,
+		google_breakpad::ExceptionHandler::HANDLER_ALL,
+		MiniDumpNormal,
+		(const wchar_t*)nullptr,
+		&custom_info
+	);
+#endif 
+#endif
 
 	// Must have command line
 	assert(m_commandLine.size() >= 1);
@@ -848,6 +878,7 @@ bool Application::m_Init()
 	Path::CreateDir(Path::Absolute("screenshots"));
 	Path::CreateDir(Path::Absolute("songs"));
 	Path::CreateDir(Path::Absolute("replays"));
+	Path::CreateDir(Path::Absolute("crash_dumps"));
 
 	return true;
 }

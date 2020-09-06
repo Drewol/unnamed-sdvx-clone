@@ -17,7 +17,29 @@
 //	2147483648	ms
 //	~2147483	sec
 //	~35791		min
-typedef int32 MapTime;
+using MapTime = int32;
+
+struct MapTimeRange
+{
+	constexpr MapTimeRange() noexcept : begin(0), end(0) {}
+	explicit constexpr MapTimeRange(MapTime begin) noexcept : begin(begin), end(0) {}
+	constexpr MapTimeRange(MapTime begin, MapTime end) noexcept : begin(begin), end(end) {}
+
+	constexpr MapTimeRange(const MapTimeRange&) noexcept = default;
+	constexpr MapTimeRange(MapTimeRange&&) noexcept = default;
+
+	constexpr MapTimeRange& operator= (const MapTimeRange&) noexcept = default;
+	constexpr MapTimeRange& operator= (MapTimeRange&&) noexcept = default;
+
+	constexpr bool HasEnd() const noexcept { return begin < end; }
+	constexpr MapTime Length() const noexcept { return HasEnd() ? end - begin : 0; }
+	constexpr MapTime Length(const MapTime defaultEnd) const noexcept { return HasEnd() ? end - begin : defaultEnd - begin; }
+	constexpr bool Includes(const MapTime t, const bool includingEnd = false) const noexcept { return begin <= t && (!HasEnd() || (includingEnd ? t <= end : t < end)); }
+	constexpr bool Includes(const MapTimeRange& other) const noexcept { return Includes(other.begin) && (other.HasEnd() ? Includes(other.end, true) : !HasEnd());}
+	constexpr bool Overlaps(const MapTimeRange& other) const noexcept { if (begin <= other.begin) return Includes(other.begin); else return other.Includes(begin); }
+
+	MapTime begin, end;
+};
 
 // Type enum for map object
 enum class ObjectType : uint8

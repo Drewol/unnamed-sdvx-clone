@@ -217,10 +217,12 @@ void CollectionDialog::Render(float deltaTime)
 	}
 }
 
-void CollectionDialog::Open(const ChartIndex& song)
+void CollectionDialog::Open(const ChartIndex* song)
 {
+	if (song == nullptr)
+		return;
 	m_active = true;
-	m_currentId = song.folderId;
+	m_currentId = song->folderId;
 	m_nameEntry->SetActive(false);
 	m_nameEntry->Reset();
 
@@ -228,15 +230,15 @@ void CollectionDialog::Open(const ChartIndex& song)
 	lua_getglobal(m_lua, "dialog");
 
 	lua_pushstring(m_lua, "title");
-	lua_pushstring(m_lua, *song.title);
+	lua_pushstring(m_lua, *song->title);
 	lua_settable(m_lua, -3);
 
 	lua_pushstring(m_lua, "artist");
-	lua_pushstring(m_lua, *song.artist);
+	lua_pushstring(m_lua, *song->artist);
 	lua_settable(m_lua, -3);
 
 	lua_pushstring(m_lua, "jacket");
-	lua_pushstring(m_lua, *song.jacket_path);
+	lua_pushstring(m_lua, *song->jacket_path);
 	lua_settable(m_lua, -3);
 
 	m_closing = false;

@@ -61,4 +61,6 @@ public:
 	virtual ~SongSelect() = default;
 	static SongSelect* Create();
 	static SongSelect* Create(MultiplayerScreen*);
+
+	virtual ChartIndex* GetCurrentSelectedChart() { return 0; }
 };

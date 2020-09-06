@@ -1,7 +1,6 @@
 #pragma once
 #include "ApplicationTickable.hpp"
 #include "GameConfig.hpp"
-#include <queue>
 #include "Application.hpp"
 #include "Input.hpp"
 #include <SDL2/SDL.h>

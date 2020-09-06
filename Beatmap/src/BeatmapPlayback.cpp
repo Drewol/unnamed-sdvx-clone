@@ -16,7 +16,7 @@ BeatmapPlayback::~BeatmapPlayback()
 		m_timingPoints.clear();
 	}
 }
-bool BeatmapPlayback::Reset(MapTime startTime)
+bool BeatmapPlayback::Reset(MapTime initTime, MapTime start)
 {
 	m_effectObjects.clear();
 	m_timingPoints = m_beatmap->GetLinearTimingPoints();
@@ -24,13 +24,19 @@ bool BeatmapPlayback::Reset(MapTime startTime)
 	m_objects = m_beatmap->GetLinearObjects();
 	m_zoomPoints = m_beatmap->GetZoomControlPoints();
 	m_laneTogglePoints = m_beatmap->GetLaneTogglePoints();
+
 	if (m_objects.size() == 0)
 		return false;
 	if (m_timingPoints.size() == 0)
 		return false;
 
-	Logf("Resetting BeatmapPlayback with StartTime = %d", Logger::Severity::Info, startTime);
-	m_playbackTime = startTime;
+	Logf("Resetting BeatmapPlayback, InitTime = %d, Start = %d", Logger::Severity::Info, initTime, start);
+	m_playbackTime = initTime;
+
+	// Ensure that nothing could go wrong when the start is 0
+	if (start <= 0) start = std::numeric_limits<decltype(start)>::min();
+	m_viewRange = { start, start };
+
 	m_currentObj = &m_objects.front();
 	m_currentAlertObj = &m_objects.front();
 	m_currentLaserObj = &m_objects.front();
@@ -72,6 +78,7 @@ void BeatmapPlayback::Update(MapTime newTime)
 		m_playbackTime = newTime;
 		return;
 	}
+
 	if (newTime < m_playbackTime)
 	{
 		// Don't allow backtracking
@@ -126,15 +133,17 @@ void BeatmapPlayback::Update(MapTime newTime)
 		for (auto it = m_currentObj; it < objEnd; it++)
 		{
 			MultiObjectState* obj = **it;
-			if (obj->type != ObjectType::Laser)
+			if (obj->type == ObjectType::Laser) continue;
+
+			if (!m_viewRange.Includes(obj->time)) continue;
+			if (obj->type == ObjectType::Hold && !m_viewRange.Includes(obj->time + obj->hold.duration, true)) continue;
+
+			if (obj->type == ObjectType::Hold || obj->type == ObjectType::Single)
 			{
-				if (obj->type == ObjectType::Hold || obj->type == ObjectType::Single)
-				{
-					m_holdObjects.Add(*obj);
-				}
-				m_hittableObjects.AddUnique(*it);
-				OnObjectEntered.Call(*it);
+				m_holdObjects.Add(*obj);
 			}
+			m_hittableObjects.AddUnique(*it);
+			OnObjectEntered.Call(*it);
 		}
 		m_currentObj = objEnd;
 	}
@@ -147,12 +156,14 @@ void BeatmapPlayback::Update(MapTime newTime)
 		for (auto it = m_currentLaserObj; it < objEnd; it++)
 		{
 			MultiObjectState* obj = **it;
-			if (obj->type == ObjectType::Laser)
-			{
-				m_holdObjects.Add(*obj);
-				m_hittableObjects.AddUnique(*it);
-				OnObjectEntered.Call(*it);
-			}
+			if (obj->type != ObjectType::Laser) continue;
+
+			if (!m_viewRange.Includes(obj->time)) continue;
+			if (!m_viewRange.Includes(obj->time + obj->laser.duration, true)) continue;
+
+			m_holdObjects.Add(*obj);
+			m_hittableObjects.AddUnique(*it);
+			OnObjectEntered.Call(*it);
 		}
 		m_currentLaserObj = objEnd;
 	}
@@ -165,6 +176,8 @@ void BeatmapPlayback::Update(MapTime newTime)
 		for (auto it = m_currentAlertObj; it < objEnd; it++)
 		{
 			MultiObjectState* obj = **it;
+			if (!m_viewRange.Includes(obj->time)) continue;
+
 			if (obj->type == ObjectType::Laser)
 			{
 				LaserObjectState* laser = (LaserObjectState*)obj;
@@ -299,14 +312,6 @@ void BeatmapPlayback::Update(MapTime newTime)
 	}
 }
 
-Vector<ObjectState*>& BeatmapPlayback::GetHittableObjects()
-{
-	if (m_isCalibration) {
-		return m_calibrationObjects;
-	}
-	return m_hittableObjects;
-}
-
 void BeatmapPlayback::MakeCalibrationPlayback()
 {
 	m_isCalibration = true;
@@ -331,10 +336,13 @@ void BeatmapPlayback::MakeCalibrationPlayback()
 
 Vector<ObjectState*> BeatmapPlayback::GetObjectsInRange(MapTime range)
 {
-	static const uint32 earlyVisiblity = 200;
+	static const uint32 earlyVisibility = 200;
+
 	const TimingPoint& tp = GetCurrentTimingPoint();
+
+	MapTime begin = (MapTime) (m_playbackTime - earlyVisibility);
 	MapTime end = m_playbackTime + range;
-	MapTime begin = m_playbackTime - earlyVisiblity;
+
 	Vector<ObjectState*> ret;
 
 	if (m_isCalibration) {
@@ -350,6 +358,9 @@ Vector<ObjectState*> BeatmapPlayback::GetObjectsInRange(MapTime range)
 		return ret;
 	}
 
+	if (begin < m_viewRange.begin) begin = m_viewRange.begin;
+	if (m_viewRange.HasEnd() && end >= m_viewRange.end) end = m_viewRange.end;
+
 	// Add hold objects
 	for (auto& ho : m_holdObjects)
 	{
@@ -361,7 +372,13 @@ Vector<ObjectState*> BeatmapPlayback::GetObjectsInRange(MapTime range)
 	// Return all objects that lie after the currently queued object and fall within the given range
 	while (!IsEndObject(obj))
 	{
-		if ((*obj)->time > end)
+		if ((*obj)->time < begin)
+		{
+			obj += 1;
+			continue;
+		}
+
+		if ((*obj)->time >= end)
 			break; // No more objects
 
 		ret.AddUnique(*obj);

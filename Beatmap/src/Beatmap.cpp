@@ -119,6 +119,100 @@ AudioEffect Beatmap::GetFilter(EffectType type) const
 	}
 	return AudioEffect::GetDefault(type);
 }
+
+MapTime Beatmap::GetLastObjectTime() const
+{
+	if (m_objectStates.size() == 0)
+		return 0;
+
+	for (auto it = m_objectStates.rbegin(); it != m_objectStates.rend(); ++it)
+	{
+		const ObjectState* obj = *it;
+		switch (obj->type)
+		{
+		case ObjectType::Event:
+			continue;
+		case ObjectType::Hold:
+			return obj->time + ((const HoldObjectState*)obj)->duration;
+		case ObjectType::Laser:
+			return obj->time + ((const LaserObjectState*)obj)->duration;
+		default:
+			return obj->time;
+		}
+	}
+
+	return 0;
+}
+
+constexpr static double MEASURE_EPSILON = 0.005;
+
+inline static int GetBarCount(const TimingPoint* a, const TimingPoint* b)
+{
+	const MapTime measureDuration = b->time - a->time;
+	const double barCount = measureDuration / a->GetBarDuration();
+	int barCountInt = static_cast<int>(barCount + 0.5);
+
+	if (std::abs(barCount - static_cast<double>(barCountInt)) >= MEASURE_EPSILON)
+	{
+		Logf("A timing point at %d contains non-integer # of bars: %g", Logger::Severity::Info, a->time, barCount);
+		if (barCount > barCountInt) ++barCountInt;
+	}
+
+	return barCountInt;
+}
+
+MapTime Beatmap::GetMapTimeFromMeasureInd(int measure) const
+{
+	if (measure < 0) return 0;
+
+	int currMeasure = 0;
+	for (int i = 0; i < m_timingPoints.size(); ++i)
+	{
+		bool isInCurrentTimingPoint = false;
+		if (i == m_timingPoints.size() - 1 || measure <= currMeasure)
+		{
+			isInCurrentTimingPoint = true;
+		}
+		else
+		{
+			const int barCount = GetBarCount(m_timingPoints[i], m_timingPoints[i + 1]);
+
+			if (measure < currMeasure + barCount)
+				isInCurrentTimingPoint = true;
+			else
+				currMeasure += barCount;
+		}
+		if (isInCurrentTimingPoint)
+		{
+			measure -= currMeasure;
+			return static_cast<MapTime>(m_timingPoints[i]->time + m_timingPoints[i]->GetBarDuration() * measure);
+		}
+	}
+
+	assert(false);
+	return 0;
+}
+
+int Beatmap::GetMeasureIndFromMapTime(MapTime time) const
+{
+	if (time <= 0) return 0;
+
+	int currMeasureCount = 0;
+	for (int i = 0; i < m_timingPoints.size(); ++i)
+	{
+		if (i < m_timingPoints.size() - 1 && m_timingPoints[i + 1]->time <= time)
+		{
+			currMeasureCount += GetBarCount(m_timingPoints[i], m_timingPoints[i + 1]);
+			continue;
+		}
+
+		return currMeasureCount + static_cast<int>(MEASURE_EPSILON + (time - m_timingPoints[i]->time) / m_timingPoints[i]->GetBarDuration());
+	}
+
+	assert(false);
+	return 0;
+}
+
 bool MultiObjectState::StaticSerialize(BinaryStream& stream, MultiObjectState*& obj)
 {
 	uint8 type = 0;

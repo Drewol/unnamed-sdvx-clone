@@ -10,7 +10,6 @@ enum class ScoreHitRating
 	Idle, // Not actual score, used when a button is pressed when there are no notes
 };
 
-
 // Hit statistic
 struct HitStat
 {
@@ -32,4 +31,48 @@ struct HitStat
 	bool hasMissed = false;
 
 	bool forReplay = true;
+};
+
+struct HitWindow
+{
+	enum class Type { None = 0, Normal, Hard };
+
+	inline HitWindow(MapTime perfect, MapTime good) noexcept : perfect(perfect), good(good) { Validate(); }
+	inline HitWindow(MapTime perfect, MapTime good, MapTime hold) noexcept : perfect(perfect), good(good), hold(hold) { Validate(); }
+	inline HitWindow(const HitWindow& that) noexcept : perfect(that.perfect), good(that.good), hold(that.hold), miss(that.miss) { Validate(); }
+
+	static HitWindow FromConfig();
+	void SaveConfig() const;
+
+	void ToLuaTable(struct lua_State* L);
+
+	inline HitWindow& operator= (const HitWindow& that) noexcept { perfect = that.perfect; good = that.good; hold = that.hold; miss = that.miss; return *this; }
+
+	constexpr bool operator== (const HitWindow& that) const noexcept { return perfect == that.perfect && good == that.good && hold == that.hold && miss == that.miss; }
+	constexpr bool operator<= (const HitWindow& that) const noexcept { return perfect <= that.perfect && good <= that.good && hold <= that.hold && miss <= that.miss; }
+
+	constexpr Type GetType() const noexcept { if (*this <= HARD) return Type::Hard; else if (*this <= NORMAL) return Type::Normal; else return Type::None; }
+
+	inline bool Validate()
+	{
+		if (perfect <= good && good <= hold && hold <= miss && miss <= NORMAL.miss)
+			return true;
+
+		Logf("Invalid timing window: %d/%d/%d/%d", Logger::Severity::Warning, perfect, good, hold, miss);
+
+		if (miss > NORMAL.miss) miss = NORMAL.miss;
+		if (hold > miss) hold = miss;
+		if (good > hold) good = hold;
+		if (perfect > good) perfect = good;
+
+		return false;
+	}
+
+	MapTime perfect = 46;
+	MapTime good = 92;
+	MapTime hold = 138;
+	MapTime miss = 250;
+
+	static const HitWindow NORMAL;
+	static const HitWindow HARD;
 };
