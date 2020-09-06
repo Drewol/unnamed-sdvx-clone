@@ -319,6 +319,11 @@ void RetriggerDSP::Process(float* out, uint32 numSamples)
 	uint32 pcmStartSample = (double)lastTimingPoint * ((double)audioBase->GetSampleRate() / 1000.0);
 	uint32 baseStartRepeat = (double)lastTimingPoint * ((double)audio->GetSampleRate() / 1000.0);
 
+	// Offset between the start of the effect hold and the nearest subdivision of this retrigger's updatePeriod.
+	int32 startResetOffset = (m_resetDuration > 0) ?
+		startSample - (startSample / (int)m_resetDuration) * m_resetDuration :
+		0;
+
 	for(uint32 i = 0; i < numSamples; i++)
 	{
 		if(nowSample + i < startSample)
@@ -330,7 +335,7 @@ void RetriggerDSP::Process(float* out, uint32 numSamples)
 		if (m_resetDuration > 0)
 		{
 			startOffset = (nowSample + i - baseStartRepeat) / (int)m_resetDuration;
-			startOffset = startOffset * m_resetDuration * rateMult;
+			startOffset = (startOffset * m_resetDuration + startResetOffset) * rateMult;
 		}
 		else
 		{
