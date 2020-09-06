@@ -539,6 +539,18 @@ public:
 		strcpy(m_multiplayerUsername, multiplayerUsername.c_str());
 		m_multiplayerUsernameLen = multiplayerUsername.length();
 
+		String irBaseURL = g_gameConfig.GetString(GameConfigKeys::IRBaseURL);
+		strcpy(m_irBaseURL, irBaseURL.c_str());
+		m_irBaseURLLen = irBaseURL.length();
+
+		String irUsername = g_gameConfig.GetString(GameConfigKeys::IRUsername);
+		strcpy(m_irUsername, irUsername.c_str());
+		m_irUsernameLen = irUsername.length();
+
+		String irPassword = g_gameConfig.GetString(GameConfigKeys::IRPassword);
+		strcpy(m_irPassword, irPassword.c_str());
+		m_irPasswordLen = irPassword.length();
+
 		return true;
 	}
 
@@ -886,6 +898,15 @@ public:
 
 			nk_label(m_nctx, "Multiplayer Server Password:", nk_text_alignment::NK_TEXT_LEFT);
 			nk_sdl_text(nk_edit_string(m_nctx, NK_EDIT_FIELD, m_multiplayerPassword, &m_multiplayerPasswordLen, 1024, nk_filter_default));
+
+			nk_label(m_nctx, "Internet Ranking URL:", nk_text_alignment::NK_TEXT_LEFT);
+			nk_sdl_text(nk_edit_string(m_nctx, NK_EDIT_FIELD, m_irBaseURL, &m_irBaseURLLen, 1024, nk_filter_default));
+
+			nk_label(m_nctx, "Account Username for Internet Ranking:", nk_text_alignment::NK_TEXT_LEFT);
+			nk_sdl_text(nk_edit_string(m_nctx, NK_EDIT_FIELD, m_irUsername, &m_irUsernameLen, 1024, nk_filter_default));
+
+			nk_label(m_nctx, "Account Password for Internet Ranking:", nk_text_alignment::NK_TEXT_LEFT);
+			nk_sdl_text(nk_edit_string(m_nctx, NK_EDIT_FIELD, m_irPassword, &m_irPasswordLen, 1024, nk_filter_default));
 			nk_tree_pop(m_nctx);
 		}
 	}
