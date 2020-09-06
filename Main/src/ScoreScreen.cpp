@@ -231,6 +231,13 @@ public:
 	}
 	
 	void SubmitScoreToIR(class Game* game) {
+		// login to ir
+		// TODO: remove this in favor of a class that handles this
+		String bearer; bool err;
+		std::tie(bearer, err) = LoginToIR();
+		if (err == true) {return;}
+
+		// get scoring info
 		Scoring& m_scoring = game->GetScoring();
 
 		// check if we can login
@@ -239,19 +246,22 @@ public:
 		// hash the file of the chart we played
 		CryptoPP::SHA3_512 hash;
 		String digest;
+
 		CryptoPP::FileSource f(
-			std::istringstream(game->GetDifficultyIndex().path),
+			std::istringstream(game->GetChartIndex()->path),
 			true,
 			new CryptoPP::HashFilter(
 				hash,
 				new CryptoPP::HexEncoder(
-					new CryptoPP::StringSink(digest))));
+					new CryptoPP::StringSink(digest), false)));
 
 		// get the ids from the file hash
 		auto res = nlohmann::json::parse(cpr::Get(cpr::Url{ url + "/api/v0/board/sha3/" + digest }).text);
 
 		uint64 track_id = res["track_id"];
 		uint64 board_id = res["id"];
+
+		//auto replay = String(nlohmann::json::parse(m_simpleHitStats));
 
 		// post the score
 		nlohmann::json score_info = {
@@ -264,12 +274,41 @@ public:
 			{"nears", m_scoring.categorizedHits[1] , },
 			{"errors", m_scoring.categorizedHits[0], },
 			{"mods", m_flags, },
-			//{"replaydata", 0, }, does usc have replays?
+			//{"replaydata", replay, },
 		};
 		cpr::Post(cpr::Url{ url + "/api/v0/score" },
 			cpr::Body{ score_info.dump() },
+			cpr::Header{ {"Content-Type", "application/json"},
+						 {"Authorization", "Bearer "+bearer },
+			});
+	}
+
+	std::pair<String, bool> LoginToIR() {
+		// get internet ranking settings info
+		String base_url = g_gameConfig.GetString(GameConfigKeys::IRBaseURL);
+		String user = g_gameConfig.GetString(GameConfigKeys::IRUsername);
+		String pass = g_gameConfig.GetString(GameConfigKeys::IRPassword);
+
+		nlohmann::json login_creds = {
+			{"username", user, },
+			{"password", pass, },
+		};
+
+		// attempt to login
+		cpr::Response resp = cpr::Post(cpr::Url{ base_url + "/api/v0/authorize/basic" },
+			cpr::Body{ login_creds.dump() },
 			cpr::Header{ {"Content-Type", "application/json"} });
 
+		// on success
+		if (resp.status_code == 202) {
+			nlohmann::json tkns = nlohmann::json::parse(resp.text);
+			String refresh = tkns["refresh"].get<std::string>(); // TODO: use this for heartbeats
+			String bearer = tkns["bearer"].get<std::string>();
+			return { bearer, false };
+		}
+
+		// on failure
+		return { NULLPTR, true };
 	}
 
 	ScoreScreen_Impl(class Game* game, MultiplayerScreen* multiplayer,
