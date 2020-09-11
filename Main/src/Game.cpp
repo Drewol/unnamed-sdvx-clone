@@ -234,8 +234,6 @@ public:
 		}
 
 		// Save practice indices
-		// TODO: this crashes when the window is closed during gaming
-		// because m_db is freed (which is owned by SongSelect) before this destructor is called.
 		if (m_db && m_isPracticeMode)
 		{
 			StorePracticeSetupIndex();
