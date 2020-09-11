@@ -907,9 +907,7 @@ void Application::m_MainLoop()
 				if (!g_tickables.empty())
 					g_tickables.back()->m_Suspend();
 
-				auto insertionPoint = g_tickables.end();
-				g_tickables.insert(insertionPoint, ch.tickable);
-
+				g_tickables.push_back(ch.tickable);
 				restoreTop = true;
 			}
 			else if (ch.mode == TickableChange::Removed || ch.mode == TickableChange::RemovedNoDelete)
@@ -919,8 +917,20 @@ void Application::m_MainLoop()
 
 				assert(!g_tickables.empty());
 				if (g_tickables.back() == ch.tickable)
+				{
 					restoreTop = true;
-				g_tickables.Remove(ch.tickable);
+					g_tickables.pop_back();
+				}
+				else
+				{
+					// This is not a desirable behavior (g_tickables can't be considered as a stack).
+					// However, currently ScoreScreen uses Game for filling game result data,
+					// so Game must be removed after transition to ScoreScreen is issued.
+					// TODO: Fix it so that Game is removed when the transition to ScoreScreen is issued.
+					// (except when 'back to practice setup' option is active; in this case ScoreScreen should be added on top of Game)
+					Logf("Removing an IApplicationTickable which is not on the top", Logger::Severity::Debug);
+					g_tickables.Remove(ch.tickable);
+				}
 				if (ch.mode == TickableChange::Removed)
 					delete ch.tickable;
 			}
