@@ -928,7 +928,7 @@ void Application::m_MainLoop()
 					// so Game must be removed after transition to ScoreScreen is issued.
 					// TODO: Fix it so that Game is removed when the transition to ScoreScreen is issued.
 					// (except when 'back to practice setup' option is active; in this case ScoreScreen should be added on top of Game)
-					Logf("Removing an IApplicationTickable which is not on the top", Logger::Severity::Debug);
+					Log("Removing an IApplicationTickable which is not on the top", Logger::Severity::Debug);
 					g_tickables.Remove(ch.tickable);
 				}
 				if (ch.mode == TickableChange::Removed)
