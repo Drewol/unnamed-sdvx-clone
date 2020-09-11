@@ -10,8 +10,8 @@ class TransitionScreen : public IApplicationTickable
 public:
 	virtual ~TransitionScreen() = default;
 	static TransitionScreen* Create();
-	virtual void TransitionTo(class Game* next, IApplicationTickable* before = nullptr) = 0;
-	virtual void TransitionTo(IAsyncLoadableApplicationTickable* next, bool noCancel = true, IApplicationTickable* before = nullptr) = 0;
+	virtual void TransitionTo(class Game* next) = 0;
+	virtual void TransitionTo(IAsyncLoadableApplicationTickable* next, bool noCancel = true) = 0;
 	virtual void RemoveOnComplete(DelegateHandle handle) = 0;
 	virtual void RemoveAllOnComplete(void* handle) = 0;
 

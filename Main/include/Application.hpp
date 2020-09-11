@@ -40,7 +40,7 @@ public:
 	class Game* LaunchMap(const String& mapPath);
 	void Shutdown();
 
-	void AddTickable(class IApplicationTickable* tickable, class IApplicationTickable* insertBefore = nullptr);
+	void AddTickable(class IApplicationTickable* tickable);
 	void RemoveTickable(class IApplicationTickable* tickable, bool noDelete = false);
 
 	// Current running map path (full file path)
@@ -113,6 +113,10 @@ private:
 	void m_MainLoop();
 	void m_Tick();
 	void m_Cleanup();
+
+	void m_SuspendAllTickables();
+	void m_RemoveAllTickables();
+
 	void m_OnKeyPressed(SDL_Scancode code);
 	void m_OnKeyReleased(SDL_Scancode code);
 	void m_OnWindowResized(const Vector2i& newSize);

@@ -156,7 +156,7 @@ public:
 		return true;
 	}
 
-	virtual void TransitionTo(IAsyncLoadableApplicationTickable *next, bool noCancel, IApplicationTickable* before)
+	virtual void TransitionTo(IAsyncLoadableApplicationTickable *next, bool noCancel)
 	{
 		m_isGame = false;
 		m_InitTransition(next);
@@ -181,10 +181,10 @@ public:
 			g_jobSheduler->Queue(m_loadingJob);
 		}
 
-		g_application->AddTickable(this, before);
+		g_application->AddTickable(this);
 	}
 
-	virtual void TransitionTo(Game* next, IApplicationTickable* before)
+	virtual void TransitionTo(Game* next)
 	{
 		m_isGame = true;
 		m_canCancel = true;
@@ -261,7 +261,7 @@ public:
 		{
 			g_jobSheduler->Queue(m_loadingJob);
 		}
-		g_application->AddTickable(this, before);
+		g_application->AddTickable(this);
 	}
 
 	void Render(float deltaTime)

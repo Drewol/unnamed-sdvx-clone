@@ -63,7 +63,6 @@ struct TickableChange
 	};
 	Mode mode;
 	IApplicationTickable *tickable;
-	IApplicationTickable *insertBefore;
 };
 // List of changes applied to the collection of tickables
 // Applied at the end of each main loop
@@ -909,15 +908,6 @@ void Application::m_MainLoop()
 					g_tickables.back()->m_Suspend();
 
 				auto insertionPoint = g_tickables.end();
-				if (ch.insertBefore)
-				{
-					// Find insertion point
-					for (insertionPoint = g_tickables.begin(); insertionPoint != g_tickables.end(); insertionPoint++)
-					{
-						if (*insertionPoint == ch.insertBefore)
-							break;
-					}
-				}
 				g_tickables.insert(insertionPoint, ch.tickable);
 
 				restoreTop = true;
@@ -1078,11 +1068,7 @@ void Application::m_Cleanup()
 {
 	ProfilerScope $("Application Cleanup");
 
-	for (auto it : g_tickables)
-	{
-		delete it;
-	}
-	g_tickables.clear();
+	m_RemoveAllTickables();
 
 	if (g_audio)
 	{
@@ -1163,6 +1149,25 @@ void Application::m_Cleanup()
 	m_SaveConfig();
 }
 
+void Application::m_SuspendAllTickables()
+{
+	for (auto it = g_tickables.rbegin(); it != g_tickables.rend(); ++it)
+	{
+		(*it)->m_Suspend();
+	}
+}
+
+void Application::m_RemoveAllTickables()
+{
+	for (auto it = g_tickables.rbegin(); it != g_tickables.rend(); ++it)
+	{
+		IApplicationTickable* tickable = *it;
+		delete tickable;
+	}
+
+	g_tickables.clear();
+}
+
 class Game *Application::LaunchMap(const String &mapPath)
 {
 	Game *game = Game::Create(mapPath, GameFlags::None);
@@ -1174,15 +1179,13 @@ void Application::Shutdown()
 	g_gameWindow->Close();
 }
 
-void Application::AddTickable(class IApplicationTickable *tickable, class IApplicationTickable *insertBefore)
+void Application::AddTickable(class IApplicationTickable *tickable)
 {
 	Log("Adding tickable", Logger::Severity::Debug);
-
 
 	TickableChange &change = g_tickableChanges.Add();
 	change.mode = TickableChange::Added;
 	change.tickable = tickable;
-	change.insertBefore = insertBefore;
 }
 void Application::RemoveTickable(IApplicationTickable *tickable, bool noDelete)
 {
@@ -1402,12 +1405,9 @@ void Application::ReloadScript(const String &name, lua_State *L)
 void Application::ReloadSkin()
 {
 	//remove all tickables
-	for (auto* t : g_tickables)
-	{
-		t->m_Suspend();
-		delete t;
-	}
-	g_tickables.clear();
+	m_SuspendAllTickables();
+	m_RemoveAllTickables();
+
 	g_tickableChanges.clear();
 
 	m_skin = g_gameConfig.GetString(GameConfigKeys::Skin);
@@ -1570,12 +1570,13 @@ void Application::JoinMultiFromInvite(String secret)
 	title->m_Suspend();
 
 	//Remove all tickables and add back a titlescreen as a base
+	for (auto it = g_tickables.rbegin(); it != g_tickables.rend(); ++it)
+	{
+		RemoveTickable(*it);
+	}
+
 	AddTickable(title);
 	g_transition->TransitionTo(mpScreen);
-	for (IApplicationTickable *tickable : g_tickables)
-	{
-		RemoveTickable(tickable);
-	}
 }
 
 void Application::LoadGauge(bool hard)
