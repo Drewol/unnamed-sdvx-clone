@@ -55,13 +55,13 @@ namespace Graphics
 				it++;
 			}
 		}
-		virtual Ref<ParticleEmitter> AddEmitter() override
+		Ref<ParticleEmitter> AddEmitter() override
 		{
 			Ref<ParticleEmitter> newEmitter = Utility::MakeRef<ParticleEmitter>(new ParticleEmitter(this));
 			m_emitters.Add(newEmitter);
 			return newEmitter;
 		}
-		virtual void Reset()
+		void Reset() override
 		{
 			for(auto em : m_emitters)
 			{

@@ -20,7 +20,7 @@ public:
 class BQFDSP : public DSP
 {
 public:
-	BQFDSP();
+	BQFDSP(uint32 sampleRate);
 	float b0 = 1.0f;
 	float b1 = 0.0f;
 	float b2 = 0.0f;
@@ -52,6 +52,7 @@ private:
 class CombinedFilterDSP : public DSP
 {
 public:
+	CombinedFilterDSP(uint32 sampleRate);
 	void SetLowPass(float q, float freq, float peakQ, float peakGain);
 	void SetHighPass(float q, float freq, float peakQ, float peakGain);
 	virtual const char* GetName() const { return "CombinedFilterDSP"; }
@@ -66,6 +67,8 @@ private:
 class LimiterDSP : public DSP
 {
 public:
+	LimiterDSP(uint32 sampleRate);
+
 	float releaseTime = 0.1f;
 	virtual void Process(float* out, uint32 numSamples);
 	virtual const char* GetName() const { return "LimiterDSP"; }
@@ -77,6 +80,8 @@ private:
 class BitCrusherDSP : public DSP
 {
 public:
+	BitCrusherDSP(uint32 sampleRate);
+
 	// Duration of samples, <1 = disable
 	void SetPeriod(float period = 0);
 	virtual void Process(float* out, uint32 numSamples);
@@ -91,6 +96,8 @@ private:
 class GateDSP : public DSP
 {
 public:
+	GateDSP(uint32 sampleRate);
+
 	// The amount of time for a single cycle in samples
 	void SetLength(double length);
 	void SetGating(float gating);
@@ -112,6 +119,8 @@ private:
 class TapeStopDSP : public DSP
 {
 public:
+	TapeStopDSP(uint32 sampleRate);
+
 	void SetLength(double length);
 
 	virtual void Process(float* out, uint32 numSamples);
@@ -120,13 +129,14 @@ private:
 	uint32 m_length = 0;
 	Vector<float> m_sampleBuffer;
 	float m_sampleIdx = 0.0f;
-	uint32 m_lastSample = 0;
 	uint32 m_currentSample = 0;
 };
 
 class RetriggerDSP : public DSP
 {
 public:
+	RetriggerDSP(uint32 sampleRate);
+
 	void SetLength(double length);
 	void SetResetDuration(uint32 resetDuration);
 	void SetGating(float gating);
@@ -140,7 +150,6 @@ private:
 	uint32 m_gateLength = 0;
 	uint32 m_resetDuration = 0;
 	Vector<float> m_sampleBuffer;
-	uint32 m_loops = 0;
 	uint32 m_currentSample = 0;
 	bool m_bufferReserved = false;
 };
@@ -148,6 +157,8 @@ private:
 class WobbleDSP : public BQFDSP
 {
 public:
+	WobbleDSP(uint32 sampleRate);
+
 	void SetLength(double length);
 
 	// Frequency range
@@ -166,6 +177,8 @@ private:
 class PhaserDSP : public DSP
 { 
 public:
+	PhaserDSP(uint32 sampleRate);
+
 	uint32 time = 0;
 
 	// Frequency range
@@ -197,6 +210,8 @@ private:
 class FlangerDSP : public DSP
 {
 public:
+	FlangerDSP(uint32 sampleRate);
+
 	void SetLength(double length);
 	void SetDelayRange(uint32 min, uint32 max);
 
@@ -218,6 +233,8 @@ private:
 class EchoDSP : public DSP
 {
 public:
+	EchoDSP(uint32 sampleRate);
+
 	void SetLength(double length);
 
 	float feedback = 0.6f;
@@ -235,6 +252,8 @@ private:
 class SidechainDSP : public DSP
 {
 public:
+	SidechainDSP(uint32 sampleRate);
+
 	// Set sidechain length in samples
 	void SetLength(double length);
 
@@ -253,10 +272,11 @@ private:
 class PitchShiftDSP : public DSP
 {
 public:
+	PitchShiftDSP(uint32 sampleRate);
+
 	// Pitch change amount
 	float amount = 0.0f;
 
-	PitchShiftDSP();
 	~PitchShiftDSP();
 
 	virtual void Process(float* out, uint32 numSamples);

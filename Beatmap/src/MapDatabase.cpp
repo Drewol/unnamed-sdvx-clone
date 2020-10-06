@@ -457,10 +457,11 @@ public:
 
 	Map<int32, FolderIndex*> FindFoldersByPath(const String& searchString)
 	{
-		String stmt = "SELECT DISTINCT folderId FROM Charts WHERE path LIKE \"%" + searchString + "%\"";
+		String stmt = "SELECT DISTINCT folderId FROM Charts WHERE path LIKE ?";
+		DBStatement search = m_database.Query(stmt);
+		search.BindString(1, "%" + searchString + "%");
 
 		Map<int32, FolderIndex*> res;
-		DBStatement search = m_database.Query(stmt);
 		while(search.StepRow())
 		{
 			int32 id = search.IntColumn(0);
@@ -487,17 +488,28 @@ public:
 		{
 			if(i > 0)
 				stmt += " AND";
-			stmt += " (artist LIKE \"%" + term + "%\"" + 
-				" OR title LIKE \"%" + term + "%\"" +
-				" OR path LIKE \"%" + term + "%\"" +
-				" OR effector LIKE \"%" + term + "%\"" +
-				" OR artist_translit LIKE \"%" + term + "%\"" +
-				" OR title_translit LIKE \"%" + term + "%\")";
+			stmt += String(" (artist LIKE ?") +
+				" OR title LIKE ?" +
+				" OR path LIKE ?" +
+				" OR effector LIKE ?" +
+				" OR artist_translit LIKE ?" +
+				" OR title_translit LIKE ?)";
 			i++;
+		}
+		DBStatement search = m_database.Query(stmt);
+
+		i = 1;
+		for (auto term : terms)
+		{
+			// Bind all the terms
+			for (int j = 0; j < 6; j++)
+			{
+				search.BindString(i+j, "%" + term + "%");
+			}
+			i+=6;
 		}
 
 		Map<int32, FolderIndex*> res;
-		DBStatement search = m_database.Query(stmt);
 		while(search.StepRow())
 		{
 			int32 id = search.IntColumn(0);
@@ -579,10 +591,11 @@ public:
 
 	Map<int32, FolderIndex*> FindFoldersByCollection(const String& collection)
 	{
-		String stmt = Utility::Sprintf("SELECT folderid FROM Collections WHERE collection==\"%s\"", collection);
+		String stmt = "SELECT folderid FROM Collections WHERE collection==?";
+		DBStatement search = m_database.Query(stmt);
+		search.BindString(1, collection);
 
 		Map<int32, FolderIndex*> res;
-		DBStatement search = m_database.Query(stmt);
 		while (search.StepRow())
 		{
 			int32 id = search.IntColumn(0);
@@ -603,10 +616,12 @@ public:
 		csep[0] = Path::sep;
 		csep[1] = 0;
 		String sep(csep);
-		String stmt = "SELECT rowid FROM folders WHERE path LIKE \"%" + sep + folder + sep + "%\"";
+		String stmt = "SELECT rowid FROM folders WHERE path LIKE ?";
+		DBStatement search = m_database.Query(stmt);
+		search.BindString(1, "%" + sep + folder + sep + "%");
+
 
 		Map<int32, FolderIndex*> res;
-		DBStatement search = m_database.Query(stmt);
 		while (search.StepRow())
 		{
 			int32 id = search.IntColumn(0);
@@ -964,12 +979,12 @@ public:
 			return;
 		}
 
-		constexpr char* addQuery = "INSERT INTO PracticeSetups("
+		const constexpr char* addQuery = "INSERT INTO PracticeSetups("
 			"chart_id, setup_title, loop_success, loop_fail, range_begin, range_end, fail_cond_type, fail_cond_value, "
 			"playback_speed, inc_speed_on_success, inc_speed, inc_streak, dec_speed_on_fail, dec_speed, min_playback_speed, max_rewind, max_rewind_measure"
 			") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-		constexpr char* updateQuery = "UPDATE PracticeSetups SET "
+		const constexpr char* updateQuery = "UPDATE PracticeSetups SET "
 			"chart_id=?, setup_title=?, loop_success=?, loop_fail=?, range_begin=?, range_end=?, fail_cond_type=?, fail_cond_value=?, "
 			"playback_speed=?, inc_speed_on_success=?, inc_speed=?, inc_streak=?, dec_speed_on_fail=?, dec_speed=?, min_playback_speed=?, max_rewind=?, max_rewind_measure=?"
 			" WHERE rowid=?";
@@ -1032,6 +1047,7 @@ public:
 
 	void UpdateChartOffset(const ChartIndex* chart)
 	{
+		// Safe from sqli bc hash will be alphanum
 		m_database.Exec(Utility::Sprintf("UPDATE Charts SET custom_offset=%d WHERE hash LIKE '%s'", chart->custom_offset, *chart->hash));
 	}
 
@@ -1050,7 +1066,11 @@ public:
 
 		if (!result) //Failed to add, try to remove
 		{
-			m_database.Exec(Utility::Sprintf("DELETE FROM collections WHERE folderid==%d AND collection==\"%s\"", mapid, name));
+			DBStatement remColl = m_database.Query("DELETE FROM collections WHERE folderid==? AND collection==?");
+			remColl.BindInt(1, mapid);
+			remColl.BindString(2, name);
+			remColl.Step();
+			remColl.Rewind();
 		}
 	}
 

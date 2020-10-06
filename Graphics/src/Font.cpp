@@ -358,7 +358,7 @@ namespace Graphics
 	bool FontRes::InitLibrary()
 	{
 		ProfilerScope $("Font library initialization");
-		if(!FT_Init_FreeType(&library) == FT_Err_Ok)
+		if(FT_Init_FreeType(&library) != FT_Err_Ok)
 			return false;
 
 		if(!LoadFallbackFont())

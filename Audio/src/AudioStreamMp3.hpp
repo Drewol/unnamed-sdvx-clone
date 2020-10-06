@@ -15,7 +15,6 @@ class AudioStreamMp3 : public AudioStreamBase
 	uint8* m_dataSource = 0;
 
 	Map<int32, size_t> m_frameIndices;
-	uint32 m_largetsFrameIndex;
 	Vector<float> m_pcm;
 	int64 m_playPos;
 

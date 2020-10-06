@@ -27,13 +27,21 @@ jobs:
             - name: cmake
               run: cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake -G "Visual Studio 16 2019" -A x64 .
             - name: Setup MSBuild.exe
-              uses: warrenbuckley/Setup-MSBuild@v1
+              uses: microsoft/Setup-MSBuild@v1.0.1
             - name: MSBuild
               run: msbuild USC.sln -p:Configuration=Release /m /verbosity:minimal
             - name: Tests
               run: rm ./bin/Tests.*
             - name: Post Build Stuff
-              run: cp ./bin/libiconv.dll ./bin/libiconv-2.dll
+              run: |
+                cp ./bin/libiconv.dll ./bin/libiconv-2.dll
+            - name: Get Symbols 
+              continue-on-error: true
+              run: |
+                mkdir -f .\bin\crash_dumps\
+                cp .\third_party\breakpad
+                .\third_party\breakpad\dump_syms.exe .\bin\usc-game.pdb > .\bin\crash_dumps\usc-game.syms
+                mv .\bin\usc-game.pdb .\bin\crash_dumps\.
             - name: Upload artifact
               uses: actions/upload-artifact@master
               with:

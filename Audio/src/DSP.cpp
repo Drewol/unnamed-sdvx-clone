@@ -15,8 +15,10 @@ void PanDSP::Process(float* out, uint32 numSamples)
 	}
 }
 
-BQFDSP::BQFDSP()
+BQFDSP::BQFDSP(uint32 sampleRate) : DSP()
 {
+	SetSampleRate(sampleRate);
+
 	for (size_t i = 0; i < 2; i++)
 	{
 		for (size_t j = 0; j < order; j++)
@@ -28,7 +30,6 @@ BQFDSP::BQFDSP()
 	}
 	
 }
-
 void BQFDSP::Process(float* out, uint32 numSamples)
 {
 	for(uint32 c = 0; c < 2; c++)
@@ -76,7 +77,7 @@ void BQFDSP::SetLowPass(float q, float freq, float sampleRate)
 }
 void BQFDSP::SetLowPass(float q, float freq)
 {
-	SetLowPass(q, freq, (float)audio->GetSampleRate());
+	SetLowPass(q, freq, (float) m_sampleRate);
 }
 void BQFDSP::SetHighPass(float q, float freq, float sampleRate)
 {
@@ -97,7 +98,7 @@ void BQFDSP::SetHighPass(float q, float freq, float sampleRate)
 }
 void BQFDSP::SetHighPass(float q, float freq)
 {
-	SetHighPass(q, freq, (float)audio->GetSampleRate());
+	SetHighPass(q, freq, (float) m_sampleRate);
 }
 void BQFDSP::SetPeaking(float q, float freq, float gain, float sampleRate)
 {
@@ -118,12 +119,38 @@ void BQFDSP::SetPeaking(float q, float freq, float gain, float sampleRate)
 }
 void BQFDSP::SetPeaking(float q, float freq, float gain)
 {
-	SetPeaking(q, freq, gain, (float)audio->GetSampleRate());
+	SetPeaking(q, freq, gain, (float) m_sampleRate);
 }
 
+CombinedFilterDSP::CombinedFilterDSP(uint32 sampleRate) : DSP(), a(sampleRate), peak(sampleRate)
+{
+	SetSampleRate(sampleRate);
+}
+void CombinedFilterDSP::SetLowPass(float q, float freq, float peakQ, float peakGain)
+{
+	a.SetLowPass(q, freq);
+	peak.SetPeaking(peakQ, freq, peakGain);
+}
+void CombinedFilterDSP::SetHighPass(float q, float freq, float peakQ, float peakGain)
+{
+	a.SetHighPass(q, freq);
+	peak.SetPeaking(peakQ, freq, peakGain);
+}
+void CombinedFilterDSP::Process(float* out, uint32 numSamples)
+{
+	a.mix = mix;
+	peak.mix = mix;
+	a.Process(out, numSamples);
+	peak.Process(out, numSamples);
+}
+
+LimiterDSP::LimiterDSP(uint32 sampleRate) : DSP()
+{
+	SetSampleRate(sampleRate);
+}
 void LimiterDSP::Process(float* out, uint32 numSamples)
 {
-	float secondsPerSample = (float)audio->GetSecondsPerSample();
+	const float secondsPerSample = (float) m_audio->GetSecondsPerSample();
 	for(uint32 i = 0; i < numSamples; i++)
 	{
 		float currentGain = 1.0f;
@@ -150,11 +177,16 @@ void LimiterDSP::Process(float* out, uint32 numSamples)
 	}
 }
 
+BitCrusherDSP::BitCrusherDSP(uint32 sampleRate) : DSP()
+{
+	SetSampleRate(sampleRate);
+}
 void BitCrusherDSP::SetPeriod(float period /*= 0*/)
 {
 	// Scale period with sample rate
-	assert(audio);
-	double f = audio->GetSampleRate() / 44100.0;
+	assert(m_sampleRate > 0);
+	double f = m_sampleRate / 44100.0;
+
 	m_increment = (uint32)((double)(1 << 16));
 	m_period = (uint32)(f * period * (double)(1 << 16));
 }
@@ -175,9 +207,13 @@ void BitCrusherDSP::Process(float* out, uint32 numSamples)
 	}
 }
 
+GateDSP::GateDSP(uint32 sampleRate) : DSP()
+{
+	SetSampleRate(sampleRate);
+}
 void GateDSP::SetLength(double length)
 {
-	double flength = length / 1000.0 * audio->GetSampleRate();
+	double flength = length / 1000.0 * m_sampleRate;
 	m_length = (uint32)flength;
 	SetGating(m_gating);
 }
@@ -191,14 +227,13 @@ void GateDSP::SetGating(float gating)
 	m_fadeOut = (uint32)((float)m_halfway * (1.0f - fadeDuration));
 	m_currentSample = 0;
 }
-
 void GateDSP::Process(float* out, uint32 numSamples)
 {
 	if(m_length < 2)
 		return;
 
-	uint32 startSample = startTime * audio->GetSampleRate() / 1000.0;
-	uint32 currentSample = audioBase->GetPosition() * audio->GetSampleRate() / 1000.0;
+	const uint32 startSample = GetStartSample();
+	const uint32 currentSample = GetCurrentSample();
 
 	for(uint32 i = 0; i < numSamples; i++)
 	{
@@ -234,18 +269,22 @@ void GateDSP::Process(float* out, uint32 numSamples)
 	}
 }
 
+TapeStopDSP::TapeStopDSP(uint32 sampleRate) : DSP()
+{
+	SetSampleRate(sampleRate);
+}
 void TapeStopDSP::SetLength(double length)
 {
-	assert(audio);
-	double flength = length / 1000.0 * audio->GetSampleRate();
+	assert(m_sampleRate > 0);
+	double flength = length / 1000.0 * m_sampleRate;
 	m_length = (uint32)flength;
 	m_sampleBuffer.clear();
 	m_sampleBuffer.reserve(2 * m_length + 100);
 }
 void TapeStopDSP::Process(float* out, uint32 numSamples)
 {
-	uint32 startSample = startTime * audio->GetSampleRate() / 1000.0;
-	uint32 currentSample = audioBase->GetPosition() * audio->GetSampleRate() / 1000.0;
+	const uint32 startSample = GetStartSample();
+	const uint32 currentSample = GetCurrentSample();
 
 	for(uint32 i = 0; i < numSamples; i++)
 	{
@@ -276,9 +315,13 @@ void TapeStopDSP::Process(float* out, uint32 numSamples)
 	}
 }
 
+RetriggerDSP::RetriggerDSP(uint32 sampleRate) : DSP()
+{
+	SetSampleRate(sampleRate);
+}
 void RetriggerDSP::SetLength(double length)
 {
-	double flength = length / 1000.0 * audio->GetSampleRate();
+	double flength = length / 1000.0 * m_sampleRate;
 	m_length = (uint32)flength;
 	SetGating(m_gating);
 	if (!m_bufferReserved)
@@ -289,7 +332,7 @@ void RetriggerDSP::SetLength(double length)
 }
 void RetriggerDSP::SetResetDuration(uint32 resetDuration)
 {
-	float flength = (float)resetDuration / 1000.0f * (float)audio->GetSampleRate();
+	float flength = (float)resetDuration / 1000.0f * (float) m_sampleRate;
 	m_resetDuration = (uint32)flength;
 }
 void RetriggerDSP::SetGating(float gating)
@@ -299,7 +342,7 @@ void RetriggerDSP::SetGating(float gating)
 }
 void RetriggerDSP::SetMaxLength(uint32 length)
 {
-	float flength = (float)length / 1000.0f * (float)audio->GetSampleRate();
+	float flength = (float)length / 1000.0f * (float) m_sampleRate;
 	if (!m_bufferReserved)
 	{
 		m_sampleBuffer.reserve(2 * (uint32_t)flength + 100);
@@ -311,13 +354,13 @@ void RetriggerDSP::Process(float* out, uint32 numSamples)
 	if (m_length == 0)
 		return;
 
-	///TODO: Clean up casting
-	uint32 startSample = (double)startTime * ((double)audio->GetSampleRate() / 1000.0);
-	uint32 nowSample = (double)audioBase->GetPosition() * ((double)audio->GetSampleRate() / 1000.0);
-	float* pcmSource = audioBase->GetPCM();
-	double rateMult = (double)audioBase->GetSampleRate() / audio->GetSampleRate();
-	uint32 pcmStartSample = (double)lastTimingPoint * ((double)audioBase->GetSampleRate() / 1000.0);
-	uint32 baseStartRepeat = (double)lastTimingPoint * ((double)audio->GetSampleRate() / 1000.0);
+	const uint32 startSample = GetStartSample();
+	const uint32 nowSample = GetCurrentSample();
+
+	float* pcmSource = m_audioBase->GetPCM();
+	double rateMult = (double)m_audioBase->GetSampleRate() / m_audio->GetSampleRate();
+	uint32 pcmStartSample = static_cast<uint32>(lastTimingPoint * ((double)m_audioBase->GetSampleRate() / 1000.0));
+	uint32 baseStartRepeat = static_cast<uint32>(lastTimingPoint * ((double)m_audio->GetSampleRate() / 1000.0));
 
 	for(uint32 i = 0; i < numSamples; i++)
 	{
@@ -330,14 +373,14 @@ void RetriggerDSP::Process(float* out, uint32 numSamples)
 		if (m_resetDuration > 0)
 		{
 			startOffset = (nowSample + i - baseStartRepeat) / (int)m_resetDuration;
-			startOffset = startOffset * m_resetDuration * rateMult;
+			startOffset = static_cast<int>(startOffset * m_resetDuration * rateMult);
 		}
 		else
 		{
-			startOffset = (startSample - baseStartRepeat) * rateMult;
+			startOffset = static_cast<int>((startSample - baseStartRepeat) * rateMult);
 		}
 
-		int pcmSample = pcmStartSample + startOffset + (int)m_currentSample * rateMult;
+		int pcmSample = static_cast<int>(pcmStartSample) + startOffset + static_cast<int>(m_currentSample * rateMult);
 		float gating = 1.0f;
 		if (m_currentSample > m_gateLength)
 			gating = 0;
@@ -351,9 +394,12 @@ void RetriggerDSP::Process(float* out, uint32 numSamples)
 	}
 }
 
+WobbleDSP::WobbleDSP(uint32 sampleRate) : BQFDSP(sampleRate)
+{
+}
 void WobbleDSP::SetLength(double length)
 {
-	double flength = length / 1000.0 * audio->GetSampleRate();
+	double flength = length / 1000.0 * m_sampleRate;
 	m_length = (uint32)flength;
 }
 void WobbleDSP::Process(float* out, uint32 numSamples)
@@ -362,8 +408,8 @@ void WobbleDSP::Process(float* out, uint32 numSamples)
 		return;
 
 	static Interpolation::CubicBezier easing(Interpolation::EaseInExpo);
-	uint32 startSample = startTime * audio->GetSampleRate() / 1000.0;
-	uint32 currentSample = audioBase->GetPosition() * audio->GetSampleRate() / 1000.0;
+	const uint32 startSample = GetStartSample();
+	const uint32 currentSample = GetCurrentSample();
 
 	for(uint32 i = 0; i < numSamples; i++)
 	{
@@ -390,9 +436,13 @@ void WobbleDSP::Process(float* out, uint32 numSamples)
 	}
 }
 
+PhaserDSP::PhaserDSP(uint32 sampleRate) : DSP()
+{
+	SetSampleRate(sampleRate);
+}
 void PhaserDSP::SetLength(double length)
 {
-	double flength = length / 1000.0 * audio->GetSampleRate();
+	double flength = length / 1000.0 * m_sampleRate;
 	m_length = (uint32)flength;
 }
 void PhaserDSP::Process(float* out, uint32 numSamples)
@@ -400,8 +450,8 @@ void PhaserDSP::Process(float* out, uint32 numSamples)
 	if (m_length == 0)
 		return;
 
-	uint32 startSample = startTime * audio->GetSampleRate() / 1000.0;
-	uint32 currentSample = audioBase->GetPosition() * audio->GetSampleRate() / 1000.0;
+	const uint32 startSample = GetStartSample();
+	const uint32 currentSample = GetCurrentSample();
 
 	for(uint32 i = 0; i < numSamples; i++)
 	{
@@ -415,7 +465,7 @@ void PhaserDSP::Process(float* out, uint32 numSamples)
 		//calculate and update phaser sweep lfo...
 		//float d = dmin + (dmax - dmin) * ((sin(f) + 1.0f) / 2.0f);
 		float d = dmin + (dmax - dmin) * f;
-		d /= (float)audio->GetSampleRate();
+		d /= (float) m_audio->GetSampleRate();
 
 		//calculate output per channel
 		for(uint32 c = 0; c < 2; c++)
@@ -451,21 +501,23 @@ float PhaserDSP::APF::Update(float in)
 	return y;
 }
 
+FlangerDSP::FlangerDSP(uint32 sampleRate) : DSP()
+{
+	SetSampleRate(sampleRate);
+}
 void FlangerDSP::SetLength(double length) {
-	double flength = length / 1000.0 * audio->GetSampleRate();
+	double flength = length / 1000.0 * m_sampleRate;
 	m_length = (uint32)flength;
 }
-
 void FlangerDSP::SetDelayRange(uint32 offset, uint32 depth)
 {
 	// Assuming 44100hz is the base sample rate
-	uint32 max = offset + depth;
-	uint32 min = offset;
+	const uint32 max = offset + depth;
+	const uint32 min = offset;
 
-
-	float mult = (float)audio->GetSampleRate() / 44100.f;
-	m_min = min * mult;
-	m_max = max * mult;
+	const float mult = (float) m_sampleRate / 44100.f;
+	m_min = static_cast<uint32>(min * mult);
+	m_max = static_cast<uint32>(max * mult);
 	m_bufferLength = m_max * 2;
 	m_sampleBuffer.resize(m_bufferLength);
 }
@@ -477,8 +529,8 @@ void FlangerDSP::Process(float* out, uint32 numSamples)
 	if (data == nullptr)
 		return;
 
-	uint32 startSample = startTime * audio->GetSampleRate() / 1000.0;
-	uint32 currentSample = audioBase->GetPosition() * audio->GetSampleRate() / 1000.0;
+	const uint32 startSample = GetStartSample();
+	const uint32 currentSample = GetCurrentSample();
 
 	for(uint32 i = 0; i < numSamples; i++)
 	{
@@ -513,9 +565,13 @@ void FlangerDSP::Process(float* out, uint32 numSamples)
 	}
 }
 
+EchoDSP::EchoDSP(uint32 sampleRate) : DSP()
+{
+	SetSampleRate(sampleRate);
+}
 void EchoDSP::SetLength(double length)
 {
-	double flength = length / 1000.0 * audio->GetSampleRate();
+	double flength = length / 1000.0 * m_sampleRate;
 	m_sampleBuffer.clear();
 	m_bufferLength = (uint32)(flength * 2);
 	m_sampleBuffer.resize(m_bufferLength);
@@ -527,8 +583,9 @@ void EchoDSP::Process(float* out, uint32 numSamples)
 	float* data = m_sampleBuffer.data();
 	if (!data)
 		return;
-	uint32 startSample = startTime * audio->GetSampleRate() / 1000.0;
-	uint32 currentSample = audioBase->GetPosition() * audio->GetSampleRate() / 1000.0;
+
+	const uint32 startSample = GetStartSample();
+	const uint32 currentSample = GetCurrentSample();
 
 	for(uint32 i = 0; i < numSamples; i++)
 	{
@@ -560,9 +617,13 @@ void EchoDSP::Process(float* out, uint32 numSamples)
 	}
 }
 
+SidechainDSP::SidechainDSP(uint32 sampleRate) : DSP()
+{
+	SetSampleRate(sampleRate);
+}
 void SidechainDSP::SetLength(double length)
 {
-	double flength = length / 1000.0 * audio->GetSampleRate();
+	double flength = length / 1000.0 * m_sampleRate;
 	m_length = (uint32)flength;
 	m_time = 0;
 }
@@ -571,8 +632,8 @@ void SidechainDSP::Process(float* out, uint32 numSamples)
 	if(m_length == 0)
 		return;
 
-	uint32 startSample = startTime * audio->GetSampleRate() / 1000.0;
-	uint32 currentSample = audioBase->GetPosition() * audio->GetSampleRate() / 1000.0;
+	const uint32 startSample = GetStartSample();
+	const uint32 currentSample = GetCurrentSample();
 
 	for(uint32 i = 0; i < numSamples; i++)
 	{
@@ -595,26 +656,6 @@ void SidechainDSP::Process(float* out, uint32 numSamples)
 			m_time = 0;
 		}
 	}
-}
-
-void CombinedFilterDSP::SetLowPass(float q, float freq, float peakQ, float peakGain)
-{
-	float sr = (float)audio->GetSampleRate();
-	a.SetLowPass(q, freq, sr);
-	peak.SetPeaking(peakQ, freq, peakGain, sr);
-}
-void CombinedFilterDSP::SetHighPass(float q, float freq, float peakQ, float peakGain)
-{
-	float sr = (float)audio->GetSampleRate();
-	a.SetHighPass(q, freq, sr);
-	peak.SetPeaking(peakQ, freq, peakGain, sr);
-}
-void CombinedFilterDSP::Process(float* out, uint32 numSamples)
-{
-	a.mix = mix;
-	peak.mix = mix;
-	a.Process(out, numSamples);
-	peak.Process(out, numSamples);
 }
 
 #include "SoundTouch.h"
@@ -659,8 +700,9 @@ public:
 	}
 };
 
-PitchShiftDSP::PitchShiftDSP()
+PitchShiftDSP::PitchShiftDSP(uint32 sampleRate) : DSP()
 {
+	SetSampleRate(sampleRate);
 	m_impl = new PitchShiftDSP_Impl();
 }
 PitchShiftDSP::~PitchShiftDSP()
@@ -669,8 +711,8 @@ PitchShiftDSP::~PitchShiftDSP()
 }
 void PitchShiftDSP::Process(float* out, uint32 numSamples)
 {
-	m_impl->pitch = amount;
+	m_impl->pitch = Math::Clamp(amount, -12.0f, 12.0f);
 	if(!m_impl->init)
-		m_impl->Init(audio);
+		m_impl->Init(m_audio);
 	m_impl->Process(out, numSamples);
 }

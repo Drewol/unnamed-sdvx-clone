@@ -200,7 +200,15 @@ void PreviewPlayer::Restore()
 		m_nextStream->Play();
 	if (m_currentStream)
 		m_currentStream->Play();
-	}
+}
+
+void PreviewPlayer::StopCurrent()
+{
+	if (m_nextStream)
+		m_nextStream.reset();
+	if (m_currentStream)
+		m_currentStream.reset();
+}
 
 
 const float PreviewPlayer::m_fadeDuration = 0.5f;
@@ -290,7 +298,7 @@ public:
 			g_application->RemoveTickable(m_owner);
 		}
 	}
-	~SelectionWheel()
+	virtual ~SelectionWheel()
 	{
 		g_gameConfig.Set(GameConfigKeys::LastSelected, m_currentlySelectedMapId);
 		if (m_lua)
@@ -1345,9 +1353,6 @@ private:
 	// Player of preview music
 	PreviewPlayer m_previewPlayer;
 
-	// Current map that has music being preview played
-	ChartIndex* m_currentPreviewAudio;
-
 	// Select sound
 	Sample m_selectSound;
 
@@ -1358,9 +1363,6 @@ private:
 	MouseLockHandle m_lockMouse;
 	bool m_suspended = true;
 	bool m_hasRestored = false;
-	bool m_previewLoaded = true;
-	bool m_showScores = false;
-	uint64_t m_previewDelayTicks = 0;
 	Map<Input::Button, float> m_timeSinceButtonPressed;
 	Map<Input::Button, float> m_timeSinceButtonReleased;
 	lua_State* m_lua = nullptr;
@@ -1368,6 +1370,8 @@ private:
 	MultiplayerScreen* m_multiplayer = nullptr;
 	CollectionDialog m_collDiag;
 	GameplaySettingsDialog m_settDiag;
+
+	int m_shiftDown = 0;
 
 	bool m_hasCollDiag = false;
 	bool m_transitionedToGame = false;
@@ -1801,7 +1805,7 @@ public:
 			m_selectionWheel->AdvanceSelection(steps);
 		}
 	}
-	virtual void OnKeyPressed(SDL_Scancode code)
+	void OnKeyPressed(SDL_Scancode code) override
 	{
 		if (m_multiplayer &&
 				m_multiplayer->GetChatOverlay()->OnKeyPressedConsume(code))
@@ -1919,23 +1923,54 @@ public:
 			{
 				m_settDiag.onPressPractice.Call();
 			}
+			else if (code == SDL_SCANCODE_LSHIFT || code == SDL_SCANCODE_RSHIFT )
+			{
+				m_shiftDown |= (code == SDL_SCANCODE_LSHIFT? 1 : 2);
+			}
 			else if (code == SDL_SCANCODE_DELETE)
 			{
+				m_previewParams = {"", 0, 0};
+
+				m_previewPlayer.FadeTo(Ref<AudioStream>());
+				m_previewPlayer.StopCurrent();
+
 				ChartIndex* chart = m_selectionWheel->GetSelectedChart();
-				String name = chart->title + " [" + chart->diff_shortname + "]";
-				bool res = g_gameWindow->ShowYesNoMessage("Delete chart?", "Are you sure you want to delete " + name + "\nThis will only delete "+chart->path+"\nThis cannot be undone...");
-				if (!res)
-					return;
-				Path::Delete(chart->path);
+				FolderIndex* folder = m_mapDatabase->GetFolder(chart->folderId);
+
+				bool deleteFolder = m_shiftDown !=0 || folder->charts.size() == 1;
+
+				if (deleteFolder)
+				{
+					bool res = g_gameWindow->ShowYesNoMessage("Delete chart folder?",
+						"Are you sure you want to delete " + folder->path + " and all its difficulties\nThis cannot be undone");
+					if (!res)
+						return;
+					Path::DeleteDir(folder->path);
+				}
+				else
+				{
+					String name = chart->title + " [" + chart->diff_shortname + "]";
+					bool res = g_gameWindow->ShowYesNoMessage("Delete chart difficulty?",
+						"Are you sure you want to delete " + name + "\nThis will only delete " + chart->path + "\nThis cannot be undone...");
+					if (!res)
+						return;
+					Path::Delete(chart->path);
+				}
+				// Seems to have an issue here where it can get stuck in the other thread
 				m_mapDatabase->StartSearching();
 				OnSearchTermChanged(m_searchInput->input);
+				// TODO if last chart in folder then remove whole folder
 			}
 		}
 	}
-	virtual void OnKeyReleased(SDL_Scancode code)
+	void OnKeyReleased(SDL_Scancode code) override
 	{
+		if (code == SDL_SCANCODE_LSHIFT)
+		{
+			m_shiftDown &= ~(code == SDL_SCANCODE_LSHIFT? 1 : 2);
+		}
 	}
-	virtual void Tick(float deltaTime) override
+	void Tick(float deltaTime) override
 	{
 		if (m_dbUpdateTimer.Milliseconds() > 500)
 		{
@@ -1960,7 +1995,7 @@ public:
 			m_multiplayer->GetChatOverlay()->Tick(deltaTime);
 	}
 
-	virtual void Render(float deltaTime)
+	void Render(float deltaTime) override
 	{
 		if (m_suspended && m_hasRestored) return;
 		lua_getglobal(m_lua, "render");
@@ -2050,7 +2085,7 @@ public:
 		m_advanceSong -= advanceSongActual;
 	}
 
-	virtual void OnSuspend()
+	void OnSuspend() override
 	{
 		m_lastMapIndex = m_selectionWheel->GetCurrentSongIndex();
 
@@ -2060,7 +2095,7 @@ public:
 		if (m_lockMouse)
 			m_lockMouse.reset();
 	}
-	virtual void OnRestore()
+	void OnRestore() override
 	{
 		g_application->DiscordPresenceMenu("Song Select");
 		m_suspended = false;

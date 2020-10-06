@@ -181,18 +181,23 @@ void AudioPlayback::SetEffect(uint32 index, HoldObjectState* object, class Beatm
 	if (m_buttonEffects[index].type == EffectType::SwitchAudio)
 		return;
 
-	dsp = m_buttonEffects[index].CreateDSP(m_GetDSPTrack().get(), *this);
+	Ref<AudioStream> audioTrack = m_GetDSPTrack();
+
+	dsp = m_buttonEffects[index].CreateDSP(*this, audioTrack->GetAudioSampleRate());
+	if (!dsp) return;
+
 	Logf("Set effect: %s", Logger::Severity::Debug, dsp->GetName());
 
-	if(dsp)
-	{
-		m_buttonEffects[index].SetParams(dsp, *this, object);
-		// Initialize mix value to previous value
-		dsp->mix = m_effectMix[index];
-		dsp->startTime = object->time;
-		dsp->chartOffset = playback.GetBeatmap().GetMapSettings().offset;
-		dsp->lastTimingPoint = playback.GetCurrentTimingPoint().time;
-	}
+	m_buttonEffects[index].SetParams(dsp, *this, object);
+
+	// Initialize mix value to previous value
+	dsp->mix = m_effectMix[index];
+	dsp->startTime = object->time;
+	dsp->chartOffset = playback.GetBeatmap().GetMapSettings().offset;
+	dsp->lastTimingPoint = playback.GetCurrentTimingPoint().time;
+
+	// Add the DSP to the track
+	audioTrack->AddDSP(dsp);
 }
 void AudioPlayback::SetEffectEnabled(uint32 index, bool enabled)
 {
@@ -251,12 +256,16 @@ void AudioPlayback::SetLaserFilterInput(float input, bool active)
 			if(m_fxtrack && m_laserEffectType == EffectType::Bitcrush)
 				return;
 
-			m_laserDSP = m_laserEffect.CreateDSP(m_GetDSPTrack().get(), *this);
+			Ref<AudioStream> audioTrack = m_GetDSPTrack();
+
+			m_laserDSP = m_laserEffect.CreateDSP(*this, audioTrack->GetAudioSampleRate());
 			if(!m_laserDSP)
 			{
 				Logf("Failed to create laser DSP with type %d", Logger::Severity::Warning, m_laserEffect.type);
 				return;
 			}
+
+			audioTrack->AddDSP(m_laserDSP);
 		}
 
 		// Set params
@@ -267,6 +276,7 @@ void AudioPlayback::SetLaserFilterInput(float input, bool active)
 	{
 		if (m_laserSwitchable > 0)
 			SetSwitchableTrackEnabled(m_laserSwitchable, true);
+
 		m_laserSwitchable = -1;
 		m_CleanupDSP(m_laserDSP);
 		m_laserInput = 0.0f;
@@ -399,6 +409,7 @@ void AudioPlayback::m_SetLaserEffectParameter(float input)
 {
 	if(!m_laserDSP)
 		return;
+
 	assert(input >= 0.0f && input <= 1.0f);
 
 	// Mix float biquad filters, these are applied manualy by changing the filter parameters (gain,q,freq,etc.)

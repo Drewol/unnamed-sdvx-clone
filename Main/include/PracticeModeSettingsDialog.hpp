@@ -7,6 +7,7 @@ struct ChartIndex;
 class PracticeModeSettingsDialog : public BaseGameSettingsDialog
 {
 public:
+	virtual ~PracticeModeSettingsDialog() = default;
 	PracticeModeSettingsDialog(Game& game, MapTime& lastMapTime,
 		int32& tempOffset, Game::PlayOptions& playOptions, MapTimeRange& range);
 	void InitTabs() override;

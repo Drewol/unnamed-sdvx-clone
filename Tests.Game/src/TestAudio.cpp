@@ -55,7 +55,7 @@ Test("Audio.Music.Phaser")
 		{
 			TestMusicPlayer::Init(songPath, startOffset);
 
-			phaser = new PhaserDSP();
+			phaser = new PhaserDSP(song->GetAudioSampleRate());
 			phaser->dmin = 800.0f;
 			phaser->dmax = 1000.0f;
 			phaser->fb = 0.8f;
@@ -82,7 +82,7 @@ Test("Audio.Music.Wobble")
 		{
 			TestMusicPlayer::Init(songPath, startOffset);
 
-			wobble = new WobbleDSP();
+			wobble = new WobbleDSP(song->GetAudioSampleRate());
 			song->AddDSP(wobble);
 			wobble->SetLength(200);
 		}
@@ -110,7 +110,7 @@ Test("Audio.Music.LPF")
 		{
 			TestMusicPlayer::Init(songPath, startOffset);
 
-			filter = new BQFDSP();
+			filter = new BQFDSP(song->GetAudioSampleRate());
 			song->AddDSP(filter);
 			filter->SetLowPass(1.0f, 500.0f);
 		}
@@ -160,7 +160,7 @@ Test("Audio.Music.LPFMix")
 		{
 			TestMusicPlayer::Init(songPath, startOffset);
 
-			filter = new BQFDSP();
+			filter = new BQFDSP(song->GetAudioSampleRate());
 			song->AddDSP(filter);
 			filter->SetLowPass(1.0f, 500.0f);
 		}
@@ -210,7 +210,7 @@ Test("Audio.Music.Peaking")
 		{
 			TestMusicPlayer::Init(songPath, startOffset);
 
-			filter = new BQFDSP();
+			filter = new BQFDSP(song->GetAudioSampleRate());
 			song->AddDSP(filter);
 			filter->SetLowPass(1.0f, 500.0f);
 		}
@@ -253,14 +253,12 @@ Test("Audio.Music.Echo")
 {
 	class MusicPlayer : public TestMusicPlayer
 	{
-		BQFDSP* filter;
-		float filterSetting = 0.0f;
 	public:
 		virtual void Init(const String& songPath, uint32 startOffset) override
 		{
 			TestMusicPlayer::Init(songPath, startOffset);
 
-			EchoDSP* echo = new EchoDSP();
+			EchoDSP* echo = new EchoDSP(song->GetAudioSampleRate());
 			song->AddDSP(echo);
 			echo->SetLength(3000);
 			echo->feedback = 0.4f;
@@ -279,14 +277,12 @@ Test("Audio.Music.Flanger")
 {
 	class MusicPlayer : public TestMusicPlayer
 	{
-		BQFDSP* filter;
-		float filterSetting = 0.0f;
 	public:
 		virtual void Init(const String& songPath, uint32 startOffset) override
 		{
 			TestMusicPlayer::Init(songPath, startOffset);
 
-			FlangerDSP* fl = new FlangerDSP();
+			FlangerDSP* fl = new FlangerDSP(song->GetAudioSampleRate());
 			song->AddDSP(fl);
 			fl->SetDelayRange(10, 120);
 			fl->SetLength(24100);

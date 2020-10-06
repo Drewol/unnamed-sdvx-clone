@@ -64,7 +64,7 @@ public:
 			//Logf("Cleaned up %d resource(s) of %s", Logger::Info, numCleanedUp, Utility::TypeInfo<T>::name);
 		}
 	}
-	virtual void ReleaseAll()
+	void ReleaseAll() override
 	{
 		m_lock.lock();
 		size_t numCleanedUp = m_objects.size();

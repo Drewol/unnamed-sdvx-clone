@@ -32,10 +32,10 @@ class LevelFilter : public SongFilter
 public:
 	~LevelFilter() = default;
 	LevelFilter(uint16 level) : m_level(level) {}
-	virtual Map<int32, SongSelectIndex> GetFiltered(const Map<int32, SongSelectIndex>& source) override;
-	virtual String GetName() const override;
-	virtual bool IsAll() const override;
-	virtual FilterType GetType() const { return FilterType::Level; }
+	Map<int32, SongSelectIndex> GetFiltered(const Map<int32, SongSelectIndex>& source) override;
+	String GetName() const override;
+	bool IsAll() const override;
+	FilterType GetType() const override { return FilterType::Level; }
 
 
 private:
@@ -47,10 +47,10 @@ class FolderFilter : public SongFilter
 public:
 	FolderFilter(String folder, MapDatabase* database) : m_folder(folder), m_mapDatabase(database) {}
 	~FolderFilter() = default;
-	virtual Map<int32, SongSelectIndex> GetFiltered(const Map<int32, SongSelectIndex>& source);
-	virtual String GetName() const override;
-	virtual bool IsAll() const override;
-	virtual FilterType GetType() const { return FilterType::Folder; }
+	Map<int32, SongSelectIndex> GetFiltered(const Map<int32, SongSelectIndex>& source) override;
+	String GetName() const override;
+	bool IsAll() const override;
+	FilterType GetType() const override { return FilterType::Folder; }
 
 
 private:
@@ -65,10 +65,10 @@ public:
 	CollectionFilter(String collection, MapDatabase* database) : m_collection(collection), m_mapDatabase(database) {}
 	~CollectionFilter() = default;
 
-	virtual Map<int32, SongSelectIndex> GetFiltered(const Map<int32, SongSelectIndex>& source);
-	virtual String GetName() const override;
-	virtual bool IsAll() const override;
-	virtual FilterType GetType() const { return FilterType::Collection; }
+	Map<int32, SongSelectIndex> GetFiltered(const Map<int32, SongSelectIndex>& source) override;
+	String GetName() const override;
+	bool IsAll() const override;
+	FilterType GetType() const override { return FilterType::Collection; }
 
 
 private:

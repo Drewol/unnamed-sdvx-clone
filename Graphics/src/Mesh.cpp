@@ -39,7 +39,7 @@ namespace Graphics
 			return m_buffer != 0 && m_vao != 0;
 		}
 
-		virtual void SetData(const void* pData, size_t vertexCount, const VertexFormatList& desc)
+		void SetData(const void* pData, size_t vertexCount, const VertexFormatList& desc) override
 		{
 			glBindVertexArray(m_vao);
 			glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
@@ -86,31 +86,31 @@ namespace Graphics
 		}
 		
 		#ifdef EMBEDDED
-		virtual void Draw()
+		void Draw() override
 		{
 			glBindVertexArray(m_vao);
 			glDrawArrays(m_glType, 0, (int)m_vertexCount);
 			glBindVertexArray(0);
 		}
-		virtual void Redraw()
+		void Redraw() override
 		{
 			glBindVertexArray(m_vao);
 			glDrawArrays(m_glType, 0, (int)m_vertexCount);
 			glBindVertexArray(0);
 		}
 		#else
-		virtual void Draw()
+		void Draw() override
 		{
 			glBindVertexArray(m_vao);
 			glDrawArrays(m_glType, 0, (int)m_vertexCount);
 		}
-		virtual void Redraw()
+		void Redraw() override
 		{
 			glDrawArrays(m_glType, 0, (int)m_vertexCount);
 		}
 		#endif
 
-		virtual void SetPrimitiveType(PrimitiveType pt)
+		void SetPrimitiveType(PrimitiveType pt) override
 		{
 			m_type = pt;
 			m_glType = primitiveTypeMap[(size_t)pt];

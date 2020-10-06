@@ -13,11 +13,11 @@ PracticeModeSettingsDialog::PracticeModeSettingsDialog(Game& game, MapTime& last
 
 void PracticeModeSettingsDialog::InitTabs()
 {
-    AddTab(std::move(m_CreateMainSettingTab()));
-    AddTab(std::move(m_CreateLoopingTab()));
-    AddTab(std::move(m_CreateLoopControlTab()));
-    AddTab(std::move(m_CreateFailConditionTab()));
-    AddTab(std::move(m_CreateGameSettingTab()));
+    AddTab(m_CreateMainSettingTab());
+    AddTab(m_CreateLoopingTab());
+    AddTab(m_CreateLoopControlTab());
+    AddTab(m_CreateFailConditionTab());
+    AddTab(m_CreateGameSettingTab());
 
     SetCurrentTab(0);
 }

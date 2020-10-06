@@ -5,6 +5,7 @@ class Scoring;
 class GameFailCondition
 {
 public:
+	virtual ~GameFailCondition() = default;
 	enum class Type
 	{
 		None, Score, Grade, Miss, MissAndNear, Gauge

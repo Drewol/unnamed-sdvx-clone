@@ -11,6 +11,7 @@ public:
 	void Update(float deltaTime);
 	void Pause();
 	void Restore();
+	void StopCurrent();
 private:
 	static const float m_fadeDuration;
 	static const float m_fadeDelayDuration;

@@ -119,11 +119,7 @@ class SettingsScreen_Impl : public SettingsScreen
 {
 private:
 	nk_context* m_nctx;
-	nk_font_atlas m_nfonts;
 
-	const char* m_speedMods[3] = { "XMod", "MMod", "CMod" };
-	const char* m_laserModes[3] = { "Keyboard", "Mouse", "Controller" };
-	const char* m_buttonModes[2] = { "Keyboard", "Controller" };
 	const Vector<const char*> m_aaModes = { "Off", "2x MSAA", "4x MSAA", "8x MSAA", "16x MSAA" };
 	Vector<String> m_gamePads;
 	Vector<String> m_skins;

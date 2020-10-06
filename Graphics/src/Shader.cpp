@@ -162,7 +162,7 @@ namespace Graphics
 		
 #endif
 
-		bool UpdateHotReload()
+		bool UpdateHotReload() override
 		{
 #ifdef _WIN32
 			if(m_changeNotification != INVALID_HANDLE_VALUE)
@@ -201,7 +201,7 @@ namespace Graphics
 			return LoadProgram(m_prog);
 		}
 #ifndef EMBEDDED
-		virtual void Bind()
+		void Bind() override
 		{
 			if(m_gl->m_activeShaders[(size_t)m_type] != this)
 			{
@@ -209,11 +209,11 @@ namespace Graphics
 				m_gl->m_activeShaders[(size_t)m_type] = this;
 			}
 		}
-		virtual bool IsBound() const
+		bool IsBound() const override
 		{
 			return m_gl->m_activeShaders[(size_t)m_type] == this;
 		}
-		virtual uint32 GetLocation(const String& name) const
+		uint32 GetLocation(const String& name) const override
 		{
 			return glGetUniformLocation(m_prog, name.c_str());
 		}
@@ -271,7 +271,7 @@ namespace Graphics
 			return m_prog;
 		}
 
-		String GetOriginalName() const
+		String GetOriginalName() const override
 		{
 			return m_sourcePath;
 		}

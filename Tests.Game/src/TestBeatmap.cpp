@@ -171,7 +171,7 @@ Test("Beatmap.DoubleFilter")
 
 			for(int i = 0; i < 2; i++)
 			{
-				filter[i] = new BQFDSP();
+				filter[i] = new BQFDSP(song->GetAudioSampleRate());
 				song->AddDSP(filter[i]);
 			}
 		}
@@ -277,7 +277,7 @@ Test("Beatmap.SingleFilter")
 				}
 			});
 
-			filter = new BQFDSP();
+			filter = new BQFDSP(song->GetAudioSampleRate());
 			song->AddDSP(filter);
 		}
 		void Update(float dt) override

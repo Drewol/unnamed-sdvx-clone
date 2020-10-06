@@ -2,6 +2,8 @@
 #include "AudioOutput.hpp"
 #include "AudioBase.hpp"
 
+#include <array>
+
 // Threading
 #include <thread>
 #include <mutex>
@@ -11,6 +13,8 @@ using std::mutex;
 class Audio_Impl : public IMixer
 {
 public:
+	Audio_Impl();
+
 	void Start();
 	void Stop();
 	// Get samples
@@ -30,13 +34,29 @@ public:
 	Vector<DSP*> globalDSPs;
 
 	class LimiterDSP* limiter = nullptr;
-
-	// Used to limit rendering to a fixed number of samples (512)
-	float* m_sampleBuffer = nullptr;
-	uint32 m_sampleBufferLength = 384;
 	uint32 m_remainingSamples = 0;
 
 	thread audioThread;
 	bool runAudioThread = false;
 	AudioOutput* output = nullptr;
+
+protected:
+	// Used to limit rendering to a fixed number of samples
+	constexpr static uint32 m_sampleBufferLength = 384;
+	std::array<float, 2*m_sampleBufferLength> m_sampleBuffer;
+	
+private:
+	alignas(sizeof(float))
+	std::array<float, 2 * m_sampleBufferLength> m_itemBuffer;
+
+	// Check memory corruption during filling m_itemBuffer
+#if _DEBUG
+	constexpr static uint32 m_guardBandSize = 256;
+
+	alignas(1)
+	std::array<uint8, m_guardBandSize> m_guard;
+
+	void InitMemoryGuard();
+	void CheckMemoryGuard();
+#endif
 };

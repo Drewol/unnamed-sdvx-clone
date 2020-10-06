@@ -35,3 +35,7 @@ target_link_libraries(GUI Shared)
 target_link_libraries(GUI nanovg)
 target_link_libraries(GUI Graphics)
 target_link_libraries(GUI lua)
+
+if(WIN32)
+    target_compile_options(Graphics PRIVATE /Zi)
+endif()

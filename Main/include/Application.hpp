@@ -7,7 +7,7 @@
 #define DISCORD_APPLICATION_ID "514489760568573952"
 
 extern class OpenGL* g_gl;
-extern class GUIState g_guiState;
+extern struct GUIState g_guiState;
 extern class Graphics::Window* g_gameWindow;
 extern float g_aspectRatio;
 extern Vector2i g_resolution;

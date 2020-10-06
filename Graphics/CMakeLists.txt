@@ -56,3 +56,7 @@ if(UNIX)
         include_directories(${X11_INCLUDE_DIR})
     endif(APPLE)
 endif(UNIX)
+
+if(WIN32)
+    target_compile_options(Graphics PRIVATE /Zi)
+endif()

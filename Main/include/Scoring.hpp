@@ -290,8 +290,6 @@ private:
 
 	// Input values for laser [-1,1]
 	float m_laserInput[2] = { 0.0f };
-	// Keeps being set to the last direction the laser was moving in to create laser intertia
-	float m_lastLaserInputDirection[2] = { 0.0f };
 	// Decides if the coming tick should be auto completed
 	float m_autoLaserTime[2] = { 0,0 };
 	

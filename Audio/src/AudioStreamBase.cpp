@@ -156,7 +156,7 @@ void AudioStreamBase::Process(float* out, uint32 numSamples)
 				outCount++;
 
 				// Increment source sample with resampling
-				m_sampleStep += m_sampleStepIncrement * PlaybackSpeed;
+				m_sampleStep += static_cast<uint64>(m_sampleStepIncrement * PlaybackSpeed);
 				while(m_sampleStep >= fp_sampleStep)
 				{
 					m_sampleStep -= fp_sampleStep;

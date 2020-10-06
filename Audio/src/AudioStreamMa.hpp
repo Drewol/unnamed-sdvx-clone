@@ -8,10 +8,8 @@ private:
 	Buffer m_Internaldata;
 	float* m_pcm = nullptr;
 	int64 m_playbackPointer = 0;
-	uint64 m_dataPosition = 0;
 	const int sample_rate = 48000;
 	ma_decoder m_decoder = {  };
-	int m_byteRate;
 protected:
 	bool Init(Audio* audio, const String& path, bool preload) override;
 	int32 GetStreamPosition_Internal() override;

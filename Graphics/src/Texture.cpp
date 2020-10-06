@@ -38,7 +38,7 @@ namespace Graphics
 				return false;
 			return true;
 		}
-		virtual void Init(Vector2i size, TextureFormat format)
+		void Init(Vector2i size, TextureFormat format) override
 		{
 			m_format = format;
 			m_size = size;
@@ -74,7 +74,7 @@ namespace Graphics
 			UpdateFilterState();
 			UpdateWrap();
 		}
-		virtual void SetFromFrameBuffer(Vector2i pos = { 0, 0 })
+		void SetFromFrameBuffer(Vector2i pos = { 0, 0 }) override
 		{
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 			glReadBuffer(GL_BACK);
@@ -83,7 +83,7 @@ namespace Graphics
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
-		virtual void SetData(Vector2i size, void* pData)
+		void SetData(Vector2i size, void* pData) override
 		{
 			m_format = TextureFormat::RGBA8;
 			m_size = size;
@@ -119,7 +119,7 @@ namespace Graphics
 			#endif
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
-		virtual void SetFilter(bool enabled, bool mipFiltering, float anisotropic)
+		void SetFilter(bool enabled, bool mipFiltering, float anisotropic) override
 		{
 			m_mipFilter = mipFiltering;
 			m_filter = enabled;
@@ -127,7 +127,7 @@ namespace Graphics
 			assert(m_anisotropic >= 1.0f && m_anisotropic <= 16.0f);
 			UpdateFilterState();
 		}
-		virtual void SetMipmaps(bool enabled)
+		void SetMipmaps(bool enabled) override
 		{
 			if(enabled)
 			{
@@ -138,22 +138,22 @@ namespace Graphics
 			m_mipmaps = enabled;
 			UpdateFilterState();
 		}
-		virtual const Vector2i& GetSize() const
+		const Vector2i& GetSize() const override
 		{
 			return m_size;
 		}
-		virtual void Bind(uint32 index)
+		void Bind(uint32 index) override
 		{
 			glActiveTexture(GL_TEXTURE0 + index);
 			glBindTexture(GL_TEXTURE_2D, m_texture);
 
 		}
-		virtual uint32 Handle()
+		uint32 Handle() override
 		{
 			return m_texture;
 		}
 
-		virtual void SetWrap(TextureWrap u, TextureWrap v) override
+		void SetWrap(TextureWrap u, TextureWrap v) override
 		{
 			m_wmode[0] = u;
 			m_wmode[1] = v;
@@ -174,7 +174,7 @@ namespace Graphics
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
-		TextureFormat GetFormat() const
+		TextureFormat GetFormat() const override
 		{
 			return m_format;
 		}

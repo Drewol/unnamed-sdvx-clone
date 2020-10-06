@@ -2588,49 +2588,49 @@ return Scoring::CalculateBadge(scoreData);
 
 		return true;
 	}
-	virtual float GetPlaybackSpeed() override
+	float GetPlaybackSpeed() override
 	{
 		return m_audioPlayback.GetPlaybackSpeed();
 	}
-	virtual const PlayOptions& GetPlayOptions() const override
+	const PlayOptions& GetPlayOptions() const override
 	{
 		return m_playOptions;
 	}
-	virtual int GetRetryCount() const override
+	int GetRetryCount() const override
 	{
 		return m_loopCount;
 	}
-	virtual String GetMissionStr() const override
+	String GetMissionStr() const override
 	{
 		return m_playOptions.failCondition ? m_playOptions.failCondition->GetDescription() : "";
 	}
-	virtual const String& GetChartRootPath() const
+	const String& GetChartRootPath() const override
 	{
 		return m_chartRootPath;
 	}
-	virtual const String& GetChartPath() const
+	const String& GetChartPath() const override
 	{
 		return m_chartPath;
 	}
-	virtual bool IsMultiplayerGame() const
+	bool IsMultiplayerGame() const override
 	{
 		return m_multiplayer != nullptr;
 	}
-	virtual ChartIndex* GetChartIndex()
+	ChartIndex* GetChartIndex() override
 	{
 		return m_chartIndex;
 	}
-	virtual void SetDemoMode(bool value)
+	void SetDemoMode(bool value) override
 	{
 		m_demo = value;
 	}
-	virtual void SetSongDB(MapDatabase* db)
+	void SetSongDB(MapDatabase* db) override
 	{
 		m_db = db;
 		
 		if (m_isPracticeMode) LoadPracticeSetupIndex();
 	}
-	virtual void SetGameplayLua(lua_State* L)
+	void SetGameplayLua(lua_State* L) override
 	{
 		//set lua
 		lua_getglobal(L, "gameplay");
@@ -2812,7 +2812,7 @@ return Scoring::CalculateBadge(scoreData);
 
 		lua_setglobal(L, "gameplay");
 	}
-	virtual void SetInitialGameplayLua(lua_State* L)
+	void SetInitialGameplayLua(lua_State* L) override
 	{
 		auto pushStringToTable = [&](const char* name, String data)
 		{

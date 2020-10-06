@@ -97,7 +97,7 @@ namespace Graphics
 			glDeleteProgramPipelines(1, &m_pipeline);
 			#endif
 		}
-		void AssignShader(ShaderType t, Shader shader)
+		void AssignShader(ShaderType t, Shader shader) override
 		{
 			m_shaders[(size_t)t] = shader;
 
@@ -241,7 +241,7 @@ namespace Graphics
 		}
 
 		// Bind only parameters
-		virtual void BindParameters(const MaterialParameterSet& params, const Transform& worldTransform)
+		void BindParameters(const MaterialParameterSet& params, const Transform& worldTransform) override
 		{
 			BindAll(SV_World, worldTransform);
 			for(auto p : params)
@@ -300,7 +300,7 @@ namespace Graphics
 			}
 		}
 
-		virtual void BindToContext()
+		void BindToContext() override
 		{
 			// Bind pipeline to context
 			#ifdef EMBEDDED
