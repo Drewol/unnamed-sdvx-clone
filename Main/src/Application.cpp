@@ -23,6 +23,7 @@
 #include "SkinConfig.hpp"
 #include "SkinHttp.hpp"
 #include "ShadedMesh.hpp"
+#include "NetworkingServices.hpp"
 
 #ifdef EMBEDDED
 #define NANOVG_GLES2_IMPLEMENTATION
@@ -48,6 +49,7 @@ Graphics::Window *g_gameWindow = nullptr;
 Application *g_application = nullptr;
 JobSheduler *g_jobSheduler = nullptr;
 TransitionScreen *g_transition = nullptr;
+NetworkingServices* g_networkingServices = nullptr;
 Input g_input;
 
 // Tickable queue
@@ -879,6 +881,15 @@ bool Application::m_Init()
 	Path::CreateDir(Path::Absolute("songs"));
 	Path::CreateDir(Path::Absolute("replays"));
 	Path::CreateDir(Path::Absolute("crash_dumps"));
+
+	// Initalize NetworkServices
+	g_networkingServices = new NetworkingServices();
+	g_networkingServices->Init(&g_gameConfig);
+	auto net_loggedin = g_networkingServices->TryLogin();
+	if (net_loggedin)
+	{
+		g_networkingServices->QueueHeartbeat();
+	}
 
 	return true;
 }
