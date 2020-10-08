@@ -21,6 +21,7 @@
 #include "cryptopp/sha3.h"
 #include <cryptopp/filters.h>
 #include <cryptopp/files.h>
+#include "NetworkingServices.hpp"
 
 class ScoreScreen_Impl : public ScoreScreen
 {
@@ -291,6 +292,10 @@ public:
 			loadScoresFromGame(game);
 		}
 
+		if (g_networkingServices->ConnectionStatus() == true)
+		{
+			g_networkingServices->SubmitScore(game, m_flags);
+		}
 
 		for (HitStat* stat : scoring.hitStats)
 		{
