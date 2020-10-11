@@ -2364,6 +2364,9 @@ void Application::SetLuaBindings(lua_State *state)
 
 	//http
 	m_skinHttp.PushFunctions(state);
+
+	//netserv
+	g_networkingServices->PushLuaFunctions(state);
 }
 
 bool JacketLoadingJob::Run()

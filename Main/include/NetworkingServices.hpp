@@ -4,6 +4,7 @@
 #include <thread>
 #include "GameConfig.hpp"
 #include "Game.hpp"
+#include "lua.hpp"
 
 class NetworkingServices
 {
@@ -14,6 +15,7 @@ public:
 	void QueueHeartbeat();
 	virtual bool SubmitScore(class Game* game, GameFlags m_flags);
 	bool ConnectionStatus();
+	void PushLuaFunctions(lua_State* L);
 	int lGetScoresForTrack(lua_State* L);
 
 private:
@@ -32,6 +34,9 @@ private:
 
 	// Static
 	std::thread::id m_heartbeat;
+
+	// Lua
+	Map<struct lua_State*, class LuaBindable*> m_boundStates;
 };
 
 extern class NetworkingServices;

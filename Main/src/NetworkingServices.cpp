@@ -326,4 +326,11 @@ int NetworkingServices::lGetScoresForTrack(lua_State* L)
 	return 1;
 }
 
+void NetworkingServices::PushLuaFunctions(lua_State* L)
+{
+	auto bindable = new LuaBindable(L, "NetServ");
+	bindable->AddFunction("GetScoresForTrack", this, &NetworkingServices::lGetScoresForTrack);
+	bindable->Push();
+	lua_settop(L, 0);
+	//m_boundStates.Add(L, bindable);
 }
