@@ -12,6 +12,8 @@
 #include <cryptopp/files.h>
 #include "Game.hpp"
 #include "Scoring.hpp"
+#include "lua.hpp"
+#include "Shared/LuaBindable.hpp"
 
 NetworkingServices::NetworkingServices()
 {
@@ -155,4 +157,173 @@ bool NetworkingServices::SubmitScore(class Game* game, GameFlags m_flags)
 	{
 		return false;
 	}
+}
+
+void m_PushStringToTable(lua_State* m_lua, const char* name, const char* data)
+{
+	lua_pushstring(m_lua, name);
+	lua_pushstring(m_lua, data);
+	lua_settable(m_lua, -3);
+}
+
+void m_PushFloatToTable(lua_State* m_lua, const char* name, float data)
+{
+	lua_pushstring(m_lua, name);
+	lua_pushnumber(m_lua, data);
+	lua_settable(m_lua, -3);
+}
+
+void m_PushIntToTable(lua_State* m_lua, const char* name, int data)
+{
+	lua_pushstring(m_lua, name);
+	lua_pushinteger(m_lua, data);
+	lua_settable(m_lua, -3);
+}
+
+int NetworkingServices::lGetScoresForTrack(lua_State* L)
+{
+	// TODO: cache the info so we aren't always wasting bandwidth
+	// get track we are talking about
+	String hash = luaL_checkstring(L, 2);
+	cpr::Response respTrackInfo = cpr::Get(cpr::Url{ m_serviceUrl + "/api/v0/board/sha3/" + hash });
+	if (respTrackInfo.status_code != 200)
+	{
+		return 0;
+	}
+
+	auto res = nlohmann::json::parse(respTrackInfo.text);
+	uint64 track_id = res["track_id"];
+	uint64 board_id = res["id"];
+
+	uint8 limit = luaL_checkinteger(L, 3);
+	uint16 offset = luaL_checkinteger(L, 4);
+
+	// get scores from board
+	cpr::Response respScoreList = cpr::Get(cpr::Url{ m_serviceUrl + 
+												"/api/v0/score?track=" + std::to_string(track_id) + 
+												"&board=" + std::to_string(board_id) + 
+												"&limit=" + std::to_string(limit) + 
+												"&offset=" + std::to_string(offset)});
+
+	if (respScoreList.status_code != 200)
+	{
+		return 0;
+	}
+
+	lua_newtable(L);
+	for (auto scoreEntry : nlohmann::json::parse(respScoreList.text))
+	{
+		lua_newtable(L);
+		uint64 profileID = scoreEntry["profile"];
+		cpr::Response respPlayerInfo = cpr::Post(cpr::Url{ m_serviceUrl + "/api/v0/profile/" + std::to_string(profileID) });
+		String playerName;
+		if (respPlayerInfo.status_code != 200)
+		{
+			playerName = "UNINITALIZEZD";
+		}
+		else 
+		{
+			nlohmann::json resp = nlohmann::json::parse(respPlayerInfo.text);
+			String pplayerName = resp["name"]; // QUEST: Why do I need to do this and can't assign to playerName directly??
+			playerName = pplayerName;
+		}
+		String dateCreated = scoreEntry["date_created"];
+		float perfRating;
+		if (scoreEntry["performance"].is_null())
+		{
+			perfRating = 0;
+		}
+		else
+		{
+			perfRating = scoreEntry["performance"];
+		}
+		uint64 score;
+		if (scoreEntry["score"].is_null())
+		{
+			score = 0;
+		}
+		else
+		{
+			score = scoreEntry["score"];
+		}
+		uint32 combo;
+		if (scoreEntry["combo"].is_null())
+		{
+			combo = 0;
+		}
+		else
+		{
+			combo = scoreEntry["combo"];
+		}
+		uint8 status = scoreEntry["status"];
+		float rate;
+		if (scoreEntry["rate"].is_null())
+		{
+			rate = 0;
+		}
+		else
+		{
+			rate = scoreEntry["rate"];
+		}
+		double accuracy;
+		if (scoreEntry["accuracy"].is_null())
+		{
+			accuracy = 0;
+		}
+		else
+		{
+			accuracy = scoreEntry["accuracy"];
+		}
+		uint32 crits;
+		if (scoreEntry["criticals"].is_null())
+		{
+			crits = 0;
+		}
+		else
+		{
+			crits = scoreEntry["criticals"];
+		}
+		uint32 nears;
+		if (scoreEntry["nears"].is_null())
+		{
+			nears = 0;
+		}
+		else
+		{
+			nears = scoreEntry["nears"];
+		}
+		uint32 errors;
+		if (scoreEntry["errors"].is_null())
+		{
+			errors = 0;
+		}
+		else
+		{
+			errors = scoreEntry["errors"];
+		}
+		Logf("[NetworkingServices] Date Created: %s", Logger::Severity::Normal, dateCreated);
+		Logf("[NetworkingServices] perfRating: %g", Logger::Severity::Normal, perfRating);
+		Logf("[NetworkingServices] Score: %d", Logger::Severity::Normal, score);
+		Logf("[NetworkingServices] Combo: %d", Logger::Severity::Normal, combo);
+		Logf("[NetworkingServices] Status: %d", Logger::Severity::Normal, status);
+		Logf("[NetworkingServices] Rate: %g", Logger::Severity::Normal, rate);
+		Logf("[NetworkingServices] Accuracy: %g", Logger::Severity::Normal, accuracy);
+		m_PushStringToTable(L, "player", playerName.c_str());
+		m_PushStringToTable(L, "date_created", dateCreated.c_str());
+		m_PushFloatToTable(L, "performance", perfRating);
+		m_PushIntToTable(L, "score", score);
+		m_PushIntToTable(L, "combo", combo);
+		m_PushIntToTable(L, "status", status);
+		m_PushFloatToTable(L, "rate", rate);
+		m_PushFloatToTable(L, "score", accuracy);
+		m_PushIntToTable(L, "criticals", crits);
+		m_PushIntToTable(L, "nears", nears);
+		m_PushIntToTable(L, "errors", errors);
+
+		lua_settable(L, -3);
+	}
+	lua_settable(L, -3);
+	return 1;
+}
+
 }

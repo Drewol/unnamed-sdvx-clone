@@ -14,6 +14,7 @@ public:
 	void QueueHeartbeat();
 	virtual bool SubmitScore(class Game* game, GameFlags m_flags);
 	bool ConnectionStatus();
+	int lGetScoresForTrack(lua_State* L);
 
 private:
 	bool Heartbeat();
