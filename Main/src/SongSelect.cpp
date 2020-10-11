@@ -21,6 +21,11 @@
 #include "SongSort.hpp"
 #include "DBUpdateScreen.hpp"
 #include "PreviewPlayer.hpp"
+#include "cryptopp/cryptlib.h"
+#include "cryptopp/hex.h"
+#include "cryptopp/sha3.h"
+#include <cryptopp/filters.h>
+#include <cryptopp/files.h>
 
 class TextInput
 {
@@ -839,6 +844,18 @@ private:
 			m_PushStringToTable("effector", diff->effector.c_str());
 			m_PushStringToTable("illustrator", diff->illustrator.c_str());
 			m_PushIntToTable("topBadge", static_cast<int>(Scoring::CalculateBestBadge(diff->scores)));
+			// TODO: Calculating a SHA3-512 hash everytime the wheel spins is going to be slow, we should cache this in the MapDatabase
+			CryptoPP::SHA3_512 hash;
+			String digest;
+
+			CryptoPP::FileSource f(
+				String(diff->path).c_str(),
+				true,
+				new CryptoPP::HashFilter(
+					hash,
+					new CryptoPP::HexEncoder(
+						new CryptoPP::StringSink(digest), false)), true);
+			m_PushStringToTable("sha3_512", digest.c_str());
 			lua_pushstring(m_lua, "scores");
 			lua_newtable(m_lua);
 			int scoreIndex = 0;
