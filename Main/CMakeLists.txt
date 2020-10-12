@@ -80,7 +80,9 @@ target_link_libraries(usc-game nlohmann_json)
 
 target_link_libraries(usc-game ${SDL2_LIBRARY})
 target_link_libraries(usc-game ${LibArchive_LIBRARIES})
+target_link_libraries(usc-game ${CryptoPP_LIBRARIES})
 target_include_directories(usc-game SYSTEM PRIVATE ${LibArchive_INCLUDE_DIRS})
+target_include_directories(usc-game SYSTEM PRIVATE ${CryptoPP_INCLUDE_DIRS})
 
 if(WIN32)
     target_link_libraries(usc-game

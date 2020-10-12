@@ -63,6 +63,7 @@ jobs:
                 make
                 make static dynamic
                 sudo make install PREFIX=/usr
+                cp /usr/lib/libcryptopp.so /usr/lib/x86_64-linux-gnu/libcryptopp.so
                 cd ..
             - name: Checkout repo
               uses: actions/checkout@v1
@@ -73,7 +74,7 @@ jobs:
                 sudo apt-get update
                 sudo apt-get install g++ libegl1-mesa-dev libfreetype6-dev libogg-dev libvorbis-dev libsdl2-dev libarchive-dev zlib1g-dev libjpeg-dev libpng-dev libcrypto++-dev
             - name: cmake
-              run: cmake -DCryptoPP_LIBRARY=/usr/lib/libcryptopp.so -DCryptoPP_INCLUDE_DIR=/usr/lib/include/cryptopp -DCMAKE_BUILD_TYPE=Release .
+              run: cmake -DCryptoPP_LIBRARY=/usr/lib/libcryptopp.so -DCryptoPP_INCLUDE_DIR=/usr/include/cryptopp -DCMAKE_BUILD_TYPE=Release .
             - name: make
               run: make
             - name: Prepare for bundling AppImage
