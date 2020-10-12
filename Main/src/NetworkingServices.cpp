@@ -210,9 +210,12 @@ int NetworkingServices::lGetScoresForTrack(lua_State* L)
 		return 0;
 	}
 
+	lua_pushstring(L, "scores");
 	lua_newtable(L);
+	int idx = 0;
 	for (auto scoreEntry : nlohmann::json::parse(respScoreList.text))
 	{
+		lua_pushinteger(L, ++idx);
 		lua_newtable(L);
 		uint64 profileID = scoreEntry["profile"];
 		cpr::Response respPlayerInfo = cpr::Post(cpr::Url{ m_serviceUrl + "/api/v0/profile/" + std::to_string(profileID) });
@@ -322,7 +325,7 @@ int NetworkingServices::lGetScoresForTrack(lua_State* L)
 
 		lua_settable(L, -3);
 	}
-	lua_settable(L, -3);
+
 	return 1;
 }
 
