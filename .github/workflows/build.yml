@@ -55,6 +55,17 @@ jobs:
         name: Linux build
         runs-on: ubuntu-latest
         steps:
+            - name: Checkout CryptoPP
+              run: |
+                git clone https://github.com/weidai11/cryptopp cryptopp
+                cd cryptopp
+                git checkout CRYPTOPP_8_2_0
+            - name: Build CryptoPP
+              run: |
+                make
+                make static dynamic
+                make install
+                cd ...
             - name: Checkout repo
               uses: actions/checkout@v1
             - name: Checkout submodules
@@ -93,7 +104,8 @@ jobs:
                 git checkout CRYPTOPP_8_2_0
             - name: Build CryptoPP
               run: |
-                make dynamic
+                make
+                make static dynamic
                 make install
                 cd ...
             - name: Checkout repo
