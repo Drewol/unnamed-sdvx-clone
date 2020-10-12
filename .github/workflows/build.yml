@@ -62,7 +62,7 @@ jobs:
                 git checkout CRYPTOPP_8_2_0
                 make
                 make static dynamic
-                make install PREFIX=/usr/lib
+                sudo make install PREFIX=/usr/lib
                 cd ..
             - name: Checkout repo
               uses: actions/checkout@v1
@@ -102,7 +102,7 @@ jobs:
                 git checkout CRYPTOPP_8_2_0
                 make
                 make static dynamic
-                make install PREFIX=/usr/local/opt
+                make install
                 cd ..
             - name: Checkout repo
               uses: actions/checkout@v1
@@ -111,7 +111,7 @@ jobs:
             - name: Install packages
               run: brew install cmake freetype libvorbis sdl2 libpng jpeg libarchive
             - name: cmake
-              run: cmake . -DLibArchive_LIBRARY=/usr/local/opt/libarchive/lib/libarchive.dylib -DLibArchive_INCLUDE_DIR=/usr/local/opt/libarchive/include -DCMAKE_BUILD_TYPE=Release
+              run: cmake . -DLibArchive_LIBRARY=/usr/local/opt/libarchive/lib/libarchive.dylib -DLibArchive_INCLUDE_DIR=/usr/local/opt/libarchive/include -DLibCryptoPP_LIBRARY=/usr/local/lib/libcryptopp.dylib -DLibCryptoPP_INCLUDE_DIR=/usr/local/include/cryptopp -DCMAKE_BUILD_TYPE=Release
             - name: make
               run: make
             - name: Upload artifact
