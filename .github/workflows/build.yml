@@ -55,6 +55,15 @@ jobs:
         name: Linux build
         runs-on: ubuntu-latest
         steps:
+            - name: Checkout and Build CryptoPP
+              run: |
+                git clone https://github.com/weidai11/cryptopp cryptopp
+                cd cryptopp
+                git checkout CRYPTOPP_8_2_0
+                make
+                make static dynamic
+                make install PREFIX=/usr/lib
+                cd ..
             - name: Checkout repo
               uses: actions/checkout@v1
             - name: Checkout submodules
@@ -62,7 +71,7 @@ jobs:
             - name: Install packages
               run: |
                 sudo apt-get update
-                sudo apt-get install g++ libegl1-mesa-dev libfreetype6-dev libogg-dev libvorbis-dev libsdl2-dev libarchive-dev zlib1g-dev libjpeg-dev libpng-dev libcrypto++-dev libcrypto++6 libcrypto++6-dbg
+                sudo apt-get install g++ libegl1-mesa-dev libfreetype6-dev libogg-dev libvorbis-dev libsdl2-dev libarchive-dev zlib1g-dev libjpeg-dev libpng-dev libcrypto++-dev
             - name: cmake
               run: cmake -DCMAKE_BUILD_TYPE=Release .
             - name: make
@@ -91,10 +100,9 @@ jobs:
                 git clone https://github.com/weidai11/cryptopp cryptopp
                 cd cryptopp
                 git checkout CRYPTOPP_8_2_0
-                ls
                 make
                 make static dynamic
-                make install
+                make install PREFIX=/usr/local/opt
                 cd ..
             - name: Checkout repo
               uses: actions/checkout@v1
