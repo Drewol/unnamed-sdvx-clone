@@ -62,7 +62,7 @@ jobs:
             - name: Install packages
               run: |
                 sudo apt-get update
-                sudo apt-get install g++ libegl1-mesa-dev libfreetype6-dev libogg-dev libvorbis-dev libsdl2-dev libarchive-dev zlib1g-dev libjpeg-dev libpng-dev
+                sudo apt-get install g++ libegl1-mesa-dev libfreetype6-dev libogg-dev libvorbis-dev libsdl2-dev libarchive-dev zlib1g-dev libjpeg-dev libpng-dev libcrypto++-dev
             - name: cmake
               run: cmake -DCMAKE_BUILD_TYPE=Release .
             - name: make
@@ -91,7 +91,7 @@ jobs:
             - name: Checkout submodules
               run: git submodule update --init --recursive
             - name: Install packages
-              run: brew install cmake freetype libvorbis sdl2 libpng jpeg libarchive
+              run: brew install cmake freetype libvorbis sdl2 libpng jpeg libarchive cryptopp
             - name: cmake
               run: cmake . -DLibArchive_LIBRARY=/usr/local/opt/libarchive/lib/libarchive.dylib -DLibArchive_INCLUDE_DIR=/usr/local/opt/libarchive/include -DCMAKE_BUILD_TYPE=Release
             - name: make
