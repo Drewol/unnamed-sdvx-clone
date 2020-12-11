@@ -17,6 +17,7 @@ public:
 	bool ConnectionStatus();
 	void PushLuaFunctions(lua_State* L);
 	int lGetScoresForTrack(lua_State* L);
+	int lIsConnected(lua_State* L);
 
 private:
 	bool Heartbeat();
