@@ -72,11 +72,17 @@ end
 function setButtons()
 	if buttons == nil then
 		buttons = {}
-		buttons[1] = {"Start", Menu.Start}
-		buttons[2] = {"Multiplayer", Menu.Multiplayer}
-		buttons[3] = {"Get Songs", Menu.DLScreen}
-		buttons[4] = {"Settings", Menu.Settings}
-		buttons[5] = {"Exit", Menu.Exit}
+		if NetServ.IsConnected() == true then
+			buttons[1] = {"Start", Menu.Start}
+			buttons[2] = {"Settings", Menu.Settings}
+			buttons[3] = {"Exit", Menu.Exit}
+		else
+			buttons[1] = {"Start", Menu.Start}
+			buttons[2] = {"Multiplayer", Menu.Multiplayer}
+			buttons[3] = {"Get Songs", Menu.DLScreen}
+			buttons[4] = {"Settings", Menu.Settings}
+			buttons[5] = {"Exit", Menu.Exit}
+		end
 	end
 end
 
