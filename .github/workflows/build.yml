@@ -55,16 +55,6 @@ jobs:
         name: Linux build
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout and Build CryptoPP
-              run: |
-                git clone https://github.com/weidai11/cryptopp cryptopp
-                cd cryptopp
-                git checkout CRYPTOPP_8_2_0
-                make
-                make static dynamic
-                sudo make install PREFIX=/usr
-                cp /usr/lib/libcryptopp.so /usr/lib/x86_64-linux-gnu/libcryptopp.so
-                cd ..
             - name: Checkout repo
               uses: actions/checkout@v1
             - name: Checkout submodules
@@ -72,9 +62,9 @@ jobs:
             - name: Install packages
               run: |
                 sudo apt-get update
-                sudo apt-get install g++ libegl1-mesa-dev libfreetype6-dev libogg-dev libvorbis-dev libsdl2-dev libarchive-dev zlib1g-dev libjpeg-dev libpng-dev libcrypto++-dev
+                sudo apt-get install g++ libegl1-mesa-dev libfreetype6-dev libogg-dev libvorbis-dev libsdl2-dev libarchive-dev zlib1g-dev libjpeg-dev libpng-dev
             - name: cmake
-              run: cmake -DCryptoPP_LIBRARY=/usr/lib/libcryptopp.so -DCryptoPP_INCLUDE_DIR=/usr/include/cryptopp -DCMAKE_BUILD_TYPE=Release .
+              run: cmake -DCMAKE_BUILD_TYPE=Release .
             - name: make
               run: make
             - name: Prepare for bundling AppImage
@@ -96,15 +86,6 @@ jobs:
         name: macOS build
         runs-on: macos-latest
         steps:
-            - name: Checkout and Build CryptoPP
-              run: |
-                git clone https://github.com/weidai11/cryptopp cryptopp
-                cd cryptopp
-                git checkout CRYPTOPP_8_2_0
-                make
-                make static dynamic
-                make install
-                cd ..
             - name: Checkout repo
               uses: actions/checkout@v1
             - name: Checkout submodules
@@ -112,7 +93,7 @@ jobs:
             - name: Install packages
               run: brew install cmake freetype libvorbis sdl2 libpng jpeg libarchive
             - name: cmake
-              run: cmake . -DLibArchive_LIBRARY=/usr/local/opt/libarchive/lib/libarchive.dylib -DLibArchive_INCLUDE_DIR=/usr/local/opt/libarchive/include -DCryptoPP_LIBRARY=/usr/local/lib/libcryptopp.dylib -DCryptoPP_INCLUDE_DIR=/usr/local/include/cryptopp -DCMAKE_BUILD_TYPE=Release
+              run: cmake . -DLibArchive_LIBRARY=/usr/local/opt/libarchive/lib/libarchive.dylib -DLibArchive_INCLUDE_DIR=/usr/local/opt/libarchive/include -DCMAKE_BUILD_TYPE=Release
             - name: make
               run: make
             - name: Upload artifact
