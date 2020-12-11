@@ -318,7 +318,7 @@ int NetworkingServices::lGetScoresForTrack(lua_State* L)
 		m_PushIntToTable(L, "combo", combo);
 		m_PushIntToTable(L, "status", status);
 		m_PushFloatToTable(L, "rate", rate);
-		m_PushFloatToTable(L, "score", accuracy);
+		m_PushFloatToTable(L, "accuracy", accuracy);
 		m_PushIntToTable(L, "criticals", crits);
 		m_PushIntToTable(L, "nears", nears);
 		m_PushIntToTable(L, "errors", errors);
