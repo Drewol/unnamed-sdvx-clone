@@ -218,7 +218,7 @@ int NetworkingServices::lGetScoresForTrack(lua_State* L)
 		lua_pushinteger(L, ++idx);
 		lua_newtable(L);
 		uint64 profileID = scoreEntry["profile"];
-		cpr::Response respPlayerInfo = cpr::Post(cpr::Url{ m_serviceUrl + "/api/v0/profile/" + std::to_string(profileID) });
+		cpr::Response respPlayerInfo = cpr::Get(cpr::Url{ m_serviceUrl + "/api/v0/profile/" + std::to_string(profileID) });
 		String playerName;
 		if (respPlayerInfo.status_code != 200)
 		{
