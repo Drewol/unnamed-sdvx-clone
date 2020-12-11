@@ -431,6 +431,18 @@ public:
 
 	void updateLuaData()
 	{
+		// hash the file of the chart we played
+		CryptoPP::SHA3_512 hash;
+		String digest;
+
+		CryptoPP::FileSource f(
+			String(m_chartIndex->path).c_str(),
+			true,
+			new CryptoPP::HashFilter(
+				hash,
+				new CryptoPP::HexEncoder(
+					new CryptoPP::StringSink(digest), false)), true);
+
 		const bool isSelf = m_displayIndex == m_selfDisplayIndex;
 
 		lua_newtable(m_lua);
@@ -443,6 +455,7 @@ public:
 		m_PushIntToTable("maxCombo", m_maxCombo);
 		m_PushIntToTable("level", m_beatmapSettings.level);
 		m_PushIntToTable("difficulty", m_beatmapSettings.difficulty);
+		m_PushStringToTable("sha3", digest);
 		if (m_multiplayer)
 		{
 			m_PushStringToTable("playerName", m_playerName);
