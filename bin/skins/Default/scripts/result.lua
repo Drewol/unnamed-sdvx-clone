@@ -146,7 +146,24 @@ result_set = function()
         hitGraphHoverScale = 10
     end
     
-    if result.uid == nil then --local scores
+	if NetServ.IsConnected() == true then
+		for i,s in ipairs(NetServ.GetScoresForTrack(result.sha3, 50, 0)) do
+			entry = { }
+			
+			game.Log(s.score, 2)
+			game.Log(s.player, 2)
+			game.Log(s.rate, 2)
+			game.Log(s.status, 2)
+			entry.score = s.score
+			entry.subtext = s.player
+			entry.badge = s.status
+			entry.badgeDesc = getScoreBadgeDesc(result)
+			entry.color = {255, 127, 0}
+			entry.xoff = 0
+			
+			table.insert(highScores, entry)
+		end
+    elseif result.uid == nil then --local scores
         for i,s in ipairs(result.highScores) do
             newScore = { }
             if currentAdded == false and result.score > s.score then
