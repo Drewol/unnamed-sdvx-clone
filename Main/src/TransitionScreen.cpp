@@ -232,6 +232,7 @@ public:
 				pushStringToTable("artist", chart->artist);
 				pushStringToTable("effector", chart->effector);
 				pushStringToTable("illustrator", chart->illustrator);
+				pushStringToTable("jacketPath", chart->jacket_path);
 				pushStringToTable("bpm", chart->bpm);
 				pushIntToTable("level", chart->level);
 				pushIntToTable("difficulty", chart->diff_index);
@@ -243,6 +244,7 @@ public:
 				pushStringToTable("artist", "");
 				pushStringToTable("effector", "");
 				pushStringToTable("illustrator", "");
+				pushStringToTable("jacketPath", "");
 				pushStringToTable("bpm", "");
 				pushIntToTable("level", 1);
 				pushIntToTable("difficulty", 0);

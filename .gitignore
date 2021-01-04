@@ -54,3 +54,4 @@ Makefile
 
 # Document build files
 docs/build
+/out/build
