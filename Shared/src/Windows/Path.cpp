@@ -134,6 +134,12 @@ Vector<String> Path::GetSubDirs(const String& path)
 	return res;
 }
 
+void Path::OpenInBrowser(const String& path)
+{
+	WString wpath = Utility::ConvertToWString(path);
+	ShellExecuteW(NULL, L"open", *wpath, NULL, NULL, SW_SHOWNORMAL);
+}
+
 bool Path::ShowInFileBrowser(const String& path)
 {
 	WString wpath = Utility::ConvertToWString(path);

@@ -41,6 +41,8 @@ public:
 	static bool CopyDir(String srcFolder, String dstFolder);
 	// Go to specified path using the system default file browser
 	static bool ShowInFileBrowser(const String& path);
+	// Go to specified url using the system default web browser
+	static void OpenInBrowser(const String& url);
 	// Open external program with specified parameters (used to open charts in editor)
 	static bool Run(const String& programPath, const String& parameters);
 

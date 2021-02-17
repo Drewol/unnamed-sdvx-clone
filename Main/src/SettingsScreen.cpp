@@ -940,6 +940,7 @@ public:
 			ToggleSetting(GameConfigKeys::MuteUnfocused, "Mute the game when unfocused");
 			ToggleSetting(GameConfigKeys::CheckForUpdates, "Check for updates on startup");
 			ToggleSetting(GameConfigKeys::OnlyRelease, "Only check for new release versions");
+			ToggleSetting(GameConfigKeys::ShowCrashUploadPrompt, "Ask to upload crash dumps on crash");
 
 			EnumSetting<Logger::Enum_Severity>(GameConfigKeys::LogLevel, "Logging level");
 

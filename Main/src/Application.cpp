@@ -625,6 +625,62 @@ void Application::m_InitDiscord()
 	Discord_Initialize(DISCORD_APPLICATION_ID, &dhe, 1, nullptr);
 }
 
+#ifdef _WIN32
+#ifdef CRASHDUMP
+bool g_HandleCrash(
+	const wchar_t* dump_path,
+	const wchar_t* minidump_id,
+	void* context,
+	EXCEPTION_POINTERS*,
+	MDRawAssertionInfo*,
+	bool succeeded)
+{
+	if (!g_gameConfig.GetBool(GameConfigKeys::ShowCrashUploadPrompt))
+		return false;
+	if (!succeeded)
+		return false;
+	bool res = g_gameWindow->ShowYesNoMessage("Report USC Crash?", "USC has crashed. Would you like to upload the crash dump?");
+
+	if (!res) {
+		g_application->Shutdown();
+		return true;
+	}
+	std::wstring asciiPath(dump_path);
+	std::wstring asciiId(minidump_id);
+	String path = String(asciiPath.begin(), asciiPath.end()) + "\\"
+		+ String(asciiId.begin(), asciiId.end()) + ".dmp";
+
+	cpr::Response resp = cpr::Post(
+		cpr::Url{ "http://uscdmp.stackchk.fail/symbolify" },
+		//cpr::Url{ "http://192.168.65.128:1338/" },
+		cpr::Multipart{
+#ifdef GIT_COMMIT
+			{"commit", GIT_COMMIT},
+#endif
+			{"ingame", "true"},
+			{"file", cpr::File{ path }}
+	});
+
+	if (resp.status_code < 400)
+	{
+		for (char c : resp.text)
+		{
+			if (!((c >= '0' && c <= '9')
+				|| (c >= 'a' && c <= 'z')
+				|| (c >= 'A' && c <= 'Z')))
+			{
+				g_application->Shutdown();
+				return true;
+			}
+		}
+		Path::OpenInBrowser("http://uscdmp.stackchk.fail/"+resp.text);
+	}
+	g_application->Shutdown();
+	return true;
+}
+#endif
+#endif
+
 bool Application::m_Init()
 {
 	ProfilerScope $("Application Setup");
@@ -655,7 +711,7 @@ bool Application::m_Init()
 	auto handler = new google_breakpad::ExceptionHandler(
 		L".\\crash_dumps",
 		NULL,
-		NULL,
+		g_HandleCrash,
 		NULL,
 		google_breakpad::ExceptionHandler::HANDLER_ALL,
 		MiniDumpNormal,
@@ -888,6 +944,8 @@ bool Application::m_Init()
 	Logger::Get().SetLogLevel(g_gameConfig.GetEnum<Logger::Enum_Severity>(GameConfigKeys::LogLevel));
 	return true;
 }
+
+
 void Application::m_MainLoop()
 {
 	Timer appTimer;
