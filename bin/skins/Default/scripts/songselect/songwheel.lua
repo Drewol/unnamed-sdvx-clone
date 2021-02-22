@@ -51,6 +51,8 @@ local badges = {
     gfx.CreateSkinImage("badges/perfect.png", 0)
 }
 
+local recordCache = {}
+
 gfx.LoadSkinFont("NotoSans-Regular.ttf");
 
 game.LoadSkinSample("menu_click")
@@ -138,43 +140,108 @@ check_or_create_cache = function(song, loadJacket)
     end
 end
 
+function get_record(hash)
+	if recordCache[hash] then 
+		return recordCache[hash]
+	end
+	
+	-- TODO: Set a field for when this cache expires (every 5 minutes)
+	recordCache[hash] = NetServ.GetScoresForTrack(hash, 1, 0)
+end
+
 draw_scores = function(difficulty, x, y, w, h)
   -- draw the top score for this difficulty
 	local xOffset = 5
   local height = h/3 - 10
   local ySpacing = h/3
 	local yOffset = h/3
+	
   gfx.FontSize(30);
   gfx.TextAlign(gfx.TEXT_ALIGN_BOTTOM + gfx.TEXT_ALIGN_CENTER);
-  gfx.FastText("HIGH SCORE", x +(w/2), y+(h/2))
+  gfx.FastText("LOCAL SCORE", x +(w/4), y+(h/2))
+  gfx.FastText("ONLINE RECORD", x + (3/4 * w), y + (h/2))
+  
+  -- local high score rect
   gfx.BeginPath()
-  gfx.Rect(x+xOffset,y+h/2,w-(xOffset*2),h/2)
+  gfx.Rect(x+xOffset,y+h/2,w/2-(xOffset*2),h/2)
   gfx.FillColor(30,30,30,10)
   gfx.StrokeColor(0,128,255)
   gfx.StrokeWidth(1)
   gfx.Fill()
   gfx.Stroke()
-	if difficulty.scores[1] ~= nil then
-		local highScore = difficulty.scores[1]
-    scoreLabel = gfx.CreateLabel(string.format("%08d",highScore.score), 40, 0)
-    for i,v in ipairs(grades) do
-      if v.max > highScore.score then
-        gfx.BeginPath()
-        iw,ih = gfx.ImageSize(v.image)
-        iar = iw / ih;
-        gfx.ImageRect(x+xOffset,y+h/2 +5, iar * (h/2-10),h/2-10, v.image, 1, 0)
-        break
-      end
+  
+  -- online record rect
+  gfx.BeginPath()
+  gfx.Rect(x + xOffset + w/2,y+h/2,w/2-(xOffset*2),h/2)
+  gfx.FillColor(30,30,30,10)
+  gfx.StrokeColor(0,128,255)
+  gfx.StrokeWidth(1)
+  gfx.Fill()
+  gfx.Stroke()
+  
+  if difficulty.scores[1] ~= nil then
+	local highScore = difficulty.scores[1]
+	scoreLabel = gfx.CreateLabel(string.format("%08d",highScore.score), 40, 0)
+	for i,v in ipairs(grades) do
+        if v.max > highScore.score then
+            gfx.BeginPath()
+            iw,ih = gfx.ImageSize(v.image)
+            iarr = ih / iw
+            oldheight = h/2 - 10
+            newheight =  iarr * (h/2-10)
+            centreoffset = (oldheight - newheight)/2 + 3 -- +3 is stupid but ehhh
+            gfx.ImageRect(x+xOffset, y+h/2 + centreoffset, oldheight,  newheight, v.image, 1, 0) --this is nasty but it works for me
+            break
+        end
     end
     if difficulty.topBadge ~= 0 then
         gfx.BeginPath()
-        gfx.ImageRect(x+xOffset+w-h/2, y+h/2 +5, (h/2-10), h/2-10, badges[difficulty.topBadge], 1, 0)
+        gfx.ImageRect(x+xOffset+w/2-h/2, y+h/2 +5, (h/2-10), h/2-10, badges[difficulty.topBadge], 1, 0)
     end
+
     gfx.FillColor(255,255,255)
-		gfx.FontSize(40);
+	gfx.FontSize(40);
     gfx.TextAlign(gfx.TEXT_ALIGN_MIDDLE + gfx.TEXT_ALIGN_CENTER);
-		gfx.DrawLabel(scoreLabel, x+(w/2),y+(h/4)*3,w)
+    gfx.DrawLabel(scoreLabel, x+(w/4),y+(h/4)*3,w/2)
 	end
+	
+    onlinerecord = get_record(difficulty.sha3_512)
+	
+	if onlinerecord == nil then --record not set, but can be tracked
+        recordLabel = gfx.CreateLabel(string.format("%08d", 0), 40, 0)
+        gfx.FillColor(170, 170, 170)
+        gfx.FontSize(40)
+        gfx.TextAlign(gfx.TEXT_ALIGN_MIDDLE + gfx.TEXT_ALIGN_CENTER);
+        gfx.DrawLabel(recordLabel, x+(w * 3/4),y+(h/4)*3,w/2)
+    else
+		for i,s in ipairs(onlinerecord) do
+			recordScoreLabel = gfx.CreateLabel(string.format("%08d", s.score), 26, 0)
+			recordPlayerLabel = gfx.CreateLabel(s.player, 26, 0)
+			
+			gfx.BeginPath()
+			gfx.ImageRect(x+xOffset+w-h/2, y+h/2 +5, (h/2-10), h/2-10, badges[s.status], 1, 0)
+
+			for ii,v in ipairs(grades) do
+				if v.max > s.score then
+					gfx.BeginPath()
+					iw,ih = gfx.ImageSize(v.image)
+					iarr = ih / iw
+					oldheight = h/2 - 10
+					newheight =  iarr * (h/2-10)
+					centreoffset = (oldheight - newheight)/2 + 3 -- +3 is stupid but ehhh
+					gfx.ImageRect(x+xOffset+w/2, y+h/2 + centreoffset, oldheight,  newheight, v.image, 1, 0) --this is nasty but it works for me
+					break
+				end
+			end
+
+			gfx.FillColor(255, 255, 255)
+			gfx.FontSize(40)
+			gfx.TextAlign(gfx.TEXT_ALIGN_MIDDLE + gfx.TEXT_ALIGN_CENTER);
+			gfx.DrawLabel(recordPlayerLabel, x+(w * 3/4),y+(h/4)*2.55,w/2)
+			gfx.DrawLabel(recordScoreLabel, x+(w * 3/4),y+(h/4)*3.45,w/2)
+		end
+	end
+	
 end
 
 draw_song = function(song, x, y, w, h, selected)
