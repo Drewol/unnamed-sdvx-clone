@@ -1315,6 +1315,9 @@ void Application::m_Cleanup()
 	nvgDeleteGL3(g_guiState.vg);
 #endif
 
+	// Fonts should be freed before the library is freed.
+	m_fonts.clear();
+
 	Graphics::FontRes::FreeLibrary();
 	if (m_updateThread.joinable())
 		m_updateThread.join();
