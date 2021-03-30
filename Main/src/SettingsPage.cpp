@@ -383,8 +383,7 @@ protected:
 		g_application->ApplySettings();
 
 		// Load new settings
-		// reverts a lot of settings.
-		// g_application->ReloadConfig(newProfile);
+		g_application->ReloadConfig(newProfile);
 		m_forceReload = true;
 	}
 

@@ -103,8 +103,23 @@ protected:
 	Color ColorInput(const Color& val, const std::string_view& label, bool& useHSV);
 
 public:
-	void Open() { Load(); }
-	void Close() { Save(); }
+	void Open()
+	{
+		if (!m_opened)
+		{
+			Load();
+			m_opened = true;
+		}
+	}
+
+	void Close()
+	{
+		if (m_opened)
+		{
+			Save();
+			m_opened = false;
+		}
+	}
 
 	void Render(const struct nk_rect& rect);
 
@@ -118,6 +133,7 @@ protected:
 	struct nk_vec2 m_comboBoxSize = nk_vec2(1050, 250);
 
 	float m_pageInnerWidth = 0.0f;
+	bool m_opened = false;
 };
 
 class SettingsPageCollection : public BasicNuklearGui
