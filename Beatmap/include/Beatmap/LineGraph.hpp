@@ -35,7 +35,9 @@ public:
     void Insert(MapTime time, double point);
     void Insert(MapTime time, const Point& point);
     void Insert(MapTime time, const std::string& point);
-    void Extend(MapTime time);
+
+    /// Returns the value being extended.
+    double Extend(MapTime time);
 
     inline PointsIterator lower_bound(MapTime time) const
     {

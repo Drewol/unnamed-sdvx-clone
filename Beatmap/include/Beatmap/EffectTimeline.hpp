@@ -26,6 +26,9 @@ public:
 		case GraphType::SHIFT_X: return m_shiftX;
 		case GraphType::ROTATION_Z: return m_rotationZ;
 		case GraphType::SCROLL_SPEED: return m_scrollSpeed;
+
+		// Shouldn't happen at all.
+		default: assert(false); return m_shiftX;
 		}
 	}
 
@@ -38,6 +41,9 @@ public:
 		case GraphType::SHIFT_X: return m_shiftX;
 		case GraphType::ROTATION_Z: return m_rotationZ;
 		case GraphType::SCROLL_SPEED: return m_scrollSpeed;
+
+		// Shouldn't happen at all.
+		default: assert(false); return m_shiftX;
 		}
 	}
 
@@ -46,13 +52,8 @@ public:
 		GetGraph(type).Insert(mapTime, value);
 	}
 
-	inline Vector<ChartStop>& GetChartStops() { return m_chartStops; }
-	inline const Vector<ChartStop>& GetChartStops() const { return m_chartStops; }
-
 private:
 	MapTime m_offset;
-
-	Vector<ChartStop> m_chartStops;
 
 	LineGraph m_zoomBottom;
 	LineGraph m_zoomTop;

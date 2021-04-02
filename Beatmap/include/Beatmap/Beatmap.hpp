@@ -61,28 +61,6 @@ public:
 	// Returns the settings of the map, contains metadata + song/image paths.
 	const BeatmapSettings& GetMapSettings() const;
 
-	/*
-	// Vector of timing points in the map, sorted by when they appear in the map
-	// Must keep the beatmap class instance alive for these to stay valid
-	// Can contain multiple objects at the same time
-	const Vector<TimingPoint*>& GetLinearTimingPoints() const;
-
-	// Vector of chart stops in the chart, sorted by when they appear in the map
-	// Must keep the beatmap class instance alive for these to stay valid
-	// Can contain multiple objects at the same time
-	const Vector<ChartStop*>& GetLinearChartStops() const;
-
-	// Vector of objects in the map, sorted by when they appear in the map
-	// Must keep the beatmap class instance alive for these to stay valid
-	// Can contain multiple objects at the same time
-	const Vector<ObjectState*>& GetLinearObjects() const;
-
-	// Vector of zoom control points in the map, sorted by when they appear in the map
-	// Must keep the beatmap class instance alive for these to stay valid
-	// Can contain multiple objects at the same time
-	const Vector<ZoomControlPoint*>& GetZoomControlPoints() const;
-	*/
-
 	const Vector<LaneHideTogglePoint>& GetLaneTogglePoints() const { return m_laneTogglePoints; }
 
 	const Vector<String>& GetSamplePaths() const { return m_samplePaths; }

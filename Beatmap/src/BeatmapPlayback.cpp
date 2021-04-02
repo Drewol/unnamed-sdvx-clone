@@ -508,7 +508,7 @@ float BeatmapPlayback::DurationToViewDistanceAtTime(MapTime time, MapTime durati
 
 	if (m_isCalibration)
 	{
-		return duration / m_calibrationTiming.beatDuration * direction;
+		return static_cast<float>(duration / m_calibrationTiming.beatDuration * direction);
 	}
 
 	// Accumulated value

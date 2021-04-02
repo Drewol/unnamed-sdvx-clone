@@ -47,23 +47,31 @@ void LineGraph::Insert(MapTime mapTime, const std::string& point)
     }
 }
 
-void LineGraph::Extend(MapTime time)
+double LineGraph::Extend(MapTime time)
 {
     if (m_points.empty())
     {
         Insert(time, m_default);
-        return;
+        return m_default;
     }
 
+    double value = m_default;
     auto it = m_points.lower_bound(time);
     if (it == m_points.end())
     {
-        Insert(time, m_points.begin()->second.value.first);
+        value = m_points.begin()->second.value.first;
     }
     else if(it->first < time)
     {
-        Insert(time, it->second.value.second);
+        value = it->second.value.second;
     }
+    else
+    {
+        return it->second.value.first;
+    }
+
+    Insert(time, value);
+    return value;
 }
 
 double LineGraph::ValueAt(MapTime mapTime) const

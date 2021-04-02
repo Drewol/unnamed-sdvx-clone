@@ -1,6 +1,4 @@
 #pragma once
-#include <math.h>
-#include <cmath>
 
 namespace Math
 {

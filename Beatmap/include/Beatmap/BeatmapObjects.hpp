@@ -329,26 +329,3 @@ struct LaneHideTogglePoint
 	// How long the transition to/from hidden should take in 1/192nd notes
 	uint32 duration = 192;
 };
-
-// Control point for track zoom levels
-struct ZoomControlPoint
-{
-	MapTime time;
-	// What zoom to control
-	// 0 = bottom
-	// 1 = top
-	uint8 index = 0;
-	// The zoom value
-	// in the range -1 to 1
-	// 1 being fully zoomed in
-	float zoom = 0.0f;
-	// Used to check if a manual tilt assignment is instant
-	bool instant = false;
-};
-
-// Chart stop object
-struct ChartStop
-{
-	MapTime time;
-	MapTime duration;
-};

@@ -33,25 +33,6 @@ const BeatmapSettings& Beatmap::GetMapSettings() const
 	return m_settings;
 }
 
-/*
-const Vector<TimingPoint*>& Beatmap::GetLinearTimingPoints() const
-{
-	return m_timingPoints;
-}
-const Vector<ChartStop*>& Beatmap::GetLinearChartStops() const
-{
-	return m_chartStops;
-}
-const Vector<ObjectState*>& Beatmap::GetLinearObjects() const
-{
-	return reinterpret_cast<const Vector<ObjectState*>&>(m_objectStates);
-}
-const Vector<ZoomControlPoint*>& Beatmap::GetZoomControlPoints() const
-{
-	return m_zoomControlPoints;
-}
-*/
-
 AudioEffect Beatmap::GetEffect(EffectType type) const
 {
 	if(type >= EffectType::UserDefined0)
@@ -198,7 +179,7 @@ double Beatmap::GetModeBPM() const
 	Map<double, MapTime> bpmDurations;
 
 	MapTime lastMT = m_settings.offset;
-	MapTime largestMT = -1;
+	double largestMT = -1;
 	double useBPM = -1;
 	double lastBPM = -1;
 
@@ -237,7 +218,8 @@ void Beatmap::GetBPMInfo(double& startBPM, double& minBPM, double& maxBPM, doubl
 	Map<double, MapTime> bpmDurations;
 
 	MapTime lastMT = m_settings.offset;
-	MapTime largestMT = -1;
+	
+	double largestMT = -1;
 	double lastBPM = -1;
 
 	for (const TimingPoint& tp : m_timingPoints)
@@ -396,7 +378,7 @@ bool Beatmap::CheckIfManualTiltInstant(MapTime lowerBound, MapTime mapTime, int 
 
 float Beatmap::GetCenterSplitValueAt(MapTime mapTime) const
 {
-	return m_centerSplit.ValueAt(mapTime);
+	return static_cast<float>(m_centerSplit.ValueAt(mapTime));
 }
 
 bool MultiObjectState::StaticSerialize(BinaryStream& stream, MultiObjectState*& obj)

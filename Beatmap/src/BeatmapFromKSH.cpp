@@ -606,10 +606,9 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 	float laserRanges[2] = {1.0f, 1.0f};
 	MapTime lastLaserPointTime[2] = {0, 0};
 
-	ZoomControlPoint *firstControlPoints[5] = {nullptr};
 	MapTime lastMapTime = 0;
 	uint32 currentTick = 0;
-	ZoomControlPoint* lastManualTiltPoint = nullptr;
+
 	for (KShootMap::TickIterator it(kshootMap); it; ++it)
 	{
 		const KShootBlock &block = it.GetCurrentBlock();
@@ -921,11 +920,14 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 			}
 			else if (p.first == "stop")
 			{
-				ChartStop cs;
-				cs.time = mapTime;
-				cs.duration = Math::RoundToInt((atol(*p.second) / 192.0f) * (lastTimingPoint->beatDuration) * 4);
+				MapTime stopDuration = Math::RoundToInt((atol(*p.second) / 192.0f) * (lastTimingPoint->beatDuration) * 4);
 
-				m_baseEffects.GetChartStops().Add(std::move(cs));
+				LineGraph& scrollSpeedGraph = m_baseEffects.GetGraph(EffectTimeline::GraphType::SCROLL_SPEED);
+
+				const double endValue = scrollSpeedGraph.ValueAt(mapTime + stopDuration);
+				scrollSpeedGraph.Extend(mapTime);
+				scrollSpeedGraph.Insert(mapTime, 0.0);
+				scrollSpeedGraph.Insert(mapTime + stopDuration, endValue);
 			}
 			else
 			{
