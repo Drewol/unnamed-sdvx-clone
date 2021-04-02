@@ -2,21 +2,23 @@
 #include "BeatmapObjects.hpp"
 
 // Object array sorting
-void TObjectState<void>::SortArray(Vector<ObjectState*>& arr)
+void TObjectState<void>::SortArray(std::vector<std::unique_ptr<ObjectState>>& arr)
 {
-	arr.Sort([](const ObjectState* l, const ObjectState* r)
+	std::sort(arr.begin(), arr.end(), [](const auto& l, const auto& r)
 	{
 		if(l->time == r->time)
 		{
 			// sort events on the same tick by their index
 			if (l->type == ObjectType::Event && r->type == ObjectType::Event)
-				return ((EventObjectState*)l)->interTickIndex < ((EventObjectState*)r)->interTickIndex;
+				return ((EventObjectState*) l.get())->interTickIndex < ((EventObjectState*) r.get())->interTickIndex;
 
 			// Sort laser slams to come first
-			bool ls = l->type == ObjectType::Laser && (((LaserObjectState*)l)->flags & LaserObjectState::flag_Instant);
-			bool rs = r->type == ObjectType::Laser && (((LaserObjectState*)r)->flags & LaserObjectState::flag_Instant);
+			const bool ls = l->type == ObjectType::Laser && (((LaserObjectState*) l.get())->flags & LaserObjectState::flag_Instant);
+			const bool rs = r->type == ObjectType::Laser && (((LaserObjectState*) r.get())->flags & LaserObjectState::flag_Instant);
+
 			return ls > rs;
 		}
+
 		return l->time < r->time;
 	});
 }

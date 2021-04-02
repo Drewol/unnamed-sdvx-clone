@@ -1,6 +1,7 @@
 #pragma once
 #include "BeatmapObjects.hpp"
 #include "AudioEffects.hpp"
+#include "EffectTimeline.hpp"
 
 /* Global settings stored in a beatmap */
 struct BeatmapSettings
@@ -53,11 +54,6 @@ struct BeatmapSettings
 class Beatmap : public Unique
 {
 public:
-	virtual ~Beatmap();
-	Beatmap() = default;
-	Beatmap(Beatmap&& other);
-	Beatmap& operator=(Beatmap&& other);
-
 	bool Load(BinaryStream& input, bool metadataOnly = false);
 	// Saves the map as it's own format
 	bool Save(BinaryStream& output) const;
@@ -65,54 +61,110 @@ public:
 	// Returns the settings of the map, contains metadata + song/image paths.
 	const BeatmapSettings& GetMapSettings() const;
 
+	/*
 	// Vector of timing points in the map, sorted by when they appear in the map
 	// Must keep the beatmap class instance alive for these to stay valid
 	// Can contain multiple objects at the same time
 	const Vector<TimingPoint*>& GetLinearTimingPoints() const;
+
 	// Vector of chart stops in the chart, sorted by when they appear in the map
 	// Must keep the beatmap class instance alive for these to stay valid
 	// Can contain multiple objects at the same time
 	const Vector<ChartStop*>& GetLinearChartStops() const;
+
 	// Vector of objects in the map, sorted by when they appear in the map
 	// Must keep the beatmap class instance alive for these to stay valid
 	// Can contain multiple objects at the same time
 	const Vector<ObjectState*>& GetLinearObjects() const;
+
 	// Vector of zoom control points in the map, sorted by when they appear in the map
 	// Must keep the beatmap class instance alive for these to stay valid
 	// Can contain multiple objects at the same time
 	const Vector<ZoomControlPoint*>& GetZoomControlPoints() const;
+	*/
 
-	const Vector<LaneHideTogglePoint*>& GetLaneTogglePoints() const;
+	const Vector<LaneHideTogglePoint>& GetLaneTogglePoints() const { return m_laneTogglePoints; }
 
-	const Vector<String>& GetSamplePaths() const;
-
-	const Vector<String>& GetSwitchablePaths() const;
+	const Vector<String>& GetSamplePaths() const { return m_samplePaths; }
+	const Vector<String>& GetSwitchablePaths() const { return m_switchablePaths; }
 
 	// Retrieves audio effect settings for a given button id
 	AudioEffect GetEffect(EffectType type) const;
 	// Retrieves audio effect settings for a given filter effect id
 	AudioEffect GetFilter(EffectType type) const;
 
+	// Get the timing of the first (non-event) object
+	MapTime GetFirstObjectTime(MapTime lowerBound) const;
+
 	// Get the timing of the last (non-event) object
 	MapTime GetLastObjectTime() const;
+
+	// Get the timing of the last object, including the event object
+	MapTime GetLastObjectTimeIncludingEvents() const;
 
 	// Measure -> Time
 	MapTime GetMapTimeFromMeasureInd(int measure) const;
 	// Time -> Measure
 	int GetMeasureIndFromMapTime(MapTime time) const;
 
+	// Computes the most frequently occuring BPM (to be used for MMod)
+	double GetModeBPM() const;
+
+	void GetBPMInfo(double& startBPM, double& minBPM, double& maxBPM, double& modeBPM) const;
+
+	void Shuffle(int seed, bool random, bool mirror);
+	void ApplyShuffle(const std::array<int, 6>& swaps, bool flipLaser);
+
+	// Vector interacts badly with unique_ptr, use std::vector instead
+	using Objects = std::vector<std::unique_ptr<ObjectState>>;
+	using ObjectsIterator = Objects::const_iterator;
+
+	const Objects& GetObjectStates() const { return m_objectStates; }
+
+	ObjectsIterator GetFirstObjectState() const { return m_objectStates.begin(); }
+	ObjectsIterator GetEndObjectState() const { return m_objectStates.end(); }
+
+	bool HasObjectState() const { return !m_objectStates.empty(); }
+
+	using TimingPoints = Vector<TimingPoint>;
+	using TimingPointsIterator = TimingPoints::const_iterator;
+
+	const TimingPoints& GetTimingPoints() const { return m_timingPoints; }
+
+	TimingPointsIterator GetFirstTimingPoint() const { return m_timingPoints.begin(); }
+	TimingPointsIterator GetEndTimingPoint() const { return m_timingPoints.end(); }
+
+	using LaneTogglePoints = Vector<LaneHideTogglePoint>;
+	using LaneTogglePointsIterator = LaneTogglePoints::const_iterator;
+
+	LaneTogglePointsIterator GetFirstLaneTogglePoint() const { return m_laneTogglePoints.begin(); }
+	LaneTogglePointsIterator GetEndLaneTogglePoint() const { return m_laneTogglePoints.end(); }
+
+	float GetGraphValueAt(EffectTimeline::GraphType type, MapTime mapTime, int aux = -1) const;
+	bool CheckIfManualTiltInstant(MapTime lowerBound, MapTime mapTime, int aux = -1) const;
+
+	float GetCenterSplitValueAt(MapTime mapTime) const;
+
 private:
 	bool m_ProcessKShootMap(BinaryStream& input, bool metadataOnly);
-	bool m_Serialize(BinaryStream& stream, bool metadataOnly);
 
-	Map<EffectType, AudioEffect> m_customEffects;
-	Map<EffectType, AudioEffect> m_customFilters;
+	Map<EffectType, AudioEffect> m_customAudioEffects;
+	Map<EffectType, AudioEffect> m_customAudioFilters;
 
-	Vector<TimingPoint*> m_timingPoints;
-	Vector<ChartStop*> m_chartStops;
-	Vector<LaneHideTogglePoint*> m_laneTogglePoints;
-	Vector<ObjectState*> m_objectStates;
-	Vector<ZoomControlPoint*> m_zoomControlPoints;
+	Objects m_objectStates;
+	TimingPoints m_timingPoints;
+
+	// Common effects
+	EffectTimeline m_baseEffects;
+
+	// Auxillary effects
+	Vector<EffectTimeline> m_auxEffects;
+
+	// Lane-specific effects
+	LineGraph m_centerSplit;
+	Vector<LaneHideTogglePoint> m_laneTogglePoints;
+	Map<String, Map<MapTime, String>> m_positionalOptions;
+
 	Vector<String> m_samplePaths;
 	Vector<String> m_switchablePaths;
 	BeatmapSettings m_settings;

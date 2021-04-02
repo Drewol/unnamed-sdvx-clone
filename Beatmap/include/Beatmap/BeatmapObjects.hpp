@@ -112,7 +112,7 @@ struct TObjectState<void> : public ObjectTypeData_Base
 	TObjectState() : ObjectTypeData_Base(ObjectType::Invalid){};
 
 	// Sort object states by their time and other properties
-	static void SortArray(Vector<TObjectState<void> *> &arr);
+	static void SortArray(std::vector<std::unique_ptr<TObjectState<void>>> &arr);
 
 	// Always allow casting from typeless object to Union State object
 	operator MultiObjectState *() { return (MultiObjectState *)this; }
@@ -180,7 +180,12 @@ struct SpinStruct
 struct ObjectTypeData_Laser
 {
 	// Retrieves the starting laser point
-	TObjectState<ObjectTypeData_Laser> *GetRoot();
+	TObjectState<ObjectTypeData_Laser>* GetRoot();
+	const TObjectState<ObjectTypeData_Laser>* GetRoot() const
+	{
+		return const_cast<ObjectTypeData_Laser*>(this)->GetRoot();
+	}
+
 	// Ending point of laser
 	TObjectState<ObjectTypeData_Laser> *GetTail();
 	float GetDirection() const;

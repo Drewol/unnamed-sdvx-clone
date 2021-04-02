@@ -10,25 +10,25 @@ static String testBeatmapPath = Path::Normalize("songs/love is insecurable/love_
 // Song with speed changes
 static String testBeatmapPath1 = Path::Normalize("songs/soflan/Konran shoujo Soflan-chan!!.ksh");
 
-Beatmap LoadTestBeatmap(const String& mapPath = testBeatmapPath)
+static inline void LoadTestBeatmap(Beatmap& beatmap, const String& mapPath = testBeatmapPath)
 {
-	Beatmap beatmap;
 	File file;
 	TestEnsure(file.OpenRead(mapPath));
 	FileReader reader(file);
 	TestEnsure(beatmap.Load(reader));
-	return beatmap;
 }
 
 Test("Beatmap.v160")
 {
-	Beatmap map = LoadTestBeatmap(Path::Normalize("D:\\KShoot/songs/Other/CHNLDiVR/exh.ksh"));
+	Beatmap map;
+	LoadTestBeatmap(map, Path::Normalize("D:\\KShoot/songs/Other/CHNLDiVR/exh.ksh"));
 
 	// Should have bitcrush effect
 	bool haveBitc = false;
-	for(auto obj : map.GetLinearObjects())
+
+	for(auto it = map.GetFirstObjectState(); it != map.GetEndObjectState(); ++it)
 	{
-		MultiObjectState* mobj = *obj;
+		MultiObjectState* mobj = *(it->get());
 		if(mobj->type == ObjectType::Hold)
 		{
 			if(mobj->hold.effectType == EffectType::Bitcrush)
@@ -43,7 +43,9 @@ Test("Beatmap.v160")
 // Test loading fo map + metadata without errors
 Test("Beatmap.Loading")
 {
-	Beatmap beatmap = LoadTestBeatmap();
+	Beatmap beatmap;
+	LoadTestBeatmap(beatmap);
+
 	BeatmapSettings settings = beatmap.GetMapSettings();
 	Logf("Artist: %s\n\t\tTitle: %s\n\t\tEffector: %s\n\t\tIllust: %s", Logger::Severity::Info,
 		settings.artist, settings.title, settings.effector, settings.illustrator);
@@ -54,7 +56,9 @@ Test("Beatmap.Loading")
 // Test 4/4 single bpm map
 Test("Beatmap.Playback")
 {
-	Beatmap beatmap = LoadTestBeatmap();
+	Beatmap beatmap;
+	LoadTestBeatmap(beatmap);
+
 	String mapRootPath = Path::RemoveLast(testBeatmapPath);
 
 	class Player : public TestMusicPlayer
@@ -70,10 +74,10 @@ Test("Beatmap.Playback")
 			Init(songPath, settings.previewOffset);
 			playback = BeatmapPlayback(beatmap);
 			playback.Reset(settings.previewOffset);
-			playback.OnTimingPointChanged.AddLambda([](TimingPoint* obj)
+			playback.OnTimingPointChanged.AddLambda([](Beatmap::TimingPointsIterator it)
 			{
-				float bpm = (float)obj->GetBPM();
-				Logf("T %.2f BPM %d/%d", Logger::Severity::Info, bpm, obj->numerator, obj->denominator);
+				float bpm = (float) it->GetBPM();
+				Logf("T %.2f BPM %d/%d", Logger::Severity::Info, bpm, it->numerator, it->denominator);
 			});
 		}
 		void Update(float dt) override
@@ -87,6 +91,7 @@ Test("Beatmap.Playback")
 			playback.Update(mapTime);
 		}
 	};
+
 	Player player(beatmap, mapRootPath);
 	player.Run();
 }
@@ -94,7 +99,9 @@ Test("Beatmap.Playback")
 // Different map with many BPM changes
 Test("Beatmap.BPMChanges")
 {
-	Beatmap beatmap = LoadTestBeatmap(testBeatmapPath1);
+	Beatmap beatmap;
+	LoadTestBeatmap(beatmap, testBeatmapPath1);
+
 	String mapRootPath = Path::RemoveLast(testBeatmapPath1);
 
 	class Player : public TestMusicPlayer
@@ -110,10 +117,10 @@ Test("Beatmap.BPMChanges")
 			Init(songPath, settings.previewOffset);
 			playback = BeatmapPlayback(beatmap);
 			playback.Reset(settings.previewOffset);
-			playback.OnTimingPointChanged.AddLambda([](TimingPoint* obj)
+			playback.OnTimingPointChanged.AddLambda([](Beatmap::TimingPointsIterator it)
 			{
-				float bpm = (float)obj->GetBPM();
-				Logf("T %.2f BPM %d/%d", Logger::Severity::Info, bpm, obj->numerator, obj->denominator);
+				float bpm = (float) it->GetBPM();
+				Logf("T %.2f BPM %d/%d", Logger::Severity::Info, bpm, it->numerator, it->denominator);
 			});
 		}
 		void Update(float dt) override
@@ -134,7 +141,9 @@ Test("Beatmap.BPMChanges")
 // Test applying effects over maps
 Test("Beatmap.DoubleFilter")
 {
-	Beatmap beatmap = LoadTestBeatmap();
+	Beatmap beatmap;
+	LoadTestBeatmap(beatmap);
+
 	String mapRootPath = Path::RemoveLast(testBeatmapPath);
 
 	class Player : public TestMusicPlayer
@@ -156,10 +165,10 @@ Test("Beatmap.DoubleFilter")
 
 			playback = BeatmapPlayback(beatmap);
 			playback.Reset(0);
-			playback.OnTimingPointChanged.AddLambda([](TimingPoint* obj)
+			playback.OnTimingPointChanged.AddLambda([](Beatmap::TimingPointsIterator it)
 			{
-				float bpm = (float)obj->GetBPM();
-				Logf("T %.2f BPM %d/%d", Logger::Severity::Info, bpm, obj->numerator, obj->denominator);
+				float bpm = (float) it->GetBPM();
+				Logf("T %.2f BPM %d/%d", Logger::Severity::Info, bpm, it->numerator, it->denominator);
 			});
 			playback.OnObjectEntered.AddLambda([&](ObjectState* obj) {
 				if(obj->type == ObjectType::Laser)
@@ -242,7 +251,9 @@ Test("Beatmap.DoubleFilter")
 // Test applying effects over maps
 Test("Beatmap.SingleFilter")
 {
-	Beatmap beatmap = LoadTestBeatmap();
+	Beatmap beatmap;
+	LoadTestBeatmap(beatmap);
+
 	String mapRootPath = Path::RemoveLast(testBeatmapPath);
 
 	class Player : public TestMusicPlayer
@@ -264,10 +275,10 @@ Test("Beatmap.SingleFilter")
 
 			playback = BeatmapPlayback(beatmap);
 			playback.Reset(0);
-			playback.OnTimingPointChanged.AddLambda([](TimingPoint* obj)
+			playback.OnTimingPointChanged.AddLambda([](Beatmap::TimingPointsIterator it)
 			{
-				float bpm = (float)obj->GetBPM();
-				Logf("T %.2f BPM %d/%d", Logger::Severity::Info, bpm, obj->numerator, obj->denominator);
+				float bpm = (float)it->GetBPM();
+				Logf("T %.2f BPM %d/%d", Logger::Severity::Info, bpm, it->numerator, it->denominator);
 			});
 			playback.OnObjectEntered.AddLambda([&](ObjectState* obj) {
 				if(obj->type == ObjectType::Laser)

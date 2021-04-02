@@ -8,8 +8,7 @@ class BeatmapPlayback
 {
 public:
 	BeatmapPlayback() = default;
-	BeatmapPlayback(Beatmap& beatmap);
-	~BeatmapPlayback();
+	BeatmapPlayback(const Beatmap& beatmap);
 
 	// Resets the playback of the map
 	// Must be called before any other function is called on this object
@@ -62,19 +61,18 @@ public:
 	float TimeToViewDistance(MapTime time);
 
 	// Current map time in ms as last passed to Update
-	MapTime GetLastTime() const;
+	inline MapTime GetLastTime() const { return m_playbackTime; }
 
 	// Value from 0 to 1 that indicates how far in a single bar the playback is
-	float GetBarTime() const;
-	float GetBeatTime() const;
+	inline float GetBarTime() const { return m_barTime; }
+	inline float GetBeatTime() const { return m_beatTime; }
 
 	// Gets the currently set value of a value set by events in the beatmap
 	const EventData& GetEventData(EventKey key);
 	// Retrieve event data as any 32-bit type
 	template<typename T>
-	const T& GetEventData(EventKey key)
+	const std::enable_if_t<std::is_integral_v<T> && sizeof(T) <= 4, T>& GetEventData(EventKey key)
 	{
-		assert(sizeof(T) <= 4);
 		return *(T*)&GetEventData(key);
 	}
 
@@ -97,55 +95,46 @@ public:
 	Delegate<HoldObjectState*> OnFXEnd;
 	
 	// Called when a new timing point becomes active
-	Delegate<TimingPoint*> OnTimingPointChanged;
-
-	Delegate<LaneHideTogglePoint*> OnLaneToggleChanged;
+	Delegate<Beatmap::TimingPointsIterator> OnTimingPointChanged;
+	Delegate<Beatmap::LaneTogglePointsIterator> OnLaneToggleChanged;
 
 	Delegate<EventKey, EventData> OnEventChanged;
 
 private:
 	// Selects an object or timing point based on a given input state
 	// if allowReset is true the search starts from the start of the object list if current point lies beyond given input time
-	TimingPoint** m_SelectTimingPoint(MapTime time, bool allowReset = false);
-	LaneHideTogglePoint** m_SelectLaneTogglePoint(MapTime time, bool allowReset = false);
-	ObjectState** m_SelectHitObject(MapTime time, bool allowReset = false);
-	ZoomControlPoint** m_SelectZoomObject(MapTime time);
-	Vector<ChartStop*> m_SelectChartStops(MapTime time, MapTime duration);
+	Beatmap::ObjectsIterator m_SelectHitObject(MapTime time, bool allowReset = false);
+	Beatmap::TimingPointsIterator m_SelectTimingPoint(MapTime time, bool allowReset = false);
+	Beatmap::LaneTogglePointsIterator m_SelectLaneTogglePoint(MapTime time, bool allowReset = false);
 
 	// End object pointer, this is not a valid pointer, but points to the element after the last element
-	bool IsEndTiming(TimingPoint** obj);
-	bool IsEndObject(ObjectState** obj);
-	bool IsEndLaneToggle(LaneHideTogglePoint ** obj);
-	bool IsEndZoomPoint(ZoomControlPoint** obj);
+	bool IsEndObject(const Beatmap::ObjectsIterator& obj) const;
+	bool IsEndTiming(const Beatmap::TimingPointsIterator& obj) const;
+	bool IsEndLaneToggle(const Beatmap::LaneTogglePointsIterator& obj) const;
 
 	// Current map position of this playback object
 	MapTime m_playbackTime;
 
 	// Disregard objects outside of these ranges
 	MapTimeRange m_viewRange;
-
-	Vector<TimingPoint*> m_timingPoints;
-	Vector<ChartStop*> m_chartStops;
-	Vector<ObjectState*> m_objects;
-	Vector<ZoomControlPoint*> m_zoomPoints;
-	Vector<LaneHideTogglePoint*> m_laneTogglePoints;
 	bool m_initialEffectStateSent = false;
 
-	TimingPoint** m_currentTiming = nullptr;
-	ObjectState** m_currentObj = nullptr;
-	ObjectState** m_currentLaserObj = nullptr;
-	ObjectState** m_currentAlertObj = nullptr;
-	LaneHideTogglePoint** m_currentLaneTogglePoint = nullptr;
-	ZoomControlPoint** m_currentZoomPoint = nullptr;
+	Beatmap::ObjectsIterator m_currObject;
+	Beatmap::ObjectsIterator m_currLaserObject;
+	Beatmap::ObjectsIterator m_currAlertObject;
 
-	// Used to calculate track zoom
-	ZoomControlPoint* m_zoomStartPoints[5] = { nullptr };
-	ZoomControlPoint* m_zoomEndPoints[5] = { nullptr };
+	Beatmap::TimingPointsIterator m_currentTiming;
+	Beatmap::LaneTogglePointsIterator m_currentLaneTogglePoint;
+
+	TrackRollBehaviour m_currentTrackRollBehaviour = TrackRollBehaviour::Normal;
+	MapTime m_lastTrackRollBehaviourChange = 0;
 
 	// Contains all the objects that are in the current valid timing area
 	Vector<ObjectState*> m_hittableObjects;
+
 	// Hold objects to render even when their start time is not in the current visibility range
 	Set<ObjectState*> m_holdObjects;
+	
 	// Hold buttons with effects that are active
 	Set<ObjectState*> m_effectObjects;
 
@@ -155,9 +144,10 @@ private:
 	float m_barTime;
 	float m_beatTime;
 
-	Beatmap* m_beatmap = nullptr;
+	const Beatmap* m_beatmap = nullptr;
 
-	//calibration mode things
+	// For calibration mode
 	bool m_isCalibration = false;
-	Vector<ObjectState*> m_calibrationObjects;
+	Vector<Ref<ObjectState>> m_calibrationObjects;
+	TimingPoint m_calibrationTiming;
 };
