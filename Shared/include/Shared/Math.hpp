@@ -1,5 +1,10 @@
 #pragma once
 
+#include <math.h>
+#include <cmath>
+
+#include <type_traits>
+
 namespace Math
 {
 	// Floating point PI constant
