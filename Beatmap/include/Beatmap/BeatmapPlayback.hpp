@@ -71,7 +71,7 @@ public:
 	const EventData& GetEventData(EventKey key);
 	// Retrieve event data as any 32-bit type
 	template<typename T>
-	const std::enable_if_t<std::is_integral_v<T> && sizeof(T) <= 4, T>& GetEventData(EventKey key)
+	const typename std::enable_if<std::is_integral<T>::value && sizeof(T) <= 4, T>::type& GetEventData(EventKey key)
 	{
 		return *(T*)&GetEventData(key);
 	}
