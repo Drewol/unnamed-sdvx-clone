@@ -764,7 +764,7 @@ public:
 		RenderQueue renderQueue(g_gl, rs);
 
 		// Get objects in range
-		MapTime msViewRange = m_playback.ViewDistanceToDuration(m_track->GetViewRange());
+		MapTime msViewRange = m_playback.OLD_ViewDistanceToDuration(m_track->GetViewRange());
 		if (m_speedMod == SpeedMods::CMod)
 		{
 			msViewRange = 480000.0 / m_playback.cModSpeed;

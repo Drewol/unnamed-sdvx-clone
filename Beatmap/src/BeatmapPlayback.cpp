@@ -360,6 +360,7 @@ const TimingPoint& BeatmapPlayback::GetCurrentTimingPoint() const
 
 	return *m_currentTiming;
 }
+
 const TimingPoint* BeatmapPlayback::GetTimingPointAt(MapTime time) const
 {
 	if (m_isCalibration)
@@ -389,7 +390,7 @@ uint32 BeatmapPlayback::CountBeats(MapTime start, MapTime range, int32& startInd
 	return (uint32)Math::Max<int64>(beatEnd - beatStart, 0);
 }
 
-MapTime BeatmapPlayback::ViewDistanceToDuration(float distance)
+MapTime BeatmapPlayback::OLD_ViewDistanceToDuration(float distance)
 {
 	if (m_isCalibration)
 	{
@@ -440,9 +441,9 @@ MapTime BeatmapPlayback::ViewDistanceToDuration(float distance)
 
 	return (MapTime)time;
 }
-float BeatmapPlayback::DurationToViewDistance(MapTime duration)
+float BeatmapPlayback::OLD_DurationToViewDistance(MapTime duration)
 {
-	return DurationToViewDistanceAtTime(m_playbackTime, duration);
+	return OLD_DurationToViewDistanceAtTime(m_playbackTime, duration);
 }
 
 /*
@@ -487,7 +488,7 @@ float BeatmapPlayback::DurationToViewDistanceAtTimeNoStops(MapTime time, MapTime
 }
 */
 
-float BeatmapPlayback::DurationToViewDistanceAtTime(MapTime time, MapTime duration)
+float BeatmapPlayback::OLD_DurationToViewDistanceAtTime(MapTime time, MapTime duration)
 {
 	if (cMod)
 	{
@@ -538,12 +539,12 @@ float BeatmapPlayback::DurationToViewDistanceAtTime(MapTime time, MapTime durati
 	return (float)barTime * direction;
 }
 
-float BeatmapPlayback::TimeToViewDistance(MapTime time)
+float BeatmapPlayback::OLD_TimeToViewDistance(MapTime time)
 {
 	if (cMod)
 		return (float)(time - m_playbackTime) / (480000.f);
 
-	return DurationToViewDistanceAtTime(m_playbackTime, time - m_playbackTime);
+	return OLD_DurationToViewDistanceAtTime(m_playbackTime, time - m_playbackTime);
 }
 
 float BeatmapPlayback::GetZoom(uint8 index)
@@ -589,26 +590,7 @@ bool BeatmapPlayback::CheckIfManualTiltInstant()
 
 Beatmap::TimingPointsIterator BeatmapPlayback::m_SelectTimingPoint(MapTime time, bool allowReset)
 {
-	Beatmap::TimingPointsIterator objStart = m_currentTiming;
-	if (IsEndTiming(objStart))
-		return objStart;
-
-	// Start at front of array if current object lies ahead of given input time
-	if (objStart->time > time && allowReset)
-		objStart = m_beatmap->GetFirstTimingPoint();
-
-	// Keep advancing the start pointer while the next object's starting time lies before the input time
-	while (true)
-	{
-		if (!IsEndTiming(objStart + 1) && (objStart+1)->time <= time)
-		{
-			objStart = objStart + 1;
-		}
-		else
-			break;
-	}
-
-	return objStart;
+	return m_beatmap->GetTimingPoint(time, m_currentTiming, !allowReset);
 }
 
 Beatmap::LaneTogglePointsIterator BeatmapPlayback::m_SelectLaneTogglePoint(MapTime time, bool allowReset)

@@ -112,6 +112,23 @@ public:
 	TimingPointsIterator GetFirstTimingPoint() const { return m_timingPoints.begin(); }
 	TimingPointsIterator GetEndTimingPoint() const { return m_timingPoints.end(); }
 
+	/// Returns the latest timing point for given mapTime
+	inline TimingPointsIterator GetTimingPoint(MapTime mapTime) const
+	{
+		return GetTimingPoint(mapTime, 0, m_timingPoints.size());
+	}
+
+	/// GetTimingPoint but a hint is given
+	TimingPointsIterator GetTimingPoint(MapTime mapTime, TimingPointsIterator hint, bool forwardOnly = false) const;
+
+	/// GetTimingPoint but begin and end ranges are specified
+	inline TimingPointsIterator GetTimingPoint(MapTime mapTime, TimingPointsIterator beginIt, TimingPointsIterator endIt) const
+	{
+		return GetTimingPoint(mapTime, static_cast<size_t>(std::distance(m_timingPoints.begin(), beginIt)), static_cast<size_t>(std::distance(m_timingPoints.begin(), endIt)));
+	}
+
+	TimingPointsIterator GetTimingPoint(MapTime mapTime, size_t begin, size_t end) const;
+
 	using LaneTogglePoints = Vector<LaneHideTogglePoint>;
 	using LaneTogglePointsIterator = LaneTogglePoints::const_iterator;
 

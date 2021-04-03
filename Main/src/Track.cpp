@@ -266,7 +266,7 @@ void Track::Tick(class BeatmapPlayback& playback, float deltaTime)
 
 	// Update ticks separating bars to draw
 	double tickTime = (double)currentTime;
-	MapTime rangeEnd = currentTime + playback.ViewDistanceToDuration(m_viewRange);
+	MapTime rangeEnd = currentTime + playback.OLD_ViewDistanceToDuration(m_viewRange);
 	const TimingPoint* tp = playback.GetTimingPointAt((MapTime)tickTime);
 	double stepTime = tp->GetBarDuration(); // Every xth note based on signature
 
@@ -278,7 +278,7 @@ void Track::Tick(class BeatmapPlayback& playback, float deltaTime)
 	m_barTicks.clear();
 
 	// Add first tick
-	m_barTicks.Add(playback.TimeToViewDistance((MapTime)tickTime));
+	m_barTicks.Add(playback.OLD_TimeToViewDistance((MapTime)tickTime));
 
 	while(tickTime < rangeEnd)
 	{
@@ -297,7 +297,7 @@ void Track::Tick(class BeatmapPlayback& playback, float deltaTime)
 		}
 
 		// Add tick
-		m_barTicks.Add(playback.TimeToViewDistance((MapTime)tickTime));
+		m_barTicks.Add(playback.OLD_TimeToViewDistance((MapTime)tickTime));
 	}
 
 	// Update track hide status
@@ -350,7 +350,7 @@ void Track::DrawLaserBase(RenderQueue& rq, class BeatmapPlayback& playback, cons
 		{
 			// Calculate height based on time on current track
 			float viewRange = GetViewRange();
-			float position = playback.TimeToViewDistance(obj->time);
+			float position = playback.OLD_TimeToViewDistance(obj->time);
 			float posmult = trackLength / (m_viewRange * laserSpeedOffset);
 
 			Mesh laserMesh = m_laserTrackBuilder[laser->index]->GenerateTrackMesh(playback, laser);
@@ -415,7 +415,7 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 {
 	// Calculate height based on time on current track
 	float viewRange = GetViewRange();
-	float position = playback.TimeToViewDistance(obj->time) / viewRange;
+	float position = playback.OLD_TimeToViewDistance(obj->time) / viewRange;
 	float glow = 0.0f;
 
 	if(obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
@@ -493,7 +493,7 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 		float scale = 1.0f;
 		if(isHold) // Hold Note?
 		{
-			float trackScale = (playback.DurationToViewDistanceAtTime(mobj->time, mobj->hold.duration) / viewRange) / length;
+			float trackScale = (playback.OLD_DurationToViewDistanceAtTime(mobj->time, mobj->hold.duration) / viewRange) / length;
 			scale = trackScale * trackLength;
 
 			params.SetParameter("trackScale", trackScale);
@@ -517,7 +517,7 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 	{
 		
 
-		position = playback.TimeToViewDistance(obj->time);
+		position = playback.OLD_TimeToViewDistance(obj->time);
 		float posmult = trackLength / (m_viewRange * laserSpeedOffset);
 		LaserObjectState* laser = (LaserObjectState*)obj;
 

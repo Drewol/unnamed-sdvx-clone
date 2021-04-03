@@ -72,7 +72,7 @@ void CalibrationScreen::Render(float deltaTime)
 	RenderState rs = m_camera.CreateRenderState(true);
 	RenderQueue renderQueue(g_gl, rs);
 
-	MapTime msViewRange = m_playback.ViewDistanceToDuration(m_track.GetViewRange());
+	MapTime msViewRange = m_playback.OLD_ViewDistanceToDuration(m_track.GetViewRange());
 	auto currentObjectSet = m_playback.GetObjectsInRange(msViewRange);
 
 	m_track.DrawBase(renderQueue);

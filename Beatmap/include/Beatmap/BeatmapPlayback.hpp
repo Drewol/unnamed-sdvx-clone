@@ -55,11 +55,11 @@ public:
 
 	// View coordinate conversions
 	// the input duration is looped throught the timing points that affect it and the resulting float is the number of 4th note offets
-	MapTime ViewDistanceToDuration(float distance);
-	float DurationToViewDistance(MapTime time);
-	float DurationToViewDistanceAtTime(MapTime time, MapTime duration);
-
-	float TimeToViewDistance(MapTime time);
+	// TODO: replace these timing functions to new ones
+	MapTime OLD_ViewDistanceToDuration(float distance);
+	float OLD_DurationToViewDistance(MapTime time);
+	float OLD_DurationToViewDistanceAtTime(MapTime time, MapTime duration);
+	float OLD_TimeToViewDistance(MapTime time);
 
 	// Current map time in ms as last passed to Update
 	inline MapTime GetLastTime() const { return m_playbackTime; }

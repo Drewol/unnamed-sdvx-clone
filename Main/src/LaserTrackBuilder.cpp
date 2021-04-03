@@ -27,7 +27,7 @@ Mesh LaserTrackBuilder::GenerateTrackMesh(class BeatmapPlayback& playback, Laser
 
 	Mesh newMesh = MeshRes::Create(m_gl);
 
-	float length = playback.DurationToViewDistanceAtTime(laser->time, laser->duration);
+	float length = playback.OLD_DurationToViewDistanceAtTime(laser->time, laser->duration);
 
 	if((laser->flags & LaserObjectState::flag_Instant) != 0) // Slam segment
 	{
@@ -61,7 +61,7 @@ Mesh LaserTrackBuilder::GenerateTrackMesh(class BeatmapPlayback& playback, Laser
 		}// else ------>
 
 		// Generate positions for middle top and bottom
-		float slamLength = playback.DurationToViewDistanceAtTime(laser->time, slamDuration) * laserLengthScale;
+		float slamLength = playback.OLD_DurationToViewDistanceAtTime(laser->time, slamDuration) * laserLengthScale;
 		float halfLength = slamLength * 0.5;
 		Rect3D centerMiddle = Rect3D(left, slamLength + halfLength, right, -halfLength);
 		Rect3D centerBottom = centerMiddle;
@@ -172,7 +172,7 @@ Mesh LaserTrackBuilder::GenerateTrackMesh(class BeatmapPlayback& playback, Laser
 		if(laser->prev && (laser->prev->flags & LaserObjectState::flag_Instant) != 0)
 		{
 			// Previous slam length
-			prevLength = playback.DurationToViewDistanceAtTime(laser->prev->time, slamDuration) * laserLengthScale;
+			prevLength = playback.OLD_DurationToViewDistanceAtTime(laser->prev->time, slamDuration) * laserLengthScale;
 		}
 
 		Vector2 points[2];
@@ -264,11 +264,11 @@ Mesh LaserTrackBuilder::GenerateTrackExit(class BeatmapPlayback& playback, Laser
 	float prevLength = 0.0f;
 	if((laser->flags & LaserObjectState::flag_Instant) != 0)
 	{
-		prevLength = playback.DurationToViewDistanceAtTime(laser->time, slamDuration) * laserLengthScale;
+		prevLength = playback.OLD_DurationToViewDistanceAtTime(laser->time, slamDuration) * laserLengthScale;
 	}
 	else
 	{
-		prevLength = playback.DurationToViewDistanceAtTime(laser->time, laser->duration) * laserLengthScale;
+		prevLength = playback.OLD_DurationToViewDistanceAtTime(laser->time, laser->duration) * laserLengthScale;
 	}
 
 	Vector<MeshGenerators::SimpleVertex> verts;

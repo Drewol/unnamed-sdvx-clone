@@ -319,6 +319,146 @@ void Beatmap::ApplyShuffle(const std::array<int, 6>& swaps, bool flipLaser)
 	}
 }
 
+Beatmap::TimingPointsIterator Beatmap::GetTimingPoint(MapTime mapTime, TimingPointsIterator hint, bool forwardOnly) const
+{
+	if (m_timingPoints.empty())
+	{
+		return m_timingPoints.end();
+	}
+
+	// Check for common cases
+	if (hint != m_timingPoints.end())
+	{
+		if (hint->time <= mapTime)
+		{
+			if (std::next(hint) == m_timingPoints.end())
+			{
+				return hint;
+			}
+			if (mapTime < std::next(hint)->time)
+			{
+				return hint;
+			}
+			else
+			{
+				++hint;
+			}
+		}
+		else if (forwardOnly)
+		{
+			return hint;
+		}
+		else if(hint == m_timingPoints.begin())
+		{
+			return hint;
+		}
+		else if(std::prev(hint)->time <= mapTime)
+		{
+			return std::prev(hint);
+		}
+		else
+		{
+			--hint;
+		}
+	}
+
+	size_t hintInd = static_cast<size_t>(std::distance(m_timingPoints.begin(), hint));
+
+	if (hint == m_timingPoints.end() || mapTime < hint->time)
+	{
+		// mapTime before hint
+		size_t diff = 1;
+		size_t prevDiff = 0;
+		while (diff <= hintInd)
+		{
+			if (m_timingPoints[hintInd - diff].time <= mapTime)
+			{
+				break;
+			}
+
+			prevDiff = diff;
+			diff *= 2;
+		}
+
+		if (diff > hintInd)
+		{
+			diff = hintInd;
+		}
+		return GetTimingPoint(mapTime, hintInd - diff, hintInd - prevDiff);
+	}
+	else if (hint->time == mapTime)
+	{
+		return hint;
+	}
+	else
+	{
+		// mapTime after hint
+		size_t diff = 1;
+		size_t prevDiff = 0;
+		while (hintInd + diff < m_timingPoints.size())
+		{
+			if (mapTime <= m_timingPoints[hintInd + diff].time)
+			{
+				break;
+			}
+
+			prevDiff = diff;
+			diff *= 2;
+		}
+
+		if (hintInd + diff >= m_timingPoints.size())
+		{
+			diff = m_timingPoints.size() - 1 - hintInd;
+		}
+
+		return GetTimingPoint(mapTime, hintInd + prevDiff, hintInd + diff + 1);
+	}
+}
+
+Beatmap::TimingPointsIterator Beatmap::GetTimingPoint(MapTime mapTime, size_t begin, size_t end) const
+{
+	if (end <= begin)
+	{
+		return m_timingPoints.begin();
+	}
+
+	if (mapTime < m_timingPoints[begin].time)
+	{
+		return m_timingPoints.begin() + begin;
+	}
+
+	if (end < m_timingPoints.size() && mapTime >= m_timingPoints[end].time)
+	{
+		return m_timingPoints.begin() + end;
+	}
+
+	while (begin + 2 < end)
+	{
+		const size_t mid = (begin + end) / 2;
+		if (m_timingPoints[mid].time < mapTime)
+		{
+			begin = mid;
+		}
+		else if (m_timingPoints[mid].time > mapTime)
+		{
+			end = mid;
+		}
+		else
+		{
+			return m_timingPoints.begin() + mid;
+		}
+	}
+
+	if (begin + 1 < end && m_timingPoints[begin + 1].time <= mapTime)
+	{
+		return m_timingPoints.begin() + (begin + 1);
+	}
+	else
+	{
+		return m_timingPoints.begin() + begin;
+	}
+}
+
 float Beatmap::GetGraphValueAt(EffectTimeline::GraphType type, MapTime mapTime, int aux /*=-1*/) const
 {
 	// TODO: must tweak camera logic to properly support aux tilt without manual main tilt.
