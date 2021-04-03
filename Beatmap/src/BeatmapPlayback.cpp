@@ -18,7 +18,7 @@ bool BeatmapPlayback::Reset(MapTime initTime, MapTime start)
 	m_playbackTime = initTime;
 
 	if (start <= 0) start = std::numeric_limits<decltype(start)>::min();
-	m_viewRange = { start, start };
+	m_playRange = { start, start };
 
 	m_currObject = m_beatmap->GetFirstObjectState();
 	m_currLaserObject = m_beatmap->GetFirstObjectState();
@@ -33,8 +33,8 @@ bool BeatmapPlayback::Reset(MapTime initTime, MapTime start)
 	//hittableLaserEnter = (*m_currentTiming)->beatDuration * 4.0;
 	//alertLaserThreshold = (*m_currentTiming)->beatDuration * 6.0;
 
-	m_hittableObjects.clear();
-	m_holdObjects.clear();
+	m_objectsByTime.clear();
+	m_objectsByLeaveTime.clear();
 
 	m_barTime = 0;
 	m_beatTime = 0;
@@ -117,15 +117,23 @@ void BeatmapPlayback::Update(MapTime newTime)
 			MultiObjectState* obj = *(*it).get();
 			if (obj->type == ObjectType::Laser) continue;
 
-			if (!m_viewRange.Includes(obj->time)) continue;
-			if (obj->type == ObjectType::Hold && !m_viewRange.Includes(obj->time + obj->hold.duration, true)) continue;
+			if (!m_playRange.Includes(obj->time)) continue;
+			if (obj->type == ObjectType::Hold && !m_playRange.Includes(obj->time + obj->hold.duration, true)) continue;
 
-			if (obj->type == ObjectType::Hold || obj->type == ObjectType::Single)
+			MapTime duration = 0;
+			if (obj->type == ObjectType::Hold)
 			{
-				m_holdObjects.Add(*obj);
+				duration = obj->hold.duration;
+			}
+			else if (obj->type == ObjectType::Event)
+			{
+				// Tiny offset to make sure events are triggered before they are needed
+				duration = -2;
 			}
 
-			m_hittableObjects.AddUnique((*it).get());
+			m_objectsByTime.Add(obj->time, (*it).get());
+			m_objectsByLeaveTime.Add(obj->time + duration + hittableObjectLeave, (*it).get());
+
 			OnObjectEntered.Call((*it).get());
 		}
 		m_currObject = objEnd;
@@ -140,11 +148,12 @@ void BeatmapPlayback::Update(MapTime newTime)
 			MultiObjectState* obj = *(*it).get();
 			if (obj->type != ObjectType::Laser) continue;
 
-			if (!m_viewRange.Includes(obj->time)) continue;
-			if (!m_viewRange.Includes(obj->time + obj->laser.duration, true)) continue;
+			if (!m_playRange.Includes(obj->time)) continue;
+			if (!m_playRange.Includes(obj->time + obj->laser.duration, true)) continue;
 
-			m_holdObjects.Add(*obj);
-			m_hittableObjects.AddUnique((*it).get());
+			m_objectsByTime.Add(obj->time, (*it).get());
+			m_objectsByLeaveTime.Add(obj->time + obj->laser.duration + hittableObjectLeave, (*it).get());
+
 			OnObjectEntered.Call((*it).get());
 		}
 		m_currLaserObject = objEnd;
@@ -157,7 +166,7 @@ void BeatmapPlayback::Update(MapTime newTime)
 		for (auto it = m_currAlertObject; it < objEnd; it++)
 		{
 			MultiObjectState* obj = **it;
-			if (!m_viewRange.Includes(obj->time)) continue;
+			if (!m_playRange.Includes(obj->time)) continue;
 
 			if (obj->type == ObjectType::Laser)
 			{
@@ -169,110 +178,97 @@ void BeatmapPlayback::Update(MapTime newTime)
 		m_currAlertObject = objEnd;
 	}
 
-	// Check passed hittable objects
-	MapTime objectPassTime = m_playbackTime - hittableObjectLeave;
-	for (auto it = m_hittableObjects.begin(); it != m_hittableObjects.end();)
+	// Check passed objects
+	for (auto it = m_objectsByLeaveTime.begin(); it != m_objectsByLeaveTime.end() && it->first < m_playbackTime; it = m_objectsByLeaveTime.erase(it))
 	{
-		MultiObjectState* obj = **it;
-		if (obj->type == ObjectType::Hold)
-		{
-			MapTime endTime = obj->hold.duration + obj->time;
-			if (endTime < objectPassTime)
-			{
-				OnObjectLeaved.Call(*it);
-				it = m_hittableObjects.erase(it);
-				continue;
-			}
-			if (obj->hold.effectType != EffectType::None && // Hold button with effect
-				obj->time - 100 <= m_playbackTime + audioOffset && endTime - 100 > m_playbackTime + audioOffset) // Hold button in active range
-			{
-				if (!m_effectObjects.Contains(*obj))
-				{
-					OnFXBegin.Call((HoldObjectState*)*it);
-					m_effectObjects.Add(*obj);
-				}
-			}
-		}
-		else if (obj->type == ObjectType::Laser)
-		{
-			if ((obj->laser.duration + obj->time) < objectPassTime)
-			{
-				OnObjectLeaved.Call(*it);
-				it = m_hittableObjects.erase(it);
-				continue;
-			}
-		}
-		else if (obj->type == ObjectType::Single)
-		{
-			if (obj->time < objectPassTime)
-			{
-				OnObjectLeaved.Call(*it);
-				it = m_hittableObjects.erase(it);
-				continue;
-			}
-		}
-		else if (obj->type == ObjectType::Event)
-		{
-			EventObjectState* evt = (EventObjectState*)obj;
-			if (obj->time < (m_playbackTime + 2)) // Tiny offset to make sure events are triggered before they are needed
-			{
-				if (evt->key == EventKey::TrackRollBehaviour)
-				{
-					if (m_currentTrackRollBehaviour != evt->data.rollVal)
-					{
-						m_currentTrackRollBehaviour = evt->data.rollVal;
-						m_lastTrackRollBehaviourChange = obj->time;
-					}
-				}
+		ObjectState* objState = it->second;
+		MultiObjectState* obj = *(objState);
 
-				// Trigger event
-				OnEventChanged.Call(evt->key, evt->data);
-				m_eventMapping[evt->key] = evt->data;
-				it = m_hittableObjects.erase(it);
-				continue;
+		// O(n^2) when there are n objects with same time,
+		// but n is usually small so let's ignore that issue for now...
+		{
+			auto pair = m_objectsByTime.equal_range(obj->time);
+
+			for (auto it2 = pair.first; it2 != pair.second; ++it2)
+			{
+				if (it2->second == objState)
+				{
+					m_objectsByTime.erase(it2);
+					break;
+				}
 			}
 		}
-		it++;
+
+		switch (obj->type)
+		{
+		case ObjectType::Hold:
+			OnObjectLeaved.Call(objState);
+
+			if (m_effectObjects.Contains(objState))
+			{
+				OnFXEnd.Call((HoldObjectState*)objState);
+				m_effectObjects.erase(objState);
+			}
+			break;
+		case ObjectType::Laser:
+		case ObjectType::Single:
+			OnObjectLeaved.Call(objState);
+			break;
+		case ObjectType::Event:
+		{
+			EventObjectState* evt = (EventObjectState*) obj;
+
+			if (evt->key == EventKey::TrackRollBehaviour)
+			{
+				if (m_currentTrackRollBehaviour != evt->data.rollVal)
+				{
+					m_currentTrackRollBehaviour = evt->data.rollVal;
+					m_lastTrackRollBehaviourChange = obj->time;
+				}
+			}
+
+			// Trigger event
+			OnEventChanged.Call(evt->key, evt->data);
+			m_eventMapping[evt->key] = evt->data;
+		}
+		default:
+			break;
+		}
 	}
 
-	// Remove passed hold objects
-	for (auto it = m_holdObjects.begin(); it != m_holdObjects.end();)
+	const MapTime audioPlaybackTime = m_playbackTime + audioOffset;
+
+	// Process FX effects
+	for (auto& it : m_objectsByTime)
 	{
-		MultiObjectState* obj = **it;
-		if (obj->type == ObjectType::Hold)
+		ObjectState* objState = it.second;
+		MultiObjectState* obj = *(objState);
+
+		if (obj->type != ObjectType::Hold || obj->hold.effectType == EffectType::None)
 		{
-			MapTime endTime = obj->hold.duration + obj->time;
-			if (endTime < objectPassTime)
+			continue;
+		}
+
+		const MapTime endTime = obj->time + obj->hold.duration;
+
+		// Send `OnFXBegin` a little bit earlier (the other side checks the exact timing again)
+		if (obj->time - 100 <= audioPlaybackTime && audioPlaybackTime <= endTime - 100)
+		{
+			if (!m_effectObjects.Contains(objState))
 			{
-				it = m_holdObjects.erase(it);
-				continue;
-			}
-			if (endTime < m_playbackTime)
-			{
-				if (m_effectObjects.Contains(*it))
-				{
-					OnFXEnd.Call((HoldObjectState*)*it);
-					m_effectObjects.erase(*it);
-				}
+				OnFXBegin.Call((HoldObjectState*)objState);
+				m_effectObjects.Add(objState);
 			}
 		}
-		else if (obj->type == ObjectType::Laser)
+
+		if (endTime < audioPlaybackTime)
 		{
-			if ((obj->laser.duration + obj->time) < objectPassTime)
+			if (m_effectObjects.Contains(objState))
 			{
-				it = m_holdObjects.erase(it);
-				continue;
+				OnFXEnd.Call((HoldObjectState*) objState);
+				m_effectObjects.erase(objState);
 			}
 		}
-		else if (obj->type == ObjectType::Single)
-		{
-			if (obj->time < objectPassTime)
-			{
-				it = m_holdObjects.erase(it);
-				continue;
-			}
-		}
-		it++;
 	}
 }
 
@@ -320,13 +316,13 @@ Vector<ObjectState*> BeatmapPlayback::GetObjectsInRange(MapTime range)
 		return ret;
 	}
 
-	if (begin < m_viewRange.begin) begin = m_viewRange.begin;
-	if (m_viewRange.HasEnd() && end >= m_viewRange.end) end = m_viewRange.end;
+	if (begin < m_playRange.begin) begin = m_playRange.begin;
+	if (m_playRange.HasEnd() && end >= m_playRange.end) end = m_playRange.end;
 
-	// Add hold objects
-	for (auto& ho : m_holdObjects)
+	// Add objects
+	for (auto& it : m_objectsByTime)
 	{
-		ret.AddUnique(ho);
+		ret.Add(it.second);
 	}
 
 	// Iterator
@@ -343,7 +339,7 @@ Vector<ObjectState*> BeatmapPlayback::GetObjectsInRange(MapTime range)
 		if ((*obj)->time >= end)
 			break; // No more objects
 
-		ret.AddUnique((*obj).get());
+		ret.Add((*obj).get());
 		obj += 1; // Next
 	}
 
@@ -449,6 +445,7 @@ float BeatmapPlayback::DurationToViewDistance(MapTime duration)
 	return DurationToViewDistanceAtTime(m_playbackTime, duration);
 }
 
+/*
 float BeatmapPlayback::DurationToViewDistanceAtTimeNoStops(MapTime time, MapTime duration)
 {
 	MapTime endTime = time + duration;
@@ -488,6 +485,7 @@ float BeatmapPlayback::DurationToViewDistanceAtTimeNoStops(MapTime time, MapTime
 
 	return (float)barTime * direction;
 }
+*/
 
 float BeatmapPlayback::DurationToViewDistanceAtTime(MapTime time, MapTime duration)
 {
@@ -531,26 +529,11 @@ float BeatmapPlayback::DurationToViewDistanceAtTime(MapTime time, MapTime durati
 				continue;
 			}
 		}
+
 		// Whole
 		barTime += (double)duration / tp->beatDuration;
 		break;
 	}
-
-	MapTime startTime = time;
-
-	// calculate stop ViewDistance
-	/*
-	double stopTime = 0.;
-	for (auto cs : m_SelectChartStops(startTime, endTime - startTime))
-	{
-		MapTime overlap = Math::Min(abs(endTime - startTime), 
-			Math::Min(abs(endTime - cs->time), 
-				Math::Min(abs((cs->time + cs->duration) - startTime), abs((cs->time + cs->duration) - cs->time))));
-
-		stopTime += DurationToViewDistanceAtTimeNoStops(Math::Max(cs->time, startTime), overlap);
-	}
-	barTime -= stopTime;
-	*/
 
 	return (float)barTime * direction;
 }

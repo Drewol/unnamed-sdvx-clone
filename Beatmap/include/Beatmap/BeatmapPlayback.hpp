@@ -34,6 +34,7 @@ public:
 	// Gets all linear objects that fall within the given time range:
 	//	<curr - keepObjectDuration, curr + range>
 	Vector<ObjectState*> GetObjectsInRange(MapTime range);
+
 	// Duration for objects to keep being returned by GetObjectsInRange after they have passed the current time
 	MapTime keepObjectDuration = 1000;
 
@@ -57,7 +58,7 @@ public:
 	MapTime ViewDistanceToDuration(float distance);
 	float DurationToViewDistance(MapTime time);
 	float DurationToViewDistanceAtTime(MapTime time, MapTime duration);
-	float DurationToViewDistanceAtTimeNoStops(MapTime time, MapTime duration);
+
 	float TimeToViewDistance(MapTime time);
 
 	// Current map time in ms as last passed to Update
@@ -115,8 +116,8 @@ private:
 	// Current map position of this playback object
 	MapTime m_playbackTime;
 
-	// Disregard objects outside of these ranges
-	MapTimeRange m_viewRange;
+	// Disregard objects outside of this range
+	MapTimeRange m_playRange;
 	bool m_initialEffectStateSent = false;
 
 	Beatmap::ObjectsIterator m_currObject;
@@ -130,10 +131,10 @@ private:
 	MapTime m_lastTrackRollBehaviourChange = 0;
 
 	// Contains all the objects that are in the current valid timing area
-	Vector<ObjectState*> m_hittableObjects;
+	Multimap<MapTime, ObjectState*> m_objectsByTime;
 
-	// Hold objects to render even when their start time is not in the current visibility range
-	Set<ObjectState*> m_holdObjects;
+	// Ordered by leaving time
+	Multimap<MapTime, ObjectState*> m_objectsByLeaveTime;
 	
 	// Hold buttons with effects that are active
 	Set<ObjectState*> m_effectObjects;

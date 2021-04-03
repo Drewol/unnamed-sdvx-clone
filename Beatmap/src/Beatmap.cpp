@@ -333,10 +333,14 @@ float Beatmap::GetGraphValueAt(EffectTimeline::GraphType type, MapTime mapTime, 
 	return value;
 }
 
-bool Beatmap::CheckIfManualTiltInstant(MapTime lowerBound, MapTime mapTime, int aux /*=-1*/) const
+bool Beatmap::CheckIfManualTiltInstant(MapTime bound, MapTime mapTime, int aux /*=-1*/) const
 {
-	auto checkManualTiltInstant = [&](LineGraph::PointsIterator point, LineGraph::PointsIterator end) {
-		if (point == end)
+	auto checkManualTiltInstant = [&](const EffectTimeline& timeline) {
+		const LineGraph& graph = timeline.GetGraph(EffectTimeline::GraphType::ROTATION_Z);
+		if (graph.empty()) return false;
+
+		const LineGraph::PointsIterator point = graph.upper_bound(bound);
+		if (point == graph.end())
 		{
 			return false;
 		}
@@ -354,20 +358,14 @@ bool Beatmap::CheckIfManualTiltInstant(MapTime lowerBound, MapTime mapTime, int 
 		return true;
 	};
 
-	const LineGraph& baseGraph = m_baseEffects.GetGraph(EffectTimeline::GraphType::ROTATION_Z);
-	LineGraph::PointsIterator basePoint = baseGraph.upper_bound(lowerBound);
-
-	if (checkManualTiltInstant(basePoint, baseGraph.end()))
+	if (checkManualTiltInstant(m_baseEffects))
 	{
 		return true;
 	}
 
 	if (aux >= 0 && aux < static_cast<int>(m_auxEffects.size()))
 	{
-		const LineGraph& auxGraph = m_auxEffects[aux].GetGraph(EffectTimeline::GraphType::ROTATION_Z);
-		LineGraph::PointsIterator auxPoint = auxGraph.upper_bound(lowerBound);
-
-		if (checkManualTiltInstant(auxPoint, auxGraph.end()))
+		if (checkManualTiltInstant(m_auxEffects[aux]))
 		{
 			return true;
 		}

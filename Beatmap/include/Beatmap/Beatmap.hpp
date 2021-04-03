@@ -119,7 +119,7 @@ public:
 	LaneTogglePointsIterator GetEndLaneTogglePoint() const { return m_laneTogglePoints.end(); }
 
 	float GetGraphValueAt(EffectTimeline::GraphType type, MapTime mapTime, int aux = -1) const;
-	bool CheckIfManualTiltInstant(MapTime lowerBound, MapTime mapTime, int aux = -1) const;
+	bool CheckIfManualTiltInstant(MapTime bound, MapTime mapTime, int aux = -1) const;
 
 	float GetCenterSplitValueAt(MapTime mapTime) const;
 

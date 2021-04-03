@@ -39,6 +39,12 @@ public:
     /// Returns the value being extended.
     double Extend(MapTime time);
 
+    double Integrate(MapTime begin, MapTime end) const;
+
+    /// When you know for certain that curr->first &lt;= begin &lt;= end &lt;= std::next(curr)-&gt;first
+    double Integrate(PointsIterator curr, MapTime begin, MapTime end) const;
+    double Integrate(PointsIterator curr) const;
+
     inline PointsIterator lower_bound(MapTime time) const
     {
         return m_points.lower_bound(time);
@@ -92,6 +98,11 @@ public:
     inline std::size_t size() const
     {
         return m_points.size();
+    }
+
+    inline bool empty() const
+    {
+        return m_points.empty();
     }
 
     inline std::size_t count(MapTime mapTime) const

@@ -53,8 +53,6 @@ public:
 	}
 
 private:
-	MapTime m_offset;
-
 	LineGraph m_zoomBottom;
 	LineGraph m_zoomTop;
 	LineGraph m_shiftX; /// former zoom_side
