@@ -68,7 +68,6 @@ Just run 'usc-game' or 'usc-game_Debug' from within the 'bin' folder. Or, to pla
 - `-autoplay` - Plays chart automatically, no user input required
 - `-autobuttons` Like autoplay, but just for the buttons. You only have to control the lasers
 - `-autoskip` - Skips beginning of song to the first chart note
-- `-convertmaps` - Allows converting of `*.ksh` charts to a binary format that loads faster (experimental, feature not complete)
 - `-debug` - Used to show relevant debug info in game such as hit timings, and scoring debug info
 - `-test` - Runs test scene, for development purposes only
 

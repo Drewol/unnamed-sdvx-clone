@@ -55,10 +55,9 @@ class Beatmap : public Unique
 {
 public:
 	bool Load(BinaryStream& input, bool metadataOnly = false);
-	// Saves the map as it's own format
 	bool Save(BinaryStream& output) const;
 
-	// Returns the settings of the map, contains metadata + song/image paths.
+	/// Returns the settings of the map, contains metadata + song/image paths.
 	const BeatmapSettings& GetMapSettings() const;
 
 	const Vector<LaneHideTogglePoint>& GetLaneTogglePoints() const { return m_laneTogglePoints; }
@@ -66,26 +65,27 @@ public:
 	const Vector<String>& GetSamplePaths() const { return m_samplePaths; }
 	const Vector<String>& GetSwitchablePaths() const { return m_switchablePaths; }
 
-	// Retrieves audio effect settings for a given button id
+	/// Retrieves audio effect settings for a given button id
 	AudioEffect GetEffect(EffectType type) const;
-	// Retrieves audio effect settings for a given filter effect id
+
+	/// Retrieves audio effect settings for a given filter effect id
 	AudioEffect GetFilter(EffectType type) const;
 
-	// Get the timing of the first (non-event) object
+	/// Get the timing of the first (non-event) object
 	MapTime GetFirstObjectTime(MapTime lowerBound) const;
 
-	// Get the timing of the last (non-event) object
+	/// Get the timing of the last (non-event) object
 	MapTime GetLastObjectTime() const;
 
-	// Get the timing of the last object, including the event object
+	/// Get the timing of the last object, including the event object
 	MapTime GetLastObjectTimeIncludingEvents() const;
 
-	// Measure -> Time
+	/// Measure -> Time
 	MapTime GetMapTimeFromMeasureInd(int measure) const;
-	// Time -> Measure
+	/// Time -> Measure
 	int GetMeasureIndFromMapTime(MapTime time) const;
 
-	// Computes the most frequently occuring BPM (to be used for MMod)
+	/// Computes the most frequently occuring BPM (to be used for MMod)
 	double GetModeBPM() const;
 
 	void GetBPMInfo(double& startBPM, double& minBPM, double& maxBPM, double& modeBPM) const;
@@ -93,7 +93,7 @@ public:
 	void Shuffle(int seed, bool random, bool mirror);
 	void ApplyShuffle(const std::array<int, 6>& swaps, bool flipLaser);
 
-	// Vector interacts badly with unique_ptr, use std::vector instead
+	/// Vector interacts badly with unique_ptr, use std::vector instead
 	using Objects = std::vector<std::unique_ptr<ObjectState>>;
 	using ObjectsIterator = Objects::const_iterator;
 
@@ -125,6 +125,7 @@ public:
 
 private:
 	bool m_ProcessKShootMap(BinaryStream& input, bool metadataOnly);
+	bool m_Serialize(BinaryStream& stream, bool metadataOnly);
 
 	Map<EffectType, AudioEffect> m_customAudioEffects;
 	Map<EffectType, AudioEffect> m_customAudioFilters;
