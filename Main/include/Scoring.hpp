@@ -28,10 +28,6 @@ public:
 	ScoreTick() = default;
 	ScoreTick(ObjectState* object) : object(object) {};
 
-	// Returns the time frame in which this tick can be hit
-	MapTime GetHitWindow(const HitWindow& hitWindow) const;
-	// Hit rating when hitting object at given time
-	ScoreHitRating GetHitRating(const HitWindow& hitWindow, MapTime currentTime) const;
 	// Hit rating when hitting object give a delta 
 	ScoreHitRating GetHitRatingFromDelta(const HitWindow& hitWindow, MapTime delta) const;
 	// Check a flag
@@ -210,8 +206,6 @@ public:
 	// Autoplay but for buttons
 	bool autoplayButtons = false;
 
-	float laserDistanceLeniency = 1.0f / 12.0f;
-
 	// Actual positions of the laser
 	float laserPositions[2];
 	// Sampled target position of the lasers in the map
@@ -278,6 +272,8 @@ private:
 	HitStat* m_AddOrUpdateHitStat(ObjectState* object);
 	void m_CleanupHitStats();
 
+	LaserObjectState* m_GetLaserObjectWithinTwoBeats(uint8 index);
+
 	// Updates laser output with or without interpolation
 	bool m_interpolateLaserOutput = false;
 
@@ -292,7 +288,10 @@ private:
 	// Input values for laser [-1,1]
 	float m_laserInput[2] = { 0.0f };
 	// Decides if the coming tick should be auto completed
-	float m_autoLaserTime[2] = { 0,0 };
+	float m_autoLaserTime[2] = { 0.0f };
+	const double m_laserDistanceLeniency = 1 / 6.;
+	const float m_autoLaserDuration = 4 / 60.f;
+	const float m_autoLaserDurationAfterSlam = 8 / 60.f;
 	
 	// Saves the time when a button was hit, used to decide if a button was held before a hold object was active
 	MapTime m_buttonHitTime[6] = { 0, 0, 0, 0, 0, 0 };
@@ -300,12 +299,6 @@ private:
 	// Saves the time when a button was hit or released for bounce guarding
 	MapTime m_buttonGuardTime[6] = { 0, 0, 0, 0, 0, 0 };
 
-	// Max number of ticks to assist
-	float m_assistLevel = 1.5f;
-	float m_assistPunish = 1.5f;
-	float m_assistChangePeriod = 50.0f;
-	float m_assistChangeExponent = 1.0f;
-	float m_assistTime = 0.0f;
 	// Offet to use for calculating judge (ms)
 	uint32 m_inputOffset = 0;
 	int32 m_bounceGuard = 0;

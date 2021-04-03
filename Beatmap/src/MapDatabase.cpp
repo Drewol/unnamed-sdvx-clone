@@ -90,7 +90,7 @@ public:
 	List<Event> m_pendingChanges;
 	mutex m_pendingChangesLock;
 
-	static const int32 m_version = 18;
+	static const int32 m_version = 19;
 
 public:
 	MapDatabase_Impl(MapDatabase& outer, bool transferScores) : m_outer(outer)
@@ -410,6 +410,12 @@ public:
 				m_database.Exec("END");
 				gotVersion = 18;
 
+			}
+			if (gotVersion == 18)
+			{
+				m_database.Exec("ALTER TABLE Scores ADD COLUMN window_slam INTEGER");
+				m_database.Exec("UPDATE Scores SET window_miss=75");
+				gotVersion = 19;
 			}
 			m_database.Exec(Utility::Sprintf("UPDATE Database SET `version`=%d WHERE `rowid`=1", m_version));
 
@@ -828,7 +834,7 @@ public:
 		DBStatement removeChallenge = m_database.Query("DELETE FROM Challenges WHERE rowid=?");
 		DBStatement removeFolder = m_database.Query("DELETE FROM Folders WHERE rowid=?");
 		DBStatement scoreScan = m_database.Query("SELECT "
-			"rowid,score,crit,near,miss,gauge,auto_flags,replay,timestamp,chart_hash,user_name,user_id,local_score,window_perfect,window_good,window_hold,window_miss,gauge_type,gauge_opt,mirror,random "
+			"rowid,score,crit,near,miss,gauge,auto_flags,replay,timestamp,chart_hash,user_name,user_id,local_score,window_perfect,window_good,window_hold,window_miss,window_slam,gauge_type,gauge_opt,mirror,random "
 			"FROM Scores WHERE chart_hash=?");
 		DBStatement moveScores = m_database.Query("UPDATE Scores set chart_hash=? where chart_hash=?");
 
@@ -1019,11 +1025,12 @@ public:
 					score->hitWindowGood = scoreScan.IntColumn(14);
 					score->hitWindowHold = scoreScan.IntColumn(15);
 					score->hitWindowMiss = scoreScan.IntColumn(16);
+					score->hitWindowSlam = scoreScan.IntColumn(17);
 
-					score->gaugeType = (GaugeType)scoreScan.IntColumn(17);
-					score->gaugeOption = scoreScan.IntColumn(18);
-					score->mirror = scoreScan.IntColumn(19) == 1;
-					score->random = scoreScan.IntColumn(20) == 1;
+					score->gaugeType = (GaugeType)scoreScan.IntColumn(18);
+					score->gaugeOption = scoreScan.IntColumn(19);
+					score->mirror = scoreScan.IntColumn(20) == 1;
+					score->random = scoreScan.IntColumn(21) == 1;
 					chart->scores.Add(score);
 				}
 				scoreScan.Rewind();
@@ -1243,8 +1250,8 @@ public:
 	void AddScore(ScoreIndex* score)
 	{
 		DBStatement addScore = m_database.Query("INSERT INTO "
-			"Scores(score,crit,near,miss,gauge,auto_flags,replay,timestamp,chart_hash,user_name,user_id,local_score,window_perfect,window_good,window_hold,window_miss,gauge_type,gauge_opt,mirror,random) "
-			"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+			"Scores(score,crit,near,miss,gauge,auto_flags,replay,timestamp,chart_hash,user_name,user_id,local_score,window_perfect,window_good,window_hold,window_miss,window_slam,gauge_type,gauge_opt,mirror,random) "
+			"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
 		m_database.Exec("BEGIN");
 		addScore.BindInt(1, score->score);
@@ -1263,10 +1270,11 @@ public:
 		addScore.BindInt(14, score->hitWindowGood);
 		addScore.BindInt(15, score->hitWindowHold);
 		addScore.BindInt(16, score->hitWindowMiss);
-		addScore.BindInt(17, (int32)score->gaugeType);
-		addScore.BindInt(18, score->gaugeOption);
-		addScore.BindInt(19, score->mirror ? 1 : 0);
-		addScore.BindInt(20, score->random ? 1 : 0);
+		addScore.BindInt(17, score->hitWindowSlam);
+		addScore.BindInt(18, (int32)score->gaugeType);
+		addScore.BindInt(19, score->gaugeOption);
+		addScore.BindInt(20, score->mirror ? 1 : 0);
+		addScore.BindInt(21, score->random ? 1 : 0);
 
 		addScore.Step();
 		addScore.Rewind();
@@ -1521,6 +1529,7 @@ private:
 			"window_good INTEGER,"
 			"window_hold INTEGER,"
 			"window_miss INTEGER,"
+			"window_slam INTEGER,"
 			"chart_hash TEXT)");
 
 		m_database.Exec("CREATE TABLE Collections"
@@ -1660,7 +1669,7 @@ private:
 
 		// Select Scores
 		DBStatement scoreScan = m_database.Query("SELECT "
-			"rowid,score,crit,near,miss,gauge,auto_flags,replay,timestamp,chart_hash,user_name,user_id,local_score,window_perfect,window_good,window_hold,window_miss,gauge_type,gauge_opt,mirror,random "
+			"rowid,score,crit,near,miss,gauge,auto_flags,replay,timestamp,chart_hash,user_name,user_id,local_score,window_perfect,window_good,window_hold,window_miss,window_slam,gauge_type,gauge_opt,mirror,random "
 			"FROM Scores");
 		
 		while (scoreScan.StepRow())
@@ -1685,11 +1694,12 @@ private:
 			score->hitWindowGood = scoreScan.IntColumn(14);
 			score->hitWindowHold = scoreScan.IntColumn(15);
 			score->hitWindowMiss = scoreScan.IntColumn(16);
+			score->hitWindowSlam = scoreScan.IntColumn(17);
 
-			score->gaugeType = (GaugeType)scoreScan.IntColumn(17);
-			score->gaugeOption = scoreScan.IntColumn(18);
-			score->mirror = scoreScan.IntColumn(19) == 1;
-			score->random = scoreScan.IntColumn(20) == 1;
+			score->gaugeType = (GaugeType)scoreScan.IntColumn(18);
+			score->gaugeOption = scoreScan.IntColumn(19);
+			score->mirror = scoreScan.IntColumn(20) == 1;
+			score->random = scoreScan.IntColumn(21) == 1;
 
 			// Add difficulty to map and resort difficulties
 			auto diffIt = m_chartsByHash.find(score->chartHash);

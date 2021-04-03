@@ -119,10 +119,6 @@ public:
 	}
 };
 
-MultiplayerScreen::MultiplayerScreen()
-{
-}
-
 MultiplayerScreen::~MultiplayerScreen()
 {
 	g_input.OnButtonPressed.RemoveAll(this);
@@ -142,6 +138,8 @@ MultiplayerScreen::~MultiplayerScreen()
 
 bool MultiplayerScreen::Init()
 {
+	if (!m_settDiag.Init())
+		return false;
 
 	return true;
 }
@@ -612,6 +610,17 @@ void MultiplayerScreen::GetMapBPMForSpeed(String path, struct MultiplayerBPMInfo
 	newMap.GetBPMInfo(info.start, info.min, info.max, info.mode);
 }
 
+ChartIndex* MultiplayerScreen::GetCurrentSelectedChart() const
+{
+	if (!m_hasSelectedMap)
+		return nullptr;
+
+	FolderIndex* folder = m_mapDatabase->GetFolder(this->m_selectedMapId);
+	ChartIndex* chart = folder->charts[this->m_selectedDiffIndex];
+
+	return chart;
+}
+
 void MultiplayerScreen::m_updateSelectedMap(int32 mapid, int32 diff_ind, bool isNew)
 {
 	this->m_selectedMapId = mapid;
@@ -772,6 +781,14 @@ void MultiplayerScreen::Tick(float deltaTime)
 	if (IsSuspended())
 		return;
 
+	for (size_t i = 0; i < (size_t)Input::Button::Length; i++)
+	{
+		m_timeSinceButtonPressed[(Input::Button)i] += deltaTime;
+		m_timeSinceButtonReleased[(Input::Button)i] += deltaTime;
+	}
+
+	m_settDiag.Tick(deltaTime);
+
 	m_chatOverlay->Tick(deltaTime);
 	m_previewPlayer.Update(deltaTime);
 
@@ -923,6 +940,7 @@ void MultiplayerScreen::Render(float deltaTime)
 	if (!IsSuspended()) {
 		m_render(deltaTime);
 		m_chatOverlay->Render(deltaTime);
+		m_settDiag.Render(deltaTime);
 	}
 }
 
@@ -941,7 +959,7 @@ void MultiplayerScreen::OnSearchStatusUpdated(String status)
 
 void MultiplayerScreen::OnKeyPressed(SDL_Scancode code)
 {
-	if (IsSuspended())
+	if (IsSuspended() || m_settDiag.IsActive())
 		return;
 
 	if (m_chatOverlay->OnKeyPressedConsume(code))
@@ -1038,7 +1056,7 @@ void MultiplayerScreen::OnKeyPressed(SDL_Scancode code)
 
 void MultiplayerScreen::OnKeyReleased(SDL_Scancode code)
 {
-	if (IsSuspended() || m_chatOverlay->IsOpen())
+	if (IsSuspended() || m_chatOverlay->IsOpen() || m_settDiag.IsActive())
 		return;
 
 	lua_getglobal(m_lua, "key_released");
@@ -1056,11 +1074,35 @@ void MultiplayerScreen::OnKeyReleased(SDL_Scancode code)
 
 void MultiplayerScreen::m_OnButtonPressed(Input::Button buttonCode)
 {
-	if (IsSuspended())
+	if (IsSuspended() || m_settDiag.IsActive())
 		return;
 
 	if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice) == InputDevice::Keyboard && (m_textInput->active || m_chatOverlay->IsOpen()))
 		return;
+
+	m_timeSinceButtonPressed[buttonCode] = 0;
+
+	switch (buttonCode)
+	{
+	case Input::Button::FX_1:
+		if (g_input.GetButton(Input::Button::FX_0))
+		{
+			m_buttonPressed[Input::Button::FX_0] = false;
+			m_settDiag.Open();
+			return;
+		}
+		break;
+	case Input::Button::FX_0:
+		if (g_input.GetButton(Input::Button::FX_1))
+		{
+			m_buttonPressed[Input::Button::FX_1] = false;
+			m_settDiag.Open();
+			return;
+		}
+		break;
+	default:
+		break;
+	}
 
 	lua_getglobal(m_lua, "button_pressed");
 	if (lua_isfunction(m_lua, -1))
@@ -1073,15 +1115,24 @@ void MultiplayerScreen::m_OnButtonPressed(Input::Button buttonCode)
 		}
 	}
 	lua_settop(m_lua, 0);
+
+	m_buttonPressed[buttonCode] = true;
 }
 
 void MultiplayerScreen::m_OnButtonReleased(Input::Button buttonCode)
 {
-	if (IsSuspended() || m_chatOverlay->IsOpen())
+	if (IsSuspended() || m_chatOverlay->IsOpen() || m_settDiag.IsActive())
 		return;
 
 	if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice) == InputDevice::Keyboard && m_textInput->active)
 		return;
+
+	// Check if press was consumed by something else
+	if (!m_buttonPressed[buttonCode])
+		return;
+
+	m_timeSinceButtonReleased[buttonCode] = 0;
+
 
 	lua_getglobal(m_lua, "button_released");
 	if (lua_isfunction(m_lua, -1))
@@ -1094,11 +1145,13 @@ void MultiplayerScreen::m_OnButtonReleased(Input::Button buttonCode)
 		}
 	}
 	lua_settop(m_lua, 0);
+
+	m_buttonPressed[buttonCode] = false;
 }
 
 void MultiplayerScreen::m_OnMouseScroll(int32 steps)
 {
-	if (IsSuspended() || m_chatOverlay->IsOpen())
+	if (IsSuspended() || m_chatOverlay->IsOpen() || m_settDiag.IsActive())
 		return;
 
 	lua_getglobal(m_lua, "mouse_scroll");
@@ -1130,10 +1183,9 @@ int MultiplayerScreen::lSongSelect(lua_State* L)
 
 int MultiplayerScreen::lSettings(lua_State* L)
 {
-	m_suspended = true;
-    // We have to shut down Nuklear because the settings menu will restart it
-    m_chatOverlay->ShutdownNuklear();
-	g_application->AddTickable(SettingsScreen::Create());
+	if (m_settDiag.IsActive())
+		return 0;
+	m_settDiag.Open();
 	return 0;
 }
 
@@ -1237,6 +1289,8 @@ bool MultiplayerScreen::AsyncFinalize()
 	g_gameWindow->OnMouseScroll.Add(this, &MultiplayerScreen::m_OnMouseScroll);
 	g_gameWindow->OnMousePressed.Add(this, &MultiplayerScreen::MousePressed);
 
+	m_settDiag.onSongOffsetChange.Add(this, &MultiplayerScreen::m_SetCurrentChartOffset);
+
 	m_bindable = new LuaBindable(m_lua, "mpScreen");
 	m_bindable->AddFunction("Exit", this, &MultiplayerScreen::lExit);
 	m_bindable->AddFunction("SelectSong", this, &MultiplayerScreen::lSongSelect);
@@ -1278,6 +1332,15 @@ bool MultiplayerScreen::AsyncFinalize()
 	m_chatOverlay->Init();
 
 	return true;
+}
+
+void MultiplayerScreen::m_SetCurrentChartOffset(int newValue)
+{
+	if (ChartIndex* chart = GetCurrentSelectedChart())
+	{
+		chart->custom_offset = newValue;
+		m_mapDatabase->UpdateChartOffset(chart);
+	}
 }
 
 void MultiplayerScreen::OnSuspend()

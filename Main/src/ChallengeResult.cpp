@@ -200,7 +200,7 @@ public:
 				m_PushIntToTable("timestamp", score->timestamp);
 				m_PushIntToTable("badge", static_cast<int>(Scoring::CalculateBadge(*score)));
 				lua_pushstring(m_lua, "hitWindow");
-				HitWindow(score->hitWindowPerfect, score->hitWindowGood, score->hitWindowHold).ToLuaTable(m_lua);
+				HitWindow(score->hitWindowPerfect, score->hitWindowGood, score->hitWindowHold, score->hitWindowSlam).ToLuaTable(m_lua);
 				lua_settable(m_lua, -3);
 				lua_settable(m_lua, -3);
 			}

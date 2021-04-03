@@ -162,17 +162,6 @@ protected:
 		SectionHeader("Laser Sensitivity");
 		RenderLaserSensitivitySettings();
 
-		// Note: remove this if #434 gets merged
-		if (nk_tree_push(m_nctx, NK_TREE_NODE, "Laser Assist", NK_MINIMIZED))
-		{
-			FloatSetting(GameConfigKeys::LaserAssistLevel, "Base Laser Assist", 0.0f, 10.0f, 0.1f);
-			FloatSetting(GameConfigKeys::LaserPunish, "Base Laser Punish", 0.0f, 10.0f, 0.1f);
-			FloatSetting(GameConfigKeys::LaserChangeTime, "Direction Change Duration (ms)", 0.0f, 1000.0f, 1.0f);
-			FloatSetting(GameConfigKeys::LaserChangeExponent, "Direction Change Curve Exponent", 0.0f, 10.0f, 0.1f);
-
-			nk_tree_pop(m_nctx);
-		}
-
 		SectionHeader("In-Game Key Inputs");
 
 		EnumSetting<Enum_AbortMethod>(GameConfigKeys::RestartPlayMethod, "Restart with F5:");
@@ -485,7 +474,7 @@ protected:
 private:
 	inline void RenderTimingWindowSettings()
 	{
-		LayoutRowDynamic(3);
+		LayoutRowDynamic(4);
 
 		const int hitWindowPerfect = IntInput(m_hitWindow.perfect, "Crit", 0, HitWindow::NORMAL.perfect);
 		if (hitWindowPerfect != m_hitWindow.perfect)
@@ -516,6 +505,10 @@ private:
 			if (m_hitWindow.hold < m_hitWindow.good)
 				m_hitWindow.good = m_hitWindow.hold;
 		}
+
+		const int hitWindowSlam = IntInput(m_hitWindow.slam, "Slam", 0, HitWindow::NORMAL.slam);
+		if (hitWindowSlam != m_hitWindow.slam)
+			m_hitWindow.slam = hitWindowSlam;
 
 		LayoutRowDynamic(2);
 
@@ -814,15 +807,17 @@ protected:
 
 	void Save() override
 	{
+		for (auto& it : m_skinConfigTextData)
+		{
+			it.second.Save();
+		}
+
 		if (m_skinConfig != g_skinConfig && m_skinConfig)
 		{
 			delete m_skinConfig;
 			m_skinConfig = nullptr;
-		}
-
-		for (auto& it : m_skinConfigTextData)
-		{
-			it.second.Save();
+			// These keep a ref to skinConfig so clear too
+			m_skinConfigTextData.clear();
 		}
 	}
 

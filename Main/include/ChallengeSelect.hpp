@@ -104,6 +104,7 @@ struct ChallengeOptions{
 	v(uint32, crit_judge) \
 	v(uint32, near_judge) \
 	v(uint32, hold_judge) \
+	v(uint32, slam_judge) \
 	v(bool, allow_cmod) \
     v(bool, allow_excessive) \
     v(bool, allow_ars) \

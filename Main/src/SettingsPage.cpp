@@ -373,7 +373,7 @@ protected:
 	void Save() override
 	{
 		String newProfile = g_gameConfig.GetString(GameConfigKeys::CurrentProfileName);
-		if (newProfile == m_currentProfile)
+		if (newProfile == m_currentProfile || newProfile.empty() || m_currentProfile.empty())
 		{
 			return;
 		}
@@ -519,6 +519,8 @@ void SettingsPageCollection::SetCurrPage(size_t ind)
 	m_currPage = ind;
 
 	m_pages[m_currPage]->Open();
+
+	g_gameConfig.Set(GameConfigKeys::SettingsLastTab, (int32)ind);
 }
 
 void SettingsPageCollection::InitStyles()
@@ -559,7 +561,11 @@ void SettingsPageCollection::InitPages()
 		m_pageNames.Add(font->CreateText(Utility::ConvertToWString(page->GetName()), PAGE_NAME_SIZE));
 	}
 
-	m_currPage = 0;
+	assert(m_pages.size() > 0);
+
+	m_currPage = g_gameConfig.GetInt(GameConfigKeys::SettingsLastTab);
+	if (m_currPage >= m_pages.size())
+		m_currPage = 0;
 
 	m_pages[m_currPage]->Open();
 

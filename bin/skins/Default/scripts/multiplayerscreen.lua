@@ -836,7 +836,7 @@ function join_room(room)
 end
 
 -- Handle button presses to advance the UI
-button_pressed = function(button)
+button_released = function(button)
     if button == game.BUTTON_STA then
         if start_game_soon then
             return
@@ -866,7 +866,6 @@ button_pressed = function(button)
             end
         end
     end
-    
     if button == game.BUTTON_FXL then
         toggle_hard();
     end

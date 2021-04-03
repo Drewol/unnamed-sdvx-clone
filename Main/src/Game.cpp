@@ -292,6 +292,9 @@ public:
 				),
 				m_challengeManager->GetCurrentOptions().hold_judge.Get(
 					g_gameConfig.GetInt(GameConfigKeys::HitWindowHold)
+				),
+				m_challengeManager->GetCurrentOptions().slam_judge.Get(
+					g_gameConfig.GetInt(GameConfigKeys::HitWindowSlam)
 				)
 			);
 		}
@@ -344,6 +347,7 @@ public:
 						replayReader.Serialize(&(replay.hitWindow.good), 4);
 						replayReader.Serialize(&(replay.hitWindow.hold), 4);
 						replayReader.Serialize(&(replay.hitWindow.miss), 4);
+						replayReader.Serialize(&replay.hitWindow.slam, 4);
 					}
 				}
 			}
@@ -1666,8 +1670,8 @@ public:
 
 		float currentBPM = (float)(60000.0 / tp.beatDuration);
 		textPos.y += RenderText(Utility::Sprintf("BPM: %.1f | Time Sig: %d/%d", currentBPM, tp.numerator, tp.denominator), textPos).y;
-		textPos.y += RenderText(Utility::Sprintf("Hit Window: p=%d g=%d h=%d m=%d",
-			m_scoring.hitWindow.perfect, m_scoring.hitWindow.good, m_scoring.hitWindow.hold, m_scoring.hitWindow.miss), textPos).y;
+		textPos.y += RenderText(Utility::Sprintf("Hit Window: p=%d g=%d h=%d s=%d m=%d",
+			m_scoring.hitWindow.perfect, m_scoring.hitWindow.good, m_scoring.hitWindow.hold, m_scoring.hitWindow.slam, m_scoring.hitWindow.miss), textPos).y;
 		textPos.y += RenderText(Utility::Sprintf("Paused: %s, LastMapTime: %d", m_paused ? "Yes" : "No", m_lastMapTime), textPos).y;
 		if (IsPartialPlay())
 			textPos.y += RenderText(Utility::Sprintf("Partial play: from %d ms to %d ms", m_playOptions.range.begin, m_playOptions.range.end), textPos).y;

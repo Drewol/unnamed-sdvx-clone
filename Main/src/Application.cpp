@@ -912,6 +912,7 @@ bool Application::m_Init()
 	if (!Path::FileExists(Path::Absolute("skins/" + m_skin)))
 	{
 		m_skin = "Default";
+		g_gameConfig.Set(GameConfigKeys::Skin, m_skin);
 	}
 
 	g_skinConfig = new SkinConfig(m_skin);
