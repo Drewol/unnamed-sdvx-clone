@@ -77,21 +77,29 @@ double LineGraph::Extend(MapTime time)
 
 double LineGraph::Integrate(MapTime begin, MapTime end) const
 {
+    int sign = 1;
+
     if (begin == end)
     {
         return 0.0;
     }
 
+    if (m_points.size() == 0)
+    {
+        return (end - begin) * m_default;
+    }
+
     if (end < begin)
     {
         std::swap(begin, end);
+        sign = -1;
     }
 
     // Integration range is after the last point
     auto beginIt = m_points.upper_bound(begin);
     if (beginIt == m_points.end())
     {
-        return m_points.rbegin()->second.value.second * (end - begin);
+        return sign * m_points.rbegin()->second.value.second * (end - begin);
     }
 
     if (end <= beginIt->first)
@@ -99,12 +107,12 @@ double LineGraph::Integrate(MapTime begin, MapTime end) const
         if (beginIt == m_points.begin())
         {
             // Integration range is before the first point
-            return beginIt->second.value.first * (end - begin);
+            return sign * beginIt->second.value.first * (end - begin);
         }
         else
         {
             // Integration range contained in a single segment
-            return Integrate(std::prev(beginIt), begin, end);
+            return sign * Integrate(std::prev(beginIt), begin, end);
         }
     }
 
@@ -121,21 +129,22 @@ double LineGraph::Integrate(MapTime begin, MapTime end) const
         result = Integrate(beginPrev, begin, beginIt->first);
     }
 
-    auto endIt = m_points.lower_bound(end);
+    auto endIt = m_points.upper_bound(end);
     if (endIt == m_points.begin())
     {
-        // This means that end <= m_points.begin()->first
+        // This means that end < m_points.begin()->first
         // But then, since begin < end, begin < m_points.begin()->first so beginIt == m_points.begin()
-        // Therefore end <= beginIt->first and this case is already handled
+        // Therefore end < beginIt->first and this case is already handled
         // But let's check for this case just to be sure
         assert(false);
-        return endIt->second.value.first * (end - begin);
+        return sign * endIt->second.value.first * (end - begin);
     }
+
+    endIt = std::prev(endIt);
 
     // Ensure that the end of the integration range is endIt
     if (endIt->first != end)
     {
-        endIt = std::prev(endIt);
         result += Integrate(endIt, endIt->first, end);
     }
 
@@ -145,11 +154,13 @@ double LineGraph::Integrate(MapTime begin, MapTime end) const
         result += Integrate(beginIt);
     }
 
-    return result;
+    return sign * result;
 }
 
 double LineGraph::Integrate(PointsIterator curr, MapTime begin, MapTime end) const
 {
+    int sign = 1;
+
     if (begin == end)
     {
         return 0.0;
@@ -158,16 +169,17 @@ double LineGraph::Integrate(PointsIterator curr, MapTime begin, MapTime end) con
     if (end < begin)
     {
         std::swap(begin, end);
+        sign = -1;
     }
 
     if (m_points.empty())
     {
-        return (end - begin) * m_default;
+        return sign * (end - begin) * m_default;
     }
 
     if (curr == m_points.end())
     {
-        return m_points.rbegin()->second.value.second * (end - begin);
+        return sign * m_points.rbegin()->second.value.second * (end - begin);
     }
 
     assert(curr->first <= begin);
@@ -175,7 +187,7 @@ double LineGraph::Integrate(PointsIterator curr, MapTime begin, MapTime end) con
     auto next = std::next(curr);
     if (next == m_points.end())
     {
-        return curr->second.value.second * (end - begin);
+        return sign * curr->second.value.second * (end - begin);
     }
 
     assert(end <= next->first);
@@ -195,7 +207,7 @@ double LineGraph::Integrate(PointsIterator curr, MapTime begin, MapTime end) con
         value -= (next->first - end) * Math::Lerp(curr->second.value.second, next->second.value.first, 1 - x * 0.5);
     }
 
-    return value;
+    return sign * value;
 }
 
 double LineGraph::Integrate(PointsIterator curr) const

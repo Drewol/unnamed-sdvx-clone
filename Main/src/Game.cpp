@@ -764,12 +764,9 @@ public:
 		RenderQueue renderQueue(g_gl, rs);
 
 		// Get objects in range
-		MapTime msViewRange = m_playback.OLD_ViewDistanceToDuration(m_track->GetViewRange());
-		if (m_speedMod == SpeedMods::CMod)
-		{
-			msViewRange = 480000.0 / m_playback.cModSpeed;
-		}
-		m_currentObjectSet = m_playback.GetObjectsInRange(msViewRange);
+		m_currentObjectSet.clear();
+		m_playback.GetObjectsInViewRange(m_track->GetViewRange(), m_currentObjectSet);
+
 		// Sort objects to draw
 		// fx holds -> bt holds -> fx chips -> bt chips
 		m_currentObjectSet.Sort([](const TObjectState<void>* a, const TObjectState<void>* b)

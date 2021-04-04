@@ -31,9 +31,10 @@ public:
 	// Removes any existing data and sets a special behaviour for calibration mode
 	void MakeCalibrationPlayback();
 
-	// Gets all linear objects that fall within the given time range:
-	//	<curr - keepObjectDuration, curr + range>
-	Vector<ObjectState*> GetObjectsInRange(MapTime range);
+	// Get all objects that fall within the given visible range,
+	// The float is the # of 4th notes
+	void GetObjectsInViewRange(float numBeats, Vector<ObjectState*>& objects);
+	void GetBarPositionsInViewRange(float numBeats, Vector<float>& barPositions) const;
 
 	// Duration for objects to keep being returned by GetObjectsInRange after they have passed the current time
 	MapTime keepObjectDuration = 1000;
@@ -54,12 +55,17 @@ public:
 	uint32 CountBeats(MapTime start, MapTime range, int32& startIndex, uint32 multiplier = 1) const;
 
 	// View coordinate conversions
-	// the input duration is looped throught the timing points that affect it and the resulting float is the number of 4th note offets
-	// TODO: replace these timing functions to new ones
-	MapTime OLD_ViewDistanceToDuration(float distance);
-	float OLD_DurationToViewDistance(MapTime time);
-	float OLD_DurationToViewDistanceAtTime(MapTime time, MapTime duration);
-	float OLD_TimeToViewDistance(MapTime time);
+	inline float TimeToViewDistance(MapTime mapTime) const
+	{
+		return GetViewDistance(m_playbackTime, mapTime); 
+	}
+	
+	inline float ToViewDistance(MapTime startTime, MapTime duration) const
+	{
+		return GetViewDistance(startTime, startTime + duration);
+	}
+
+	float GetViewDistance(MapTime startTime, MapTime endTime) const;
 
 	// Current map time in ms as last passed to Update
 	inline MapTime GetLastTime() const { return m_playbackTime; }

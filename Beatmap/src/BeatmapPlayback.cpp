@@ -118,6 +118,7 @@ void BeatmapPlayback::Update(MapTime newTime)
 			if (obj->type == ObjectType::Laser) continue;
 
 			if (!m_playRange.Includes(obj->time)) continue;
+
 			if (obj->type == ObjectType::Hold && !m_playRange.Includes(obj->time + obj->hold.duration, true)) continue;
 
 			MapTime duration = 0;
@@ -292,58 +293,110 @@ void BeatmapPlayback::MakeCalibrationPlayback()
 	m_calibrationTiming.numerator = 4;
 }
 
-Vector<ObjectState*> BeatmapPlayback::GetObjectsInRange(MapTime range)
+void BeatmapPlayback::GetObjectsInViewRange(float numBeats, Vector<ObjectState*>& objects)
 {
-	static const uint32 earlyVisibility = 200;
+	// TODO: properly implement backwards scroll speed support...
+	numBeats *= 3;
 
-	const TimingPoint& tp = GetCurrentTimingPoint();
-
-	MapTime begin = (MapTime) (m_playbackTime - earlyVisibility);
-	MapTime end = m_playbackTime + range;
-
-	Vector<ObjectState*> ret;
+	const static MapTime earlyVisibility = 200;
 
 	if (m_isCalibration) {
 		for (auto& o : m_calibrationObjects)
 		{
-			if (o->time < begin)
+			if (o->time < (MapTime)(m_playbackTime - earlyVisibility))
 				continue;
-			if (o->time > end)
+
+			if (o->time > m_playbackTime + static_cast<MapTime>(numBeats * m_calibrationTiming.beatDuration))
 				break;
 
-			ret.Add(o.get());
+			objects.Add(o.get());
 		}
-		return ret;
-	}
 
-	if (begin < m_playRange.begin) begin = m_playRange.begin;
-	if (m_playRange.HasEnd() && end >= m_playRange.end) end = m_playRange.end;
+		return;
+	}
 
 	// Add objects
 	for (auto& it : m_objectsByTime)
 	{
-		ret.Add(it.second);
+		objects.Add(it.second);
 	}
 
-	// Iterator
-	Beatmap::ObjectsIterator obj = m_currObject;
-	// Return all objects that lie after the currently queued object and fall within the given range
-	while (!IsEndObject(obj))
+	Beatmap::TimingPointsIterator tp = m_SelectTimingPoint(m_playbackTime);
+	Beatmap::TimingPointsIterator tp_next = std::next(tp);
+
+	// # of beats from m_playbackTime to curr TP
+	MapTime currRefTime = m_playbackTime;
+	float currBeats = 0.0f;
+
+	for (Beatmap::ObjectsIterator obj = m_currObject; !IsEndObject(obj) && m_playRange.Includes((*obj)->time); ++obj)
 	{
-		if ((*obj)->time < begin)
+		const MapTime objTime = (*obj)->time;
+
+		if (!IsEndTiming(tp_next) && tp_next->time <= objTime)
 		{
-			obj += 1;
+			currBeats += m_beatmap->GetBeatCountWithScrollSpeedApplied(currRefTime, tp_next->time, tp);
+
+			tp = tp_next;
+			tp_next = std::next(tp_next);
+			currRefTime = tp->time;
+		}
+
+		const float objBeats = currBeats + m_beatmap->GetBeatCountWithScrollSpeedApplied(currRefTime, objTime, tp);
+		if (objBeats >= numBeats)
+		{
+			break;
+		}
+
+		// Lasers might be already added before
+		if ((*obj)->type == ObjectType::Laser && obj < m_currLaserObject)
+		{
 			continue;
 		}
 
-		if ((*obj)->time >= end)
-			break; // No more objects
-
-		ret.Add((*obj).get());
-		obj += 1; // Next
+		objects.Add(obj->get());
 	}
+}
 
-	return ret;
+void BeatmapPlayback::GetBarPositionsInViewRange(float numBeats, Vector<float>& barPositions) const
+{
+	// TODO
+	/*
+	// Update ticks separating bars to draw
+	double tickTime = (double)currentTime;
+	MapTime rangeEnd = currentTime + playback.OLD_ViewDistanceToDuration(m_viewRange);
+	const TimingPoint* tp = playback.GetTimingPointAt((MapTime)tickTime);
+	double stepTime = tp->GetBarDuration(); // Every xth note based on signature
+
+	// Overflow on first tick
+	double firstOverflow = fmod((double)tickTime - tp->time, stepTime);
+	if(fabs(firstOverflow) > 1)
+		tickTime -= firstOverflow;
+
+	m_barTicks.clear();
+
+	// Add first tick
+	m_barTicks.Add(playback.TimeToViewDistance((MapTime)tickTime));
+
+	while(tickTime < rangeEnd)
+	{
+		double next = tickTime + stepTime;
+
+		const TimingPoint* tpNext = playback.GetTimingPointAt((MapTime)tickTime);
+		if(tpNext != tp)
+		{
+			tp = tpNext;
+			tickTime = tp->time;
+			stepTime = tp->GetBarDuration(); // Every xth note based on signature
+		}
+		else
+		{
+			tickTime = next;
+		}
+
+		// Add tick
+		m_barTicks.Add(playback.TimeToViewDistance((MapTime)tickTime));
+	}
+	*/
 }
 
 const TimingPoint& BeatmapPlayback::GetCurrentTimingPoint() const
@@ -390,161 +443,24 @@ uint32 BeatmapPlayback::CountBeats(MapTime start, MapTime range, int32& startInd
 	return (uint32)Math::Max<int64>(beatEnd - beatStart, 0);
 }
 
-MapTime BeatmapPlayback::OLD_ViewDistanceToDuration(float distance)
+float BeatmapPlayback::GetViewDistance(MapTime startTime, MapTime endTime) const
 {
-	if (m_isCalibration)
+	if (startTime == endTime)
 	{
-		return static_cast<MapTime>(distance * m_calibrationTiming.beatDuration);
+		return 0.0f;
 	}
 
-	Beatmap::TimingPointsIterator tp = m_SelectTimingPoint(m_playbackTime, true);
-
-	double time = 0;
-
-	MapTime currentTime = m_playbackTime;
-	while (true)
-	{
-		if (!IsEndTiming(tp + 1))
-		{
-			double maxDist = ((tp + 1)->time - (double)currentTime) / tp->beatDuration;
-			if (maxDist < distance)
-			{
-				// Split up
-				time += maxDist * tp->beatDuration;
-				distance -= (float)maxDist;
-				tp++;
-				continue;
-			}
-		}
-		time += distance * tp->beatDuration;
-		break;
-	}
-
-	// TODO: Optimize?
-
-	/*
-	uint32 processedStops = 0;
-	Vector<ChartStop*> ignoreStops;
-	do
-	{
-		processedStops = 0;
-		for (auto cs : m_SelectChartStops(currentTime, time))
-		{
-			if (std::find(ignoreStops.begin(), ignoreStops.end(), cs) != ignoreStops.end())
-				continue;
-			time += cs->duration;
-			processedStops++;
-			ignoreStops.Add(cs);
-		}
-	} while (processedStops);
-	*/
-
-	return (MapTime)time;
-}
-float BeatmapPlayback::OLD_DurationToViewDistance(MapTime duration)
-{
-	return OLD_DurationToViewDistanceAtTime(m_playbackTime, duration);
-}
-
-/*
-float BeatmapPlayback::DurationToViewDistanceAtTimeNoStops(MapTime time, MapTime duration)
-{
-	MapTime endTime = time + duration;
-	int8 direction = Math::Sign(duration);
-	if (duration < 0)
-	{
-		MapTime temp = time;
-		time = endTime;
-		endTime = temp;
-		duration *= -1;
-	}
-
-	// Accumulated value
-	double barTime = 0.0f;
-
-	// Split up to see if passing other timing points on the way
-	Beatmap::TimingPointsIterator tp = m_SelectTimingPoint(time, true);
-	while (true)
-	{
-		if (!IsEndTiming(tp + 1))
-		{
-			if ((tp+1)->time < endTime)
-			{
-				// Split up
-				MapTime myDuration = (tp+1)->time - time;
-				barTime += (double)myDuration / tp->beatDuration;
-				duration -= myDuration;
-				time = tp->time;
-				tp++;
-				continue;
-			}
-		}
-		// Whole
-		barTime += (double)duration / tp->beatDuration;
-		break;
-	}
-
-	return (float)barTime * direction;
-}
-*/
-
-float BeatmapPlayback::OLD_DurationToViewDistanceAtTime(MapTime time, MapTime duration)
-{
 	if (cMod)
 	{
-		return (float)duration / 480000.0f;
-	}
-
-	MapTime endTime = time + duration;
-	int8 direction = Math::Sign(duration);
-	if (duration < 0)
-	{
-		MapTime temp = time;
-		time = endTime;
-		endTime = temp;
-		duration *= -1;
+		return static_cast<float>(endTime - startTime) / 480000.0f;
 	}
 
 	if (m_isCalibration)
 	{
-		return static_cast<float>(duration / m_calibrationTiming.beatDuration * direction);
+		return static_cast<float>((endTime - startTime) / m_calibrationTiming.beatDuration);
 	}
 
-	// Accumulated value
-	double barTime = 0.0f;
-
-	// Split up to see if passing other timing points on the way
-	Beatmap::TimingPointsIterator tp = m_SelectTimingPoint(time, true);
-	while (true)
-	{
-		if (!IsEndTiming(tp + 1))
-		{
-			if ((tp+1)->time < endTime)
-			{
-				// Split up
-				MapTime myDuration = (tp+1)->time - time;
-				barTime += (double)myDuration / tp->beatDuration;
-				duration -= myDuration;
-				time = (tp+1)->time;
-				tp++;
-				continue;
-			}
-		}
-
-		// Whole
-		barTime += (double)duration / tp->beatDuration;
-		break;
-	}
-
-	return (float)barTime * direction;
-}
-
-float BeatmapPlayback::OLD_TimeToViewDistance(MapTime time)
-{
-	if (cMod)
-		return (float)(time - m_playbackTime) / (480000.f);
-
-	return OLD_DurationToViewDistanceAtTime(m_playbackTime, time - m_playbackTime);
+	return m_beatmap->GetBeatCountWithScrollSpeedApplied(startTime, endTime, m_currentTiming);
 }
 
 float BeatmapPlayback::GetZoom(uint8 index)

@@ -54,6 +54,17 @@ struct BeatmapSettings
 class Beatmap : public Unique
 {
 public:
+	/// Vector interacts badly with unique_ptr, use std::vector instead
+	using Objects = std::vector<std::unique_ptr<ObjectState>>;
+	using ObjectsIterator = Objects::const_iterator;
+
+	using TimingPoints = Vector<TimingPoint>;
+	using TimingPointsIterator = TimingPoints::const_iterator;
+
+	using LaneTogglePoints = Vector<LaneHideTogglePoint>;
+	using LaneTogglePointsIterator = LaneTogglePoints::const_iterator;
+
+public:
 	bool Load(BinaryStream& input, bool metadataOnly = false);
 	bool Save(BinaryStream& output) const;
 
@@ -93,9 +104,12 @@ public:
 	void Shuffle(int seed, bool random, bool mirror);
 	void ApplyShuffle(const std::array<int, 6>& swaps, bool flipLaser);
 
-	/// Vector interacts badly with unique_ptr, use std::vector instead
-	using Objects = std::vector<std::unique_ptr<ObjectState>>;
-	using ObjectsIterator = Objects::const_iterator;
+	/// # of (4th-note) beats with scroll speeds taken into account
+	float GetBeatCountWithScrollSpeedApplied(MapTime start, MapTime end, TimingPointsIterator hint) const;
+	inline float GetBeatCountWithScrollSpeedApplied(MapTime start, MapTime end) const
+	{
+		return GetBeatCountWithScrollSpeedApplied(start, end, GetTimingPoint(start));
+	}
 
 	const Objects& GetObjectStates() const { return m_objectStates; }
 
@@ -104,8 +118,6 @@ public:
 
 	bool HasObjectState() const { return !m_objectStates.empty(); }
 
-	using TimingPoints = Vector<TimingPoint>;
-	using TimingPointsIterator = TimingPoints::const_iterator;
 
 	const TimingPoints& GetTimingPoints() const { return m_timingPoints; }
 
@@ -128,9 +140,6 @@ public:
 	}
 
 	TimingPointsIterator GetTimingPoint(MapTime mapTime, size_t begin, size_t end) const;
-
-	using LaneTogglePoints = Vector<LaneHideTogglePoint>;
-	using LaneTogglePointsIterator = LaneTogglePoints::const_iterator;
 
 	LaneTogglePointsIterator GetFirstLaneTogglePoint() const { return m_laneTogglePoints.begin(); }
 	LaneTogglePointsIterator GetEndLaneTogglePoint() const { return m_laneTogglePoints.end(); }

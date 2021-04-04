@@ -927,7 +927,13 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 				const double endValue = scrollSpeedGraph.ValueAt(mapTime + stopDuration);
 				scrollSpeedGraph.Extend(mapTime);
 				scrollSpeedGraph.Insert(mapTime, 0.0);
-				scrollSpeedGraph.Insert(mapTime + stopDuration, endValue);
+				scrollSpeedGraph.Insert(mapTime + stopDuration, LineGraph::Point{ 0.0, endValue });
+			}
+			// TEMPORARY for testing; get permission from m4saka before committing to the main branch
+			else if (p.first == "scroll_speed")
+			{
+				LineGraph& scrollSpeedGraph = m_baseEffects.GetGraph(EffectTimeline::GraphType::SCROLL_SPEED);
+				scrollSpeedGraph.Insert(mapTime, atol(p.second.data()) / 100.0);
 			}
 			else
 			{

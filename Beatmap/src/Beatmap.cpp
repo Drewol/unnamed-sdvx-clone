@@ -319,6 +319,45 @@ void Beatmap::ApplyShuffle(const std::array<int, 6>& swaps, bool flipLaser)
 	}
 }
 
+float Beatmap::GetBeatCountWithScrollSpeedApplied(MapTime start, MapTime end, TimingPointsIterator hint) const
+{
+	int sign = 1;
+
+	if (m_timingPoints.empty() || start == end)
+	{
+		return 0.0f;
+	}
+
+	if (end < start)
+	{
+		std::swap(start, end);
+		sign = -1;
+	}
+
+	TimingPointsIterator tp = GetTimingPoint(start, hint);
+	assert(tp != m_timingPoints.end());
+
+	TimingPointsIterator tp_next = std::next(tp);
+
+	float result = 0.0f;
+	MapTime refTime = start;
+
+	const LineGraph& scrollSpeedGraph = m_baseEffects.GetGraph(EffectTimeline::GraphType::SCROLL_SPEED);
+
+	while (tp_next != m_timingPoints.end() && tp_next->time < end)
+	{
+		result += static_cast<float>(scrollSpeedGraph.Integrate(refTime, tp_next->time) / tp->beatDuration);
+
+		tp = tp_next;
+		tp_next = std::next(tp);
+		refTime = tp->time;
+	}
+
+	result += static_cast<float>(scrollSpeedGraph.Integrate(refTime, end) / tp->beatDuration);
+
+	return sign * result;
+}
+
 Beatmap::TimingPointsIterator Beatmap::GetTimingPoint(MapTime mapTime, TimingPointsIterator hint, bool forwardOnly) const
 {
 	if (m_timingPoints.empty())
