@@ -251,8 +251,8 @@ void OffsetComputer::ComputeEnergy()
 
 	int64 energyInd = 0;
 	
-	float prevAmp = ind < 0 ? 0 : std::hypotf(m_pcm[2*ind-2], m_pcm[2*ind-1]);
-	float currAmp = ind < 0 ? 0 : std::hypotf(m_pcm[2 * ind], m_pcm[2 * ind + 1]);
+	float prevAmp = ind <= 0 ? 0 : std::hypotf(m_pcm[2*ind - 2], m_pcm[2*ind - 1]);
+	float currAmp = ind < 0 ? 0 : std::hypotf(m_pcm[2*ind], m_pcm[2*ind + 1]);
 
 	for (; ind < endInd; ++ind)
 	{
