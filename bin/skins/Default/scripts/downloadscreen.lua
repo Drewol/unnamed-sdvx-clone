@@ -254,26 +254,68 @@ function archive_callback(entries, id)
     local songsfolder = dlScreen.GetSongsPath()
     res = {}
     folders = { songsfolder .. "/nautica/" }
-    local hasFolder = false
+
+    local longestCommonPath = nil
     for i, entry in ipairs(entries) do
-        for j = 1, #entry do
-            if entry:sub(j,j) == '/' then
-               hasFolder = true
-               table.insert(folders, songsfolder .. "/nautica/" .. entry:sub(1,j))
+        if longestCommonPath == nil then
+            longestCommonPath = entry
+        else
+            if #entry < #longestCommonPath then
+                longestCommonPath = longestCommonPath:sub(1, #entry)
+            end
+            for j=1, #longestCommonPath do
+                if longestCommonPath:sub(j, j) ~= entry:sub(j, j) then
+                    longestCommonPath = longestCommonPath:sub(1, j-1)
+                    break
+                end
+            end
+            if #longestCommonPath == 0 then
+                break
             end
         end
-        game.Log(entry, 0)
-        res[entry] = songsfolder .. "/nautica/" .. entry
     end
-    
-    if not hasFolder then
-        for i, entry in ipairs(entries) do
-            res[entry] = songsfolder .. "/nautica/" .. id .. "/" .. entry
+
+    -- There was nothing!
+    if longestCommonPath == nil then
+        return res
+    end
+
+    for j=#longestCommonPath, 1, -1 do
+        if longestCommonPath:sub(j, j) == '/' then
+            longestCommonPath = longestCommonPath:sub(1, j)
+            break
         end
-        table.insert(folders, songsfolder .. "/nautica/" .. id .. "/")
     end
+
+    game.Log("CommonPath: " .. longestCommonPath, 0)
+
+    local root = songsfolder .. "/nautica/" .. id
+    root = root .. "/"
+
+    table.insert(folders, root)
+
+    for i, entry in ipairs(entries) do
+        game.Log(entry, 0)
+
+        local entryReplaced = entry
+        if #longestCommonPath > 1 then
+            entryReplaced = entryReplaced:sub(#longestCommonPath + 1)
+        end
+
+        if #entryReplaced > 0 then
+            for j = 1, #entryReplaced do
+                if entryReplaced:sub(j, j) == '/' then
+                    table.insert(folders, root .. entryReplaced:sub(1, j))
+                end
+            end
+
+            res[entry] = root .. entryReplaced
+        end
+    end
+
     downloaded[id] = "Downloaded"
     res[".folders"] = table.concat(folders, "|")
+
     return res
 end
 
@@ -345,7 +387,7 @@ function button_pressed(button)
     elseif button == game.BUTTON_FXR then
         if screenState ~= 2 then
             screenState = 2
-         else
+        else
             screenState = 0
         end
     end
@@ -353,10 +395,14 @@ end
 
 function key_pressed(key)
     if key == 27 then --escape pressed
-        dlcache = io.open(cachepath, "w")
-        dlcache:write(json.encode(downloaded))
-        dlcache:close()
-        dlScreen.Exit() 
+        if screenState == 0 then
+            dlcache = io.open(cachepath, "w")
+            dlcache:write(json.encode(downloaded))
+            dlcache:close()
+            dlScreen.Exit()
+        else
+            screenState = 0
+        end
     end
 end
 
