@@ -609,6 +609,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 	MapTime lastMapTime = 0;
 	uint32 currentTick = 0;
 
+	bool isManualTilt = false;
 	for (KShootMap::TickIterator it(kshootMap); it; ++it)
 	{
 		const KShootBlock &block = it.GetCurrentBlock();
@@ -623,7 +624,6 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 
 		// flag set when a new effect parameter is set and a new hold notes should be created
 		bool splitupHoldNotes[2] = {false, false};
-		bool isManualTilt = false;
 
 		uint32 tickSettingIndex = 0;
 		// Process settings
