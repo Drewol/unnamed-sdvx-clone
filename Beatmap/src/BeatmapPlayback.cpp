@@ -450,6 +450,21 @@ float BeatmapPlayback::GetViewDistance(MapTime startTime, MapTime endTime) const
 		return 0.0f;
 	}
 
+	if (cMod || m_isCalibration)
+	{
+		return GetViewDistanceIgnoringScrollSpeed(startTime, endTime);
+	}
+
+	return m_beatmap->GetBeatCountWithScrollSpeedApplied(startTime, endTime, m_currentTiming);
+}
+
+float BeatmapPlayback::GetViewDistanceIgnoringScrollSpeed(MapTime startTime, MapTime endTime) const
+{
+	if (startTime == endTime)
+	{
+		return 0.0f;
+	}
+
 	if (cMod)
 	{
 		return static_cast<float>(endTime - startTime) / 480000.0f;
@@ -460,10 +475,10 @@ float BeatmapPlayback::GetViewDistance(MapTime startTime, MapTime endTime) const
 		return static_cast<float>((endTime - startTime) / m_calibrationTiming.beatDuration);
 	}
 
-	return m_beatmap->GetBeatCountWithScrollSpeedApplied(startTime, endTime, m_currentTiming);
+	return m_beatmap->GetBeatCount(startTime, endTime, m_currentTiming);
 }
 
-float BeatmapPlayback::GetZoom(uint8 index)
+float BeatmapPlayback::GetZoom(uint8 index) const
 {
 	EffectTimeline::GraphType graphType;
 
@@ -491,6 +506,12 @@ float BeatmapPlayback::GetZoom(uint8 index)
 
 	// TODO: pass aux value
 	return m_beatmap->GetGraphValueAt(graphType, m_playbackTime);
+}
+
+float BeatmapPlayback::GetScrollSpeed() const
+{
+	// TODO: pass aux value
+	return m_beatmap->GetScrollSpeedAt(m_playbackTime);
 }
 
 bool BeatmapPlayback::CheckIfManualTiltInstant()

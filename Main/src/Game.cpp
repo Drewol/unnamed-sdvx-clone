@@ -757,8 +757,10 @@ public:
 		RenderState rs = m_camera.CreateRenderState(true);
 
 		// Draw BG first
-		if(m_background)
-			m_background->Render(deltaTime);
+		if (m_background)
+		{
+			m_background->Render(deltaTime * m_playback.GetScrollSpeed());
+		}
 
 		// Main render queue
 		RenderQueue renderQueue(g_gl, rs);

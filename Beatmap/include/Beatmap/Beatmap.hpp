@@ -106,9 +106,15 @@ public:
 
 	/// # of (4th-note) beats with scroll speeds taken into account
 	float GetBeatCountWithScrollSpeedApplied(MapTime start, MapTime end, TimingPointsIterator hint) const;
+	float GetBeatCount(MapTime start, MapTime end, TimingPointsIterator hint) const;
+
 	inline float GetBeatCountWithScrollSpeedApplied(MapTime start, MapTime end) const
 	{
 		return GetBeatCountWithScrollSpeedApplied(start, end, GetTimingPoint(start));
+	}
+	inline float GetBeatCount(MapTime start, MapTime end) const
+	{
+		return GetBeatCount(start, end, GetTimingPoint(start));
 	}
 
 	const Objects& GetObjectStates() const { return m_objectStates; }
@@ -147,7 +153,8 @@ public:
 	float GetGraphValueAt(EffectTimeline::GraphType type, MapTime mapTime, int aux = -1) const;
 	bool CheckIfManualTiltInstant(MapTime bound, MapTime mapTime, int aux = -1) const;
 
-	float GetCenterSplitValueAt(MapTime mapTime) const;
+	float GetCenterSplitValueAt(MapTime mapTime, int aux = -1) const;
+	float GetScrollSpeedAt(MapTime mapTime, int aux = -1) const;
 
 private:
 	bool m_ProcessKShootMap(BinaryStream& input, bool metadataOnly);

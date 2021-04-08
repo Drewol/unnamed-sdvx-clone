@@ -358,6 +358,43 @@ float Beatmap::GetBeatCountWithScrollSpeedApplied(MapTime start, MapTime end, Ti
 	return sign * result;
 }
 
+float Beatmap::GetBeatCount(MapTime start, MapTime end, TimingPointsIterator hint) const
+{
+	int sign = 1;
+
+	if (m_timingPoints.empty() || start == end)
+	{
+		return 0.0f;
+	}
+
+	if (end < start)
+	{
+		std::swap(start, end);
+		sign = -1;
+	}
+
+	TimingPointsIterator tp = GetTimingPoint(start, hint);
+	assert(tp != m_timingPoints.end());
+
+	TimingPointsIterator tp_next = std::next(tp);
+
+	float result = 0.0f;
+	MapTime refTime = start;
+
+	while (tp_next != m_timingPoints.end() && tp_next->time < end)
+	{
+		result += (tp_next->time - refTime) / tp->beatDuration;
+
+		tp = tp_next;
+		tp_next = std::next(tp);
+		refTime = tp->time;
+	}
+
+	result += static_cast<float>((end - refTime) / tp->beatDuration);
+
+	return sign * result;
+}
+
 Beatmap::TimingPointsIterator Beatmap::GetTimingPoint(MapTime mapTime, TimingPointsIterator hint, bool forwardOnly) const
 {
 	if (m_timingPoints.empty())
@@ -553,9 +590,14 @@ bool Beatmap::CheckIfManualTiltInstant(MapTime bound, MapTime mapTime, int aux /
 	return false;
 }
 
-float Beatmap::GetCenterSplitValueAt(MapTime mapTime) const
+float Beatmap::GetCenterSplitValueAt(MapTime mapTime, int aux /*=-1*/) const
 {
 	return static_cast<float>(m_centerSplit.ValueAt(mapTime));
+}
+
+float Beatmap::GetScrollSpeedAt(MapTime mapTime, int aux /*=-1*/) const
+{
+	return static_cast<float>(m_baseEffects.GetGraph(EffectTimeline::GraphType::SCROLL_SPEED).ValueAt(mapTime));
 }
 
 bool Beatmap::m_Serialize(BinaryStream& stream, bool metadataOnly)

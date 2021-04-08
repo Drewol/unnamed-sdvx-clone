@@ -59,13 +59,24 @@ public:
 	{
 		return GetViewDistance(m_playbackTime, mapTime); 
 	}
+
+	inline float TimeToViewDistanceIgnoringScrollSpeed(MapTime mapTime) const
+	{
+		return GetViewDistanceIgnoringScrollSpeed(m_playbackTime, mapTime);
+	}
 	
 	inline float ToViewDistance(MapTime startTime, MapTime duration) const
 	{
 		return GetViewDistance(startTime, startTime + duration);
 	}
 
+	inline float ToViewDistanceIgnoringScrollSpeed(MapTime startTime, MapTime duration) const
+	{
+		return GetViewDistanceIgnoringScrollSpeed(startTime, startTime + duration);
+	}
+
 	float GetViewDistance(MapTime startTime, MapTime endTime) const;
+	float GetViewDistanceIgnoringScrollSpeed(MapTime startTime, MapTime endTime) const;
 
 	// Current map time in ms as last passed to Update
 	inline MapTime GetLastTime() const { return m_playbackTime; }
@@ -84,7 +95,8 @@ public:
 	}
 
 	// Get interpolated top or bottom zoom as set by the map
-	float GetZoom(uint8 index);
+	float GetZoom(uint8 index) const;
+	float GetScrollSpeed() const;
 
 	// Checks if current manual tilt value is instant
 	bool CheckIfManualTiltInstant();
