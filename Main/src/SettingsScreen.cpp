@@ -967,6 +967,7 @@ private:
 		if (it == m_skinConfigTextData.end())
 		{
 			it = m_skinConfigTextData.emplace_hint(it, setting.key, SkinConfigTextData { m_skinConfig, setting.key });
+			it->second.Load();
 		}
 
 		if (it == m_skinConfigTextData.end())

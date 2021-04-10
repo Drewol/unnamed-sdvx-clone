@@ -414,7 +414,7 @@ public:
 			if (gotVersion == 18)
 			{
 				m_database.Exec("ALTER TABLE Scores ADD COLUMN window_slam INTEGER");
-				m_database.Exec("UPDATE Scores SET window_miss=75");
+				m_database.Exec("UPDATE Scores SET window_slam=84");
 				gotVersion = 19;
 			}
 			m_database.Exec(Utility::Sprintf("UPDATE Database SET `version`=%d WHERE `rowid`=1", m_version));

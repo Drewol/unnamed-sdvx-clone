@@ -1115,7 +1115,7 @@ bool Scoring::m_IsRoot(const HoldObjectState* hold) const
 
 void Scoring::m_UpdateLasers(float deltaTime)
 {
-	MapTime mapTime = m_playback->GetLastTime();
+	MapTime mapTime = m_playback->GetLastTime() + m_inputOffset;
 	bool currentlySlamNextSegmentStraight[2] = { false };
 	// Check for new laser segments in laser queue
 	for (auto it = m_laserSegmentQueue.begin(); it != m_laserSegmentQueue.end();)

@@ -93,6 +93,7 @@ private:
 
 	// Map object approach speed, scaled by BPM
 	float m_hispeed = 1.0f;
+	float m_hispeedAdvance = 0.f;
 
 	// Current lane toggle status
 	bool m_hideLane = false;
@@ -681,22 +682,21 @@ public:
 		{
 			for (int i = 0; i < 2; i++)
 			{
-				float change = g_input.GetInputLaserDir(i) / 3.0f;
-				m_hispeed += change;
-				m_hispeed = Math::Clamp(m_hispeed, 0.1f, 16.f);
-				if ((m_speedMod != SpeedMods::XMod) && change != 0.0f)
+				m_hispeedAdvance += g_input.GetInputLaserDir(i) / 3.0f;
+				int hispeedSteps = static_cast<int>(truncf(m_hispeedAdvance * 10.0f));
+				m_hispeedAdvance -= 0.1f * hispeedSteps;
+				if (hispeedSteps != 0)
 				{
+					m_hispeed = static_cast<float>(static_cast<int>(m_hispeed * 10.0f) + hispeedSteps) / 10.0f;
+					m_hispeed = Math::Clamp(m_hispeed, 0.1f, 16.f);
+
 					if (m_saveSpeed)
 					{
 						g_gameConfig.Set(GameConfigKeys::ModSpeed, m_hispeed * (float)m_currentTiming->GetBPM());
 					}
 					m_modSpeed = m_hispeed * (float)m_currentTiming->GetBPM();
 					// Have to check in here so we can update m_playback
-					CheckChallengeHispeed(m_currentTiming->GetBPM());
 					m_playback.cModSpeed = m_modSpeed;
-				}
-				else
-				{
 					CheckChallengeHispeed(m_currentTiming->GetBPM());
 				}
 			}

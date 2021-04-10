@@ -48,10 +48,13 @@ void SettingsPage::SettingTextData::Load()
 	}
 
 	std::memcpy(m_buffer.data(), str.data(), m_len + 1);
+	m_loaded = true;
 }
 
 void SettingsPage::SettingTextData::Save()
 {
+	if (!m_loaded) return;
+
 	String str = String(m_buffer.data(), m_len);
 
 	str.TrimBack('\n');

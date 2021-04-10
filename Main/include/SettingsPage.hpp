@@ -6,10 +6,10 @@ class SettingsPage
 protected:
 	SettingsPage(nk_context* nctx, const std::string_view& name) : m_nctx(nctx), m_name(name) {}
 
-	/// Called when the page is opened; may be called multiple times.
+	/// Called when the page is opened; may be called multiple times, but only when the page is opening.
 	virtual void Load() = 0;
 
-	/// Called when the page is closed; may be called multiple times.
+	/// Called when the page is closed; may be called multiple times, but only when the page is closing.
 	virtual void Save() = 0;
 
 	virtual void RenderContents() = 0;
@@ -32,7 +32,7 @@ protected:
 		virtual void SaveConfig(const String& value) {}
 
 	private:
-
+		bool m_loaded = false;
 		std::array<char, BUFFER_SIZE> m_buffer;
 		int m_len = 0;
 	};
@@ -105,20 +105,18 @@ protected:
 public:
 	void Open()
 	{
-		if (!m_opened)
-		{
-			Load();
-			m_opened = true;
-		}
+		if (m_opened) return;
+
+		Load();
+		m_opened = true;
 	}
 
 	void Close()
 	{
-		if (m_opened)
-		{
-			Save();
-			m_opened = false;
-		}
+		if (!m_opened) return;
+
+		Save();
+		m_opened = false;
 	}
 
 	void Render(const struct nk_rect& rect);
