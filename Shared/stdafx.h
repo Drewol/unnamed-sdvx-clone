@@ -11,4 +11,11 @@
 #include <windows.h>
 #endif
 
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "Shared/Types.hpp"
+
+#include "Lua.hpp"

@@ -831,6 +831,12 @@ bool Application::m_Init()
 	if (!m_LoadConfig())
 		Log("Failed to load config file", Logger::Severity::Warning);
 
+	// I18N
+	I18N::Get().Initialize("./translations");
+
+	// TODO: load from the config
+	I18N::Get().SetLanguage("ko");
+
 	// Job sheduler
 	g_jobSheduler = new JobSheduler();
 
@@ -2511,6 +2517,9 @@ void Application::SetLuaBindings(lua_State *state)
 
 	//http
 	m_skinHttp.PushFunctions(state);
+
+	// i18n
+	I18N::Get().BindLua(state);
 }
 
 bool JacketLoadingJob::Run()
