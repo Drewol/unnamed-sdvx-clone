@@ -12,3 +12,7 @@
 #endif
 
 #include "Shared/Types.hpp"
+
+#include <math.h>
+#include <cmath>
+#include <type_traits>

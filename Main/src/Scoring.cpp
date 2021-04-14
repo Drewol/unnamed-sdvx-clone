@@ -1309,13 +1309,12 @@ MapTotals Scoring::CalculateMapTotals() const
 	MapTotals ret = { 0, 0, 0 };
 	const Beatmap& map = m_playback->GetBeatmap();
 
-	Set<LaserObjectState*> processedLasers;
+	Set<const LaserObjectState*> processedLasers;
 
 	assert(m_playback);
-	auto& objects = map.GetLinearObjects();
-	for (auto& _obj : objects)
+	for (const auto& _obj : map.GetObjectStates())
 	{
-		MultiObjectState* obj = *_obj;
+		const MultiObjectState* obj = *_obj;
 		const TimingPoint* tp = m_playback->GetTimingPointAt(obj->time);
 		if (obj->type == ObjectType::Single)
 		{
@@ -1331,7 +1330,7 @@ MapTotals Scoring::CalculateMapTotals() const
 		}
 		else if (obj->type == ObjectType::Laser)
 		{
-			LaserObjectState* laserRoot = obj->laser.GetRoot();
+			const LaserObjectState* laserRoot = obj->laser.GetRoot();
 
 			// Don't evaluate ticks for every segment, only for entire chains of segments
 			if (!processedLasers.Contains(laserRoot))

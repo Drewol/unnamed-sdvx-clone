@@ -72,8 +72,8 @@ void CalibrationScreen::Render(float deltaTime)
 	RenderState rs = m_camera.CreateRenderState(true);
 	RenderQueue renderQueue(g_gl, rs);
 
-	MapTime msViewRange = m_playback.ViewDistanceToDuration(m_track.GetViewRange());
-	auto currentObjectSet = m_playback.GetObjectsInRange(msViewRange);
+	Vector<ObjectState*> currentObjectSet;
+	m_playback.GetObjectsInViewRange(m_track.GetViewRange(), currentObjectSet);
 
 	m_track.DrawBase(renderQueue);
 	std::unordered_set<MapTime> chipFXTimes[2];

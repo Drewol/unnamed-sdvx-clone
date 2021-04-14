@@ -311,53 +311,23 @@ public:
 
 		const BeatmapSettings& mapSettings = m_beatmap->GetMapSettings();
 
-		// Move this somewhere else?
 		// Set hi-speed for m-Mod
-		// Uses the "mode" of BPMs in the chart, should use median?
 		if(m_speedMod == SpeedMods::MMod)
 		{
-			Map<double, MapTime> bpmDurations;
-			const Vector<TimingPoint*>& timingPoints = m_beatmap->GetLinearTimingPoints();
-			MapTime lastMT = mapSettings.offset;
-			MapTime largestMT = -1;
-			double useBPM = -1;
-			double lastBPM = -1;
-			for (TimingPoint* tp : timingPoints)
-			{
-				double thisBPM = tp->GetBPM();
-				if (!bpmDurations.count(lastBPM))
-				{
-					bpmDurations[lastBPM] = 0;
-				}
-				MapTime timeSinceLastTP = tp->time - lastMT;
-				bpmDurations[lastBPM] += timeSinceLastTP;
-				if (bpmDurations[lastBPM] > largestMT)
-				{
-					useBPM = lastBPM;
-					largestMT = bpmDurations[lastBPM];
-				}
-				lastMT = tp->time;
-				lastBPM = thisBPM;
-			}
-			bpmDurations[lastBPM] += m_endTime - lastMT;
+			const double modeBPM = m_beatmap->GetModeBPM();
 
-			if (bpmDurations[lastBPM] > largestMT)
-			{
-				useBPM = lastBPM;
-			}
-
-			m_hispeed = m_modSpeed / useBPM; 
-			CheckChallengeHispeed(useBPM);
+			m_hispeed = m_modSpeed / modeBPM;
+			CheckChallengeHispeed(modeBPM);
 		}
 		else if (m_speedMod == SpeedMods::CMod)
 		{
-			double bpm = m_beatmap->GetLinearTimingPoints().front()->GetBPM();
+			double bpm = m_beatmap->GetFirstTimingPoint()->GetBPM();
 			m_hispeed = m_modSpeed / bpm;
 			CheckChallengeHispeed(bpm);
 		}
 		else if (m_speedMod == SpeedMods::XMod)
 		{
-			CheckChallengeHispeed(m_beatmap->GetLinearTimingPoints().front()->GetBPM());
+			CheckChallengeHispeed(m_beatmap->GetFirstTimingPoint()->GetBPM());
 		}
 
 
@@ -530,76 +500,9 @@ public:
 
 		g_input.OnButtonPressed.Add(this, &Game_Impl::m_OnButtonPressed);
 
-		if (GetPlaybackOptions().random)
+		if (GetPlaybackOptions().random || GetPlaybackOptions().mirror)
 		{
-			//Randomize
-			std::array<int,4> swaps = { 0,1,2,3 };
-			
-			std::shuffle(swaps.begin(), swaps.end(), std::default_random_engine((int)(1000 * g_application->GetAppTime())));
-
-			bool unchanged = true;
-			for (int i = 0; i < 4; i++)
-			{
-				if (swaps[i] != i)
-				{
-					unchanged = false;
-					break;
-				}
-			}
-			bool flipFx = false;
-
-			if (unchanged)
-			{
-				flipFx = true;
-			}
-			else
-			{
-				std::srand((int)(1000 * g_application->GetAppTime()));
-				flipFx = (std::rand() % 2) == 1;
-			}
-
-			const Vector<ObjectState*> chartObjects = m_playback.GetBeatmap().GetLinearObjects();
-			for (ObjectState* currentobj : chartObjects)
-			{
-				if (currentobj->type == ObjectType::Single || currentobj->type == ObjectType::Hold)
-				{
-					ButtonObjectState* bos = (ButtonObjectState*)currentobj;
-					if (bos->index < 4)
-					{
-						bos->index = swaps[bos->index];
-					}
-					else if (flipFx)
-					{
-						bos->index = (bos->index - 3) % 2;
-						bos->index += 4;
-					}
-				}
-			}
-
-		}
-
-		if (GetPlaybackOptions().mirror)
-		{
-			int buttonSwaps[] = { 3,2,1,0,5,4 };
-
-			const Vector<ObjectState*> chartObjects = m_playback.GetBeatmap().GetLinearObjects();
-			for (ObjectState* currentobj : chartObjects)
-			{
-				if (currentobj->type == ObjectType::Single || currentobj->type == ObjectType::Hold)
-				{
-					ButtonObjectState* bos = (ButtonObjectState*)currentobj;
-					bos->index = buttonSwaps[bos->index];
-				}
-				else if (currentobj->type == ObjectType::Laser)
-				{
-					LaserObjectState* los = (LaserObjectState*)currentobj;
-					los->index = (los->index + 1) % 2;
-					for (size_t i = 0; i < 2; i++)
-					{
-						los->points[i] = fabsf(los->points[i] - 1.0f);
-					}
-				}
-			}
+			m_beatmap->Shuffle((int)(1000 * g_application->GetAppTime()), GetPlaybackOptions().random, GetPlaybackOptions().mirror);
 		}
 
 		if (m_practiceSetupDialog)
@@ -854,19 +757,18 @@ public:
 		RenderState rs = m_camera.CreateRenderState(true);
 
 		// Draw BG first
-		if(m_background)
-			m_background->Render(deltaTime);
+		if (m_background)
+		{
+			m_background->Render(deltaTime * m_playback.GetScrollSpeed());
+		}
 
 		// Main render queue
 		RenderQueue renderQueue(g_gl, rs);
 
 		// Get objects in range
-		MapTime msViewRange = m_playback.ViewDistanceToDuration(m_track->GetViewRange());
-		if (m_speedMod == SpeedMods::CMod)
-		{
-			msViewRange = 480000.0 / m_playback.cModSpeed;
-		}
-		m_currentObjectSet = m_playback.GetObjectsInRange(msViewRange);
+		m_currentObjectSet.clear();
+		m_playback.GetObjectsInViewRange(m_track->GetViewRange(), m_currentObjectSet);
+
 		// Sort objects to draw
 		// fx holds -> bt holds -> fx chips -> bt chips
 		m_currentObjectSet.Sort([](const TObjectState<void>* a, const TObjectState<void>* b)
@@ -1132,17 +1034,8 @@ public:
 	{
 		// Select the correct first object to set the intial playback position
 		// if it starts before a certain time frame, the song starts at a negative time (lead-in)
-		ObjectState* const* firstObj = &m_beatmap->GetLinearObjects().front();
-		for (; firstObj != &m_beatmap->GetLinearObjects().back(); ++firstObj)
-		{
-			if ((*firstObj)->type == ObjectType::Event) continue;
-			if ((*firstObj)->time < m_playOptions.range.begin) continue;
-
-			break;
-		}
-
 		const MapTime beginTime = m_playOptions.range.begin;
-		const MapTime firstObjectTime = (*firstObj)->time;
+		const MapTime firstObjectTime = m_beatmap->GetFirstObjectTime(beginTime);
 
 		return std::min(beginTime, firstObjectTime - GetAudioLeadIn());
 	}
@@ -1388,8 +1281,6 @@ public:
 		m_currentTiming = &m_playback.GetCurrentTimingPoint();
 
 		// Update song info display
-		ObjectState *const* lastObj = &m_beatmap->GetLinearObjects().back();
-
 		if (m_multiplayer != nullptr)
 			m_multiplayer->PerformScoreTick(m_scoring, m_lastMapTime);
 
@@ -2061,16 +1952,16 @@ public:
 		}
 	}
 
-	void OnTimingPointChanged(TimingPoint* tp)
+	void OnTimingPointChanged(Beatmap::TimingPointsIterator tp)
 	{
 	   m_hispeed = m_modSpeed / tp->GetBPM(); 
 	}
-	void OnTimingPointChangedChallenge(TimingPoint* tp)
+	void OnTimingPointChangedChallenge(Beatmap::TimingPointsIterator tp)
 	{
 		CheckChallengeHispeed(tp->GetBPM());
 	}
 
-	void OnLaneToggleChanged(LaneHideTogglePoint* tp)
+	void OnLaneToggleChanged(Beatmap::LaneTogglePointsIterator tp)
 	{
 		// Calculate how long the transition should be in seconds
 		double duration = m_currentTiming->beatDuration * 4.0f * (tp->duration / 192.0f) * 0.001f;
@@ -2248,8 +2139,7 @@ public:
 				return;
 			}
 
-			ObjectState* const* lastObj = &m_beatmap->GetLinearObjects().back();
-			MapTime timePastEnd = m_lastMapTime - (*lastObj)->time;
+			MapTime timePastEnd = m_lastMapTime - m_beatmap->GetLastObjectTimeIncludingEvents();
 			if (timePastEnd < 0)
 				m_manualExit = true;
 
@@ -2377,12 +2267,7 @@ public:
 	// Skips ahead to the right before the first object in the map
 	bool SkipIntro()
 	{
-		ObjectState* const* firstObj = &m_beatmap->GetLinearObjects().front();
-		while ((*firstObj)->type == ObjectType::Event && firstObj != &m_beatmap->GetLinearObjects().back())
-		{
-			firstObj++;
-		}
-		MapTime skipTime = (*firstObj)->time - 1000;
+		const MapTime skipTime = m_beatmap->GetFirstObjectTime(0) - 1000;
 		if (skipTime > m_lastMapTime)
 		{
 			// In multiplayer mode we have to stay synced
@@ -2398,15 +2283,14 @@ public:
 	void SkipOutro()
 	{
 		// Just to be sure
-		if (m_beatmap->GetLinearObjects().empty())
+		if (!m_beatmap->HasObjectState())
 		{
 			FinishGame();
 			return;
 		}
 
 		// Check if last object has passed
-		ObjectState* const* lastObj = &m_beatmap->GetLinearObjects().back();
-		MapTime timePastEnd = m_lastMapTime - (*lastObj)->time;
+		MapTime timePastEnd = m_lastMapTime - m_beatmap->GetLastObjectTimeIncludingEvents();
 		if (timePastEnd > 250)
 		{
 			FinishGame();

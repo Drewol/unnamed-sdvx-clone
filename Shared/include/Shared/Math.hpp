@@ -1,6 +1,9 @@
 #pragma once
+
 #include <math.h>
 #include <cmath>
+
+#include <type_traits>
 
 namespace Math
 {
@@ -38,6 +41,13 @@ namespace Math
 		if(v > max)
 			return max;
 		return v;
+	}
+
+	template<typename T>
+	static constexpr std::enable_if_t<std::is_arithmetic<T>::value, T> Lerp(T a, T b, T t) noexcept
+	{
+		// Not the spec-confirming lerp, but good enough
+		return t == 0 ? a : t == 1 ? b : a + t * (b - a);
 	}
 
 	// Templated Greatest common divisor

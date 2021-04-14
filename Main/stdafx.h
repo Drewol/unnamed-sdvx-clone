@@ -28,6 +28,7 @@
 
 #include <functional>
 #include <memory>
+#include <random>
 #include <stack>
 #include <string>
 #include <queue>
