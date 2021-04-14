@@ -833,9 +833,7 @@ bool Application::m_Init()
 
 	// I18N
 	I18N::Get().Initialize("./translations");
-
-	// TODO: load from the config
-	I18N::Get().SetLanguage("ko");
+	I18N::Get().SetLanguage(g_gameConfig.GetString(GameConfigKeys::Language));
 
 	// Job sheduler
 	g_jobSheduler = new JobSheduler();

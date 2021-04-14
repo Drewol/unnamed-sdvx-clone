@@ -202,6 +202,28 @@ bool SettingsPage::StringSelectionSetting(GameConfigKeys key, const Vector<Strin
 	}
 	return false;
 }
+
+bool SettingsPage::StringSelectionSetting(GameConfigKeys key, const Vector<String>& values, const Vector<const char*>& labels, const std::string_view& label)
+{
+	assert(values.size() >= labels.size());
+
+	String value = g_gameConfig.GetString(key);
+	int selection = 0;
+
+	const auto stringSearch = std::find(values.begin(), values.end(), value);
+	if (stringSearch != values.end())
+	{
+		selection = static_cast<int>(stringSearch - values.begin());
+	}
+
+	const int newSelection = SelectionInput(selection, labels, label);
+
+	if (newSelection != selection) {
+		g_gameConfig.Set(key, values[newSelection]);
+		return true;
+	}
+	return false;
+}
 	
 int SettingsPage::IntInput(int val, const std::string_view& label, int min, int max, int step, float perPixel)
 {

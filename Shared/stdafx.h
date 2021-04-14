@@ -11,6 +11,7 @@
 #include <windows.h>
 #endif
 
+#include <algorithm>
 #include <map>
 #include <sstream>
 #include <string>

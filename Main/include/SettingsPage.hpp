@@ -92,6 +92,7 @@ protected:
 	int SelectionInput(int val, const Vector<const char*>& options, const std::string_view& label);
 	bool SelectionSetting(GameConfigKeys key, const Vector<const char*>& options, const std::string_view& label);
 	bool StringSelectionSetting(GameConfigKeys key, const Vector<String>& options, const std::string_view& label);
+	bool StringSelectionSetting(GameConfigKeys key, const Vector<String>& values, const Vector<const char*>& labels, const std::string_view& label);
 
 	int IntInput(int val, const std::string_view& label, int min, int max, int step = 1, float perPixel = 1.0f);
 	bool IntSetting(GameConfigKeys key, const std::string_view& label, int min, int max, int step = 1, float perPixel = 1.0f);

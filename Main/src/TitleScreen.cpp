@@ -24,6 +24,7 @@ class TitleScreen_Impl : public TitleScreen
 private:
 	lua_State* m_lua = nullptr;
 	LuaBindable* m_luaBinds = nullptr;
+	String m_currLanguage = "";
 
 	void Exit()
 	{
@@ -148,6 +149,9 @@ public:
 		lua_settop(m_lua, 0);
 		g_gameWindow->OnMousePressed.Add(this, &TitleScreen_Impl::MousePressed);
 		g_input.OnButtonPressed.Add(this, &TitleScreen_Impl::m_OnButtonPressed);
+
+		m_currLanguage = g_gameConfig.GetString(GameConfigKeys::Language);
+
 		return true;
 	}
 	
@@ -186,16 +190,23 @@ public:
 			assert(false);
 		}
 	}
+
 	virtual void OnSuspend()
 	{
 	}
+
 	virtual void OnRestore()
 	{
 		g_gameWindow->SetCursorVisible(true);
 		g_application->DiscordPresenceMenu("Title Screen");
+
+		if (m_currLanguage != g_gameConfig.GetString(GameConfigKeys::Language))
+		{
+			m_currLanguage = g_gameConfig.GetString(GameConfigKeys::Language);
+
+			g_application->ReloadScript("titlescreen", m_lua);
+		}
 	}
-
-
 };
 
 TitleScreen* TitleScreen::Create()

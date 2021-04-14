@@ -665,6 +665,15 @@ protected:
 		{
 			m_channels.insert(m_channels.begin(), channel);
 		}
+
+		m_languages.clear();
+		m_languageNames.clear();
+
+		for (const auto& pair : I18N::SUPPORTED_LANGUAGE_NAMES)
+		{
+			m_languages.Add(pair.first);
+			m_languageNames.Add(pair.second);
+		}
 	}
 
 	void Save() override
@@ -677,6 +686,9 @@ protected:
 
 	const Vector<const char*> m_aaModes = { "Off", "2x MSAA", "4x MSAA", "8x MSAA", "16x MSAA" };
 	Vector<String> m_channels;
+
+	Vector<String> m_languages;
+	Vector<const char*> m_languageNames;
 
 protected:
 	void RenderContents() override
@@ -704,6 +716,9 @@ protected:
 		SetApply(ToggleSetting(GameConfigKeys::VSync, "VSync"));
 		SetApply(ToggleSetting(GameConfigKeys::ShowFps, "Show FPS"));
 
+		SectionHeader("Language");
+		RenderLanguageSelection();
+
 		SectionHeader("Update");
 
 		ToggleSetting(GameConfigKeys::CheckForUpdates, "Check for updates on startup");
@@ -720,6 +735,19 @@ protected:
 		if (applySettings)
 		{
 			g_application->ApplySettings();
+		}
+	}
+
+private:
+	void RenderLanguageSelection()
+	{
+		const int oldVal = I18N::GetLanguageIndexFromNamesMap(g_gameConfig.GetString(GameConfigKeys::Language));
+		const int newVal = SelectionInput(oldVal, m_languageNames, "Language:");
+		if (newVal != oldVal && newVal >= 0 && newVal < static_cast<int>(m_languages.size()))
+		{
+			const String& newLanguage = m_languages[newVal];
+			g_gameConfig.Set(GameConfigKeys::Language, newLanguage);
+			I18N::Get().SetLanguage(newLanguage);
 		}
 	}
 };
