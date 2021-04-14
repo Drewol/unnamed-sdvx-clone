@@ -115,6 +115,16 @@ std::string_view I18N::GetText(const std::string_view& msg_id) const
 	return m_files[m_currFile].GetText(msg_id);
 }
 
+std::string_view I18N::GetText(const std::string_view& msg_ctxt, const std::string_view& msg_id) const
+{
+	if (m_currFile >= m_files.size())
+	{
+		return msg_id;
+	}
+
+	return m_files[m_currFile].GetText(msg_ctxt, msg_id);
+}
+
 void I18N::BindLua(lua_State* L)
 {
 	lua_pushcfunction(L, I18N::Lua_GetText);

@@ -36,6 +36,44 @@ std::string_view POFile::GetText(const std::string_view& msg_id) const
 	return msg_id;
 }
 
+static inline size_t LongestMatch(const std::string_view& x, const std::string_view& y)
+{
+	size_t i = 0;
+
+	for (; i < x.size() && i < y.size(); ++i)
+	{
+		if (x[i] != y[i]) return i;
+	}
+
+	return i;
+}
+
+std::string_view POFile::GetText(const std::string_view& msg_ctxt, const std::string_view& msg_id) const
+{
+	auto range = m_contents.equal_range(msg_id);
+	auto longest_match = range.first;
+	size_t longest_match_size = 0;
+
+	for (auto it = range.first; it != range.second; ++it)
+	{
+		const size_t curr_match_size = LongestMatch(msg_ctxt, it->second.m_context);
+		if (curr_match_size > longest_match_size)
+		{
+			longest_match_size = curr_match_size;
+			longest_match = it;
+		}
+	}
+
+	if (longest_match != m_contents.end())
+	{
+		return longest_match->second.m_value;
+	}
+	else
+	{
+		return msg_id;
+	}
+}
+
 void POFile::Parse(File& file)
 {
 	FileReader reader(file);
@@ -118,6 +156,13 @@ void POFile::Parse(FileReader& reader)
 
 	bool curr_id_seen = false;
 
+	const static int CURR_ITEM_NONE = -1;
+	const static int CURR_ITEM_MSGCTXT = 0;
+	const static int CURR_ITEM_MSGID = 1;
+	const static int CURR_ITEM_MSGSTR = 2;
+
+	int curr_item = CURR_ITEM_NONE;
+
 	auto push_curr_msg = [&]() {
 		if (curr_id_seen)
 		{
@@ -127,6 +172,7 @@ void POFile::Parse(FileReader& reader)
 			}
 			else
 			{
+				if (!curr_msgid.empty() && curr_msgstr.empty()) curr_msgstr = curr_msgid;
 				m_contents.emplace(curr_msgid, Entry{ curr_msgctxt, curr_msgstr });
 			}
 		}
@@ -147,7 +193,20 @@ void POFile::Parse(FileReader& reader)
 
 		if (line.substr(0, 3).compare("msg") != 0)
 		{
-			if (line[0] == '"') curr_msgstr += unquote(line);
+			if (line[0] == '"')
+			{
+				switch (curr_item)
+				{
+				case CURR_ITEM_MSGCTXT: curr_msgctxt += unquote(line); break;
+				case CURR_ITEM_MSGID: curr_msgid += unquote(line); break;
+				case CURR_ITEM_MSGSTR: curr_msgstr += unquote(line); break;
+				default: break;
+				}
+			}
+			else
+			{
+				curr_item = CURR_ITEM_NONE;
+			}
 			continue;
 		}
 
@@ -157,12 +216,14 @@ void POFile::Parse(FileReader& reader)
 			push_curr_msg();
 			curr_id_seen = true;
 			curr_msgid = unquote(line.substr(6));
+			curr_item = CURR_ITEM_MSGID;
 		}
 
 		// msgstr
 		else if (line.substr(3, 4).compare("str ") == 0)
 		{
 			curr_msgstr += unquote(line.substr(7));
+			curr_item = CURR_ITEM_MSGSTR;
 		}
 
 		// msgctxt
@@ -170,6 +231,7 @@ void POFile::Parse(FileReader& reader)
 		{
 			push_curr_msg();
 			curr_msgctxt = unquote(line.substr(8));
+			curr_item = CURR_ITEM_MSGCTXT;
 		}
 	}
 

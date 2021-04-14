@@ -23,12 +23,12 @@ local searchIndex = 1
 local jacketFallback = gfx.CreateSkinImage("song_select/loading.png", 0)
 local showGuide = game.GetSkinSetting("show_guide")
 local legendTable = {
-  {["labelSingleLine"] =  gfx.CreateLabel("DIFFICULTY SELECT",16, 0), ["labelMultiLine"] =  gfx.CreateLabel("DIFFICULTY\nSELECT",16, 0), ["image"] = gfx.CreateSkinImage("legend/knob-left.png", 0)},
-  {["labelSingleLine"] =  gfx.CreateLabel("MUSIC SELECT",16, 0),      ["labelMultiLine"] =  gfx.CreateLabel("MUSIC\nSELECT",16, 0),      ["image"] = gfx.CreateSkinImage("legend/knob-right.png", 0)},
-  {["labelSingleLine"] =  gfx.CreateLabel("FILTER MUSIC",16, 0),      ["labelMultiLine"] =  gfx.CreateLabel("FILTER\nMUSIC",16, 0),      ["image"] = gfx.CreateSkinImage("legend/FX-L.png", 0)},
-  {["labelSingleLine"] =  gfx.CreateLabel("SORT MUSIC",16, 0),        ["labelMultiLine"] =  gfx.CreateLabel("SORT\nMUSIC",16, 0),        ["image"] = gfx.CreateSkinImage("legend/FX-R.png", 0)},
-  {["labelSingleLine"] =  gfx.CreateLabel("MUSIC MODS",16, 0),        ["labelMultiLine"] =  gfx.CreateLabel("MUSIC\nMODS",16, 0),        ["image"] = gfx.CreateSkinImage("legend/FX-LR.png", 0)},
-  {["labelSingleLine"] =  gfx.CreateLabel("PLAY",16, 0),              ["labelMultiLine"] =  gfx.CreateLabel("PLAY",16, 0),               ["image"] = gfx.CreateSkinImage("legend/start.png", 0)}
+  {["labelSingleLine"] =  gfx.CreateLabel(_("DIFFICULTY SELECT"),16, 0), ["labelMultiLine"] =  gfx.CreateLabel(_("DIFFICULTY\nSELECT"),16, 0), ["image"] = gfx.CreateSkinImage("legend/knob-left.png", 0)},
+  {["labelSingleLine"] =  gfx.CreateLabel(_("MUSIC SELECT"),16, 0),      ["labelMultiLine"] =  gfx.CreateLabel(_("MUSIC\nSELECT"),16, 0),      ["image"] = gfx.CreateSkinImage("legend/knob-right.png", 0)},
+  {["labelSingleLine"] =  gfx.CreateLabel(_("FILTER MUSIC"),16, 0),      ["labelMultiLine"] =  gfx.CreateLabel(_("FILTER\nMUSIC"),16, 0),      ["image"] = gfx.CreateSkinImage("legend/FX-L.png", 0)},
+  {["labelSingleLine"] =  gfx.CreateLabel(_("SORT MUSIC"),16, 0),        ["labelMultiLine"] =  gfx.CreateLabel(_("SORT\nMUSIC"),16, 0),        ["image"] = gfx.CreateSkinImage("legend/FX-R.png", 0)},
+  {["labelSingleLine"] =  gfx.CreateLabel(_("PLAY MODS"),16, 0),         ["labelMultiLine"] =  gfx.CreateLabel(_("PLAY\nMODS"),16, 0),         ["image"] = gfx.CreateSkinImage("legend/FX-LR.png", 0)},
+  {["labelSingleLine"] =  gfx.CreateLabel(_("PLAY"),16, 0),              ["labelMultiLine"] =  gfx.CreateLabel(_("PLAY"),16, 0),               ["image"] = gfx.CreateSkinImage("legend/start.png", 0)}
 }
 local grades = {
   {["max"] = 6999999, ["image"] = gfx.CreateSkinImage("score/D.png", 0)},
@@ -157,7 +157,7 @@ end
 function get_record(hash)
     if recordCache[hash] then return recordCache[hash] end
 
-    recordCache[hash] = {good=false, reason="Loading..."}
+    recordCache[hash] = {good=false, reason=_("Loading...")}
 
     IR.Record(hash, record_handler_factory(hash))
 
@@ -200,8 +200,8 @@ draw_scores_ir = function(difficulty, x, y, w, h)
     gfx.FontSize(30);
     gfx.TextAlign(gfx.TEXT_ALIGN_BOTTOM + gfx.TEXT_ALIGN_CENTER);
 
-    gfx.FastText("HIGH SCORE", x +(w/4), y+(h/2))
-    gfx.FastText("IR RECORD", x + (3/4 * w), y + (h/2))
+    gfx.FastText(_("HIGH SCORE"), x +(w/4), y+(h/2))
+    gfx.FastText(_("IR RECORD"), x + (3/4 * w), y + (h/2))
 
     gfx.BeginPath()
     gfx.Rect(x+xOffset,y+h/2,w/2-(xOffset*2),h/2)
@@ -300,7 +300,7 @@ draw_scores = function(difficulty, x, y, w, h)
 	local yOffset = h/3
   gfx.FontSize(30);
   gfx.TextAlign(gfx.TEXT_ALIGN_BOTTOM + gfx.TEXT_ALIGN_CENTER);
-  gfx.FastText("HIGH SCORE", x +(w/2), y+(h/2))
+  gfx.FastText(_("HIGH SCORE"), x +(w/2), y+(h/2))
   gfx.BeginPath()
   gfx.Rect(x+xOffset,y+h/2,w-(xOffset*2),h/2)
   gfx.FillColor(30,30,30,10)
@@ -485,7 +485,7 @@ draw_selected = function(song, x, y, w, h)
       gfx.DrawLabel(songCache[song.id]["artist"], xpos+xPadding+imageSize+3, y+yMargin+yPadding + 45, width-imageSize-20)
       gfx.FontSize(20)
       gfx.DrawLabel(songCache[song.id]["bpm"], xpos+xPadding+imageSize+3, y+yMargin+yPadding + 85, width-imageSize-20)
-      gfx.FastText(string.format("Effector: %s", diff.effector), xpos+xPadding+imageSize+3, y+yMargin+yPadding + 115)
+      gfx.FastText(string.format(_("Effector: %s"), diff.effector), xpos+xPadding+imageSize+3, y+yMargin+yPadding + 115)
     else
       gfx.FontSize(40)
       gfx.TextAlign(gfx.TEXT_ALIGN_TOP + gfx.TEXT_ALIGN_LEFT)
@@ -495,7 +495,7 @@ draw_selected = function(song, x, y, w, h)
       gfx.FillColor(255,255,255)
       gfx.FontSize(20)
       gfx.DrawLabel(songCache[song.id]["bpm"], xpos+10, (height/10)*6 + 85)
-      gfx.FastText(string.format("Effector: %s", diff.effector),xpos+10, (height/10)*6 + 115)
+      gfx.FastText(string.format(_("Effector: %s"), diff.effector),xpos+10, (height/10)*6 + 115)
     end
     if aspectRatio == "PortraitWidescreen" then
       draw_scores(diff, xpos+xPadding+imageSize+3,  (height/3)*2, width-imageSize-20, (height/3)-yPadding)
@@ -590,7 +590,7 @@ draw_search = function(x,y,w,h)
   gfx.Fill()
   gfx.ForceRender()
   local xpos = x + (searchIndex + soffset)*w
-  gfx.UpdateLabel(searchText ,string.format("Search: %s",songwheel.searchText), 30, 0)
+  gfx.UpdateLabel(searchText ,string.format(_("Search: %s"),songwheel.searchText), 30, 0)
   gfx.BeginPath()
   gfx.RoundedRect(xpos,y,w,h,h/2)
   gfx.FillColor(30,30,30)
@@ -657,7 +657,7 @@ render = function(deltaTime)
 		gfx.FillColor(255,255,255)
 		gfx.FontSize(20);
 		gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM)
-		local forceText = string.format("Force: %.2f", totalForce)
+		local forceText = string.format(_("Force: %.2f"), totalForce)
 		gfx.Text(forceText, 0, fullY)
 	end
     gfx.LoadSkinFont("NotoSans-Regular.ttf");

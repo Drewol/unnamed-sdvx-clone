@@ -32,7 +32,7 @@ protected:
 class BasicWindow : public BasicNuklearGui
 {
 public:
-	BasicWindow(String name) : m_name(name) {};
+	BasicWindow(std::string_view name) : m_name(name) {};
 	void Tick(float deltaTime) override;
 	void Render(float deltaTime) override;
 	bool OnKeyPressedConsume(SDL_Scancode code) override;
@@ -58,7 +58,7 @@ bool nk_edit_isfocused(struct nk_context* ctx);
 
 class BasicPrompt : public BasicWindow {
 public:
-	BasicPrompt(String title, String body, String submitText = "Submit")
+	BasicPrompt(std::string_view title, std::string_view body, std::string_view submitText = "Submit")
 		: BasicWindow(title), m_text(body), m_submitText(submitText) { };
 	bool Init() override;
 	virtual bool OnKeyPressedConsume(SDL_Scancode code) override;

@@ -622,14 +622,14 @@ public:
 	{
 		if (m_sorts.size() == 0)
 		{
-			m_sorts.Add(new ChallengeTitleSort("Title ^", false));
-			m_sorts.Add(new ChallengeTitleSort("Title v", true));
-			m_sorts.Add(new ChallengeScoreSort("Score ^", false));
-			m_sorts.Add(new ChallengeScoreSort("Score v", true));
-			m_sorts.Add(new ChallengeDateSort("Date ^", false));
-			m_sorts.Add(new ChallengeDateSort("Date v", true));
-			m_sorts.Add(new ChallengeClearMarkSort("Badge ^", false));
-			m_sorts.Add(new ChallengeClearMarkSort("Badge v", true));
+			m_sorts.Add(new ChallengeTitleSort(false));
+			m_sorts.Add(new ChallengeTitleSort(true));
+			m_sorts.Add(new ChallengeScoreSort(false));
+			m_sorts.Add(new ChallengeScoreSort(true));
+			m_sorts.Add(new ChallengeDateSort(false));
+			m_sorts.Add(new ChallengeDateSort(true));
+			m_sorts.Add(new ChallengeClearMarkSort(false));
+			m_sorts.Add(new ChallengeClearMarkSort(true));
 		}
 
 		CheckedLoad(m_lua = g_application->LoadScript("songselect/sortwheel"));

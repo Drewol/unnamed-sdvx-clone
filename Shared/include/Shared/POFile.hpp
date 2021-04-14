@@ -17,6 +17,7 @@ public:
 	POFile(class File& file);
 
 	std::string_view GetText(const std::string_view& msg_id) const;
+	std::string_view GetText(const std::string_view& msg_ctxt, const std::string_view& msg_id) const;
 
 	inline const String& GetLanguage() const { return m_language; }
 

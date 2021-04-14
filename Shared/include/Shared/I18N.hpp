@@ -16,6 +16,8 @@ public:
 	void SetLanguage(const String& lang);
 
 	std::string_view GetText(const std::string_view& msg_id) const;
+	std::string_view GetText(const std::string_view& msg_ctxt, const std::string_view& msg_id) const;
+
 	void BindLua(struct lua_State* L);
 
 	const static std::map<String, const char*> SUPPORTED_LANGUAGE_NAMES;
@@ -38,4 +40,9 @@ private:
 inline std::string_view _(const std::string_view& msg_id)
 {
 	return I18N::Get().GetText(msg_id);
+}
+
+inline std::string_view _p(const std::string_view& msg_ctxt, const std::string_view& msg_id)
+{
+	return I18N::Get().GetText(msg_ctxt, msg_id);
 }
