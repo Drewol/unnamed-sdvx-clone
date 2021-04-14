@@ -122,7 +122,7 @@ std::string_view I18N::GetText(const std::string_view& msg_ctxt, const std::stri
 		return msg_id;
 	}
 
-	return m_files[m_currFile].GetText(msg_ctxt, msg_id);
+	return m_files[m_currFile].GetText(msg_id, msg_ctxt);
 }
 
 void I18N::BindLua(lua_State* L)
@@ -164,15 +164,35 @@ int I18N::GetLanguageIndexFromNamesMap(const String& lang)
 
 int I18N::Lua_GetText(lua_State* L)
 {
-	if (const char* msg_id = luaL_checkstring(L, 1))
+	switch (lua_gettop(L))
 	{
-		lua_pushstring(L, I18N::Get().GetText(msg_id).data());
-		return 1;
-	}
-	else
+	case 1:
 	{
-		return 0;
+		const char* msg_id = luaL_checkstring(L, 1);
+		if (msg_id)
+		{
+			lua_pushstring(L, I18N::Get().GetText(msg_id).data());
+			return 1;
+		}
 	}
+		break;
+	case 2:
+	{
+		const char* msg_id = luaL_checkstring(L, 1);
+		const char* msg_ctxt = luaL_checkstring(L, 1);
+		if (msg_id && msg_ctxt)
+		{
+			lua_pushstring(L, I18N::Get().GetText(msg_id, msg_ctxt).data());
+			return 1;
+		}
+	}
+		break;
+	default:
+		return luaL_error(L, "expecting 1 or 2 string arguments");
+		break;
+	}
+
+	return luaL_error(L, "unknown error");
 }
 
 String I18N::GetFilePath(const String& lang) const

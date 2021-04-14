@@ -26,14 +26,9 @@ POFile::POFile(File& file)
 
 std::string_view POFile::GetText(const std::string_view& msg_id) const
 {
-	auto range = m_contents.equal_range(msg_id);
-	
-	for (auto it = range.first; it != range.second; ++it)
-	{
-		return it->second.m_value;
-	}
-	
-	return msg_id;
+	auto it = m_contents.find(msg_id);
+	if (it != m_contents.end()) return it->second.m_value;
+	else return msg_id;
 }
 
 static inline size_t LongestMatch(const std::string_view& x, const std::string_view& y)
@@ -48,7 +43,7 @@ static inline size_t LongestMatch(const std::string_view& x, const std::string_v
 	return i;
 }
 
-std::string_view POFile::GetText(const std::string_view& msg_ctxt, const std::string_view& msg_id) const
+std::string_view POFile::GetText(const std::string_view& msg_id, const std::string_view& msg_ctxt) const
 {
 	auto range = m_contents.equal_range(msg_id);
 	auto longest_match = range.first;

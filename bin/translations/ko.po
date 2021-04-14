@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed sdvx clone\n"
-"POT-Creation-Date: 2021-04-14 22:07+0900\n"
-"PO-Revision-Date: 2021-04-14 22:07+0900\n"
+"POT-Creation-Date: 2021-04-14 23:48+0900\n"
+"PO-Revision-Date: 2021-04-14 23:48+0900\n"
 "Last-Translator: \n"
 "Language-Team: https://github.com/Drewol/unnamed-sdvx-clone\n"
 "Language: ko\n"
@@ -12,7 +12,7 @@ msgstr ""
 "X-Generator: Poedit 2.4.2\n"
 "X-Poedit-Basepath: ../..\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Poedit-KeywordsList: ;_p:1c,2;_:1\n"
+"X-Poedit-KeywordsList: ;_:1,2c;_:1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-SearchPath-0: bin/skins/Default\n"
 "X-Poedit-SearchPath-1: Main/src\n"
@@ -114,6 +114,8 @@ msgid "Score Display"
 msgstr "스코어 표시"
 
 #: Main/src/GameplaySettingsDialog.cpp:43
+#, fuzzy
+#| msgid "Autoplay"
 msgid "Autoplay"
 msgstr "오토플레이"
 
