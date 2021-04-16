@@ -30,6 +30,7 @@ protected:
 
 private:
 	void InitNuklearFontAtlas();
+	void InitNuklearFontAtlasFallback(struct nk_font_atlas* atlas, float fontSize);
 };
 
 class BasicWindow : public BasicNuklearGui

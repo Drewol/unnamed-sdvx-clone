@@ -72,8 +72,8 @@ static void ExtendFontAtlas(struct nk_font_atlas* atlas, const std::string_view&
 
 void BasicNuklearGui::InitNuklearFontAtlas()
 {
+	// This font should cover latin and cyrillic fonts.
 	const String defaultFontPath = Path::Normalize(Path::Absolute("fonts/settings/NotoSans-Regular.ttf"));
-	const String cjkFontPath = Path::Normalize(Path::Absolute("fonts/settings/DroidSansFallback.ttf"));
 	const float fontSize = 24.f;
 
 	struct nk_font_atlas* atlas;
@@ -81,32 +81,56 @@ void BasicNuklearGui::InitNuklearFontAtlas()
 
 	struct nk_font* font = nk_font_atlas_add_from_file(atlas, defaultFontPath.data(), fontSize, 0);
 
-	static const nk_rune cjk_ranges[] = {
-		0x0020, 0x00FF,
-		// Chinese
-		0x3000, 0x30FF,
-		0x31F0, 0x31FF,
-		0xFF00, 0xFFEF,
-		0x4E00, 0x9FAF,
-		// Korean
-		0x3131, 0x3163,
-		0xAC00, 0xD7A3,
-		0
-	};
-
-	int maxTextureSize = 0;
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-	Logf("System max texture size: %d", Logger::Severity::Info, maxTextureSize);
-
-	if (maxTextureSize >= FULL_FONT_TEXTURE_HEIGHT && !g_gameConfig.GetBool(GameConfigKeys::LimitSettingsFont))
+	if (!g_gameConfig.GetBool(GameConfigKeys::LimitSettingsFont))
 	{
-		ExtendFontAtlas(atlas, cjkFontPath, fontSize, cjk_ranges);
+		InitNuklearFontAtlasFallback(atlas, fontSize);
 	}
 
 	usc_nk_sdl_font_stash_end();
 	nk_font_atlas_cleanup(atlas);
 
 	nk_style_set_font(m_nctx, &font->handle);
+}
+
+void BasicNuklearGui::InitNuklearFontAtlasFallback(struct nk_font_atlas* atlas, float fontSize)
+{
+	const String cjkFontPath = Path::Normalize(Path::Absolute("fonts/settings/DroidSansFallback.ttf"));
+
+	// Essentials
+	constexpr int CJK_SIZE_SMALL = 1024;
+	static const nk_rune cjk_ranges_small[] = {
+		// CJK symbols and punctuation
+		0x3000, 0x303F,
+		// Hiragana
+		0x3040, 0x309F,
+		// Katakana
+		0x30A0, 0x30FF,
+		0x31F0, 0x31FF,
+		// Fullwidth and halfwidth characters
+		0xFF00, 0xFFEF,
+		0
+	};
+
+	// Basically all BMP characters in the font file
+	constexpr int CJK_SIZE_LARGE = 8192;
+	static const nk_rune cjk_ranges_large[] = {
+		0x0E3F, 0xFFFF,
+		0
+	};
+
+	int maxTextureSize = 0;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+	Logf("System max texture size: %d (cjk small: %d / large: %d)", Logger::Severity::Info,
+		maxTextureSize, CJK_SIZE_SMALL, CJK_SIZE_LARGE);
+
+	if (maxTextureSize >= CJK_SIZE_LARGE)
+	{
+		ExtendFontAtlas(atlas, cjkFontPath, fontSize, cjk_ranges_large);
+	}
+	else if (maxTextureSize >= CJK_SIZE_SMALL)
+	{
+		ExtendFontAtlas(atlas, cjkFontPath, fontSize, cjk_ranges_small);
+	}
 }
 
 void BasicNuklearGui::Tick(float deltatime)
