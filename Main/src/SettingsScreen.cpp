@@ -660,6 +660,7 @@ protected:
 	void Load() override
 	{
 		m_channels = { "release", "master", "develop" };
+		m_lightPlugins = g_application->GetLightPluginList();
 		String channel = g_gameConfig.GetString(GameConfigKeys::UpdateChannel);
 
 		if (!m_channels.Contains(channel))
@@ -678,6 +679,7 @@ protected:
 
 	const Vector<const char*> m_aaModes = { "Off", "2x MSAA", "4x MSAA", "8x MSAA", "16x MSAA" };
 	Vector<String> m_channels;
+	Vector<String> m_lightPlugins;
 
 protected:
 	void RenderContents() override
@@ -695,6 +697,10 @@ protected:
 		ToggleSetting(GameConfigKeys::WASAPI_Exclusive, "WASAPI exclusive mode (requires restart)");
 #endif // _WIN32
 		ToggleSetting(GameConfigKeys::PrerenderEffects, "Pre-render song effects (experimental)");
+
+		SectionHeader("Lights");
+		StringSelectionSetting(GameConfigKeys::LightPlugin, m_lightPlugins, "Light plugin:");
+
 
 		SectionHeader("Render");
 

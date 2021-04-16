@@ -39,6 +39,7 @@ public:
 	bool GetButton(Button button) const;
 	float GetAbsoluteLaser(int laser) const;
 	bool Are3BTsHeld() const;
+	uint32 GetButtonBits() const;
 
 	// Controller state as a string
 	// Primarily used for debugging

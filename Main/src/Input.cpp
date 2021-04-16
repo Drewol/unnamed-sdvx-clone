@@ -238,6 +238,16 @@ bool Input::Are3BTsHeld() const
 	return (bta && btb && btc) || (bta && btb && btd) || (bta && btc && btd) || (btb && btc && btd);
 }
 
+uint32 Input::GetButtonBits() const
+{
+	uint32 res = 0;
+	for (size_t i = 0; i < 7; i++)
+	{
+		res = res | ((m_buttonStates[i] ? 1 : 0) << i);
+	}
+	return res;
+}
+
 String Input::GetControllerStateString() const
 {
 	if(m_gamepad)

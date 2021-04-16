@@ -972,9 +972,10 @@ private:
 	bool m_hasRestored = false;
 	Map<Input::Button, float> m_timeSinceButtonPressed;
 	Map<Input::Button, float> m_timeSinceButtonReleased;
-	lua_State* m_lua = nullptr;
+	lua_State *m_lua = nullptr;
+	float m_lightTimer = 0.0f;
 
-	MultiplayerScreen* m_multiplayer = nullptr;
+	MultiplayerScreen *m_multiplayer = nullptr;
 	CollectionDialog m_collDiag;
 	GameplaySettingsDialog m_settDiag;
 
@@ -1594,6 +1595,21 @@ public:
 			m_previewPlayer.Update(deltaTime);
 			m_searchInput->Tick();
 			m_selectionWheel->SetSearchFieldLua(m_searchInput);
+
+			//tick light
+			m_lightTimer += deltaTime;
+			m_lightTimer = fmodf(m_lightTimer, 2);
+			for (size_t i = 0; i < 2; i++)
+			{
+				for (size_t j = 0; j < 3; j++)
+				{
+					g_application->SetRgbLights(i, j, Colori::Black);
+				}
+			}
+			if (m_lightTimer >= 1)
+				g_application->SetButtonLights(1 << 6);
+			else
+				g_application->SetButtonLights(0);
 			if (m_collDiag.IsActive())
 			{
 				m_collDiag.Tick(deltaTime);

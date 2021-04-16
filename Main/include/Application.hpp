@@ -10,11 +10,11 @@ extern struct GUIState g_guiState;
 extern class Graphics::Window* g_gameWindow;
 extern float g_aspectRatio;
 extern Vector2i g_resolution;
-extern class Application* g_application;
-extern class JobSheduler* g_jobSheduler;
+extern class Application *g_application;
+extern class JobSheduler *g_jobSheduler;
 extern class Input g_input;
-extern class SkinConfig* g_skinConfig;
-extern class TransitionScreen* g_transition;
+extern class SkinConfig *g_skinConfig;
+extern class TransitionScreen *g_transition;
 
 class Application
 {
@@ -36,11 +36,11 @@ public:
 	void SetCommandLine(int32 argc, char** argv);
 	void SetCommandLine(const char* cmdLine);
 
-	class Game* LaunchMap(const String& mapPath);
+	class Game *LaunchMap(const String &mapPath);
 	void Shutdown();
 
-	void AddTickable(class IApplicationTickable* tickable, class IApplicationTickable* insertBefore = nullptr);
-	void RemoveTickable(class IApplicationTickable* tickable, bool noDelete = false);
+	void AddTickable(class IApplicationTickable *tickable, class IApplicationTickable *insertBefore = nullptr);
+	void RemoveTickable(class IApplicationTickable *tickable, bool noDelete = false);
 
 	// Current running map path (full file path)
 	String GetCurrentMapPath();
@@ -49,11 +49,11 @@ public:
 	String GetCurrentSkin();
 
 	// Retrieves application command line parameters
-	const Vector<String>& GetAppCommandLine() const;
+	const Vector<String> &GetAppCommandLine() const;
 
 	// Gets a basic template for a render state, with all the application variables initialized
 	RenderState GetRenderStateBase() const;
-	RenderQueue* GetRenderQueueBase();
+	RenderQueue *GetRenderQueueBase();
 
 #ifdef LoadImage
 #undef LoadImage
@@ -92,14 +92,17 @@ public:
 	void DiscordError(int errorCode, const char* message);
 	void DiscordPresenceMenu(String name);
 	void DiscordPresenceMulti(String secret, int partySize, int partyMax, String id);
-	void DiscordPresenceSong(const struct BeatmapSettings& song, int64 startTime, int64 endTime);
+	void DiscordPresenceSong(const struct BeatmapSettings &song, int64 startTime, int64 endTime);
 	void JoinMultiFromInvite(String secret);
-	void SetUpdateAvailable(const String& version, const String& url, const String& download);
+	void SetUpdateAvailable(const String &version, const String &url, const String &download);
 	void RunUpdater();
 	void CheckForUpdate();
 	void ForceRender();
 	void SetLuaBindings(struct lua_State* state);
+	Vector<String> GetLightPluginList();
 	struct NVGcontext* GetVGContext();
+	void SetRgbLights(int left, int pos, Colori color);
+	void SetButtonLights(uint32 buttonbits);
 
 	//if empty: no update avaiable
 	//else: index 0 = url, index 1 = version
@@ -116,9 +119,10 @@ private:
 	void m_MainLoop();
 	void m_Tick();
 	void m_Cleanup();
-	void m_OnKeyPressed(SDL_Scancode code);
-	void m_OnKeyReleased(SDL_Scancode code);
-	void m_OnWindowResized(const Vector2i& newSize);
+	void m_OnKeyPressed(SDL_Scancode key);
+	void m_OnKeyReleased(SDL_Scancode key);
+	void m_OnWindowResized(const Vector2i &newSize);
+	void m_InitLightPlugins();
 	void m_OnFocusChanged(bool focused);
 	void m_unpackSkins();
 
@@ -133,7 +137,7 @@ private:
 	Map<String, CachedJacketImage*> m_jacketImages;
 	String m_lastMapPath;
 	Thread m_updateThread;
-	class Beatmap* m_currentMap = nullptr;
+	class Beatmap *m_currentMap = nullptr;
 	SkinHttp m_skinHttp;
 	SkinIR m_skinIR;
 
@@ -150,8 +154,10 @@ private:
 	String m_skin;
 	bool m_needSkinReload = false;
 	Timer m_jobTimer;
+	struct LightPlugin* m_activeLightPlugin = nullptr;
 	//gauge colors, 0 = normal fail, 1 = normal clear, 2 = hard lower, 3 = hard upper
 	Color m_gaugeColors[4] = { Colori(0, 204, 255), Colori(255, 102, 255), Colori(200, 50, 0), Colori(255, 100, 0) };
+	Map<String, struct LightPlugin> m_lightPlugins;
 
 	String m_multiRoomSecret;
 	String m_multiRoomId;
@@ -170,7 +176,7 @@ public:
 	String imagePath;
 	int w = 0, h = 0;
 	bool web = false;
-	Application::CachedJacketImage* target;
+	Application::CachedJacketImage *target;
 };
 
-void __discordJoinGame(const char* joins);
+void __discordJoinGame(const char *joins);

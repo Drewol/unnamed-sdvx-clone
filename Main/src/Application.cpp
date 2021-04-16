@@ -30,6 +30,7 @@
 #endif
 #include "archive.h"
 #include "archive_entry.h"
+#include "LightPlugin/LightPlugin.h"
 
 GameConfig g_gameConfig;
 SkinConfig *g_skinConfig;
@@ -97,6 +98,12 @@ void Application::SetCommandLine(const char *cmdLine)
 	// Split up command line parameters
 	m_commandLine = Path::SplitCommandLine(cmdLine);
 }
+
+static void PluginLog(char* msg)
+{
+	Logf("[Light Plugin]: %s", Logger::Severity::Info, msg);
+}
+
 void Application::ApplySettings()
 {
 	String newskin = g_gameConfig.GetString(GameConfigKeys::Skin);
@@ -108,6 +115,25 @@ void Application::ApplySettings()
 	g_gameWindow->SetVSync(g_gameConfig.GetBool(GameConfigKeys::VSync) ? 1 : 0);
 	m_showFps = g_gameConfig.GetBool(GameConfigKeys::ShowFps);
 	m_OnWindowResized(g_gameWindow->GetWindowSize());
+
+	//restart light plugin
+	if (m_activeLightPlugin)
+	{
+		m_activeLightPlugin->Close();
+		m_activeLightPlugin = nullptr;
+	}
+
+	String newPlugin = g_gameConfig.GetString(GameConfigKeys::LightPlugin);
+	if (m_lightPlugins.Contains(newPlugin))
+	{
+		m_activeLightPlugin = &m_lightPlugins.at(newPlugin);
+		if (m_activeLightPlugin->Init(PluginLog) != 0)
+		{
+			Logf("Failed to initialize light plugin: \"%s\"", Logger::Severity::Warning, newPlugin);
+			m_activeLightPlugin = nullptr;
+		}
+	}
+
 	m_SaveConfig();
 }
 int32 Application::Run()
@@ -203,6 +229,22 @@ void Application::ForceRender()
 NVGcontext *Application::GetVGContext()
 {
 	return g_guiState.vg;
+}
+
+void Application::SetRgbLights(int left, int pos, Colori color)
+{
+	if (m_activeLightPlugin)
+	{
+		m_activeLightPlugin->SetLights(left, pos, color.x, color.y, color.z);
+	}
+}
+
+void Application::SetButtonLights(uint32 buttonbits)
+{
+	if (m_activeLightPlugin)
+	{
+		m_activeLightPlugin->SetButtons(buttonbits);
+	}
 }
 
 Vector<String> Application::GetUpdateAvailable()
@@ -758,6 +800,61 @@ void Application::m_InitDiscord()
 	Discord_Initialize(DISCORD_APPLICATION_ID, &dhe, 1, nullptr);
 }
 
+void Application::m_InitLightPlugins()
+{
+	ProfilerScope $("Load Light Plugins");
+
+	String pluginpath = Path::Absolute("LightPlugins");
+
+#if WIN32
+	Vector<FileInfo> plugins = Files::ScanFiles(pluginpath, "dll");
+#else
+	Vector<FileInfo> plugins = Files::ScanFiles("LightPlugins", "so");
+#endif
+
+	auto verifyPlugin = [this](const LightPlugin& lp)
+	{
+		return lp.Close != nullptr &&
+			lp.GetName != nullptr &&
+			lp.Init != nullptr &&
+			lp.SetButtons != nullptr &&
+			lp.SetLights != nullptr &&
+			lp.Tick != nullptr;
+	};
+
+	for (auto& p : plugins)
+	{
+		void* handle = SDL_LoadObject(*p.fullPath);
+		if (handle)
+		{
+			LightPlugin lp;
+			lp.Init = (int(*)(void(*)(char*)))SDL_LoadFunction(handle, "Init");
+			lp.Close = (int(*)())SDL_LoadFunction(handle, "Close");
+			lp.SetButtons = (void(*)(uint32))SDL_LoadFunction(handle, "SetButtons");
+			lp.GetName = (char*(*)())SDL_LoadFunction(handle, "GetName");
+			lp.SetLights = (void(*)(uint8, uint32, uint8, uint8, uint8))SDL_LoadFunction(handle, "SetLights");
+			lp.Tick = (void(*)(float))SDL_LoadFunction(handle, "Tick");
+			if (verifyPlugin(lp))
+				m_lightPlugins.Add(lp.GetName(), lp);
+			else
+				SDL_UnloadObject(handle);
+		}
+	}
+
+
+	String newPlugin = g_gameConfig.GetString(GameConfigKeys::LightPlugin);
+	if (m_lightPlugins.Contains(newPlugin))
+	{
+		m_activeLightPlugin = &m_lightPlugins.at(newPlugin);
+		int res = m_activeLightPlugin->Init(PluginLog);
+		if (res != 0)
+		{
+			Logf("Failed to initialize light plugin: \"%s\"", Logger::Severity::Warning, newPlugin);
+			m_activeLightPlugin = nullptr;
+		}
+	}
+}
+
 bool Application::m_Init()
 {
 	ProfilerScope $("Application Setup");
@@ -990,6 +1087,7 @@ bool Application::m_Init()
 
 
 	m_InitDiscord();
+	m_InitLightPlugins();
 
 	CheckedLoad(m_fontMaterial = LoadMaterial("font"));
 	m_fontMaterial->opaque = false;
@@ -1165,7 +1263,6 @@ void Application::m_Tick()
 	{
 		tickable->Tick(m_deltaTime);
 	}
-
 	// Not minimized / Valid resolution
 	if (g_resolution.x > 0 && g_resolution.y > 0)
 	{
@@ -1227,6 +1324,13 @@ void Application::m_Tick()
 		m_needSkinReload = false;
 		ReloadSkin();
 	}
+
+	// Tick light plugin
+	if (m_activeLightPlugin)
+	{
+		m_activeLightPlugin->Tick(m_deltaTime);
+	}
+
 }
 
 void Application::m_Cleanup()
@@ -1277,6 +1381,11 @@ void Application::m_Cleanup()
 	{
 		delete g_transition;
 		g_transition = nullptr;
+	}
+	if (m_activeLightPlugin)
+	{
+		m_activeLightPlugin->Close();
+		m_activeLightPlugin = nullptr;
 	}
 
 	//if (m_skinHtpp)
@@ -2511,6 +2620,17 @@ void Application::SetLuaBindings(lua_State *state)
 
 	//http
 	m_skinHttp.PushFunctions(state);
+}
+
+Vector<String> Application::GetLightPluginList()
+{
+	Vector<String> names;
+	names.Add("");
+	for (auto& p : m_lightPlugins)
+	{
+		names.Add(p.first);
+	}
+	return names;
 }
 
 bool JacketLoadingJob::Run()
