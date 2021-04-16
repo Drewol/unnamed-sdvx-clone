@@ -27,6 +27,9 @@ protected:
 	bool m_backgroundFrame = true;
 	Texture m_fromTexture;
 	Mesh m_bgMesh;
+
+private:
+	void InitNuklearFontAtlas();
 };
 
 class BasicWindow : public BasicNuklearGui

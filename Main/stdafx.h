@@ -83,7 +83,7 @@ using namespace Graphics;
 
 constexpr int MAX_VERTEX_MEMORY = 512 * 1024;
 constexpr int MAX_ELEMENT_MEMORY = 128 * 1024;
-constexpr int FULL_FONT_TEXTURE_HEIGHT = 32768; //needed to load all CJK glyphs
+constexpr int FULL_FONT_TEXTURE_HEIGHT = 8192; //needed to load all CJK glyphs
 
 #include "BasicDefinitions.hpp"
 
@@ -93,3 +93,6 @@ constexpr int FULL_FONT_TEXTURE_HEIGHT = 32768; //needed to load all CJK glyphs
 
 // Asset loading macro
 #define CheckedLoad(__stmt) if(!(__stmt)){Logf("Failed to load asset [%s]", Logger::Severity::Error, #__stmt); return false; }
+
+/// nk_sdl_font_stash_end but uses a better bake function to reduce baked font texture dimension
+void usc_nk_sdl_font_stash_end();

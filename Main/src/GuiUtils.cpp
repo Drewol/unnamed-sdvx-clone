@@ -30,7 +30,9 @@ bool BasicNuklearGui::Init()
 	if (m_backgroundFrame)
 	{
 		m_fromTexture = TextureRes::CreateFromFrameBuffer(g_gl, g_resolution);
-		m_bgMesh = MeshGenerators::Quad(g_gl, Vector2(0, g_resolution.y), Vector2(g_resolution.x, -g_resolution.y));
+		m_bgMesh = MeshGenerators::Quad(g_gl,
+			Vector2(0, static_cast<float>(g_resolution.y)),
+			Vector2(static_cast<float>(g_resolution.x), static_cast<float>(-g_resolution.y)));
 	}
     InitNuklearIfNeeded();
     return true;
@@ -44,57 +46,9 @@ void BasicNuklearGui::InitNuklearIfNeeded()
 	m_nctx = nk_sdl_init((SDL_Window*)g_gameWindow->Handle());
 
 	g_gameWindow->OnAnyEvent.Add(this, &BasicNuklearGui::UpdateNuklearInput);
-	{
-		struct nk_font_atlas *atlas;
-		nk_sdl_font_stash_begin(&atlas);
-		struct nk_font *fallback = nk_font_atlas_add_from_file(atlas, Path::Normalize( Path::Absolute("fonts/settings/NotoSans-Regular.ttf")).c_str(), 24, 0);
 
-		// struct nk_font_config cfg_kr = nk_font_config(24);
-		// cfg_kr.merge_mode = nk_true;
-		// cfg_kr.range = nk_font_korean_glyph_ranges();
+	InitNuklearFontAtlas();
 
-		// NK_STORAGE const nk_rune jp_ranges[] = {
-		// 	0x0020, 0x00FF,
-		// 	0x3000, 0x303f,
-		// 	0x3040, 0x309f,
-		// 	0x30a0, 0x30ff,
-		// 	0x4e00, 0x9faf,
-		// 	0xff00, 0xffef,
-		// 	0
-		// };
-		// struct nk_font_config cfg_jp = nk_font_config(24);
-		// cfg_jp.merge_mode = nk_true;
-		// cfg_jp.range = jp_ranges;
-
-		NK_STORAGE const nk_rune cjk_ranges[] = {
-			0x0020, 0x00FF,
-			0x3000, 0x30FF,
-			0x3131, 0x3163,
-			0xAC00, 0xD79D,
-			0x31F0, 0x31FF,
-			0xFF00, 0xFFEF,
-			0x4e00, 0x9FAF,
-			0
-		};
-
-		struct nk_font_config cfg_cjk = nk_font_config(24);
-		cfg_cjk.merge_mode = nk_true;
-		cfg_cjk.range = cjk_ranges;
-
-		int maxSize;
-		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);
-		Logf("System max texture size: %d", Logger::Severity::Info, maxSize);
-		if (maxSize >= FULL_FONT_TEXTURE_HEIGHT && !g_gameConfig.GetBool(GameConfigKeys::LimitSettingsFont))
-		{
-			nk_font_atlas_add_from_file(atlas, Path::Normalize(Path::Absolute("fonts/settings/DroidSansFallback.ttf")).c_str(), 24, &cfg_cjk);
-		}
-		
-		nk_sdl_font_stash_end();
-		nk_font_atlas_cleanup(atlas);
-		//nk_style_load_all_cursors(m_nctx, atlas->cursors);
-		nk_style_set_font(m_nctx, &fallback->handle);
-	}
-	
 	m_nctx->style.text.color = nk_rgb(255, 255, 255);
 	m_nctx->style.button.border_color = nk_rgb(0, 128, 255);
 	m_nctx->style.button.padding = nk_vec2(5,5);
@@ -105,6 +59,54 @@ void BasicNuklearGui::InitNuklearIfNeeded()
 	m_nctx->style.slider.bar_active = nk_rgb(20, 20, 20);
 
     m_nuklearRunning = true;
+}
+
+static void ExtendFontAtlas(struct nk_font_atlas* atlas, const std::string_view& fontPath, float pixelHeight, const nk_rune* ranges)
+{
+	struct nk_font_config cfg = nk_font_config(pixelHeight);
+	cfg.merge_mode = nk_true;
+	cfg.range = ranges;
+
+	nk_font_atlas_add_from_file(atlas, fontPath.data(), pixelHeight, &cfg);
+}
+
+void BasicNuklearGui::InitNuklearFontAtlas()
+{
+	const String defaultFontPath = Path::Normalize(Path::Absolute("fonts/settings/NotoSans-Regular.ttf"));
+	const String cjkFontPath = Path::Normalize(Path::Absolute("fonts/settings/DroidSansFallback.ttf"));
+	const float fontSize = 24.f;
+
+	struct nk_font_atlas* atlas;
+	nk_sdl_font_stash_begin(&atlas);
+
+	struct nk_font* font = nk_font_atlas_add_from_file(atlas, defaultFontPath.data(), fontSize, 0);
+
+	static const nk_rune cjk_ranges[] = {
+		0x0020, 0x00FF,
+		// Chinese
+		0x3000, 0x30FF,
+		0x31F0, 0x31FF,
+		0xFF00, 0xFFEF,
+		0x4E00, 0x9FAF,
+		// Korean
+		0x3131, 0x3163,
+		0xAC00, 0xD7A3,
+		0
+	};
+
+	int maxTextureSize = 0;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+	Logf("System max texture size: %d", Logger::Severity::Info, maxTextureSize);
+
+	if (maxTextureSize >= FULL_FONT_TEXTURE_HEIGHT && !g_gameConfig.GetBool(GameConfigKeys::LimitSettingsFont))
+	{
+		ExtendFontAtlas(atlas, cjkFontPath, fontSize, cjk_ranges);
+	}
+
+	usc_nk_sdl_font_stash_end();
+	nk_font_atlas_cleanup(atlas);
+
+	nk_style_set_font(m_nctx, &font->handle);
 }
 
 void BasicNuklearGui::Tick(float deltatime)
@@ -169,8 +171,8 @@ void BasicWindow::EnableInputForEdit(int widgetWidth, int widgetHeight)
 		SDL_Rect boxrect;
 
 		struct nk_vec2 textBoxPos = nk_widget_position(m_nctx);
-		boxrect.x = textBoxPos.x;
-		boxrect.y = textBoxPos.y;
+		boxrect.x = static_cast<int>(textBoxPos.x);
+		boxrect.y = static_cast<int>(textBoxPos.y);
 		boxrect.w = widgetWidth;
 		boxrect.h = widgetHeight;
 
@@ -190,9 +192,10 @@ void BasicWindow::Render(float deltatime)
 			m_nctx,
 			*m_name,
 			nk_rect(
-				g_resolution.x / 2 - m_width / 2,
-				g_resolution.y / 2 - m_height / 2,
-				m_width, m_height),
+				static_cast<float>(g_resolution.x / 2 - m_width / 2),
+				static_cast<float>(g_resolution.y / 2 - m_height / 2),
+				static_cast<float>(m_width),
+				static_cast<float>(m_height)),
 			m_windowFlag))
 		{
 			// Window contents
@@ -287,7 +290,7 @@ void nk_multiline_label(struct nk_context* ctx, const char* allText, nk_text_ali
 		int maxlen = 0;
 		do
 		{
-			maxlen = end - text;
+			maxlen = static_cast<int>(end - text);
 			textEnd = maxlen;
 
 			// We are going to try to find the max length that fits
@@ -319,7 +322,7 @@ void BasicPrompt::DrawWindow()
 	nk_layout_set_min_row_height(m_nctx, 20);
 	nk_layout_row_dynamic(m_nctx, 20, 1);
 
-	nk_multiline_label(m_nctx, *m_text, NK_TEXT_LEFT, m_width - 30);
+	nk_multiline_label(m_nctx, *m_text, NK_TEXT_LEFT, static_cast<float>(m_width - 30));
 
 	nk_layout_row_dynamic(m_nctx, 40, 1);
 
@@ -350,8 +353,8 @@ void BasicPrompt::DrawWindow()
 
 	if (m_shrinkWindow) {
 		nk_window_set_size(m_nctx, *m_name, nk_vec2(
-			m_width,
-			end_pos.y - start_pos.y + 60
+			static_cast<float>(m_width),
+			end_pos.y - start_pos.y + 60.0f
 		));
 		m_shrinkWindow = false;
 	}
