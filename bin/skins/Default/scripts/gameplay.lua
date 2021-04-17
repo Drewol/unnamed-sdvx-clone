@@ -186,7 +186,10 @@ local critCap = gfx.CreateSkinImage("crit_cap.png", 0)
 local critCapBack = gfx.CreateSkinImage("crit_cap_back.png", 0)
 local laserCursor = gfx.CreateSkinImage("pointer.png", 0)
 local laserCursorOverlay = gfx.CreateSkinImage("pointer_overlay.png", 0)
+
 local earlatePos = game.GetSkinSetting("earlate_position")
+local earlatePosDelta = game.GetSkinSetting("earlate_position_delta")
+local earlateShowDeltaShape = game.GetSkinSetting("earlate_show_delta_shape")
 
 local prevGaugeType = nil
 local gaugeTransition = nil
@@ -215,12 +218,17 @@ if introTimer == nil then
     outroTimer = 0
 end
 local alertTimers = {-2,-2}
-
-local earlateTimer = 0
-local critAnimTimer = 0
+local animTimer = 0
 
 local consoleAnimSpeed = 10
 local consoleAnimTimers = { 0, 0, 0, 0, 0, 0, 0, 0 }
+
+-- -------------------------------------------------------------------------- --
+-- For early/late display:                                                    --
+local earlate_force_show = false
+local mostRecentHit = nil
+local mostRecentNear = nil
+
 -- -------------------------------------------------------------------------- --
 -- Miscelaneous, currently unsorted:                                          --
 local score = 0
@@ -374,7 +382,6 @@ function render(deltaTime)
     draw_song_info(deltaTime)
     draw_score(deltaTime)
 
-    
     if prevGaugeType ~= nil then
         if gameplay.gauge.type ~= prevGaugeType and gaugeTransition == nil then
             gaugeTransition = Animation:new()
@@ -403,13 +410,14 @@ function render(deltaTime)
     else
         prevGaugeType = gameplay.gauge.type
     end
+    
     draw_gauge(gameplay.gauge)
     gfx.Restore()
-
-
+    
     if earlatePos ~= "off" then
         draw_earlate(deltaTime)
     end
+    
     draw_combo(deltaTime)
     draw_alerts(deltaTime)
     
@@ -476,7 +484,7 @@ function render_crit_base(deltaTime)
         resy_old = resy
     end
 
-    critAnimTimer = critAnimTimer + deltaTime
+    animTimer = animTimer + deltaTime
     SetUpCritTransform()
     
     -- Figure out how to offset the center of the crit line to remain
@@ -511,7 +519,7 @@ function render_crit_base(deltaTime)
     -- render the core of the crit line
     do
         -- The crit line is made up of two rects with a pattern that scrolls in opposite directions on each rect
-        local startOffset = crit_base_info.critAnimWidth * ((critAnimTimer * 1.5) % 1)
+        local startOffset = crit_base_info.critAnimWidth * ((animTimer * 1.5) % 1)
 
         -- left side
         -- Use a scissor to limit the drawable area to only what should be visible
@@ -924,28 +932,123 @@ end
 -- -------------------------------------------------------------------------- --
 -- draw_earlate:                                                              --
 function draw_earlate(deltaTime)
-    earlateTimer = math.max(earlateTimer - deltaTime,0)
-    if earlateTimer == 0 then return nil end
-    local alpha = math.floor(earlateTimer * 20) % 2
-    alpha = alpha * 200 + 55
     gfx.BeginPath()
     gfx.FontSize(35)
-    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER, gfx.TEXT_ALIGN_MIDDLE)
-    local ypos = desh * critLinePos[1] - 150
-    if portrait then ypos = desh * critLinePos[2] - 200 end
-    if earlatePos == "middle" then
-        ypos = ypos - 200
+    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
+    
+    -- Determine position
+    local ypos = desh * critLinePos[1] - 350
+    
+    if portrait then ypos = desh * critLinePos[2] - 400 end
+    
+    if earlatePos == "bottom" then
+        ypos = ypos + 200
     elseif earlatePos == "top" then
-        ypos = ypos - 400
+        ypos = ypos - 200
     end
+    
+    ypos = ypos - earlatePosDelta
+    
+    gfx.Save()
+    gfx.Translate(desw/2, ypos)
+    
+    local lingerNearType = 0 -- +1: late, 0: crit, -1: early
+    
+    local hitAlpha = 0
+    local mostRecentAlpha = 0
+    
+    if mostRecentNear ~= nil then
+        local lingerNearRemainTime = math.max(0, mostRecentNear[4] + 0.75 - animTimer)
 
-    if late then
-        gfx.FillColor(0,255,255, alpha)
-        gfx.Text("LATE", desw / 2, ypos)
-    else
-        gfx.FillColor(255,0,255, alpha)
-        gfx.Text("EARLY", desw / 2, ypos)
+        if lingerNearRemainTime > 0 then 
+            lingerNearType = -1
+            if mostRecentNear[2] > 0 then
+                lingerNearType = 1
+            end
+            
+            hitAlpha = math.floor(lingerNearRemainTime * 20) % 2
+            hitAlpha = 200 * hitAlpha + 55
+        end
     end
+    
+    if mostRecentHit ~= nil then
+        mostRecentAlpha = clamp(math.floor(255 * (3.0 - 2.0 * (animTimer - mostRecentHit[4]))), 0, 255)
+    end
+    
+    if lingerNearType == 0 and mostRecentHit ~= nil then
+        hitAlpha = mostRecentAlpha
+    end
+    
+    if earlate_force_show then hitAlpha = 255 end
+    
+    -- Show early / late text
+    if lingerNearType == -1 then
+        gfx.FillColor(255, 0, 255, hitAlpha)
+    elseif lingerNearType == 0 then
+        gfx.FillColor(255, 255, 0, hitAlpha)
+    elseif lingerNearType == 1 then
+        gfx.FillColor(0, 255, 255, hitAlpha)
+    elseif earlate_force_show then
+        gfx.FillColor(255, 255, 0, hitAlpha)
+    end
+    
+    local earlyLateText = ""
+    if lingerNearType == -1 then earlyLateText = "EARLY"
+    elseif lingerNearType == 1 then earlyLateText = "LATE"
+    elseif earlate_force_show then earlyLateText = "CRIT"
+    end
+    
+    gfx.Text(earlyLateText, 0, 0)    
+    
+    -- Show delta shape
+    if earlateShowDeltaShape and (earlate_force_show or (mostRecentHit ~= nil and mostRecentAlpha > 0)) then
+        local offset = 0
+        if mostRecentHit ~= nil then offset = mostRecentHit[2] end
+        
+        local count = 0
+        
+        if offset >= 10 then count = math.floor(offset / 10)
+        elseif offset <= -10 then count = math.floor(-offset / 10)
+        end
+        
+        if earlate_force_show then count = 4 end
+        if count > 4 then count = 4 end
+        
+        if count > 0 then
+            if not earlate_force_show and lingerNearType == 0 then
+                gfx.StrokeColor(128, 128, 128, mostRecentAlpha)
+                gfx.StrokeWidth(1)
+                gfx.BeginPath()
+                gfx.MoveTo(-20, 0)
+                gfx.LineTo(20, 0)
+                gfx.Stroke()
+            end
+            
+            local shapeWidth = 8
+            local shapeDist = 4
+            local totalShapeWidth = shapeWidth * count + shapeDist * (count - 1)
+            local shapeY = 0
+            
+            local shapeYOffset = shapeDist + shapeWidth/2
+            if earlate_force_show or lingerNearType ~= 0 then shapeYOffset = shapeYOffset + 15 end
+            
+            if offset > 0 then
+                gfx.FillColor(0, 255, 255, mostRecentAlpha)
+                shapeY = shapeY + shapeYOffset
+            else
+                gfx.FillColor(255, 0, 255, mostRecentAlpha)
+                shapeY = shapeY - shapeYOffset
+            end
+            
+            gfx.BeginPath()
+            for i = 1, count do
+                gfx.Circle(-totalShapeWidth/2 + (i-1)*(shapeWidth + shapeDist) + shapeWidth/2, shapeY, shapeWidth/2)
+            end
+        end
+        gfx.Fill()
+    end
+    
+    gfx.Restore()
 end
 -- -------------------------------------------------------------------------- --
 -- draw_alerts:                                                               --
@@ -1030,10 +1133,10 @@ function render_intro(deltaTime)
         return true
     end
     if not game.GetButton(game.BUTTON_STA) then
+        earlate_force_show = false
         introTimer = introTimer - deltaTime
-        earlateTimer = 0
     else
-        earlateTimer = 1
+        earlate_force_show = true
         if (not bta_last) and game.GetButton(game.BUTTON_BTA) then
             change_earlatepos()
         end
@@ -1082,11 +1185,22 @@ function update_combo(newCombo)
     comboScale = 1.5
 end
 -- -------------------------------------------------------------------------- --
--- near_hit:                                                                  --
-function near_hit(wasLate) --for updating early/late display
-    late = wasLate
-    earlateTimer = 0.75
+-- button_hit:                                                                  --
+function button_hit(buttonIdx, rating, delta)
+    if rating <= 0 or rating >= 3 or buttonIdx < 0 or buttonIdx >= 6 then
+        return
+    end
+
+    local hit = {buttonIdx, delta, rating, animTimer}
+
+    if rating == 1 or rating == 2 then
+        mostRecentHit = hit
+    end
+    if rating == 1 then
+        mostRecentNear = hit
+    end
 end
+
 -- -------------------------------------------------------------------------- --
 -- laser_alert:                                                               --
 function laser_alert(isRight) --for starting laser alert animations

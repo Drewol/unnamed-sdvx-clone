@@ -5,15 +5,32 @@
 		"type": "selection",
 		"label": "Early/Late display position",
 		"default": "bottom",
-		"values": ["bottom", "middle", "top", "off"]
+		"values": ["off", "bottom", "middle", "top"]
 	},
+	
+	"earlate_position_delta": {
+		"type": "int",
+		"label": "Offset for Early/Late display position",
+		"default": 0,
+		"max": 300,
+		"min": -300
+	},
+	
+	"earlate_show_delta_shape": {
+		"type": "bool",
+		"label": "Show delta time using shapes",
+		"default": true
+	},
+	
+	"separator_a" : {},
+	
 	"nick": {
 		"type" : "text",
 		"label" : "Display name",
 		"default" : "Guest"
 	},
 
-	"separator_a" : {},
+	"separator_b" : {},
 	"Song select:" : { "type" : "label" },
 	"show_guide": {
 		"label" : "Show control guide on song select",
@@ -21,7 +38,7 @@
 		"default": true
 	},
 
-	"separator_b" : {},
+	"separator_c" : {},
 	"Result:" : { "type" : "label" },
 	"show_result_hiscore": {
 		"label": "Show hiscore on result",
@@ -56,7 +73,7 @@
 		"default": false
 	},
 
-	"separator_c" : {},
+	"separator_test" : {},
 	"Test objects:" : { "type" : "label" },
 	"Testing with space" : {
 		"type": "float",
@@ -68,7 +85,7 @@
 
 	"Ineger_test" : {
 		"type": "int",
-		"label": "Ineger Test with range -100<->100",
+		"label": "Integer Test with range -100<->100",
 		"default": 50,
 		"max": 100,
 		"min": -100
