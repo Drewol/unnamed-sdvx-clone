@@ -8,12 +8,20 @@
 		"values": ["off", "bottom", "middle", "top"]
 	},
 	
-	"earlate_position_delta": {
+	"earlate_position_offset_x": {
 		"type": "int",
-		"label": "Offset for Early/Late display position",
+		"label": "X offset for Early/Late display position",
 		"default": 0,
-		"max": 300,
-		"min": -300
+		"max": 1000,
+		"min": -1000
+	},
+	
+	"earlate_position_offset_y": {
+		"type": "int",
+		"label": "Y offset for Early/Late display position",
+		"default": 0,
+		"max": 1000,
+		"min": -1000
 	},
 	
 	"earlate_show_delta_ms": {
@@ -25,17 +33,17 @@
 	"earlate_delta_ms_offset_x": {
 		"type": "int",
 		"label": "X offset for delta time position",
-		"default": 120,
-		"max": 500,
-		"min": -500
+		"default": 300,
+		"max": 1000,
+		"min": -1000
 	},
 	
 	"earlate_delta_ms_offset_y": {
 		"type": "int",
 		"label": "Y offset for delta time position",
 		"default": 0,
-		"max": 500,
-		"min": -500
+		"max": 1000,
+		"min": -1000
 	},
 	
 	"earlate_show_delta_shape": {

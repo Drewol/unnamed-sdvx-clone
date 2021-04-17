@@ -188,7 +188,9 @@ local laserCursor = gfx.CreateSkinImage("pointer.png", 0)
 local laserCursorOverlay = gfx.CreateSkinImage("pointer_overlay.png", 0)
 
 local earlatePos = game.GetSkinSetting("earlate_position")
-local earlatePosDelta = game.GetSkinSetting("earlate_position_delta")
+local earlatePosOffX = game.GetSkinSetting("earlate_position_offset_x")
+local earlatePosOffY = game.GetSkinSetting("earlate_position_offset_y")
+
 local earlateShowDeltaShape = game.GetSkinSetting("earlate_show_delta_shape")
 
 local earlateShowDeltaMs = game.GetSkinSetting("earlate_show_delta_ms")
@@ -951,10 +953,8 @@ function draw_earlate(deltaTime)
         ypos = ypos - 200
     end
     
-    ypos = ypos + earlatePosDelta
-    
     gfx.Save()
-    gfx.Translate(desw/2, ypos)
+    gfx.Translate(desw/2 + earlatePosOffX, ypos + earlatePosOffY)
     
     local lingerNearType = 0 -- +1: late, 0: crit, -1: early
     
