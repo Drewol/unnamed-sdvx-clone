@@ -16,11 +16,34 @@
 		"min": -300
 	},
 	
-	"earlate_show_delta_shape": {
+	"earlate_show_delta_ms": {
 		"type": "bool",
-		"label": "Show delta time using shapes",
+		"label": "Show delta time in milliseconds",
 		"default": false
 	},
+	
+	"earlate_delta_ms_offset_x": {
+		"type": "int",
+		"label": "X offset for delta time position",
+		"default": 120,
+		"max": 500,
+		"min": -500
+	},
+	
+	"earlate_delta_ms_offset_y": {
+		"type": "int",
+		"label": "Y offset for delta time position",
+		"default": 0,
+		"max": 500,
+		"min": -500
+	},
+	
+	"earlate_show_delta_shape": {
+		"type": "bool",
+		"label": "Show delta using shapes",
+		"default": false
+	},
+	
 	
 	"separator_a" : {},
 	

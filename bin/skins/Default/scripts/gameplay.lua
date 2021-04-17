@@ -191,6 +191,10 @@ local earlatePos = game.GetSkinSetting("earlate_position")
 local earlatePosDelta = game.GetSkinSetting("earlate_position_delta")
 local earlateShowDeltaShape = game.GetSkinSetting("earlate_show_delta_shape")
 
+local earlateShowDeltaMs = game.GetSkinSetting("earlate_show_delta_ms")
+local earlateDeltaMsOffX = game.GetSkinSetting("earlate_delta_ms_offset_x")
+local earlateDeltaMsOffY = game.GetSkinSetting("earlate_delta_ms_offset_y")
+
 local prevGaugeType = nil
 local gaugeTransition = nil
 
@@ -947,7 +951,7 @@ function draw_earlate(deltaTime)
         ypos = ypos - 200
     end
     
-    ypos = ypos - earlatePosDelta
+    ypos = ypos + earlatePosDelta
     
     gfx.Save()
     gfx.Translate(desw/2, ypos)
@@ -1003,15 +1007,16 @@ function draw_earlate(deltaTime)
     
     gfx.Text(earlyLateText, 0, 0)    
     
+    local mostRecentOffset = 0
+    if mostRecentHit ~= nil then mostRecentOffset = mostRecentHit[2] end
+        
     -- Show delta shape
     if earlateShowDeltaShape and (earlate_force_show or (mostRecentHit ~= nil and mostRecentAlpha > 0)) then
-        local offset = 0
-        if mostRecentHit ~= nil then offset = mostRecentHit[2] end
         
         local count = 0
         
-        if offset >= 10 then count = math.floor(offset / 10)
-        elseif offset <= -10 then count = math.floor(-offset / 10)
+        if mostRecentOffset >= 10 then count = math.floor(mostRecentOffset / 10)
+        elseif mostRecentOffset <= -10 then count = math.floor(-mostRecentOffset / 10)
         end
         
         if earlate_force_show then count = 4 end
@@ -1035,7 +1040,7 @@ function draw_earlate(deltaTime)
             local shapeYOffset = shapeDist + shapeWidth/2
             if earlate_force_show or lingerNearType ~= 0 then shapeYOffset = shapeYOffset + 15 end
             
-            if offset > 0 then
+            if mostRecentOffset > 0 then
                 gfx.FillColor(0, 255, 255, mostRecentAlpha)
                 shapeY = shapeY + shapeYOffset
             else
@@ -1049,6 +1054,26 @@ function draw_earlate(deltaTime)
             end
         end
         gfx.Fill()
+    end
+    
+    -- Show delta ms
+    if earlateShowDeltaMs and (earlate_force_show or (mostRecentHit ~= nil and mostRecentAlpha > 0)) then
+        gfx.LoadSkinFont("NovaMono.ttf")
+        gfx.FontSize(24)
+        
+        local msText = ""
+        if mostRecentOffset < 0 then
+            gfx.FillColor(255, 0, 255, mostRecentAlpha)
+            msText = string.format("- %02d ms", -mostRecentOffset)
+        elseif mostRecentOffset == 0 then
+            gfx.FillColor(255, 255, 0, mostRecentAlpha)
+            msText = "  00 ms"
+        else
+            gfx.FillColor(0, 255, 255, mostRecentAlpha)
+            msText = string.format("  %02d ms", mostRecentOffset)
+        end
+        
+        gfx.Text(msText, earlateDeltaMsOffX, earlateDeltaMsOffY)
     end
     
     gfx.Restore()
