@@ -19,7 +19,7 @@
 	"earlate_show_delta_shape": {
 		"type": "bool",
 		"label": "Show delta time using shapes",
-		"default": true
+		"default": false
 	},
 	
 	"separator_a" : {},
