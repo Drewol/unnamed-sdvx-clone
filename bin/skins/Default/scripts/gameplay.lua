@@ -979,7 +979,10 @@ function draw_earlate(deltaTime)
         hitAlpha = mostRecentAlpha
     end
     
-    if earlate_force_show then hitAlpha = 255 end
+    if earlate_force_show then
+        hitAlpha = 255
+        mostRecentAlpha = 255
+    end
     
     -- Show early / late text
     if lingerNearType == -1 then
