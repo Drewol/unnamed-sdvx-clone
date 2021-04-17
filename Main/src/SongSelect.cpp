@@ -1105,7 +1105,7 @@ public:
 				return;
 			}
 
-			game->GetScoring().autoplay = true;
+			game->GetScoring().autoplayInfo.autoplay = true;
 
 			if(m_settDiag.IsActive()) m_settDiag.Close();
 			m_suspended = true;
@@ -1287,7 +1287,7 @@ public:
 					Log("Failed to start game", Logger::Severity::Error);
 					return;
 				}
-				game->GetScoring().autoplay = autoplay;
+				game->GetScoring().autoplayInfo.autoplay = autoplay;
 
 				// Transition to game
 				g_transition->TransitionTo(game);
@@ -1494,7 +1494,7 @@ public:
 					Log("Failed to start game", Logger::Severity::Error);
 					return;
 				}
-				game->GetScoring().autoplay = true;
+				game->GetScoring().autoplayInfo.autoplay = true;
 				game->SetDemoMode(true);
 				game->SetSongDB(m_mapDatabase);
 				m_suspended = true;

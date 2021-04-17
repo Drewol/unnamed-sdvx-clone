@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "BeatmapPlayback.hpp"
-#include "Shared/Profiling.hpp"
 
 BeatmapPlayback::BeatmapPlayback(Beatmap& beatmap) : m_beatmap(&beatmap)
 {

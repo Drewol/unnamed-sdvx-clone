@@ -86,6 +86,7 @@ void CalibrationScreen::Render(float deltaTime)
 	{
 		m_track.DrawTrackCover(renderQueue);
 	}
+	m_track.DrawHitEffects(renderQueue);
 	m_track.DrawOverlays(renderQueue);
 	m_track.DrawCalibrationCritLine(renderQueue);
 	renderQueue.Process();
@@ -263,13 +264,13 @@ void CalibrationScreen::m_OnButtonPressed(Input::Button buttonCode)
 		HitWindow hitWindow = HitWindow::NORMAL;
 
 		if (hitDelta <= hitWindow.perfect) {
-			m_track.AddEffect(new ButtonHitEffect((int)buttonCode, m_track.hitColors[2]));
+			m_track.AddHitEffect((int)buttonCode, m_track.hitColors[2]);
 		}
 		else if (hitDelta <= hitWindow.good) {
-			m_track.AddEffect(new ButtonHitEffect((int)buttonCode, m_track.hitColors[1]));
+			m_track.AddHitEffect((int)buttonCode, m_track.hitColors[1]);
 		}
 		else {
-			m_track.AddEffect(new ButtonHitEffect((int)buttonCode, m_track.hitColors[3]));
+			m_track.AddHitEffect((int)buttonCode, m_track.hitColors[3]);
 		}
 
 	}

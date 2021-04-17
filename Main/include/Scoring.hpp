@@ -4,6 +4,8 @@
 #include "Input.hpp"
 #include "Game.hpp"
 
+#define AUTOPLAY_BUTTON_HIT_DURATION (4 / 60.f)
+
 enum class TickFlags : uint8
 {
 	None = 0,
@@ -17,6 +19,9 @@ enum class TickFlags : uint8
 	// For lasers only
 	Laser = 0x10,
 	Slam = 0x20,
+
+	// Used to make hit effects appear correctly for holds
+	Ignore = 0x40
 };
 TickFlags operator|(const TickFlags& a, const TickFlags& b);
 TickFlags operator&(const TickFlags& a, const TickFlags& b);
@@ -37,6 +42,17 @@ public:
 	TickFlags flags = TickFlags::None;
 	MapTime time;
 	ObjectState* object = nullptr;
+};
+
+struct AutoplayInfo
+{
+    // Autoplay mode
+    bool autoplay = false;
+    // Autoplay but for buttons
+    bool autoplayButtons = false;
+    float buttonAnimationTimer[6] = { 0 };
+
+    bool IsAutoplayButtons() const { return autoplay || autoplayButtons; };
 };
 
 // Various information about all the objects in a map
@@ -136,6 +152,8 @@ public:
 	inline bool IsPerfect() const { return GetMisses() == 0 && GetGoods() == 0; }
 	inline bool IsFullCombo() const { return GetMisses() == 0; }
 
+	bool HoldObjectAvailable(uint32 index, bool checkIfPassedCritLine);
+
 	// Called when a hit is recorded on a given button index (excluding hold notes)
 	// (Hit Button, Score, Hit Object(optional))
 	Delegate<Input::Button, ScoreHitRating, ObjectState*, MapTime> OnButtonHit;
@@ -146,6 +164,9 @@ public:
 	Delegate<Input::Button, ObjectState*> OnObjectHold;
 	// Called when an object is let go of
 	Delegate<Input::Button, ObjectState*> OnObjectReleased;
+
+	Delegate<Input::Button> OnHoldEnter;
+	Delegate<Input::Button> OnHoldLeave;
 
 	// Called when a laser slam was hit
 	// (Laser slam segment)
@@ -166,7 +187,6 @@ public:
 
 	// Object timing window
 	HitWindow hitWindow = HitWindow::NORMAL;
-	static const float idleLaserSpeed;
 
 	// Map total infos
 	MapTotals mapTotals;
@@ -187,7 +207,6 @@ public:
 	// 1 = Late
 	uint32 timedHits[2] = { 0 };
 
-
 	// Current combo
 	uint32 currentComboCounter;
 
@@ -201,10 +220,7 @@ public:
 	// these are used for debugging
 	Vector<HitStat*> hitStats;
 
-	// Autoplay mode
-	bool autoplay = false;
-	// Autoplay but for buttons
-	bool autoplayButtons = false;
+	struct AutoplayInfo autoplayInfo;
 
 	// Actual positions of the laser
 	float laserPositions[2];

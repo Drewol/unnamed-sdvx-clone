@@ -16,46 +16,59 @@ void TimedEffect::Tick(float deltaTime)
 	time -= deltaTime;
 }
 
-ButtonHitEffect::ButtonHitEffect(uint32 buttonCode, Color color) : TimedEffect(0.2f), buttonCode(buttonCode), color(color)
+ButtonHitEffect::ButtonHitEffect() : TimedEffect(0)
+{
+}
+
+void ButtonHitEffect::Reset(int buttonCode, Color color, bool hold)
 {
 	assert(buttonCode < 6);
+	this->color = color;
+	duration = hitEffectDuration;
+	time = hitEffectDuration + (hold ? 0 : delayFadeDuration);
+	held = buttonCode < 4 && ((track->hitEffectAutoplay && hold) || !track->hitEffectAutoplay);
 }
+
+void ButtonHitEffect::Tick(float deltaTime)
+{
+	if (held && delayFadeDuration)
+		return;
+	time = Math::Max(time - deltaTime, 0.f);
+}
+
 void ButtonHitEffect::Draw(class RenderQueue& rq)
 {
-	float x = 0.0f;
-	float w = track->buttonWidth;
+	float x;
+	float w;
+	float hiSpeedAlphaOffset = 0;
 	float yMult = 2.0f;
-	if(buttonCode < 4)
+	if (buttonCode < 4)
 	{
-		w = track->buttonWidth;
-		x = (-track->buttonWidth * 1.5f) + w * buttonCode;
+		// Scale hit effect alpha between hispeed range of 100 to 600
+		if (delayFadeDuration > 0)
+            hiSpeedAlphaOffset = 0.25f * (Math::Clamp(track->scrollSpeed - 100, 0.f, 500.f) / 500);
+
+		w = Track::buttonWidth;
+		x = (-Track::buttonWidth * 1.5f) + w * buttonCode;
 		if (buttonCode < 2)
-		{
-			x -= 0.5 * track->centerSplit * track->buttonWidth;
-		}
+			x -= 0.5 * track->centerSplit * Track::buttonWidth;
 		else
-		{
-			x += 0.5 * track->centerSplit * track->buttonWidth;
-		}
+			x += 0.5 * track->centerSplit * Track::buttonWidth;
 	}
 	else
 	{
 		yMult = 1.0f;
-		w = track->buttonWidth * 2.0f;
-		x = -track->buttonWidth + w * (buttonCode - 4);
+		w = Track::buttonWidth * 2.0f;
+		x = -Track::buttonWidth + w * (buttonCode - 4);
 		if (buttonCode < 5)
-		{
-			x -= 0.5 * track->centerSplit * track->buttonWidth;
-		}
+			x -= 0.5 * track->centerSplit * Track::buttonWidth;
 		else
-		{
-			x += 0.5 * track->centerSplit * track->buttonWidth;
-		}
+			x += 0.5 * track->centerSplit * Track::buttonWidth;
 	}
 
 	Vector2 hitEffectSize = Vector2(w, 0.0f);
 	hitEffectSize.y = track->scoreHitTexture->CalculateHeight(hitEffectSize.x) * yMult;
-	Color c = color.WithAlpha(GetRate());
+	Color c = color.WithAlpha(GetRate() * (alphaScale + hiSpeedAlphaOffset));
 	c.w *= yMult / 2.f;
 	track->DrawSprite(rq, Vector3(x, hitEffectSize.y * 0.5f, 0.0f), hitEffectSize, track->scoreHitTexture, c);
 }
@@ -66,36 +79,37 @@ ButtonHitRatingEffect::ButtonHitRatingEffect(uint32 buttonCode, ScoreHitRating r
 	if(rating == ScoreHitRating::Miss)
 		Reset(0.4f);
 }
+
 void ButtonHitRatingEffect::Draw(class RenderQueue& rq)
 {
-	float x = 0.0f;
-	float w = track->buttonWidth;
-	float y = 0.0f;
+	float x;
+	float w;
+	float y;
 	if(buttonCode < 4)
 	{
-		w = track->buttonWidth;
-		x = (-track->buttonWidth * 1.5f) + w * buttonCode;
+		w = Track::buttonWidth;
+		x = (-Track::buttonWidth * 1.5f) + w * buttonCode;
 		if (buttonCode < 2)
 		{
-			x -= 0.5 * track->centerSplit * track->buttonWidth;
+			x -= 0.5 * track->centerSplit * Track::buttonWidth;
 		}
 		else
 		{
-			x += 0.5 * track->centerSplit * track->buttonWidth;
+			x += 0.5 * track->centerSplit * Track::buttonWidth;
 		}
 		y = 0.15f;
 	}
 	else
 	{
-		w = track->buttonWidth * 2.0f;
-		x = -track->buttonWidth + w * (buttonCode - 4);
+		w = Track::buttonWidth * 2.0f;
+		x = -Track::buttonWidth + w * (buttonCode - 4);
 		if (buttonCode < 5)
 		{
-			x -= 0.5 * track->centerSplit * track->buttonWidth;
+			x -= 0.5 * track->centerSplit * Track::buttonWidth;
 		}
 		else
 		{
-			x += 0.5 * track->centerSplit * track->buttonWidth;
+			x += 0.5 * track->centerSplit * Track::buttonWidth;
 		}
 		y = 0.175f;
 	}
@@ -116,7 +130,7 @@ void ButtonHitRatingEffect::Draw(class RenderQueue& rq)
 		float add = 0.4f * t * (2 - t);
 
 		// Size of effect
-		Vector2 hitEffectSize = Vector2(track->buttonWidth * (1.0f + add), 0.0f);
+		Vector2 hitEffectSize = Vector2(Track::buttonWidth * (1.0f + add), 0.0f);
 		hitEffectSize.y = hitTexture->CalculateHeight(hitEffectSize.x);
 
 		// Fade out
@@ -136,8 +150,7 @@ TimedHitEffect::TimedHitEffect(bool late) : TimedEffect(0.75f), late(late)
 void TimedHitEffect::Draw(class RenderQueue& rq)
 {
 	float x = 0.0f;
-	float w = track->buttonWidth * 2;
-	float y = 0.5f;
+    float y = 0.5f;
 
 	float iScale = 1.0f;
 	uint32 on = (uint32)floorf(time * 20) % 2;
@@ -148,7 +161,7 @@ void TimedHitEffect::Draw(class RenderQueue& rq)
 		Texture hitTexture = track->scoreHitTextures[late ? 1 : 0];
 
 		// Size of effect
-		Vector2 hitEffectSize = Vector2(track->buttonWidth * 2.f, 0.0f);
+		Vector2 hitEffectSize = Vector2(Track::buttonWidth * 2.f, 0.0f);
 		hitEffectSize.y = hitTexture->CalculateHeight(hitEffectSize.x);
 
 		// Fade out

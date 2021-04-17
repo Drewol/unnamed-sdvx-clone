@@ -1,6 +1,7 @@
 #pragma once
 #include "SkinHttp.hpp"
 #include "SkinIR.hpp"
+#include "Scoring.hpp"
 
 #define DISCORD_APPLICATION_ID "514489760568573952"
 
@@ -103,6 +104,8 @@ public:
 	//if empty: no update avaiable
 	//else: index 0 = url, index 1 = version
 	Vector<String> GetUpdateAvailable();
+
+	AutoplayInfo* autoplayInfo = nullptr;
 
 private:
 	bool m_LoadConfig(String profileName = "");

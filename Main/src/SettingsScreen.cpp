@@ -581,6 +581,7 @@ protected:
 		SectionHeader("Game Elements");
 
 		ToggleSetting(GameConfigKeys::DisableBackgrounds, "Disable song backgrounds");
+		ToggleSetting(GameConfigKeys::DelayedHitEffects, "Delayed fade button hit effects");
 		FloatSetting(GameConfigKeys::DistantButtonScale, "Distant button scale", 1.0f, 5.0f);
 
 		SectionHeader("Game UI");

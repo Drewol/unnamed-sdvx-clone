@@ -95,7 +95,7 @@ public:
 	Delegate<HoldObjectState*> OnFXBegin;
 	// Called when an FX button with effect leaves
 	Delegate<HoldObjectState*> OnFXEnd;
-	
+
 	// Called when a new timing point becomes active
 	Delegate<TimingPoint*> OnTimingPointChanged;
 

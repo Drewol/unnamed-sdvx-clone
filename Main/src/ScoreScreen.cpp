@@ -478,7 +478,6 @@ public:
 
 		m_numPlayersSeen = m_stats->size();
 		m_displayId = static_cast<String>((*m_stats)[m_displayIndex].value("uid",""));
-
 	}
 
 	ScoreScreen_Impl(class Game* game, MultiplayerScreen* multiplayer,
@@ -488,8 +487,8 @@ public:
 		m_displayIndex = 0;
 		m_selfDisplayIndex = 0;
 		Scoring& scoring = game->GetScoring();
-		m_autoplay = scoring.autoplay;
-		m_autoButtons = scoring.autoplayButtons;
+		m_autoplay = scoring.autoplayInfo.autoplay;
+		m_autoButtons = scoring.autoplayInfo.autoplayButtons;
 
 		if (ChartIndex* chart = game->GetChartIndex())
 		{

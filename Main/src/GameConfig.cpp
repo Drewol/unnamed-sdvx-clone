@@ -190,6 +190,7 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::AutoResetSettings, false);
 	Set(GameConfigKeys::AutoResetToSpeed, 400.0f);
 	Set(GameConfigKeys::SlamThicknessMultiplier, 1.0f);
+	Set(GameConfigKeys::DelayedHitEffects, true);
 
 	SetEnum<Enum_AutoScoreScreenshotSettings>(GameConfigKeys::AutoScoreScreenshot, AutoScoreScreenshotSettings::Off);
 

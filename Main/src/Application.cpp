@@ -6,17 +6,12 @@
 #include "SongSelect.hpp"
 #include "TitleScreen.hpp"
 #include <Audio/Audio.hpp>
-#include <Graphics/Window.hpp>
 #include <Graphics/ResourceManagers.hpp>
-#include "Shared/Jobs.hpp"
 #include <Shared/Profiling.hpp>
-#include "Scoring.hpp"
 #include "GameConfig.hpp"
 #include "Input.hpp"
 #include "TransitionScreen.hpp"
 #include "SkinConfig.hpp"
-#include "SkinHttp.hpp"
-#include "SkinIR.hpp"
 #include "ShadedMesh.hpp"
 #include "IR.hpp"
 
@@ -28,7 +23,6 @@
 #include "nanovg_gl.h"
 #include "GUI/nanovg_lua.h"
 #ifdef _WIN32
-#include <Windows.h>
 #ifdef CRASHDUMP
 #include "exception_handler.h"
 #include "client_info.h"
@@ -142,7 +136,7 @@ int32 Application::Run()
 				auto &cmdLine = g_application->GetAppCommandLine();
 				if (cmdLine.Contains("-autoplay") || cmdLine.Contains("-auto"))
 				{
-					game->GetScoring().autoplay = true;
+					game->GetScoring().autoplayInfo.autoplay = true;
 				}
 				mapLaunched = true;
 			}
@@ -2036,16 +2030,22 @@ static int lLog(lua_State *L)
 
 static int lGetButton(lua_State *L /* int button */)
 {
-	int button = luaL_checkinteger(L, 1);
-	lua_pushboolean(L, g_input.GetButton((Input::Button)button));
-	return 1;
+    int button = luaL_checkinteger(L, 1);
+    if (g_application->autoplayInfo
+        && (g_application->autoplayInfo->IsAutoplayButtons()) && button < 6)
+        lua_pushboolean(L, g_application->autoplayInfo->buttonAnimationTimer[button] > 0);
+    else
+        lua_pushboolean(L, g_input.GetButton((Input::Button)button));
+    return 1;
 }
+
 static int lGetKnob(lua_State *L /* int knob */)
 {
 	int knob = luaL_checkinteger(L, 1);
 	lua_pushnumber(L, g_input.GetAbsoluteLaser(knob));
 	return 1;
 }
+
 static int lGetUpdateAvailable(lua_State *L)
 {
 	Vector<String> info = g_application->GetUpdateAvailable();

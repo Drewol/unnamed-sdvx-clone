@@ -3,6 +3,61 @@
 #include "AsyncLoadable.hpp"
 #include <unordered_set>
 
+#define BT_DELAY_FADE_DURATION (4 / 60.f)
+#define BT_HIT_EFFECT_DURATION (4 / 60.f)
+#define FX_DELAY_FADE_DURATION (3 / 60.f)
+#define FX_HIT_EFFECT_DURATION (3 / 60.f)
+
+// Base class for sprite effects on the track
+struct TimedEffect
+{
+	explicit TimedEffect(float duration);
+	virtual ~TimedEffect() = default;
+	void Reset(float duration);
+	float GetRate() const { return time / duration; }
+	virtual void Draw(class RenderQueue& rq) = 0;
+	virtual void Tick(float deltaTime);
+
+	Track* track;
+	float duration;
+	float time = 0;
+};
+
+// Button hit effect
+struct ButtonHitEffect : TimedEffect
+{
+	ButtonHitEffect();
+	void Draw(class RenderQueue& rq) override;
+	void Tick(float deltaTime) override;
+	void Reset(int buttonCode, Color color, bool hold);
+	float GetRate() const { return Math::Min(time, hitEffectDuration) / duration; }
+
+	uint32 buttonCode; // Only used for Draw
+	Color color;
+	float delayFadeDuration;
+	bool held = false;
+	float hitEffectDuration;
+	float alphaScale;
+};
+
+// Button hit rating effect
+struct ButtonHitRatingEffect : TimedEffect
+{
+	ButtonHitRatingEffect(uint32 buttonCode, ScoreHitRating rating);
+	void Draw(class RenderQueue& rq) override;
+
+	uint32 buttonCode;
+	ScoreHitRating rating;
+};
+
+struct TimedHitEffect : TimedEffect
+{
+	TimedHitEffect(bool late);
+	void Draw(class RenderQueue& rq) override;
+
+	bool late;
+};
+
 /*
 	The object responsible for drawing the track.
 */
@@ -34,7 +89,6 @@ public:
 
 	class AsyncAssetLoader* loader = nullptr;
 
-public:
 	Track();
 	~Track();
 	virtual bool AsyncLoad() override;
@@ -49,6 +103,7 @@ public:
 	void DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, ObjectState* obj, bool active, const std::unordered_set<MapTime> chipFXTimes[2]);
 	// Things like the laser pointers, hit bar and effect
 	void DrawOverlays(RenderQueue& rq);
+	void DrawHitEffects(RenderQueue& rq);
 	// Draws a plane over the track
 	void DrawTrackOverlay(RenderQueue& rq, Texture texture, float heightOffset = 0.05f, float widthScale = 1.0f);
 	// Draw a centered sprite at pos, relative from the track
@@ -60,7 +115,8 @@ public:
 	Vector3 TransformPoint(const Vector3& p);
 
 	// Adds a sprite effect to the track
-	struct TimedEffect* AddEffect(struct TimedEffect* effect);
+	void AddEffect(struct TimedEffect* effect);
+	void AddHitEffect(uint32 buttonCode, Color color, bool hold = false);
 	void ClearEffects();
 
 	void SetViewRange(float newRange);
@@ -70,6 +126,9 @@ public:
 
 	// Normal/FX button X-axis placement
 	float GetButtonPlacement(uint32 buttonIdx);
+
+    void OnHoldEnter(Input::Button buttonCode);
+    void OnButtonReleased(Input::Button buttonCode);
 
 	// Laser positions, as shown on the overlay
 	float laserPositions[2];
@@ -85,7 +144,6 @@ public:
 
 	float laserSpeedOffset = 0.90f;
 	float centerSplit = 0.0f;
-	Vector3 shakeOffset;
 
 	// Visible time elements on the playfield track
 	// a single unit is 1 beat in distance
@@ -145,6 +203,9 @@ public:
 	// Track Origin position
 	Transform trackOrigin;
 
+    bool hitEffectAutoplay;
+    float scrollSpeed;
+
 private:
 	// Laser track generators
 	class LaserTrackBuilder* m_laserTrackBuilder[2] = { 0 };
@@ -156,6 +217,8 @@ private:
 
 	// Active effects
 	Vector<struct TimedEffect*> m_hitEffects;
+
+	struct ButtonHitEffect m_buttonHitEffects[6];
 
 	// Distance of seen objects on the track
 	float m_viewRange;
@@ -170,51 +233,8 @@ private:
 	float m_pitchOffset[2] = { 0.05f, 0.265f }; // how far from the bottom of the screen should the crit line be
 	float m_fov[2] = { 70.f, 90.f };
 
-
 	// How much the track is hidden. 1.0 = fully hidden, 0.0 = fully visible
 	float m_trackHide = 0.0f;
 	float m_trackHideSpeed = 0.0f;
 	float m_btOverFxScale = 0.8f;
-}; 
-
-// Base class for sprite effects on the track
-struct TimedEffect
-{
-	TimedEffect(float duration);;
-	virtual ~TimedEffect() = default;
-	void Reset(float duration);
-	float GetRate() const { return time / duration; }
-	virtual void Draw(class RenderQueue& rq) = 0;
-	virtual void Tick(float deltaTime);
-
-	Track* track;
-	float duration;
-	float time;
-};
-
-// Button hit effect
-struct ButtonHitEffect : public TimedEffect
-{
-	ButtonHitEffect(uint32 buttonCode, Color color);;
-	virtual void Draw(class RenderQueue& rq) override;
-
-	uint32 buttonCode;
-	Color color;
-};
-// Button hit rating effect
-struct ButtonHitRatingEffect : public TimedEffect
-{
-	ButtonHitRatingEffect(uint32 buttonCode, ScoreHitRating rating);;
-	virtual void Draw(class RenderQueue& rq) override;
-
-	uint32 buttonCode;
-	ScoreHitRating rating;
-};
-
-struct TimedHitEffect : public TimedEffect
-{
-	TimedHitEffect(bool late);
-	virtual void Draw(class RenderQueue& rq) override;
-
-	bool late;
 };

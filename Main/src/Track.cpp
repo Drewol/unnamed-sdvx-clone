@@ -4,8 +4,6 @@
 #include "Game.hpp"
 #include "Track.hpp"
 #include "LaserTrackBuilder.hpp"
-#include <Beatmap/BeatmapPlayback.hpp>
-#include <Beatmap/BeatmapObjects.hpp>
 #include "AsyncAssetLoader.hpp"
 #include <unordered_set>
 
@@ -23,6 +21,7 @@ Track::Track()
 	else
 		trackLength = 10.0f;
 }
+
 Track::~Track()
 {
 	if(loader)
@@ -40,6 +39,7 @@ Track::~Track()
 	if(timedHitEffect)
 		delete timedHitEffect;
 }
+
 bool Track::AsyncLoad()
 {
 	loader = new AsyncAssetLoader();
@@ -49,6 +49,35 @@ bool Track::AsyncLoad()
 	laserHues[0] = g_gameConfig.GetFloat(GameConfigKeys::Laser0Color);
 	laserHues[1] = g_gameConfig.GetFloat(GameConfigKeys::Laser1Color);
 	m_btOverFxScale = Math::Clamp(g_gameConfig.GetFloat(GameConfigKeys::BTOverFXScale), 0.01f, 1.0f);
+	bool delayedHitEffects = g_gameConfig.GetBool(GameConfigKeys::DelayedHitEffects);
+
+	for (int i = 0; i < 6; ++i)
+	{
+		ButtonHitEffect& bfx = m_buttonHitEffects[i];
+		if (delayedHitEffects)
+		{
+			if (i < 4)
+			{
+				bfx.delayFadeDuration = BT_DELAY_FADE_DURATION;
+				bfx.hitEffectDuration = BT_HIT_EFFECT_DURATION;
+				bfx.alphaScale = 0.6f; // Ranges from 0.6 to 0.85 depending on hispeed
+			}
+			else
+			{
+				bfx.delayFadeDuration = FX_DELAY_FADE_DURATION;
+				bfx.hitEffectDuration = FX_HIT_EFFECT_DURATION;
+				bfx.alphaScale = 0.45f;
+			}
+		}
+		else
+		{
+			bfx.delayFadeDuration = 0;
+			bfx.hitEffectDuration = 7 / 60.f;
+			bfx.alphaScale = 1;
+		}
+		bfx.buttonCode = i;
+		bfx.track = this;
+	}
 
 	for (uint32 i = 0; i < 2; i++)
 		laserColors[i] = Color::FromHSV(laserHues[i],1.0,1.0);
@@ -236,16 +265,13 @@ bool Track::AsyncFinalize()
 void Track::Tick(class BeatmapPlayback& playback, float deltaTime)
 {
 	const TimingPoint& currentTimingPoint = playback.GetCurrentTimingPoint();
-	if(&currentTimingPoint != m_lastTimingPoint)
+	if (&currentTimingPoint != m_lastTimingPoint)
 	{
 		m_lastTimingPoint = &currentTimingPoint;
 	}
 
-	// Calculate track origin transform
-	uint8 portrait = g_aspectRatio > 1.0f ? 0 : 1;
-
 	// Button Hit FX
-	for(auto it = m_hitEffects.begin(); it != m_hitEffects.end();)
+	for (auto it = m_hitEffects.begin(); it != m_hitEffects.end();)
 	{
 		(*it)->Tick(deltaTime);
 		if((*it)->time <= 0.0f)
@@ -256,6 +282,9 @@ void Track::Tick(class BeatmapPlayback& playback, float deltaTime)
 		}
 		it++;
 	}
+	for (auto& bfx : m_buttonHitEffects)
+		bfx.Tick(deltaTime);
+		
 	timedHitEffect->Tick(deltaTime);
 
 	MapTime currentTime = playback.GetLastTime();
@@ -280,7 +309,7 @@ void Track::Tick(class BeatmapPlayback& playback, float deltaTime)
 	// Add first tick
 	m_barTicks.Add(playback.TimeToViewDistance((MapTime)tickTime));
 
-	while(tickTime < rangeEnd)
+	while (tickTime < rangeEnd)
 	{
 		double next = tickTime + stepTime;
 
@@ -490,7 +519,7 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 
 		Transform buttonTransform = trackOrigin;
 		buttonTransform *= Transform::Translation(buttonPos);
-		float scale = 1.0f;
+		float scale;
 		if(isHold) // Hold Note?
 		{
 			float trackScale = (playback.DurationToViewDistanceAtTime(mobj->time, mobj->hold.duration) / viewRange) / length;
@@ -515,8 +544,6 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 	}
 	else if(obj->type == ObjectType::Laser) // Draw laser
 	{
-		
-
 		position = playback.TimeToViewDistance(obj->time);
 		float posmult = trackLength / (m_viewRange * laserSpeedOffset);
 		LaserObjectState* laser = (LaserObjectState*)obj;
@@ -579,16 +606,23 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 		}
 	}
 }
+
 void Track::DrawOverlays(class RenderQueue& rq)
 {
 	// Draw button hit effect sprites
-	for(auto& hfx : m_hitEffects)
-	{
+	for (auto& hfx : m_hitEffects)
 		hfx->Draw(rq);
-	}
-	if(timedHitEffect->time > 0.0f)
+
+	if (timedHitEffect->time > 0.0f)
 		timedHitEffect->Draw(rq);
 }
+
+void Track::DrawHitEffects(RenderQueue& rq)
+{
+	for (auto& bfx : m_buttonHitEffects)
+		bfx.Draw(rq);
+}
+
 void Track::DrawTrackOverlay(RenderQueue& rq, Texture texture, float heightOffset /*= 0.05f*/, float widthScale /*= 1.0f*/)
 {
 	MaterialParameterSet params;
@@ -598,6 +632,7 @@ void Track::DrawTrackOverlay(RenderQueue& rq, Texture texture, float heightOffse
 	transform *= Transform::Translation({ 0.0f, heightOffset, 0.0f });
 	rq.Draw(transform, trackMesh, trackOverlay, params);
 }
+
 void Track::DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, Color color /*= Color::White*/, float tilt /*= 0.0f*/)
 {
 	Transform spriteTransform = trackOrigin;
@@ -611,6 +646,7 @@ void Track::DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, 
 	params.SetParameter("color", color);
 	rq.Draw(spriteTransform, centeredTrackMesh, spriteMaterial, params);
 }
+
 void Track::DrawCombo(RenderQueue& rq, uint32 score, Color color, float scale)
 {
 	if(score == 0)
@@ -690,12 +726,17 @@ Vector3 Track::TransformPoint(const Vector3 & p)
 	return trackOrigin.TransformPoint(p);
 }
 
-TimedEffect* Track::AddEffect(TimedEffect* effect)
+void Track::AddEffect(TimedEffect* effect)
 {
 	m_hitEffects.Add(effect);
 	effect->track = this;
-	return effect;
 }
+
+void Track::AddHitEffect(uint32 buttonCode, Color color, bool hold)
+{
+	m_buttonHitEffects[buttonCode].Reset(buttonCode, color, hold);
+}
+
 void Track::ClearEffects()
 {
 	m_trackHide = 0.0f;
@@ -771,3 +812,18 @@ float Track::GetButtonPlacement(uint32 buttonIdx)
 	}
 }
 
+void Track::OnHoldEnter(Input::Button buttonCode)
+{
+    const auto buttonIndex = (uint32)buttonCode;
+    if (buttonIndex >= 6)
+        return;
+    m_buttonHitEffects[buttonIndex].Reset(buttonIndex, hitColors[(size_t)ScoreHitRating::Perfect], true);
+}
+
+void Track::OnButtonReleased(Input::Button buttonCode)
+{
+	const auto buttonIndex = (uint32)buttonCode;
+	if (buttonIndex >= 6)
+		return;
+	m_buttonHitEffects[buttonIndex].held = false;
+}
