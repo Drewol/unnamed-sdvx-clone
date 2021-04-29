@@ -873,26 +873,33 @@ button_pressed = function(button)
     if button == game.BUTTON_FXR then
         toggle_mirror();
     end
+    if button == game.BUTTON_BCK then
+        -- Same behaviour as escape being pressed
+        handle_exit()
+    end
 end
 
 -- Handle the escape key around the UI
 function key_pressed(key)
     if key == 27 then --escape pressed
-        if screenState == "roomList" then
-            did_exit = true;
-            mpScreen.Exit();
-            return
-        end
-
-        -- Reset room data
-        screenState = "roomList" -- have to update here
-        selected_room = nil;
-        rooms = {};
-        selected_song = nil
-        selected_song_index = 1;
-        jacket = 0;
+        handle_exit()
     end
+end
 
+function handle_exit()
+    if screenState == "roomList" then
+        did_exit = true;
+        mpScreen.Exit();
+        return
+    end
+    
+    -- Reset room data
+    screenState = "roomList" -- have to update here
+    selected_room = nil;
+    rooms = {};
+    selected_song = nil
+    selected_song_index = 1;
+    jacket = 0;
 end
 
 -- Handle mouse clicks in the UI
