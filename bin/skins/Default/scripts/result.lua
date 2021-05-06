@@ -140,7 +140,7 @@ result_set = function()
 
     if result.duration ~= nil then
         chartDuration = result.duration
-        chartDurationText = string.format("%dm %02d.%01ds", chartDuration // 60000, (chartDuration // 1000) % 60, (chartDuration // 100) % 10)
+        chartDurationText = string.format(_("%dm %02d.%01ds"), chartDuration // 60000, (chartDuration // 1000) % 60, (chartDuration // 100) % 10)
         hitGraphHoverScale = math.max(chartDuration / 10000, 5)
     else
         chartDuration = 0
@@ -247,15 +247,15 @@ result_set = function()
     end
 
     if result.playbackSpeed ~= nil and result.playbackSpeed ~= 1.00 then
-        if clearTextBase == "" then clearText = string.format("x%.2f play", result.playbackSpeed)
-        else clearText = string.format("%s (x%.2f play)", clearTextBase, result.playbackSpeed)
+        if clearTextBase == "" then clearText = string.format(_("x%.2f play"), result.playbackSpeed)
+        else clearText = string.format(_("%s (x%.2f play)"), clearTextBase, result.playbackSpeed)
         end
     else
         clearText = clearTextBase
     end
 
     if result.uid ~= nil and result.playerName ~= nil and result.isSelf ~= true then
-        clearText = string.format("By %s", result.playerName)
+        clearText = string.format(_("By %s"), result.playerName)
     end
 
     if result.speedModType ~= nil then
@@ -289,8 +289,8 @@ result_set = function()
         hitWindowGood = result.hitWindow.good
 
         if hitWindowPerfect ~= 46 or hitWindowGood ~= 92 then
-            critText = string.format("%02dms CRIT", hitWindowPerfect)
-            nearText = string.format("%02dms NEAR", hitWindowGood)
+            critText = string.format(_("%02dms CRIT"), hitWindowPerfect)
+            nearText = string.format(_("%02dms NEAR"), hitWindowGood)
         end
     end
 
@@ -323,7 +323,7 @@ draw_shotnotif = function(x,y)
     gfx.Stroke()
     gfx.FillColor(255,255,255)
     gfx.FontSize(15)
-    gfx.Text("Screenshot saved to:", 3,5)
+    gfx.Text(_("Screenshot saved to:"), 3,5)
     gfx.Text(shotPath, 3,20)
     gfx.Restore()
 end
@@ -381,12 +381,12 @@ draw_ir = function(full)
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT)
     gfx.LoadSkinFont("NotoSans-Regular.ttf")
     gfx.FontSize(30)
-    gfx.Text("IR (BT-D: High Scores)",510,30)
+    gfx.Text(_("IR (BT-D: High Scores)"),510,30)
 
     if result.irState == IRData.States.Pending then
         gfx.FontSize(15)
         gfx.FillColor(170, 170, 170)
-        gfx.Text("Loading... please wait.", 510, 60)
+        gfx.Text(_("Loading... please wait."), 510, 60)
         return
     end
 
@@ -443,11 +443,14 @@ draw_ir = function(full)
         gfx.LoadSkinFont("NotoSans-Regular.ttf")
         gfx.FontSize(20)
 
+        local timeStr = ""
         if s.yours and s.justSet then
-            gfx.Text(string.format("%s, Now", s.username), 130, 45)
+            timeStr = _("Now")
         else
-            gfx.Text(string.format("%s, %s", s.username, os.date("%Y-%m-%d %H:%M:%S", s.timestamp)), 130, 45)
+            timeStr = os.date("%Y-%m-%d %H:%M:%S", s.timestamp)
         end
+        
+        gfx.Text(string.format("%s, %s", s.username, timeStr), 130, 45)
         gfx.Restore()
     end
 end
@@ -459,9 +462,9 @@ draw_highscores = function(full)
     gfx.FontSize(30)
 
     if not IRData.Active then
-        gfx.Text("High Scores",510,30)
+        gfx.Text(_("High Scores"),510,30)
     else
-        gfx.Text("High Scores (BT-D: IR)",510,30)
+        gfx.Text(_("High Scores (BT-D: IR)"),510,30)
     end
 
     gfx.StrokeWidth(1)
@@ -632,7 +635,7 @@ draw_left_graph = function(x, y, w, h)
     gfx.FillColor(255, 255, 255, 32)
     gfx.Fill()
 
-    local chartDurationDisp = string.format("Duration: %s", chartDurationText)
+    local chartDurationDisp = string.format(_("Duration: %s"), chartDurationText)
 
     if mhit then
         hit_xfocus = mx - x
@@ -653,7 +656,7 @@ draw_left_graph = function(x, y, w, h)
 
     if result.bpm ~= nil then
         gfx.BeginPath()
-        gfx.Text(string.format("BPM: %s", result.bpm), x+5, y+15)
+        gfx.Text(string.format(_("BPM: %s"), result.bpm), x+5, y+15)
     end
 
     draw_hit_graph(x, y, w, h, hit_xfocus, hit_xscale)
@@ -686,13 +689,13 @@ draw_left_graph = function(x, y, w, h)
         gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM)
         gfx.BeginPath()
         gfx.FillColor(255, 255, 255, 128)
-        gfx.Text(string.format("Mean: %.1f ms, Median: %d ms", result.meanHitDelta, result.medianHitDelta), x+4, y+h)
+        gfx.Text(string.format(_("Mean: %.1f ms, Median: %d ms"), result.meanHitDelta, result.medianHitDelta), x+4, y+h)
     elseif hasHitStat then
         gfx.FontSize(16)
         gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM)
         gfx.BeginPath()
         gfx.FillColor(255, 255, 255, 128)
-        gfx.Text(string.format("Mean deviation: %.1fms", result.meanHitDeltaAbs), x+4, y+h)
+        gfx.Text(string.format(_("Mean deviation: %.1fms"), result.meanHitDeltaAbs), x+4, y+h)
     end
 
     -- End gauge display
@@ -785,7 +788,7 @@ draw_right_graph = function(x, y, w, h)
     end
     gfx.FillColor(255, 128, 128)
     gfx.FontSize(16)
-    gfx.Text(string.format("Mean: %.1f ms", result.meanHitDelta), x+2, y+meanY)
+    gfx.Text(string.format(_("Mean: %.1f ms"), result.meanHitDelta), x+2, y+meanY)
 
     gfx.BeginPath()
     if medianY <= meanY then
@@ -795,18 +798,18 @@ draw_right_graph = function(x, y, w, h)
     end
     gfx.FillColor(196, 196, 255)
     gfx.FontSize(16)
-    gfx.Text(string.format("Median: %d ms", result.medianHitDelta), x+2, y+medianY)
+    gfx.Text(string.format(_("Median: %d ms"), result.medianHitDelta), x+2, y+medianY)
 
     gfx.FillColor(255, 255, 255)
     gfx.FontSize(15)
 
     gfx.BeginPath()
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
-    gfx.Text(string.format("Earliest: %d ms", hitMinDelta), x+5, y)
+    gfx.Text(string.format(_("Earliest: %d ms"), hitMinDelta), x+5, y)
 
     gfx.BeginPath()
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM)
-    gfx.Text(string.format("Latest: %d ms", hitMaxDelta), x+5, y+h)
+    gfx.Text(string.format(_("Latest: %d ms"), hitMaxDelta), x+5, y+h)
 end
 
 draw_laser_icon = function(x, y, s)
@@ -976,7 +979,7 @@ draw_chart_info = function(x, y, w, h, full)
         gfx.FillColor(255, 255, 255, math.floor(40+80*waveParam(4)))
         gfx.FontSize(30)
         gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
-        gfx.Text("No Image", x+w/2, jacket_y + jacket_size/2)
+        gfx.Text(_("No Image"), x+w/2, jacket_y + jacket_size/2)
     end
 
     if full then
@@ -997,7 +1000,7 @@ draw_chart_info = function(x, y, w, h, full)
             local effector_text = ""
 
             if result.effector ~= nil and result.effector ~= "" then
-                effector_text = string.format("  by %s", result.effector)
+                effector_text = string.format(_("  by %s"), result.effector)
 
                 gfx.FontSize(16)
                 local _d, _e, effector_text_width, _f = gfx.TextBounds(0, 0, effector_text)
@@ -1051,7 +1054,7 @@ draw_chart_info = function(x, y, w, h, full)
         gfx.TextAlign(gfx.TEXT_ALIGN_CENTER)
         gfx.FillColor(255, 255, 255)
         gfx.FontSize(16)
-        gfx.Text("Effected by", x+w/2, draw_y)
+        gfx.Text(_("Effected by"), x+w/2, draw_y)
         gfx.FontSize(27)
         drawScaledText(result.effector, x+w/2, draw_y+24, w/2-5)
         draw_y = draw_y + 50
@@ -1060,7 +1063,7 @@ draw_chart_info = function(x, y, w, h, full)
     if result.illustrator ~= nil and result.illustrator ~= "" then
         gfx.TextAlign(gfx.TEXT_ALIGN_CENTER)
         gfx.FontSize(16)
-        gfx.Text("Illustrated by", x+w/2, draw_y)
+        gfx.Text(_("Illustrated by"), x+w/2, draw_y)
         gfx.FontSize(27)
         drawScaledText(result.illustrator, x+w/2, draw_y+24, w/2-5)
         draw_y = draw_y + 50
@@ -1172,7 +1175,7 @@ draw_basic_hitstat = function(x, y, w, h, full)
 
             gfx.BeginPath()
             gfx.FontSize(16)
-            gfx.Text(string.format("Mission: %s", result.mission), x+4, stat_y)
+            gfx.Text(string.format(_("Mission: %s"), result.mission), x+4, stat_y)
         end
     end
 end
@@ -1189,12 +1192,12 @@ end
 draw_guide = function(x, y, w, h, full)
     gfx.LoadSkinFont("NotoSans-Regular.ttf")
 
-    local fxLText = "FX-L: more info"
+    local fxLText = _("FX-L: more info")
     if full then
-        fxLText = "FX-L: simple view"
+        fxLText = _("FX-L: simple view")
     end
 
-    local fxRText = "FX-R: toggle hiscore"
+    local fxRText = _("FX-R: toggle hiscore")
 
     gfx.FontSize(20)
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM)

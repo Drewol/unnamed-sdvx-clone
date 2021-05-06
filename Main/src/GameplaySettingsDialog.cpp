@@ -8,64 +8,63 @@
 void GameplaySettingsDialog::InitTabs()
 {
     Tab offsetTab = std::make_unique<TabData>();
-    offsetTab->name = "Offsets";
-    offsetTab->settings.push_back(CreateIntSetting(GameConfigKeys::GlobalOffset, "Global Offset", { -200, 200 }));
-    offsetTab->settings.push_back(CreateIntSetting(GameConfigKeys::InputOffset, "Input Offset", { -200, 200 }));
+    offsetTab->name = String(_("Offsets"));
+    offsetTab->settings.push_back(CreateIntSetting(GameConfigKeys::GlobalOffset, _("Global Offset"), { -200, 200 }));
+    offsetTab->settings.push_back(CreateIntSetting(GameConfigKeys::InputOffset, _("Input Offset"), { -200, 200 }));
     if (m_songSelectScreen != nullptr || m_multiPlayerScreen != nullptr)
     {
         offsetTab->settings.push_back(m_CreateSongOffsetSetting());
     }
     if (m_songSelectScreen != nullptr)
     {
-        offsetTab->settings.push_back(CreateButton("Compute Song Offset", [this](const auto&) { onPressComputeSongOffset.Call(); }));
+        offsetTab->settings.push_back(CreateButton(_("Compute Song Offset"), [this](const auto&) { onPressComputeSongOffset.Call(); }));
     }
 
     Tab speedTab = std::make_unique<TabData>();
-    speedTab->name = "HiSpeed";
-    speedTab->settings.push_back(CreateEnumSetting<Enum_SpeedMods>(GameConfigKeys::SpeedMod, "Speed Mod"));
-    speedTab->settings.push_back(CreateFloatSetting(GameConfigKeys::HiSpeed, "HiSpeed", { 0.1f, 16.f }));
-    speedTab->settings.push_back(CreateFloatSetting(GameConfigKeys::ModSpeed, "ModSpeed", { 50, 1500 }, 20.0f));
+    speedTab->name = String(_("HiSpeed"));
+    speedTab->settings.push_back(CreateEnumSetting<Enum_SpeedMods>(GameConfigKeys::SpeedMod, _("Speed Mod")));
+    speedTab->settings.push_back(CreateFloatSetting(GameConfigKeys::HiSpeed, _("HiSpeed"), { 0.1f, 16.f }));
+    speedTab->settings.push_back(CreateFloatSetting(GameConfigKeys::ModSpeed, _("ModSpeed"), { 50, 1500 }, 20.0f));
 
     Tab gameTab = std::make_unique<TabData>();
-    gameTab->name = "Game";
+    gameTab->name = String(_("Game"));
     // For now we can't set these like this in mp
     if (m_multiPlayerScreen == nullptr)
     {
-        gameTab->settings.push_back(CreateEnumSetting<Enum_GaugeTypes>(GameConfigKeys::GaugeType, "Gauge"));
-		gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::BackupGauge, "Backup Gauge"));
-		gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::RandomizeChart, "Random"));
-		gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::MirrorChart, "Mirror"));
+        gameTab->settings.push_back(CreateEnumSetting<Enum_GaugeTypes>(GameConfigKeys::GaugeType, _("Gauge")));
+		gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::BackupGauge, _("Backup Gauge")));
+		gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::RandomizeChart, _("Random")));
+		gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::MirrorChart, _("Mirror")));
 	}
-    gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::DisableBackgrounds, "Hide Backgrounds"));
-    gameTab->settings.push_back(CreateEnumSetting<Enum_ScoreDisplayModes>(GameConfigKeys::ScoreDisplayMode, "Score Display"));
+    gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::DisableBackgrounds, _("Hide Backgrounds")));
+    gameTab->settings.push_back(CreateEnumSetting<Enum_ScoreDisplayModes>(GameConfigKeys::ScoreDisplayMode, _("Score Display")));
     if (m_songSelectScreen != nullptr)
     {
-        gameTab->settings.push_back(CreateButton("Autoplay", [this](const auto&) { onPressAutoplay.Call(); }));
-        gameTab->settings.push_back(CreateButton("Practice", [this](const auto&) { onPressPractice.Call(); }));
+        gameTab->settings.push_back(CreateButton(_("Autoplay"), [this](const auto&) { onPressAutoplay.Call(); }));
+        gameTab->settings.push_back(CreateButton(_("Practice"), [this](const auto&) { onPressPractice.Call(); }));
     }
 
     Tab hidsudTab = std::make_unique<TabData>();
-    hidsudTab->name = "Hid/Sud";
-    hidsudTab->settings.push_back(CreateBoolSetting(GameConfigKeys::EnableHiddenSudden, "Enable Hidden / Sudden"));
-    hidsudTab->settings.push_back(CreateFloatSetting(GameConfigKeys::HiddenCutoff, "Hidden Cutoff", { 0.f, 1.f }));
-    hidsudTab->settings.push_back(CreateFloatSetting(GameConfigKeys::HiddenFade, "Hidden Fade", { 0.f, 1.f }));
-    hidsudTab->settings.push_back(CreateFloatSetting(GameConfigKeys::SuddenCutoff, "Sudden Cutoff", { 0.f, 1.f }));
-    hidsudTab->settings.push_back(CreateFloatSetting(GameConfigKeys::SuddenFade, "Sudden Fade", { 0.f, 1.f }));
-    hidsudTab->settings.push_back(CreateBoolSetting(GameConfigKeys::ShowCover, "Show Track Cover"));
+    hidsudTab->name = String(_("Hid/Sud"));
+    hidsudTab->settings.push_back(CreateBoolSetting(GameConfigKeys::EnableHiddenSudden, _("Enable Hidden / Sudden")));
+    hidsudTab->settings.push_back(CreateFloatSetting(GameConfigKeys::HiddenCutoff, _("Hidden Cutoff"), { 0.f, 1.f }));
+    hidsudTab->settings.push_back(CreateFloatSetting(GameConfigKeys::HiddenFade, _("Hidden Fade"), { 0.f, 1.f }));
+    hidsudTab->settings.push_back(CreateFloatSetting(GameConfigKeys::SuddenCutoff, _("Sudden Cutoff"), { 0.f, 1.f }));
+    hidsudTab->settings.push_back(CreateFloatSetting(GameConfigKeys::SuddenFade, _("Sudden Fade"), { 0.f, 1.f }));
+    hidsudTab->settings.push_back(CreateBoolSetting(GameConfigKeys::ShowCover, _("Show Track Cover")));
 
     Tab judgeWindowTab = std::make_unique<TabData>();
-    judgeWindowTab->name = "Judgement";
-    judgeWindowTab->settings.push_back(CreateIntSetting(GameConfigKeys::HitWindowPerfect, "Crit Window", { 0, HitWindow::NORMAL.perfect }));
-    judgeWindowTab->settings.push_back(CreateIntSetting(GameConfigKeys::HitWindowGood, "Near Window", { 0, HitWindow::NORMAL.good }));
-    judgeWindowTab->settings.push_back(CreateIntSetting(GameConfigKeys::HitWindowHold, "Hold Window", { 0, HitWindow::NORMAL.hold }));
-	judgeWindowTab->settings.push_back(CreateIntSetting(GameConfigKeys::HitWindowSlam, "Slam Window", { 0, HitWindow::NORMAL.slam }));
-    judgeWindowTab->settings.push_back(CreateButton("Set to NORMAL", [](const auto&) { HitWindow::NORMAL.SaveConfig(); }));
-    judgeWindowTab->settings.push_back(CreateButton("Set to HARD", [](const auto&) { HitWindow::HARD.SaveConfig(); }));
+    judgeWindowTab->name = String(_("Judgement"));
+    judgeWindowTab->settings.push_back(CreateIntSetting(GameConfigKeys::HitWindowPerfect, _("Crit Window"), { 0, HitWindow::NORMAL.perfect }));
+    judgeWindowTab->settings.push_back(CreateIntSetting(GameConfigKeys::HitWindowGood, _("Near Window"), { 0, HitWindow::NORMAL.good }));
+    judgeWindowTab->settings.push_back(CreateIntSetting(GameConfigKeys::HitWindowHold, _("Hold Window"), { 0, HitWindow::NORMAL.hold }));
+	judgeWindowTab->settings.push_back(CreateIntSetting(GameConfigKeys::HitWindowSlam, _("Slam Window"), { 0, HitWindow::NORMAL.slam }));
+    judgeWindowTab->settings.push_back(CreateButton(_("Set to NORMAL"), [](const auto&) { HitWindow::NORMAL.SaveConfig(); }));
+    judgeWindowTab->settings.push_back(CreateButton(_("Set to HARD"), [](const auto&) { HitWindow::HARD.SaveConfig(); }));
 
 
     Tab profileWindowTab = std::make_unique<TabData>();
-    profileWindowTab->name = "Profiles";
-
+    profileWindowTab->name = String(_("Profiles"));
 
 	profileWindowTab->settings.push_back(m_CreateProfileSetting("Main"));
 	{
@@ -87,11 +86,11 @@ void GameplaySettingsDialog::InitTabs()
     // For now we can't set these like this in mp
     if (m_multiPlayerScreen == nullptr)
     {
-        profileWindowTab->settings.push_back(CreateButton("Create Profile", [this_p](const auto&) {
+        profileWindowTab->settings.push_back(CreateButton(_("Create Profile"), [this_p](const auto&) {
             BasicPrompt* w = new BasicPrompt(
-                "Create New Profile",
-                "Enter name for profile\n(This will copy your current profile)",
-                "Create Profile");
+                _("Create New Profile"),
+                _("Enter name for profile\n(This will copy your current profile)"),
+                _("Create Profile"));
             w->OnResult.AddLambda([this_p](bool valid, const char* data) {
                 if (!valid || strlen(data) == 0)
                     return;
@@ -146,7 +145,7 @@ void GameplaySettingsDialog::InitTabs()
             w->Focus();
             g_application->AddTickable(w);
             }));
-		profileWindowTab->settings.push_back(CreateButton("Manage Profiles", [this_p](const auto&) {
+		profileWindowTab->settings.push_back(CreateButton(_("Manage Profiles"), [this_p](const auto&) {
 			if (!Path::IsDirectory(Path::Absolute("profiles")))
 				Path::CreateDir(Path::Absolute("profiles"));
 			Path::ShowInFileBrowser(Path::Absolute("profiles"));
@@ -170,8 +169,8 @@ void GameplaySettingsDialog::OnAdvanceTab()
 
 GameplaySettingsDialog::Setting GameplaySettingsDialog::m_CreateSongOffsetSetting()
 {
-    Setting songOffsetSetting = std::make_unique<SettingData>("Song Offset", SettingType::Integer);
-    songOffsetSetting->name = "Song Offset";
+    Setting songOffsetSetting = std::make_unique<SettingData>(_("Song Offset"), SettingType::Integer);
+    songOffsetSetting->name = String(_("Song Offset"));
     songOffsetSetting->type = SettingType::Integer;
     songOffsetSetting->intSetting.val = 0;
     songOffsetSetting->intSetting.min = -200;

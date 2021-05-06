@@ -74,8 +74,8 @@ function render(deltaTime, visible)
 
     local posX = SettingsDiag.posX or 0.5
     local posY = SettingsDiag.posY or 0.5
-    local message_1 = "Press both FXs to open/close. Use the Start button to press buttons."
-    local message_2 = "Use FX keys to navigate tabs. Use arrow keys to navigate and modify settings."
+    local message_1 = _("Press both FXs to open/close. Use the Start button to press buttons.")
+    local message_2 = _("Use FX keys to navigate tabs. Use arrow keys to navigate and modify settings.")
 
     resX, resY = game.GetResolution()
     local scale = resY / 1080

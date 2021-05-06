@@ -145,7 +145,7 @@ bool BaseGameSettingsDialog::IsSelectionOnPressable()
     return currentSetting->type == SettingType::Button || currentSetting->type == SettingType::Boolean;
 }
 
-BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateFloatSetting(GameConfigKeys key, String name, Vector2 range, float mult)
+BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateFloatSetting(GameConfigKeys key, std::string_view name, Vector2 range, float mult)
 {
     Setting s = std::make_unique<SettingData>(name, SettingType::Floating);
 
@@ -166,7 +166,7 @@ BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateFloatSetting(GameC
     return s;
 }
 
-BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateBoolSetting(String label, bool& val)
+BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateBoolSetting(std::string_view label, bool& val)
 {
     Setting s = std::make_unique<SettingData>(label, SettingType::Boolean);
     
@@ -185,7 +185,7 @@ BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateBoolSetting(String
     return s;
 }
 
-BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateIntSetting(String label, int& val, Vector2i range, int step)
+BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateIntSetting(std::string_view label, int& val, Vector2i range, int step)
 {
     Setting s = std::make_unique<SettingData>(label, SettingType::Integer);
 
@@ -208,7 +208,7 @@ BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateIntSetting(String 
     return s;
 }
 
-BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateButton(String label, std::function<void(const BaseGameSettingsDialog::SettingData &)>&& callback)
+BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateButton(std::string_view label, std::function<void(const BaseGameSettingsDialog::SettingData &)>&& callback)
 {
     Setting s = std::make_unique<SettingData>(label, SettingType::Button);
     s->setter.AddLambda(std::move(callback));
@@ -216,7 +216,7 @@ BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateButton(String labe
     return s;
 }
 
-BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateIntSetting(GameConfigKeys key, String name, Vector2i range, int step)
+BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateIntSetting(GameConfigKeys key, std::string_view name, Vector2i range, int step)
 {
     Setting s = std::make_unique<SettingData>(name, SettingType::Integer);
 
@@ -237,7 +237,7 @@ BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateIntSetting(GameCon
     return s;
 }
 
-BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateBoolSetting(GameConfigKeys key, String name)
+BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateBoolSetting(GameConfigKeys key, std::string_view name)
 {
     Setting s = std::make_unique<SettingData>(name, SettingType::Boolean);
 

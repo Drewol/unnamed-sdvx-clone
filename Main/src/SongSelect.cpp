@@ -839,18 +839,18 @@ public:
 	{
 		if (m_sorts.size() == 0)
 		{
-			m_sorts.Add(new TitleSort("Title ^", false));
-			m_sorts.Add(new TitleSort("Title v", true));
-			m_sorts.Add(new ScoreSort("Score ^", false));
-			m_sorts.Add(new ScoreSort("Score v", true));
-			m_sorts.Add(new DateSort("Date ^", false));
-			m_sorts.Add(new DateSort("Date v", true));
-			m_sorts.Add(new ClearMarkSort("Badge ^", false));
-			m_sorts.Add(new ClearMarkSort("Badge v", true));
-			m_sorts.Add(new ArtistSort("Artist ^", false));
-			m_sorts.Add(new ArtistSort("Artist v", true));
-			m_sorts.Add(new EffectorSort("Effector ^", false));
-			m_sorts.Add(new EffectorSort("Effector v", true));
+			m_sorts.Add(new TitleSort(false));
+			m_sorts.Add(new TitleSort(true));
+			m_sorts.Add(new ScoreSort(false));
+			m_sorts.Add(new ScoreSort(true));
+			m_sorts.Add(new DateSort(false));
+			m_sorts.Add(new DateSort(true));
+			m_sorts.Add(new ClearMarkSort(false));
+			m_sorts.Add(new ClearMarkSort(true));
+			m_sorts.Add(new ArtistSort(false));
+			m_sorts.Add(new ArtistSort(true));
+			m_sorts.Add(new EffectorSort(false));
+			m_sorts.Add(new EffectorSort(true));
 		}
 
 		CheckedLoad(m_lua = g_application->LoadScript("songselect/sortwheel"));

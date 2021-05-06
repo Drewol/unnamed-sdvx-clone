@@ -33,3 +33,6 @@
 #include "Rect.hpp"
 #include "Margin.hpp"
 #include "Random.hpp"
+
+// I18N
+#include "I18N.hpp"

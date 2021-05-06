@@ -2,6 +2,11 @@ json = require "json"
 local header = {}
 header["user-agent"] = "unnamed_sdvx_clone"
 
+-- For I18N song status
+_("Downloaded")
+_("Downloading...")
+_("Playing")
+
 local jacketFallback = gfx.CreateSkinImage("song_select/loading.png", 0)
 local diffColors = {{50,50,127}, {50,127,50}, {127,50,50}, {127, 50, 127}}
 local entryW = 770
@@ -120,7 +125,7 @@ function render_song(song, x,y)
         gfx.FillColor(255,255,255)
         gfx.FontSize(40)
         gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_MIDDLE)
-        gfx.Text(string.format("%d Effected by %s", diff.level, diff.effector), 255, diffY + 250 / 8)
+        gfx.Text(string.format(_("%d Effected by %s"), diff.level, diff.effector), 255, diffY + 250 / 8)
     end
     if downloaded[song.id] then
         gfx.BeginPath()
@@ -130,7 +135,7 @@ function render_song(song, x,y)
         gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
         gfx.FontSize(60)
         gfx.FillColor(255,255,255)
-        gfx.Text(downloaded[song.id], 375, 150)
+        gfx.Text(_(downloaded[song.id]), 375, 150)
     elseif song.status then
         gfx.BeginPath()
         gfx.Rect(0,0,750,300)
@@ -139,7 +144,7 @@ function render_song(song, x,y)
         gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
         gfx.FontSize(60)
         gfx.FillColor(255,255,255)
-        gfx.Text(song.status, 375, 150)
+        gfx.Text(_(song.status), 375, 150)
     end
     gfx.ResetScissor()
     gfx.Restore()
@@ -177,7 +182,7 @@ function render_loading()
     gfx.FillColor(255,255,255)
     gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT, gfx.TEXT_ALIGN_BOTTOM)
     gfx.FontSize(70)
-    gfx.Text("LOADING...", resX - 20, resY - 3)
+    gfx.Text(_("LOADING..."), resX - 20, resY - 3)
     gfx.Restore()
 end
 
@@ -191,9 +196,9 @@ function render_hotkeys()
     gfx.FontSize(30)
     gfx.FillColor(255,255,255)
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT, gfx.TEXT_ALIGN_BOTTOM)
-    gfx.Text("FXR: Sorting", resX/2 + 20, resY - 10)
+    gfx.Text(_("FX-R: Sorting"), resX/2 + 20, resY - 10)
     gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT, gfx.TEXT_ALIGN_BOTTOM)
-    gfx.Text("FXL: Levels", resX/2 - 20, resY - 10)
+    gfx.Text(_("FX-L: Levels"), resX/2 - 20, resY - 10)
     gfx.Restore()
 end
 
@@ -386,7 +391,7 @@ function render_level_filters()
     gfx.FillColor(255,255,255)
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
     gfx.FontSize(60)
-    gfx.Text("Level filters:", 10, 10)
+    gfx.Text(_("Level filters:"), 10, 10)
     gfx.BeginPath()
     gfx.Rect(resX/2 - 30, resY/2 - 22, 60, 44)
     gfx.StrokeColor(255,128,0)
@@ -412,7 +417,7 @@ function render_sorting_selection()
     gfx.FillColor(255,255,255)
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
     gfx.FontSize(60)
-    gfx.Text("Sorting method:", 10, 10)
+    gfx.Text(_("Sorting method:"), 10, 10)
     gfx.BeginPath()
     gfx.Rect(resX/2 - 75, resY/2 - 22, 150, 44)
     gfx.StrokeColor(255,128,0)

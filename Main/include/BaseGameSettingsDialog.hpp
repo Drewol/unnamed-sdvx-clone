@@ -18,7 +18,7 @@ class BaseGameSettingsDialog
 public:
     typedef struct SettingData
     {
-        SettingData(const String& name, SettingType type) : name(name), type(type) {}
+        SettingData(const std::string_view& name, SettingType type) : name(name), type(type) {}
 
         String name;
         SettingType type;
@@ -93,16 +93,16 @@ protected:
     virtual void InitTabs() = 0;
     virtual void OnAdvanceTab() {};
 
-    Setting CreateBoolSetting(GameConfigKeys key, String name);
-    Setting CreateIntSetting(GameConfigKeys key, String name, Vector2i range, int step = 1);
-    Setting CreateFloatSetting(GameConfigKeys key, String name, Vector2 range, float mult = 1.0f);
+    Setting CreateBoolSetting(GameConfigKeys key, std::string_view name);
+    Setting CreateIntSetting(GameConfigKeys key, std::string_view name, Vector2i range, int step = 1);
+    Setting CreateFloatSetting(GameConfigKeys key, std::string_view name, Vector2 range, float mult = 1.0f);
 
-    Setting CreateBoolSetting(String label, bool& val);
-    Setting CreateIntSetting(String label, int& val, Vector2i range, int step = 1);
-    Setting CreateButton(String label, std::function<void(const BaseGameSettingsDialog::SettingData&)>&& callback);
+    Setting CreateBoolSetting(std::string_view label, bool& val);
+    Setting CreateIntSetting(std::string_view label, int& val, Vector2i range, int step = 1);
+    Setting CreateButton(std::string_view label, std::function<void(const BaseGameSettingsDialog::SettingData&)>&& callback);
 
     template <typename EnumClass>
-    Setting CreateEnumSetting(GameConfigKeys key, String name);
+    Setting CreateEnumSetting(GameConfigKeys key, std::string_view name);
 
     inline int GetCurrentTab() const { return m_currentTab; }
     inline void SetCurrentTab(int tabIndex) { m_currentTab = tabIndex; }
@@ -138,7 +138,7 @@ private:
 };
 
 template <typename EnumClass>
-BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateEnumSetting(GameConfigKeys key, String name)
+BaseGameSettingsDialog::Setting BaseGameSettingsDialog::CreateEnumSetting(GameConfigKeys key, std::string_view name)
 {
     Setting s = std::make_unique<SettingData>(name, SettingType::Enum);
 

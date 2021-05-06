@@ -1,0 +1,528 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: unnamed sdvx clone\n"
+"POT-Creation-Date: 2021-04-14 23:48+0900\n"
+"PO-Revision-Date: 2021-04-14 23:48+0900\n"
+"Last-Translator: \n"
+"Language-Team: https://github.com/Drewol/unnamed-sdvx-clone\n"
+"Language: ko\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.4.2\n"
+"X-Poedit-Basepath: ../..\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Poedit-KeywordsList: ;_:1,2c;_:1\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-SearchPath-0: bin/skins/Default\n"
+"X-Poedit-SearchPath-1: Main/src\n"
+"X-Poedit-SearchPath-2: Main/include\n"
+
+#: Main/include/SongSort.hpp:26
+#, c-format
+msgid "%s v"
+msgstr "%s v"
+
+#: Main/include/SongSort.hpp:26
+#, c-format
+msgid "%s ^"
+msgstr "%s ^"
+
+#: Main/include/SongSort.hpp:43 Main/include/SongSort.hpp:128
+msgid "Title"
+msgstr "제목"
+
+#: Main/include/SongSort.hpp:58 Main/include/SongSort.hpp:155
+msgid "Score"
+msgstr "점수"
+
+#: Main/include/SongSort.hpp:72 Main/include/SongSort.hpp:143
+msgid "Date"
+msgstr "날짜"
+
+#: Main/include/SongSort.hpp:86
+msgid "Artist"
+msgstr "작곡가"
+
+#: Main/include/SongSort.hpp:100
+msgid "Effector"
+msgstr "이펙터"
+
+#: Main/include/SongSort.hpp:112
+msgid "Badge"
+msgstr "클리어 마크"
+
+#: Main/include/SongSort.hpp:167
+msgid "Clear"
+msgstr "클리어 마크"
+
+#: Main/src/GameplaySettingsDialog.cpp:11
+msgid "Offsets"
+msgstr "오프셋"
+
+#: Main/src/GameplaySettingsDialog.cpp:12
+msgid "Global Offset"
+msgstr "글로벌 오프셋"
+
+#: Main/src/GameplaySettingsDialog.cpp:13
+msgid "Input Offset"
+msgstr "입력 오프셋"
+
+#: Main/src/GameplaySettingsDialog.cpp:20
+msgid "Compute Song Offset"
+msgstr "곡 오프셋 계산하기"
+
+#: Main/src/GameplaySettingsDialog.cpp:24
+#: Main/src/GameplaySettingsDialog.cpp:26
+msgid "HiSpeed"
+msgstr "HiSpeed"
+
+#: Main/src/GameplaySettingsDialog.cpp:25
+msgid "Speed Mod"
+msgstr "배속 모드"
+
+#: Main/src/GameplaySettingsDialog.cpp:27
+msgid "ModSpeed"
+msgstr "ModSpeed"
+
+#: Main/src/GameplaySettingsDialog.cpp:30
+msgid "Game"
+msgstr "게임"
+
+#: Main/src/GameplaySettingsDialog.cpp:34
+msgid "Gauge"
+msgstr "게이지"
+
+#: Main/src/GameplaySettingsDialog.cpp:35
+msgid "Backup Gauge"
+msgstr "백업 게이지"
+
+#: Main/src/GameplaySettingsDialog.cpp:36
+msgid "Random"
+msgstr "랜덤"
+
+#: Main/src/GameplaySettingsDialog.cpp:37
+msgid "Mirror"
+msgstr "미러"
+
+#: Main/src/GameplaySettingsDialog.cpp:39
+msgid "Hide Backgrounds"
+msgstr "배경 숨기기"
+
+#: Main/src/GameplaySettingsDialog.cpp:40
+msgid "Score Display"
+msgstr "스코어 표시"
+
+#: Main/src/GameplaySettingsDialog.cpp:43
+#, fuzzy
+#| msgid "Autoplay"
+msgid "Autoplay"
+msgstr "오토플레이"
+
+#: Main/src/GameplaySettingsDialog.cpp:44
+msgid "Practice"
+msgstr "연습하기"
+
+#: Main/src/GameplaySettingsDialog.cpp:48
+msgid "Hid/Sud"
+msgstr "히든/서든"
+
+#: Main/src/GameplaySettingsDialog.cpp:49
+msgid "Enable Hidden / Sudden"
+msgstr "히든/서든 활성화"
+
+#: Main/src/GameplaySettingsDialog.cpp:50
+msgid "Hidden Cutoff"
+msgstr "히든 위치"
+
+#: Main/src/GameplaySettingsDialog.cpp:51
+msgid "Hidden Fade"
+msgstr "히든 페이드"
+
+#: Main/src/GameplaySettingsDialog.cpp:52
+msgid "Sudden Cutoff"
+msgstr "서든 위치"
+
+#: Main/src/GameplaySettingsDialog.cpp:53
+msgid "Sudden Fade"
+msgstr "서든 페이드"
+
+#: Main/src/GameplaySettingsDialog.cpp:54
+msgid "Show Track Cover"
+msgstr "트랙 커버 표시"
+
+#: Main/src/GameplaySettingsDialog.cpp:57
+msgid "Judgement"
+msgstr "판정"
+
+#: Main/src/GameplaySettingsDialog.cpp:58
+msgid "Crit Window"
+msgstr "크리티컬 범위"
+
+#: Main/src/GameplaySettingsDialog.cpp:59
+msgid "Near Window"
+msgstr "니어 범위"
+
+#: Main/src/GameplaySettingsDialog.cpp:60
+msgid "Hold Window"
+msgstr "롱노트 범위"
+
+#: Main/src/GameplaySettingsDialog.cpp:61
+msgid "Slam Window"
+msgstr "직각 노브 범위"
+
+#: Main/src/GameplaySettingsDialog.cpp:62
+msgid "Set to NORMAL"
+msgstr "NORMAL로 설정"
+
+#: Main/src/GameplaySettingsDialog.cpp:63
+msgid "Set to HARD"
+msgstr "HARD로 설정"
+
+#: Main/src/GameplaySettingsDialog.cpp:67
+msgid "Profiles"
+msgstr "프로필"
+
+#: Main/src/GameplaySettingsDialog.cpp:89
+#: Main/src/GameplaySettingsDialog.cpp:93
+msgid "Create Profile"
+msgstr "프로필 만들기"
+
+#: Main/src/GameplaySettingsDialog.cpp:91
+msgid "Create New Profile"
+msgstr "새 프로필 만들기"
+
+#: Main/src/GameplaySettingsDialog.cpp:92
+msgid ""
+"Enter name for profile\n"
+"(This will copy your current profile)"
+msgstr ""
+"프로필 이름을 입력하세요\n"
+"(현재 프로필에서 복사됨)"
+
+#: Main/src/GameplaySettingsDialog.cpp:148
+msgid "Manage Profiles"
+msgstr "프로필 관리"
+
+#: Main/src/GameplaySettingsDialog.cpp:172
+#: Main/src/GameplaySettingsDialog.cpp:173
+msgid "Song Offset"
+msgstr "곡 오프셋"
+
+#: bin/skins/Default/scripts/downloadscreen.lua:6
+msgid "Downloaded"
+msgstr "다운로드 완료"
+
+#: bin/skins/Default/scripts/downloadscreen.lua:7
+msgid "Downloading..."
+msgstr "다운로드 중..."
+
+#: bin/skins/Default/scripts/downloadscreen.lua:8
+msgid "Playing"
+msgstr "재생 중"
+
+#: bin/skins/Default/scripts/downloadscreen.lua:128
+#, lua-format
+msgid "%d Effected by %s"
+msgstr "%d 이펙터: %s"
+
+#: bin/skins/Default/scripts/downloadscreen.lua:185
+msgid "LOADING..."
+msgstr "로딩 중..."
+
+#: bin/skins/Default/scripts/downloadscreen.lua:199
+msgid "FX-R: Sorting"
+msgstr "FX-R: 정렬"
+
+#: bin/skins/Default/scripts/downloadscreen.lua:201
+msgid "FX-L: Levels"
+msgstr "FX-L: 레벨"
+
+#: bin/skins/Default/scripts/downloadscreen.lua:394
+msgid "Level filters:"
+msgstr "레벨 필터:"
+
+#: bin/skins/Default/scripts/downloadscreen.lua:420
+msgid "Sorting method:"
+msgstr "정렬 방식:"
+
+#: bin/skins/Default/scripts/gamesettingsdialog.lua:77
+msgid "Press both FXs to open/close. Use the Start button to press buttons."
+msgstr ""
+"두 FX 버튼을 동시에 눌러 여닫을 수 있습니다. 시작 버튼을 이용해 버튼을 누를 "
+"수 있습니다."
+
+#: bin/skins/Default/scripts/gamesettingsdialog.lua:78
+msgid ""
+"Use FX keys to navigate tabs. Use arrow keys to navigate and modify settings."
+msgstr ""
+"FX 버튼을 사용해 탭을 선택할 수 있습니다. 키보드 방향키로 설정 선택 및 조작"
+"을 할 수 있습니다."
+
+#: bin/skins/Default/scripts/result.lua:143
+#, lua-format
+msgid "%dm %02d.%01ds"
+msgstr "%d분 %02d.%01d초"
+
+#: bin/skins/Default/scripts/result.lua:250
+#, lua-format
+msgid "x%.2f play"
+msgstr "%.2f배속 플레이"
+
+#: bin/skins/Default/scripts/result.lua:251
+#, lua-format
+msgid "%s (x%.2f play)"
+msgstr "%s (%.2f배속 플레이)"
+
+#: bin/skins/Default/scripts/result.lua:258
+#, lua-format
+msgid "By %s"
+msgstr "플레이어: %s"
+
+#: bin/skins/Default/scripts/result.lua:292
+#, lua-format
+msgid "%02dms CRIT"
+msgstr "크리티컬 %02dms"
+
+#: bin/skins/Default/scripts/result.lua:293
+#, lua-format
+msgid "%02dms NEAR"
+msgstr "니어 %02dms"
+
+#: bin/skins/Default/scripts/result.lua:326
+msgid "Screenshot saved to:"
+msgstr "스크린샷 저장 경로:"
+
+#: bin/skins/Default/scripts/result.lua:384
+msgid "IR (BT-D: High Scores)"
+msgstr "인터넷 랭킹 (BT-D: 최고 기록)"
+
+#: bin/skins/Default/scripts/result.lua:389
+msgid "Loading... please wait."
+msgstr "로딩 중..."
+
+#: bin/skins/Default/scripts/result.lua:448
+msgid "Now"
+msgstr "지금"
+
+#: bin/skins/Default/scripts/result.lua:465
+msgid "High Scores"
+msgstr "최고 기록"
+
+#: bin/skins/Default/scripts/result.lua:467
+msgid "High Scores (BT-D: IR)"
+msgstr "최고 기록 (BT-D: 인터넷 랭킹)"
+
+#: bin/skins/Default/scripts/result.lua:638
+#, lua-format
+msgid "Duration: %s"
+msgstr "재생 시간: %s"
+
+#: bin/skins/Default/scripts/result.lua:659
+#, lua-format
+msgid "BPM: %s"
+msgstr "BPM: %s"
+
+#: bin/skins/Default/scripts/result.lua:692
+#, lua-format
+msgid "Mean: %.1f ms, Median: %d ms"
+msgstr "평균: %.1f ms, 중간값: %d ms"
+
+#: bin/skins/Default/scripts/result.lua:698
+#, lua-format
+msgid "Mean deviation: %.1fms"
+msgstr "편차 중간값: %1fms"
+
+#: bin/skins/Default/scripts/result.lua:791
+#, lua-format
+msgid "Mean: %.1f ms"
+msgstr "평균: %.1f ms"
+
+#: bin/skins/Default/scripts/result.lua:801
+#, lua-format
+msgid "Median: %d ms"
+msgstr "중간값: %d ms"
+
+#: bin/skins/Default/scripts/result.lua:808
+#, lua-format
+msgid "Earliest: %d ms"
+msgstr "가장 이름: %d ms"
+
+#: bin/skins/Default/scripts/result.lua:812
+#, lua-format
+msgid "Latest: %d ms"
+msgstr "가장 늦음: %d ms"
+
+#: bin/skins/Default/scripts/result.lua:982
+msgid "No Image"
+msgstr "이미지 없음"
+
+#: bin/skins/Default/scripts/result.lua:1003
+#, lua-format
+msgid "  by %s"
+msgstr " 이펙터: %s"
+
+#: bin/skins/Default/scripts/result.lua:1057
+msgid "Effected by"
+msgstr "이펙터"
+
+#: bin/skins/Default/scripts/result.lua:1066
+msgid "Illustrated by"
+msgstr "일러스트레이터"
+
+#: bin/skins/Default/scripts/result.lua:1178
+#, lua-format
+msgid "Mission: %s"
+msgstr "미션: %s"
+
+#: bin/skins/Default/scripts/result.lua:1195
+msgid "FX-L: more info"
+msgstr "FX-L: 추가 정보"
+
+#: bin/skins/Default/scripts/result.lua:1197
+msgid "FX-L: simple view"
+msgstr "FX-L: 요약 보기"
+
+#: bin/skins/Default/scripts/result.lua:1200
+msgid "FX-R: toggle hiscore"
+msgstr "FX-R: 최고 기록 표시 토글"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:26
+msgid "DIFFICULTY SELECT"
+msgstr "난이도 선택"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:26
+msgid ""
+"DIFFICULTY\n"
+"SELECT"
+msgstr "난이도 선택"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:27
+msgid "MUSIC SELECT"
+msgstr "음악 선택"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:27
+msgid ""
+"MUSIC\n"
+"SELECT"
+msgstr "음악 선택"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:28
+msgid "FILTER MUSIC"
+msgstr "음악 필터 설정"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:28
+msgid ""
+"FILTER\n"
+"MUSIC"
+msgstr "음악 필터 설정"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:29
+msgid "SORT MUSIC"
+msgstr "정렬 방식 설정"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:29
+msgid ""
+"SORT\n"
+"MUSIC"
+msgstr "정렬 방식 설정"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:30
+msgid "PLAY MODS"
+msgstr "플레이 설정"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:30
+msgid ""
+"PLAY\n"
+"MODS"
+msgstr "플레이 설정"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:31
+msgid "PLAY"
+msgstr "플레이 시작"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:160
+msgid "Loading..."
+msgstr "로딩 중..."
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:203
+#: bin/skins/Default/scripts/songselect/songwheel.lua:303
+msgid "HIGH SCORE"
+msgstr "최고 기록"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:204
+msgid "IR RECORD"
+msgstr "인터넷 랭킹 기록"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:488
+#: bin/skins/Default/scripts/songselect/songwheel.lua:498
+#, lua-format
+msgid "Effector: %s"
+msgstr "이펙터: %s"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:593
+#, lua-format
+msgid "Search: %s"
+msgstr "검색: %s"
+
+#: bin/skins/Default/scripts/songselect/songwheel.lua:660
+#, lua-format
+msgid "Force: %.2f"
+msgstr "포스: %.2f"
+
+#: bin/skins/Default/scripts/titlescreen.lua:75
+msgid "Start"
+msgstr "시작"
+
+#: bin/skins/Default/scripts/titlescreen.lua:76
+msgid "Multiplayer"
+msgstr "멀티플레이"
+
+#: bin/skins/Default/scripts/titlescreen.lua:77
+msgid "Challenges"
+msgstr "코스 플레이"
+
+#: bin/skins/Default/scripts/titlescreen.lua:78
+msgid "Get Songs"
+msgstr "곡 내려받기"
+
+#: bin/skins/Default/scripts/titlescreen.lua:79
+msgid "Settings"
+msgstr "설정"
+
+#: bin/skins/Default/scripts/titlescreen.lua:80
+msgid "Exit"
+msgstr "종료"
+
+#: bin/skins/Default/scripts/titlescreen.lua:187
+msgid "unnamed_sdvx_clone"
+msgstr "unnamed_sdvx_clone"
+
+#: bin/skins/Default/scripts/titlescreen.lua:196
+#, lua-format
+msgid "Version %s is now available"
+msgstr "버전 %s 이용 가능"
+
+#: bin/skins/Default/scripts/titlescreen.lua:197
+msgid "View"
+msgstr "보기"
+
+#: bin/skins/Default/scripts/titlescreen.lua:198
+msgid "Update"
+msgstr "업데이트"
+
+#~ msgid "MUSIC MODS"
+#~ msgstr "플레이 설정"
+
+#~ msgid ""
+#~ "MUSIC\n"
+#~ "MODS"
+#~ msgstr "플레이 설정"
+
+#, lua-format
+#~ msgid "%s %02d"
+#~ msgstr "%s %02d"
+
+#, lua-format
+#~ msgid "%s, %s"
+#~ msgstr "%s, %s"

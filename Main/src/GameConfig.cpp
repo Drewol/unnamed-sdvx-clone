@@ -229,6 +229,8 @@ void GameConfig::InitDefaults()
 
 	Set(GameConfigKeys::CurrentProfileName, "Main");
 	Set(GameConfigKeys::UpdateChannel, "master");
+
+	Set(GameConfigKeys::Language, I18N::GetSystemLanguage());
 }
 
 void GameConfig::UpdateVersion()

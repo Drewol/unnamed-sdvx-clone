@@ -72,12 +72,12 @@ end
 function setButtons()
 	if buttons == nil then
 		buttons = {}
-		buttons[1] = {"Start", Menu.Start}
-		buttons[2] = {"Multiplayer", Menu.Multiplayer}
-        buttons[3] = {"Challenges", Menu.Challenges}
-		buttons[4] = {"Get Songs", Menu.DLScreen}
-		buttons[5] = {"Settings", Menu.Settings}
-		buttons[6] = {"Exit", Menu.Exit}
+		buttons[1] = {_("Start"), Menu.Start}
+		buttons[2] = {_("Multiplayer"), Menu.Multiplayer}
+        buttons[3] = {_("Challenges"), Menu.Challenges}
+		buttons[4] = {_("Get Songs"), Menu.DLScreen}
+		buttons[5] = {_("Settings"), Menu.Settings}
+		buttons[6] = {_("Exit"), Menu.Exit}
 	end
 end
 
@@ -165,7 +165,7 @@ render = function(deltaTime)
 	cursorGet = 1
     buttonY = resy / 2;
     hovered = nil;
-	
+    
     gfx.LoadSkinFont("NotoSans-Regular.ttf");
 	
 	for i=1,#buttons do
@@ -184,7 +184,7 @@ render = function(deltaTime)
     gfx.FillColor(255,255,255);
     gfx.FontSize(120);
     if label == -1 then
-        label = gfx.CreateLabel("unnamed_sdvx_clone", 120, 0);
+        label = gfx.CreateLabel(_("unnamed_sdvx_clone"), 120, 0);
     end
     gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE);
     gfx.DrawLabel(label, resx / 2, resy / 2 - 200, resx-40);
@@ -193,9 +193,9 @@ render = function(deltaTime)
        gfx.BeginPath()
        gfx.TextAlign(gfx.TEXT_ALIGN_BOTTOM + gfx.TEXT_ALIGN_LEFT)
        gfx.FontSize(30)
-       gfx.Text(string.format("Version %s is now available", updateVersion), 5, resy - buttonHeight - 10)
-       draw_button({"View", view_update}, buttonWidth / 2 + 5, resy - buttonHeight / 2 - 5);
-       draw_button({"Update", Menu.Update}, buttonWidth * 1.5 + 15, resy - buttonHeight / 2 - 5)
+       gfx.Text(string.format(_("Version %s is now available"), updateVersion), 5, resy - buttonHeight - 10)
+       draw_button({_("View"), view_update}, buttonWidth / 2 + 5, resy - buttonHeight / 2 - 5);
+       draw_button({_("Update"), Menu.Update}, buttonWidth * 1.5 + 15, resy - buttonHeight / 2 - 5)
     end
 end;
 

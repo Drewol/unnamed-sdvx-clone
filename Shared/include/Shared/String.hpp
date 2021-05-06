@@ -38,8 +38,8 @@ public:
 	bool Split(const StringBase& delim, StringBase* l, StringBase* r) const;
 	bool SplitLast(const StringBase& delim, StringBase* l, StringBase* r) const;
 	Vector<StringBase> Explode(const StringBase& delim, bool keepEmpty = true) const;
-	void TrimFront(T c);
-	void TrimBack(T c);
+	void TrimFront(T c = ' ');
+	void TrimBack(T c = ' ');
 	void Trim(T c = ' ');
 	T* GetData();
 	const T* GetData() const;
@@ -224,8 +224,8 @@ void StringBase<T>::TrimBack(T c)
 template<typename T>
 void StringBase<T>::Trim(T c)
 {
-	TrimFront(c);
 	TrimBack(c);
+	TrimFront(c);
 }
 template<typename T>
 T* StringBase<T>::GetData()

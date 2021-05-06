@@ -180,6 +180,8 @@ DefineEnum(GameConfigKeys,
 
 		   CurrentProfileName,
 
+		   Language,
+
 		   // Gameplay options
 		   GaugeType,
 		   MirrorChart,

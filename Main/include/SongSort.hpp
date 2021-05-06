@@ -23,7 +23,7 @@ template<class ItemIndex>
 class ItemSort
 {
 	public:
-		ItemSort(String name, bool dir) : m_name(name),m_dir(dir) {};
+		ItemSort(const std::string_view& name, bool dir) : m_name(Utility::Sprintf((dir ? _("%s v") : _("%s ^")).data(), name.data())), m_dir(dir) {};
 		virtual ~ItemSort() = default;
 
 		virtual SortType GetType() const { return NO_SORT; };
@@ -40,7 +40,8 @@ using SongSort = ItemSort<SongSelectIndex>;
 class TitleSort : public SongSort
 {
 	public:
-		TitleSort(String name, bool dir) : SongSort(name, dir) {};
+		TitleSort(bool dir) : TitleSort(_("Title"), dir) {};
+		TitleSort(const std::string_view& name, bool dir) : SongSort(name, dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				SongSelectIndex>& collection) override;
 		virtual bool CompareSongs(const SongSelectIndex& song_a,
@@ -54,7 +55,7 @@ class TitleSort : public SongSort
 class ScoreSort : public TitleSort
 {
 	public:
-		ScoreSort(String name, bool dir) : TitleSort(name, dir) {};
+		ScoreSort(bool dir) : TitleSort(_("Score"), dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				SongSelectIndex>& collection) override;
 		SortType GetType() const override
@@ -68,7 +69,7 @@ class ScoreSort : public TitleSort
 class DateSort : public TitleSort
 {
 	public:
-		DateSort(String name, bool dir) : TitleSort(name, dir) {};
+		DateSort(bool dir) : TitleSort(_("Date"), dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				SongSelectIndex>& collection) override;
 		SortType GetType() const override
@@ -82,7 +83,7 @@ class DateSort : public TitleSort
 class ArtistSort : public TitleSort
 {
 	public:
-		ArtistSort(String name, bool dir) : TitleSort(name, dir) {};
+		ArtistSort(bool dir) : TitleSort(_("Artist"), dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				SongSelectIndex>& collection) override;
 		SortType GetType() const override
@@ -96,7 +97,7 @@ class ArtistSort : public TitleSort
 class EffectorSort : public TitleSort
 {
 	public:
-		EffectorSort(String name, bool dir) : TitleSort(name, dir) {};
+		EffectorSort(bool dir) : TitleSort(_("Effector"), dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				SongSelectIndex>& collection) override;
 		SortType GetType() const override
@@ -108,7 +109,7 @@ class EffectorSort : public TitleSort
 class ClearMarkSort : public TitleSort
 {
 	public:
-		ClearMarkSort(String name, bool dir) : TitleSort(name, dir) {};
+		ClearMarkSort(bool dir) : TitleSort(_("Badge"), dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				SongSelectIndex>& collection) override;
 		SortType GetType() const override
@@ -124,7 +125,8 @@ using ChallengeSort = ItemSort<ChallengeSelectIndex>;
 class ChallengeTitleSort : public ChallengeSort
 {
 	public:
-		ChallengeTitleSort(String name, bool dir) : ChallengeSort(name, dir) {};
+		ChallengeTitleSort(bool dir) : ChallengeTitleSort(_("Title"), dir) {};
+		ChallengeTitleSort(const std::string_view& name, bool dir) : ChallengeSort(name, dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				ChallengeSelectIndex>& collection) override;
 		virtual bool CompareChallenges(const ChallengeSelectIndex& song_a,
@@ -138,7 +140,7 @@ class ChallengeTitleSort : public ChallengeSort
 class ChallengeDateSort : public ChallengeTitleSort
 {
 	public:
-		ChallengeDateSort(String name, bool dir) : ChallengeTitleSort(name, dir) {};
+		ChallengeDateSort(bool dir) : ChallengeTitleSort(_("Date"), dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				ChallengeSelectIndex>& collection) override;
 		SortType GetType() const override
@@ -150,7 +152,7 @@ class ChallengeDateSort : public ChallengeTitleSort
 class ChallengeScoreSort : public ChallengeTitleSort
 {
 	public:
-		ChallengeScoreSort(String name, bool dir) : ChallengeTitleSort(name, dir) {};
+		ChallengeScoreSort(bool dir) : ChallengeTitleSort(_("Score"), dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				ChallengeSelectIndex>& collection) override;
 		SortType GetType() const override
@@ -162,7 +164,7 @@ class ChallengeScoreSort : public ChallengeTitleSort
 class ChallengeClearMarkSort : public ChallengeTitleSort
 {
 	public:
-		ChallengeClearMarkSort(String name, bool dir) : ChallengeTitleSort(name, dir) {};
+		ChallengeClearMarkSort(bool dir) : ChallengeTitleSort(_("Clear"), dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				ChallengeSelectIndex>& collection) override;
 		SortType GetType() const override
