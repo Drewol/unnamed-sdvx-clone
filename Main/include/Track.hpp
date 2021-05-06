@@ -34,10 +34,10 @@ struct ButtonHitEffect : TimedEffect
 
 	uint32 buttonCode; // Only used for Draw
 	Color color;
-	float delayFadeDuration;
+	float delayFadeDuration = 0;
 	bool held = false;
 	float hitEffectDuration;
-	float alphaScale;
+	float alphaScale = 1;
 };
 
 // Button hit rating effect
@@ -203,8 +203,8 @@ public:
 	// Track Origin position
 	Transform trackOrigin;
 
-    bool hitEffectAutoplay;
-    float scrollSpeed;
+    bool hitEffectAutoplay = false;
+    float scrollSpeed = 0;
 
 private:
 	// Laser track generators

@@ -107,6 +107,8 @@ void Application::ApplySettings()
 	Logger::Get().SetLogLevel(g_gameConfig.GetEnum<Logger::Enum_Severity>(GameConfigKeys::LogLevel));
 	g_gameWindow->SetVSync(g_gameConfig.GetBool(GameConfigKeys::VSync) ? 1 : 0);
 	m_showFps = g_gameConfig.GetBool(GameConfigKeys::ShowFps);
+
+	m_UpdateWindowPosAndShape();
 	m_OnWindowResized(g_gameWindow->GetWindowSize());
 	m_SaveConfig();
 }
@@ -835,11 +837,12 @@ bool Application::m_Init()
 	m_allowMapConversion = false;
 	bool debugMute = false;
 	bool startFullscreen = false;
-	uint32 fullscreenMonitor = -1;
+	int32 fullscreenMonitor = -1;
 
 	// Fullscreen settings from config
 	if (g_gameConfig.GetBool(GameConfigKeys::Fullscreen))
 		startFullscreen = true;
+
 	fullscreenMonitor = g_gameConfig.GetInt(GameConfigKeys::FullscreenMonitorIndex);
 
 	// Flags read _after_ config load
@@ -896,6 +899,7 @@ bool Application::m_Init()
 	g_gameWindow->OnKeyPressed.Add(this, &Application::m_OnKeyPressed);
 	g_gameWindow->OnKeyReleased.Add(this, &Application::m_OnKeyReleased);
 	g_gameWindow->OnResized.Add(this, &Application::m_OnWindowResized);
+	g_gameWindow->OnMoved.Add(this, &Application::m_OnWindowMoved);
 	g_gameWindow->OnFocusChanged.Add(this, &Application::m_OnFocusChanged);
 
 	// Initialize Input
@@ -914,15 +918,12 @@ bool Application::m_Init()
 	}
 
 	g_skinConfig = new SkinConfig(m_skin);
+
 	// Window cursor
 	Image cursorImg = ImageRes::Create(Path::Absolute("skins/" + m_skin + "/textures/cursor.png"));
 	g_gameWindow->SetCursor(cursorImg, Vector2i(5, 5));
 
-	if (startFullscreen)
-		g_gameWindow->SwitchFullscreen(
-			g_gameConfig.GetInt(GameConfigKeys::ScreenWidth), g_gameConfig.GetInt(GameConfigKeys::ScreenHeight),
-			g_gameConfig.GetInt(GameConfigKeys::FullScreenWidth), g_gameConfig.GetInt(GameConfigKeys::FullScreenHeight),
-			fullscreenMonitor, g_gameConfig.GetBool(GameConfigKeys::WindowedFullscreen));
+	m_UpdateWindowPosAndShape(fullscreenMonitor, startFullscreen, g_gameConfig.GetBool(GameConfigKeys::AdjustWindowPositionOnStartup));
 
 	// Set render state variables
 	m_renderStateBase.aspectRatio = g_aspectRatio;
@@ -1866,12 +1867,9 @@ void Application::m_OnKeyPressed(SDL_Scancode code)
 	{
 		if ((g_gameWindow->GetModifierKeys() & ModifierKeys::Alt) == ModifierKeys::Alt)
 		{
-			g_gameWindow->SwitchFullscreen(
-				g_gameConfig.GetInt(GameConfigKeys::ScreenWidth), g_gameConfig.GetInt(GameConfigKeys::ScreenHeight),
-				g_gameConfig.GetInt(GameConfigKeys::FullScreenWidth), g_gameConfig.GetInt(GameConfigKeys::FullScreenHeight),
-				-1, g_gameConfig.GetBool(GameConfigKeys::WindowedFullscreen));
-			g_gameConfig.Set(GameConfigKeys::Fullscreen, g_gameWindow->IsFullscreen());
-			//m_OnWindowResized(g_gameWindow->GetWindowSize());
+			g_gameConfig.Set(GameConfigKeys::Fullscreen, !g_gameWindow->IsFullscreen());
+			m_UpdateWindowPosAndShape();
+
 			return;
 		}
 	}
@@ -1942,6 +1940,36 @@ void Application::m_OnWindowResized(const Vector2i &newSize)
 			g_gameConfig.Set(GameConfigKeys::ScreenHeight, newSize.y);
 		}
 	}
+}
+
+void Application::m_OnWindowMoved(const Vector2i& newPos)
+{
+	if (g_gameWindow->IsActive() && !g_gameWindow->IsFullscreen())
+	{
+		g_gameConfig.Set(GameConfigKeys::ScreenX, newPos.x);
+		g_gameConfig.Set(GameConfigKeys::ScreenY, newPos.y);
+	}
+}
+
+void Application::m_UpdateWindowPosAndShape()
+{
+	m_UpdateWindowPosAndShape(
+		g_gameConfig.GetInt(GameConfigKeys::FullscreenMonitorIndex),
+		g_gameConfig.GetBool(GameConfigKeys::Fullscreen),
+		false
+	);
+}
+
+void Application::m_UpdateWindowPosAndShape(int32 monitorId, bool fullscreen, bool ensureInBound)
+{
+	const Vector2i windowPos(g_gameConfig.GetInt(GameConfigKeys::ScreenX), g_gameConfig.GetInt(GameConfigKeys::ScreenY));
+	const Vector2i windowSize(g_gameConfig.GetInt(GameConfigKeys::ScreenWidth), g_gameConfig.GetInt(GameConfigKeys::ScreenHeight));
+	const Vector2i fullscreenSize(g_gameConfig.GetInt(GameConfigKeys::FullScreenWidth), g_gameConfig.GetInt(GameConfigKeys::FullScreenHeight));
+
+	g_gameWindow->SetPosAndShape(Graphics::Window::PosAndShape {
+		fullscreen, g_gameConfig.GetBool(GameConfigKeys::WindowedFullscreen),
+		windowPos, windowSize, monitorId, fullscreenSize
+	}, ensureInBound);
 }
 
 void Application::m_OnFocusChanged(bool focused)

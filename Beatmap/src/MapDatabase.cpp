@@ -207,7 +207,6 @@ public:
 						continue;
 					}
 
-
 					String hash;
 					File diffFile;
 					if (diffFile.OpenRead(diffpath))
@@ -345,9 +344,9 @@ public:
 				m_database.Exec("ALTER TABLE Scores ADD COLUMN window_hold INTEGER");
 				m_database.Exec("ALTER TABLE Scores ADD COLUMN window_miss INTEGER");
 				m_database.Exec("UPDATE Scores SET window_perfect=46");
-				m_database.Exec("UPDATE Scores SET window_good=92");
-				m_database.Exec("UPDATE Scores SET window_hold=138");
-				m_database.Exec("UPDATE Scores SET window_miss=250");
+				m_database.Exec("UPDATE Scores SET window_good=150");
+				m_database.Exec("UPDATE Scores SET window_hold=150");
+				m_database.Exec("UPDATE Scores SET window_miss=300");
 				gotVersion = 16;
 			}
 			if (gotVersion == 16)

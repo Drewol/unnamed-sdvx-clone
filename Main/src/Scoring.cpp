@@ -718,7 +718,7 @@ void Scoring::m_UpdateTicks()
 					assert(buttonCode < 6);
 					if (!tick->HasFlag(TickFlags::Ignore))
 					{
-						if (m_IsBeingHold(tick) || autoplayInfo.IsAutoplayButtons())
+						if (m_IsBeingHeld(tick) || autoplayInfo.IsAutoplayButtons())
 						{
 							m_TickHit(tick, buttonCode);
 							HitStat* stat = new HitStat(tick->object);
@@ -736,7 +736,6 @@ void Scoring::m_UpdateTicks()
 						}
 					}
 					else if (tick->HasFlag(TickFlags::End))
-					    // Simulate releasing a held button on autoplay
 					    OnHoldLeave.Call(button);
 
 					processed = true;
@@ -817,14 +816,14 @@ ObjectState* Scoring::m_ConsumeTick(uint32 buttonCode)
 		ObjectState* hitObject = tick->object;
 		if (tick->HasFlag(TickFlags::Laser))
 		{
-			// Ignore laser and hold ticks
+			// Ignore laser ticks
 			return nullptr;
 		}
 		if (tick->HasFlag(TickFlags::Hold))
 		{
 			HoldObjectState* hos = (HoldObjectState*)hitObject;
 			hos = hos->GetRoot();
-			if (hos->time - hitWindow.hold <= currentTime)
+			if (hos->time - currentTime <= hitWindow.hold)
 				m_SetHoldObject(hitObject, buttonCode);
 			return nullptr;
 		}
@@ -849,6 +848,7 @@ void Scoring::m_OnTickProcessed(ScoreTick* tick, uint32 index)
 		OnScoreChanged.Call();
 	}
 }
+
 void Scoring::m_TickHit(ScoreTick* tick, uint32 index, MapTime delta /*= 0*/)
 {
 	HitStat* stat = m_AddOrUpdateHitStat(tick->object);
@@ -1080,7 +1080,7 @@ void Scoring::m_ReleaseHoldObject(uint32 index)
 	m_ReleaseHoldObject(m_holdObjects[index]);
 }
 
-bool Scoring::m_IsBeingHold(const ScoreTick* tick) const
+bool Scoring::m_IsBeingHeld(const ScoreTick* tick) const
 {
 	// NOTE: all these are just heuristics. If there's a better heuristic, change this.
 	// See issue #355 for more detail.
@@ -1425,15 +1425,17 @@ bool Scoring::HoldObjectAvailable(uint32 index, bool checkIfPassedCritLine)
     if (m_ticks[index].empty())
         return false;
 
-    auto currentTime = m_playback->GetLastTime();
+    auto currentTime = m_playback->GetLastTime() + m_inputOffset;
     auto tick = m_ticks[index].front();
     auto obj = (HoldObjectState*)tick->object;
+    if (obj->type != ObjectType::Hold)
+		return false;
     // When a hold passes the crit line and we're eligible to hit the starting tick,
     // change the idle hit effect to the crit hit effect
-    bool withinHoldStartWindow = tick->HasFlag(TickFlags::Start) && m_IsBeingHold(tick) && (!checkIfPassedCritLine || obj->time <= currentTime);
+    bool withinHoldStartWindow = tick->HasFlag(TickFlags::Start) && m_IsBeingHeld(tick) && (!checkIfPassedCritLine || obj->time <= currentTime);
     // This allows us to have a crit hit effect anytime a hold hasn't fully scrolled past,
     // including when the final scorable tick has been processed
-    bool holdObjectHittable = obj->time + obj->duration > currentTime && m_buttonHitTime[index] > obj->time;
+    bool holdObjectHittable = obj->time + obj->duration > currentTime && m_buttonHitTime[index] + m_inputOffset > obj->time;
 
     return withinHoldStartWindow || holdObjectHittable;
 }

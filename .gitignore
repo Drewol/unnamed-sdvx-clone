@@ -20,6 +20,7 @@ bin/skins/*
 !bin/skins/Default
 bin/skins/Default/skin.cfg
 bin/replays
+bin/profiles
 
 # Intermediate Files
 x64

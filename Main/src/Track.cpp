@@ -24,24 +24,20 @@ Track::Track()
 
 Track::~Track()
 {
-	if(loader)
-		delete loader;
+	g_input.OnButtonReleased.Remove(this, &Track::OnButtonReleased);
 
-	for(uint32 i = 0; i < 2; i++)
-	{
-		if(m_laserTrackBuilder[i])
-			delete m_laserTrackBuilder[i];
-	}
-	for(auto it = m_hitEffects.begin(); it != m_hitEffects.end(); it++)
-	{
-		delete *it;
-	}
-	if(timedHitEffect)
-		delete timedHitEffect;
+	delete loader;
+	for (auto & i : m_laserTrackBuilder)
+		delete i;
+	for (auto & m_hitEffect : m_hitEffects)
+		delete m_hitEffect;
+	delete timedHitEffect;
 }
 
 bool Track::AsyncLoad()
 {
+	g_input.OnButtonReleased.Add(this, &Track::OnButtonReleased);
+
 	loader = new AsyncAssetLoader();
 	String skin = g_application->GetCurrentSkin();
 
@@ -49,35 +45,6 @@ bool Track::AsyncLoad()
 	laserHues[0] = g_gameConfig.GetFloat(GameConfigKeys::Laser0Color);
 	laserHues[1] = g_gameConfig.GetFloat(GameConfigKeys::Laser1Color);
 	m_btOverFxScale = Math::Clamp(g_gameConfig.GetFloat(GameConfigKeys::BTOverFXScale), 0.01f, 1.0f);
-	bool delayedHitEffects = g_gameConfig.GetBool(GameConfigKeys::DelayedHitEffects);
-
-	for (int i = 0; i < 6; ++i)
-	{
-		ButtonHitEffect& bfx = m_buttonHitEffects[i];
-		if (delayedHitEffects)
-		{
-			if (i < 4)
-			{
-				bfx.delayFadeDuration = BT_DELAY_FADE_DURATION;
-				bfx.hitEffectDuration = BT_HIT_EFFECT_DURATION;
-				bfx.alphaScale = 0.6f; // Ranges from 0.6 to 0.85 depending on hispeed
-			}
-			else
-			{
-				bfx.delayFadeDuration = FX_DELAY_FADE_DURATION;
-				bfx.hitEffectDuration = FX_HIT_EFFECT_DURATION;
-				bfx.alphaScale = 0.45f;
-			}
-		}
-		else
-		{
-			bfx.delayFadeDuration = 0;
-			bfx.hitEffectDuration = 7 / 60.f;
-			bfx.alphaScale = 1;
-		}
-		bfx.buttonCode = i;
-		bfx.track = this;
-	}
 
 	for (uint32 i = 0; i < 2; i++)
 		laserColors[i] = Color::FromHSV(laserHues[i],1.0,1.0);
@@ -131,6 +98,7 @@ bool Track::AsyncLoad()
 
 	return loader->Load();
 }
+
 bool Track::AsyncFinalize()
 {
 	// Finalizer loading textures/material/etc.
@@ -173,18 +141,18 @@ bool Track::AsyncFinalize()
 
 	holdButtonMaterial->opaque = false;
 
-	for (uint32 i = 0; i < 2; i++)
+	for (auto &laserTexture : laserTextures)
 	{
-		laserTextures[i]->SetMipmaps(true);
-		laserTextures[i]->SetFilter(true, true, 16.0f);
-		laserTextures[i]->SetWrap(TextureWrap::Clamp, TextureWrap::Repeat);
+		laserTexture->SetMipmaps(true);
+		laserTexture->SetFilter(true, true, 16.0f);
+		laserTexture->SetWrap(TextureWrap::Clamp, TextureWrap::Repeat);
 	}
 
-	for(uint32 i = 0; i < 4; i++)
+	for (auto &laserTailTexture : laserTailTextures)
 	{
-		laserTailTextures[i]->SetMipmaps(true);
-		laserTailTextures[i]->SetFilter(true, true, 16.0f);
-		laserTailTextures[i]->SetWrap(TextureWrap::Clamp, TextureWrap::Clamp);
+		laserTailTexture->SetMipmaps(true);
+		laserTailTexture->SetFilter(true, true, 16.0f);
+		laserTailTexture->SetWrap(TextureWrap::Clamp, TextureWrap::Clamp);
 	}
 
 	// Track and sprite material (all transparent)
@@ -255,10 +223,39 @@ bool Track::AsyncFinalize()
 	whiteTexture = TextureRes::Create(g_gl);
 	whiteTexture->SetData({ 1,1 }, (void*)whiteData);
 
-
 	timedHitEffect = new TimedHitEffect(false);
 	timedHitEffect->time = 0;
 	timedHitEffect->track = this;
+
+	bool delayedHitEffects = g_gameConfig.GetBool(GameConfigKeys::DelayedHitEffects);
+
+	for (int i = 0; i < 6; ++i)
+	{
+		ButtonHitEffect& bfx = m_buttonHitEffects[i];
+		if (delayedHitEffects)
+		{
+			if (i < 4)
+			{
+				bfx.delayFadeDuration = BT_DELAY_FADE_DURATION;
+				bfx.hitEffectDuration = BT_HIT_EFFECT_DURATION;
+				bfx.alphaScale = 0.6f; // Ranges from 0.6 to 0.85 depending on hispeed
+			}
+			else
+			{
+				bfx.delayFadeDuration = FX_DELAY_FADE_DURATION;
+				bfx.hitEffectDuration = FX_HIT_EFFECT_DURATION;
+				bfx.alphaScale = 0.45f;
+			}
+		}
+		else
+		{
+			bfx.delayFadeDuration = 0;
+			bfx.hitEffectDuration = 7 / 60.f;
+			bfx.alphaScale = 1;
+		}
+		bfx.buttonCode = i;
+		bfx.track = this;
+	}
 
 	return success;
 }

@@ -24,6 +24,8 @@ DefineEnum(GameConfigKeys,
 		   Fullscreen,
 		   FullscreenMonitorIndex,
 		   WindowedFullscreen,
+		   AdjustWindowPositionOnStartup,
+
 		   AntiAliasing,
 		   MasterVolume,
 		   VSync,

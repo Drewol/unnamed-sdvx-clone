@@ -63,6 +63,7 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::Fullscreen, false);
 	Set(GameConfigKeys::FullscreenMonitorIndex, 0);
 	Set(GameConfigKeys::WindowedFullscreen, false);
+	Set(GameConfigKeys::AdjustWindowPositionOnStartup, true);
 	Set(GameConfigKeys::AntiAliasing, 1);
 	Set(GameConfigKeys::MasterVolume, 1.0f);
 	Set(GameConfigKeys::ScreenX, -1);

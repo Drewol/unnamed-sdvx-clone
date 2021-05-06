@@ -5,6 +5,9 @@
 	GUI space rectangle with bottom as y+height
 */
 
+template<typename T>
+class Vector;
+
 namespace Shared
 {
 	template<typename T>
@@ -90,13 +93,23 @@ namespace Shared
 			return newRect;
 		}
 
+		inline bool Contains(const RectangleBase& other) const
+		{
+			return Left() <= other.Left() && other.Right() <= Right() && Top() <= other.Top() && other.Bottom() <= Bottom();
+		}
+
+		inline bool NotSmallerThan(const VectorType& other_size) const
+		{
+			return size.x >= other_size.x && size.y >= other_size.y;
+		}
+
 		// Clamp the parameter to this rectangle
 		RectangleBase Clamp(const RectangleBase& other) const
 		{
-			float top = Math::Max(other.Top(), Top());
-			float bottom = Math::Min(other.Bottom(), Bottom());
-			float left = Math::Max(other.Left(), Left());
-			float right = Math::Min(other.Right(), Right());
+			T top = Math::Max(other.Top(), Top());
+			T bottom = Math::Min(other.Bottom(), Bottom());
+			T left = Math::Max(other.Left(), Left());
+			T right = Math::Min(other.Right(), Right());
 			if (right < left)
 				right = left;
 			if (bottom < top)

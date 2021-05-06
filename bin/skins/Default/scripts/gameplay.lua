@@ -453,9 +453,16 @@ end
 -- -------------------------------------------------------------------------- --
 -- GetCritLineCenteringOffset:                                                --
 -- Utility function which returns the magnitude of an offset to center the    --
---  crit line on the screen based on its position and rotation.               --
+--  crit line on the screen based on its rotation.                            --
 function GetCritLineCenteringOffset()
     return gameplay.critLine.xOffset * 10
+end
+-- -------------------------------------------------------------------------- --
+-- GetConsoleCenteringOffset:                                                 --
+-- Utility function which returns the magnitude of an offset to center the    --
+--  console on the screen based on its position and rotation.                 --
+function GetConsoleCenteringOffset()
+    return (resx / 2 - gameplay.critLine.x) * (5 / 6)
 end
 -- -------------------------------------------------------------------------- --
 -- render_crit_base:                                                          --
@@ -594,13 +601,13 @@ function render_crit_overlay(deltaTime)
 
     -- Figure out how to offset the center of the crit line to remain
     --  centered on the players screen.
-    local xOffset = resx / 2 - gameplay.critLine.x
+    local xOffset = GetConsoleCenteringOffset()
 
     -- When in portrait, we can draw the console at the bottom
     if portrait then
         -- We're going to make temporary modifications to the transform
         gfx.Save()
-        gfx.Translate(xOffset * 0.85, 0)
+        gfx.Translate(xOffset, 0)
 
         local bfw, bfh = gfx.ImageSize(bottomFill)
 

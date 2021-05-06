@@ -5,13 +5,13 @@
 
 namespace Graphics
 {
-	// Windowed or bordered window style
+	/// Windowed or bordered window style
 	enum class WindowStyle
 	{
 		Windowed, Borderless
 	};
 
-	// Text input data
+	/// Text input data
 	struct TextComposition
 	{
 		String composition;
@@ -26,6 +26,39 @@ namespace Graphics
 	class Window : Unique
 	{
 	public:
+		/// Window position and size parameter
+		struct PosAndShape
+		{
+			enum class Mode { Windowed, Fullscreen, WindowedFullscreen };
+			Mode mode;
+
+			PosAndShape(bool fullscreen, bool windowedFullscreen, const Vector2i& pos, const Vector2i& size, int32 monitorId, const Vector2i& fullscreenSize)
+				: PosAndShape(FlagsToMode(fullscreen, windowedFullscreen), pos, size, monitorId, fullscreenSize) {}
+
+			PosAndShape(Mode mode, const Vector2i& pos, const Vector2i& size, int32 monitorId, const Vector2i& fullscreenSize)
+				: mode(mode), windowPos(pos), windowSize(size), monitorId(monitorId), fullscreenSize(fullscreenSize){}
+
+			inline static Mode FlagsToMode(bool fullscreen, bool windowedFullscreen)
+			{
+				return fullscreen ? windowedFullscreen ? Mode::WindowedFullscreen : Mode::Fullscreen : Mode::Windowed;
+			}
+
+			inline void SetMode(bool fullscreen, bool windowedFullscreen)
+			{
+				mode = FlagsToMode(fullscreen, windowedFullscreen);
+			}
+
+			/// Position of the window; ignored when in fullscreen mode
+			Vector2i windowPos;
+			/// Size of the window; ignored when in fullscreen mode
+			Vector2i windowSize;
+			
+			/// Monitor to use when in fullscreen; ignored when in windowed mode
+			int32 monitorId;
+			/// Only used for windowed fullscreen mode
+			Vector2i fullscreenSize;
+		};
+
 		Window(Vector2i size = Vector2i(800, 600), uint8 samplecount = 0);
 		~Window();
 		// Show the window
@@ -56,8 +89,6 @@ namespace Graphics
 
 		// Get full window position
 		Vector2i GetWindowPos() const;
-		// Set full window position
-		void SetWindowPos(const Vector2i& pos);
 
 		// Window Client area size
 		Vector2i GetWindowSize() const;
@@ -67,9 +98,9 @@ namespace Graphics
 
 		// Window is active
 		bool IsActive() const;
+		
 		// Set window client area size
-		void SetWindowSize(const Vector2i& size);
-		void SwitchFullscreen(int w, int h, int fsw = -1, int fsh = -1, uint32 monitorID = -1, bool windowedFullscreen = false);
+		void SetPosAndShape(const PosAndShape& posAndShape, bool ensureInBound);
 		bool IsFullscreen() const;
 
 		int GetDisplayIndex() const;
@@ -118,6 +149,7 @@ namespace Graphics
 		Delegate<const String&> OnTextInput;
 		Delegate<const TextComposition&> OnTextComposition;
 		Delegate<const Vector2i&> OnResized;
+		Delegate<const Vector2i&> OnMoved;
 		Delegate<bool> OnFocusChanged;
 
 	private:
