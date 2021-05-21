@@ -103,7 +103,8 @@ To run from Visual Studio, go to Properties for Main > Debugging > Working Direc
 		* `/usr/local/include ---> /opt/homebrew/include`
 		* `/usr/local/opt ---> /opt/homebrew/opt`
 2. Run `mac-cmake.sh` and then `make` from the root of the project.
-3. Run the executable made in the 'bin' folder.
+	* The build may fail with error mentioning `NK_STATIC_ASSERT` at lines 422 and 423 in `third_party/nuklear/nuklear.h`. You can comment out those lines in the code since those are datatype checks and the game will still build and run fine.
+4. Run the executable made in the 'bin' folder.
 
 ### Embedded (Raspberry Pi):
 1. Install the libraries listed in 'build.linux'
