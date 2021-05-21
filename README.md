@@ -99,6 +99,9 @@ To run from Visual Studio, go to Properties for Main > Debugging > Working Direc
 ### macOS:
 1. Install dependencies
 	* [Homebrew](https://github.com/Homebrew/brew): `brew install cmake freetype libvorbis sdl2 libpng jpeg libarchive libiconv`
+	* Apple Silicon Macs (created after late 2020) install Homebrew in `/opt/homebrew` by default, which currently causes the build to fail. To work around this, you'll need to create the following symlinks:
+		* `/usr/local/include ---> /opt/homebrew/include`
+		* `/usr/local/opt ---> /opt/homebrew/opt`
 2. Run `mac-cmake.sh` and then `make` from the root of the project.
 3. Run the executable made in the 'bin' folder.
 
