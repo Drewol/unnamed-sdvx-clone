@@ -486,6 +486,8 @@ public:
 		m_track->distantButtonScale = g_gameConfig.GetFloat(GameConfigKeys::DistantButtonScale);
 		m_showCover = g_gameConfig.GetBool(GameConfigKeys::ShowCover);
 
+		m_track->EnableVisualOffset(g_gameConfig.GetBool(GameConfigKeys::EnableVisualOffset));
+
 		if (m_delayedHitEffects)
 		{
 			m_scoring.OnHoldEnter.Add(m_track, &Track::OnHoldEnter);
@@ -1004,7 +1006,7 @@ public:
 					if (!m_holdEmitters[i])
 					{
 						Color hitColor = (i < 4) ? Color::White : Color::FromHSV(20, 0.7f, 1.0f);
-						float hitWidth = (i < 4) ? m_track->buttonWidth : m_track->fxbuttonWidth;
+						float hitWidth = (i < 4) ? m_track->buttonWidth : m_track->fxButtonWidth;
 						m_holdEmitters[i] = CreateHoldEmitter(hitColor, hitWidth);
 					}
 					m_holdEmitters[i]->position = m_track->TransformPoint(Vector3(m_track->GetButtonPlacement(i), 0.f, 0.f));
@@ -1988,7 +1990,7 @@ public:
 
 			// Create hit effect particle
 			Color hitColor = (buttonIdx < 4) ? Color::White : Color::FromHSV(20, 0.7f, 1.0f);
-			float hitWidth = (buttonIdx < 4) ? m_track->buttonWidth : m_track->fxbuttonWidth;
+			float hitWidth = (buttonIdx < 4) ? m_track->buttonWidth : m_track->fxButtonWidth;
 			if (particleMaterial && basicParticleTexture) 
 			{
 				Ref<ParticleEmitter> emitter = CreateHitEmitter(hitColor, hitWidth);

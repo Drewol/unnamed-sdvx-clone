@@ -186,7 +186,9 @@ DefineEnum(GameConfigKeys,
 		   MirrorChart,
 		   RandomizeChart,
 		   BackupGauge,
-		   UpdateChannel)
+		   UpdateChannel,
+
+		   EnableVisualOffset)
 
 // List of settings overriden by profiles
 extern ConfigBase::KeyList GameConfigProfileSettings;

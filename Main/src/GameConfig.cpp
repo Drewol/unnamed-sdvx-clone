@@ -1,7 +1,5 @@
 #include "stdafx.h"
 #include "GameConfig.hpp"
-
-#include "Shared/Log.hpp"
 #include "HitStat.hpp"
 #include "Input.hpp"
 
@@ -19,7 +17,7 @@ inline static void ConvertKeyCodeToScanCode(GameConfig& config, std::vector<Game
 		const int32 keycodeInt = config.GetInt(key);
 		if (keycodeInt < 0) continue;
 
-		const SDL_Keycode keycode = static_cast<SDL_Keycode>(keycodeInt);
+		const auto keycode = static_cast<SDL_Keycode>(keycodeInt);
 		const SDL_Scancode scancode = SDL_GetScancodeFromKey(keycode);
 
 		if (scancode != SDL_SCANCODE_UNKNOWN)
@@ -230,6 +228,8 @@ void GameConfig::InitDefaults()
 
 	Set(GameConfigKeys::CurrentProfileName, "Main");
 	Set(GameConfigKeys::UpdateChannel, "master");
+
+	Set(GameConfigKeys::EnableVisualOffset, false);
 }
 
 void GameConfig::UpdateVersion()

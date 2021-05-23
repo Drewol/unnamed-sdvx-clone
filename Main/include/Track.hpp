@@ -14,7 +14,8 @@ struct TimedEffect
 	explicit TimedEffect(float duration);
 	virtual ~TimedEffect() = default;
 	void Reset(float duration);
-	float GetRate() const { return time / duration; }
+
+	virtual float GetRate() const { return time / duration; }
 	virtual void Draw(class RenderQueue& rq) = 0;
 	virtual void Tick(float deltaTime);
 
@@ -30,7 +31,7 @@ struct ButtonHitEffect : TimedEffect
 	void Draw(class RenderQueue& rq) override;
 	void Tick(float deltaTime) override;
 	void Reset(int buttonCode, Color color, bool hold);
-	float GetRate() const { return Math::Min(time, hitEffectDuration) / duration; }
+	float GetRate() const override { return Math::Min(time, hitEffectDuration) / duration; }
 
 	uint32 buttonCode; // Only used for Draw
 	Color color;
@@ -68,13 +69,13 @@ public:
 	static const float trackWidth;
 	static const float buttonWidth;
 	static const float laserWidth;
-	static const float fxbuttonWidth;
+	static const float fxButtonWidth;
 	static const float buttonTrackWidth;
 
 	float trackLength;
-	float trackTickLength;
-	float buttonLength;
-	float fxbuttonLength;
+	float trackTickLength{};
+	float buttonLength{};
+	float fxButtonLength{};
 	float distantButtonScale = 2.0f;
 
 	// Laser color setting
@@ -104,11 +105,8 @@ public:
 	// Things like the laser pointers, hit bar and effect
 	void DrawOverlays(RenderQueue& rq);
 	void DrawHitEffects(RenderQueue& rq);
-	// Draws a plane over the track
-	void DrawTrackOverlay(RenderQueue& rq, Texture texture, float heightOffset = 0.05f, float widthScale = 1.0f);
 	// Draw a centered sprite at pos, relative from the track
 	void DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, Color color = Color::White, float tilt = 0.0f);
-	void DrawCombo(RenderQueue& rq, uint32 score, Color color, float scale = 1.0f);
 	void DrawTrackCover(RenderQueue& rq);
 	void DrawCalibrationCritLine(RenderQueue& rq);
 
@@ -130,8 +128,10 @@ public:
     void OnHoldEnter(Input::Button buttonCode);
     void OnButtonReleased(Input::Button buttonCode);
 
+    void EnableVisualOffset(bool setting);
+
 	// Laser positions, as shown on the overlay
-	float laserPositions[2];
+	float laserPositions[2]{};
 	// Current lasers are extended
 	bool lasersAreExtend[2] = { false, false };
 	float laserPointerOpacity[2] = { 1.0f };
@@ -193,9 +193,9 @@ public:
 	Material spriteMaterial;
 
 	// For flickering objects, like hold objects that are active
-	float objectGlow;
+	float objectGlow{};
 	// 20Hz flickering. 0 = Miss, 1 = Inactive, 2 & 3 = Active alternating.
-	int objectGlowState;
+	int objectGlowState{};
 
 	// Early/Late indicator
 	struct TimedHitEffect* timedHitEffect = nullptr;
@@ -207,6 +207,8 @@ public:
     float scrollSpeed = 0;
 
 private:
+	float m_GetObjectPosition(BeatmapPlayback& playback, ObjectState* obj);
+
 	// Laser track generators
 	class LaserTrackBuilder* m_laserTrackBuilder[2] = { 0 };
 
@@ -237,4 +239,7 @@ private:
 	float m_trackHide = 0.0f;
 	float m_trackHideSpeed = 0.0f;
 	float m_btOverFxScale = 0.8f;
+
+	bool m_enableVisualOffset = false;
+	const float m_offsetMult = 0.1;
 };
