@@ -340,7 +340,6 @@ void Track::Tick(class BeatmapPlayback& playback, float deltaTime)
 	// Perform laser track cache cleanup, etc.
 	for (auto & i : m_laserTrackBuilder)
 	{
-		m_laserTrackBuilder[i]->Update(m_lastMapTime);
 		i->Update(m_lastMapTime);
 	}
 }
