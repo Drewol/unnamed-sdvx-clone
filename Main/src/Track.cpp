@@ -766,15 +766,13 @@ float Track::m_GetObjectPosition(BeatmapPlayback& playback, ObjectState *obj)
 {
 	float visualOffset = m_GetBaseVisualOffsetForObject(obj);
 
-	switch (obj->type)
+	if (obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
+		playback.TimeToViewDistance(obj->time) / m_viewRange + visualOffset;
+	else // laser
 	{
-		case ObjectType::Single:
-		case ObjectType::Hold:
-			return playback.TimeToViewDistance(obj->time) / m_viewRange + visualOffset;
-		case ObjectType::Laser:
-			// Calculate height based on time on current track
-			float posMult = trackLength / (m_viewRange * laserSpeedOffset);
-			return playback.TimeToViewDistance(obj->time) * posMult + visualOffset;
+		// Calculate height based on time on current track
+		float posMult = trackLength / (m_viewRange * laserSpeedOffset);
+		return playback.TimeToViewDistance(obj->time) * posMult + visualOffset;
 	}
 }
 
@@ -782,14 +780,9 @@ float Track::m_GetBaseVisualOffsetForObject(ObjectState* obj) const
 {
 	if (!m_enableVisualOffset)
 		return 0;
-	if (obj == nullptr)
+
+	if (obj == nullptr || obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
 		return m_offsetMult / trackLength;
-	switch (obj->type)
-	{
-		case ObjectType::Single:
-		case ObjectType::Hold:
-			return m_offsetMult / trackLength;
-		case ObjectType::Laser:
-			return m_offsetMult;
-	}
+	else // laser
+		return m_offsetMult;
 }
