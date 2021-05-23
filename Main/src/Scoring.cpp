@@ -755,13 +755,15 @@ void Scoring::m_UpdateTicks()
 				}
 				else if (tick->HasFlag(TickFlags::Laser))
 				{
-					LaserObjectState* laserObject = (LaserObjectState*)tick->object;
+					auto* laserObject = (LaserObjectState*)tick->object;
 					if (tick->HasFlag(TickFlags::Slam))
 					{
 						// Check if slam hit
 						float dirSign = Math::Sign(laserObject->GetDirection());
 						float inputSign = Math::Sign(m_input->GetInputLaserDir(buttonCode - 6));
-						if (autoplayInfo.autoplay || (dirSign == inputSign && delta <= hitWindow.slam))
+
+						if (autoplayInfo.autoplay || (dirSign == inputSign && delta <= hitWindow.slam / 2)
+							|| tick->HasFlag(TickFlags::Processed))
 						{
 							m_TickHit(tick, buttonCode);
 							HitStat* stat = new HitStat(tick->object);
@@ -791,6 +793,14 @@ void Scoring::m_UpdateTicks()
 						processed = true;
 					}
 				}
+			}
+			else if (tick->HasFlag(TickFlags::Slam)) // Check early for slam input
+			{
+				auto* laserObject = (LaserObjectState*)tick->object;
+				float dirSign = Math::Sign(laserObject->GetDirection());
+				float inputSign = Math::Sign(m_input->GetInputLaserDir(buttonCode - 6));
+				if (dirSign == inputSign && std::abs(delta) <= hitWindow.slam / 2)
+					tick->SetFlag(TickFlags::Processed);
 			}
 
 			bool miss = (tick->HasFlag(TickFlags::Slam) && delta > hitWindow.slam)
@@ -998,7 +1008,6 @@ void Scoring::m_UpdateGauges(ScoreHitRating rating, TickFlags flags)
 		}
 	}
 
-
 	while (m_gaugeStack.size() > 1 && m_gaugeStack.back()->FailOut())
 	{
 		Gauge* lostGauge = m_gaugeStack.back();
@@ -1019,11 +1028,11 @@ void Scoring::m_UpdateGaugeSamples()
 
 void Scoring::m_CleanupTicks()
 {
-	for (uint32 i = 0; i < 8; i++)
+	for (auto & m_tick : m_ticks)
 	{
-		for (ScoreTick* tick : m_ticks[i])
+		for (ScoreTick* tick : m_tick)
 			delete tick;
-		m_ticks[i].clear();
+		m_tick.clear();
 	}
 }
 

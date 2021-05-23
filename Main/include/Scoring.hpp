@@ -21,7 +21,9 @@ enum class TickFlags : uint8
 	Slam = 0x20,
 
 	// Used to make hit effects appear correctly for holds
-	Ignore = 0x40
+	Ignore = 0x40,
+
+	Processed = 0x80
 };
 TickFlags operator|(const TickFlags& a, const TickFlags& b);
 TickFlags operator&(const TickFlags& a, const TickFlags& b);
