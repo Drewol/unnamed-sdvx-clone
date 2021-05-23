@@ -396,7 +396,7 @@ void Track::DrawBase(class RenderQueue& rq)
 	// Draw the main beat ticks on the track
 	params.SetParameter("mainTex", trackTickTexture);
 	params.SetParameter("hasSample", false);
-	float visualOffset = m_enableVisualOffset ? m_offsetMult / trackLength : 0;
+	float visualOffset = m_GetBaseVisualOffsetForObject(nullptr);
 	for (float f : m_barTicks)
 	{
 		float fLocal = f / m_viewRange + visualOffset;
@@ -764,18 +764,32 @@ void Track::EnableVisualOffset(bool setting)
 
 float Track::m_GetObjectPosition(BeatmapPlayback& playback, ObjectState *obj)
 {
-	float visualOffset;
+	float visualOffset = m_GetBaseVisualOffsetForObject(obj);
 
 	switch (obj->type)
 	{
 		case ObjectType::Single:
 		case ObjectType::Hold:
-			visualOffset = m_enableVisualOffset ? m_offsetMult / trackLength : 0;
 			return playback.TimeToViewDistance(obj->time) / m_viewRange + visualOffset;
 		case ObjectType::Laser:
 			// Calculate height based on time on current track
-			visualOffset = m_enableVisualOffset ? m_offsetMult : 0;
 			float posMult = trackLength / (m_viewRange * laserSpeedOffset);
 			return playback.TimeToViewDistance(obj->time) * posMult + visualOffset;
+	}
+}
+
+float Track::m_GetBaseVisualOffsetForObject(ObjectState* obj) const
+{
+	if (!m_enableVisualOffset)
+		return 0;
+	if (obj == nullptr)
+		return m_offsetMult / trackLength;
+	switch (obj->type)
+	{
+		case ObjectType::Single:
+		case ObjectType::Hold:
+			return m_offsetMult / trackLength;
+		case ObjectType::Laser:
+			return m_offsetMult;
 	}
 }

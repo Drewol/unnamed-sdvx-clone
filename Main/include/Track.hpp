@@ -208,6 +208,7 @@ public:
 
 private:
 	float m_GetObjectPosition(BeatmapPlayback& playback, ObjectState* obj);
+	float m_GetBaseVisualOffsetForObject(ObjectState* obj) const;
 
 	// Laser track generators
 	class LaserTrackBuilder* m_laserTrackBuilder[2] = { 0 };
