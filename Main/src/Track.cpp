@@ -767,7 +767,7 @@ float Track::m_GetObjectPosition(BeatmapPlayback& playback, ObjectState *obj)
 	float visualOffset = m_GetBaseVisualOffsetForObject(obj);
 
 	if (obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
-		playback.TimeToViewDistance(obj->time) / m_viewRange + visualOffset;
+		return playback.TimeToViewDistance(obj->time) / m_viewRange + visualOffset;
 	else // laser
 	{
 		// Calculate height based on time on current track
