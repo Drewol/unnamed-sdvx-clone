@@ -1111,7 +1111,6 @@ void MultiplayerScreen::OnKeyPressed(SDL_Scancode code)
 	else if (code == SDL_SCANCODE_ESCAPE)
 	{
 		int backScancode = g_gameConfig.GetInt(GameConfigKeys::Key_Back);
-//		SDL_Keycode k = SDL_GetKeyFromScancode(g_gameConfig.GetInt(GameConfigKeys::Key_Back));
 
 		if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice) != InputDevice::Keyboard
 			|| backScancode != SDL_SCANCODE_ESCAPE)
@@ -1203,8 +1202,25 @@ void MultiplayerScreen::m_OnButtonPressed(Input::Button buttonCode)
 		}
 		break;
 	case Input::Button::Back:
-		if (m_returnToMainList())
-			return;
+		switch (m_screenState)
+		{
+		case MultiplayerScreenState::JOIN_PASSWORD:
+		case MultiplayerScreenState::NEW_ROOM_NAME:
+		case MultiplayerScreenState::NEW_ROOM_PASSWORD:
+		case MultiplayerScreenState::SET_USERNAME:
+			if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice) == InputDevice::Keyboard)
+			{
+				// In this case we want them to hit escape so we don't exit on text inputs
+				break;
+			}
+			// Otherwise fall though
+            [[fallthrough]];
+		default:
+			if (m_returnToMainList())
+				return;
+			break;
+		}
+		break;
 	default:
 		break;
 	}
