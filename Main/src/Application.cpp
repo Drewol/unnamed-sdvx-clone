@@ -1966,6 +1966,13 @@ void Application::m_UpdateWindowPosAndShape(int32 monitorId, bool fullscreen, bo
 		fullscreen, g_gameConfig.GetBool(GameConfigKeys::WindowedFullscreen),
 		windowPos, windowSize, monitorId, fullscreenSize
 	}, ensureInBound);
+	
+	if (ensureInBound && !fullscreen)
+	{
+		Vector2i windowPos = g_gameWindow->GetWindowPos();
+		g_gameConfig.Set(GameConfigKeys::ScreenX, windowPos.x);
+		g_gameConfig.Set(GameConfigKeys::ScreenY, windowPos.y);
+	}
 }
 
 void Application::m_OnFocusChanged(bool focused)
