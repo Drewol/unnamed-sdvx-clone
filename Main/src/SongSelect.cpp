@@ -1711,6 +1711,7 @@ public:
 		m_hasRestored = true;
 		m_transitionedToGame = false;
 		m_previewPlayer.Restore();
+		m_mapDatabase->Update(); //flush pending db changes before setting lua tables
 		m_selectionWheel->ResetLuaTables();
 		m_mapDatabase->ResumeSearching();
 		if (g_gameConfig.GetBool(GameConfigKeys::AutoResetSettings))

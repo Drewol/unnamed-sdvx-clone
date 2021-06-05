@@ -220,6 +220,9 @@ public:
 		for (auto i : items)
 		{
 			ItemSelectIndex index(i);
+			assert(m_items.Contains(index.id));
+			ItemSelectIndex* item = &m_items.at(index.id);
+			*item = index;
 		}
 
 		// Clear the current queue of random charts
