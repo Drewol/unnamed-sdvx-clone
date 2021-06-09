@@ -1263,6 +1263,7 @@ public:
 	bool InitGameplay()
 	{
 		// Playback and timing
+    		g_gameWindow->StopTextInput();
 		m_playback = BeatmapPlayback(*m_beatmap);
 		m_playback.OnEventChanged.Add(this, &Game_Impl::OnEventChanged);
 		m_playback.OnLaneToggleChanged.Add(this, &Game_Impl::OnLaneToggleChanged);
@@ -1651,6 +1652,7 @@ public:
 
 		m_scoring.FinishGame();
 		m_ended = true;
+    		g_gameWindow->StartTextInput();
 	}
 	void OnScoreScreenLoaded(IAsyncLoadableApplicationTickable* tickable)
 	{
