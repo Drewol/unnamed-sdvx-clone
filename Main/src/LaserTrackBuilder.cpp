@@ -64,11 +64,6 @@ Mesh LaserTrackBuilder::GenerateTrackMesh(class BeatmapPlayback& playback, Laser
 		float slamLength = playback.DurationToViewDistanceAtTime(laser->time, slamDuration) * laserLengthScale;
 		float halfLength = slamLength * 0.5;
 		Rect3D centerMiddle = Rect3D(left, slamLength + halfLength, right, -halfLength);
-		Rect3D centerBottom = centerMiddle;
-		centerBottom.size.y = realBorderSize;
-		centerBottom.pos.y = centerMiddle.Bottom() - centerBottom.size.y;
-		Rect3D centerTop = centerBottom;
-		centerTop.pos.y = centerMiddle.Top();
 
 		Vector<MeshGenerators::SimpleVertex> verts =
 		{
@@ -84,23 +79,10 @@ Mesh LaserTrackBuilder::GenerateTrackMesh(class BeatmapPlayback& playback, Laser
 		// Generate left corner
 		{
 			Rect3D leftCenter = Rect3D(left - actualLaserWidth, centerMiddle.Top() - halfLength, left + halfWidth, centerMiddle.Bottom() + halfLength);
-			Rect3D leftCap = leftCenter;
-			leftCap.pos.y = leftCap.pos.y + leftCap.size.y;
-			leftCap.size.y = realBorderSize;
-			leftCap.size.x += realBorderSize;
-			leftCap.pos.x -= realBorderSize;
-			Rect3D leftSide = leftCenter;
-			leftSide.size.x = realBorderSize;
-			leftSide.pos.x = leftCap.Left();
 
-			//Rect sideUv = Rect(0.0f, textureBorder, textureBorder, invTextureBorder);
-			Rect capUv = Rect(0.0f, 0.0f, invTextureBorder, textureBorder); // Cap at the top
 			Vector<MeshGenerators::SimpleVertex> leftVerts;
 			if(swapped)
 			{
-				capUv = Rect(0.0f, invTextureBorder, invTextureBorder, 1.0f); // Cap at the bottom
-				leftCap.size.y = realBorderSize;
-				leftCap.pos.y = leftCenter.pos.y - leftCap.size.y;
 
 				leftVerts =
 				{
@@ -126,22 +108,9 @@ Mesh LaserTrackBuilder::GenerateTrackMesh(class BeatmapPlayback& playback, Laser
 		// Generate right corner
 		{
 			Rect3D rightCenter = Rect3D(right - halfWidth, centerMiddle.Top() - halfLength, right + actualLaserWidth, centerMiddle.Bottom() + halfLength);
-			Rect3D rightCap = rightCenter;
-			rightCap.size.y = realBorderSize;
-			rightCap.size.x += realBorderSize;
-			rightCap.pos.y = rightCenter.Bottom() - rightCap.size.y;
-			Rect3D rightSide = rightCenter;
-			rightSide.size.x = realBorderSize;
-			rightSide.pos.x = rightCenter.Right();
-
-			//Rect sideUv = Rect(invTextureBorder, textureBorder, 1.0f, invTextureBorder);
-			Rect capUv = Rect(textureBorder, invTextureBorder, 1.0f, 1.0f); // Cap at the bottom
 			Vector<MeshGenerators::SimpleVertex> rightVerts;
 			if(swapped)
 			{
-				capUv = Rect(textureBorder, 0.0f, 1.0f, textureBorder); // Cap at the top
-				rightCap.pos.y = rightCenter.Top();
-
 				rightVerts =
 				{
 					{ { rightCenter.Left(), rightCenter.Bottom(),  0.0f },{ 0.0f, 0.0f } }, // BL

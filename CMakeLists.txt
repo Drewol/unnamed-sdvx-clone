@@ -13,7 +13,7 @@ elseif(WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 endif()
 
 
-project(USC VERSION 0.4.0)
+project(USC VERSION 0.5.0)
 if(WIN32 AND ${CMAKE_VERSION} VERSION_GREATER "3.12")
     cmake_policy(SET CMP0079 NEW)
 endif()
