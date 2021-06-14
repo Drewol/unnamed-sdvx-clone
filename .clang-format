@@ -1,0 +1,107 @@
+AccessModifierOffset: -8
+AlignAfterOpenBracket: DontAlign
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+# AlignConsecutiveMacros: true # Unknown key
+AlignEscapedNewlines: DontAlign
+AlignOperands: true
+AlignTrailingComments: true
+# AllowAllArgumentsOnNextLine:
+# AllowAllConstructorInitializersOnNextLine:
+# AllowAllParametersOfDeclarationOnNextLine:
+# AllowShortBlocksOnASingleLine:
+# AllowShortCaseLabelsOnASingleLine:
+AllowShortFunctionsOnASingleLine: None
+# AllowShortIfStatementsOnASingleLine:
+# AllowShortLambdasOnASingleLine:
+# AllowShortLoopsOnASingleLine:
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: true
+# BinPackArguments:
+# BinPackParameters:
+BraceWrapping:
+#        AfterCaseLabel: false
+        AfterClass: true
+        AfterControlStatement: true
+        AfterEnum: true
+        AfterFunction: true
+        AfterNamespace: true
+        AfterStruct: true
+        AfterUnion: true
+        AfterExternBlock: true
+        BeforeCatch: true
+        BeforeElse: true
+        IndentBraces: false
+        SplitEmptyFunction: false
+        SplitEmptyRecord: false
+        SplitEmptyNamespace: false
+# BreakAfterJavaFieldAnnotations:
+# BreakBeforeBinaryOperators:
+BreakBeforeBraces: Custom
+# BreakBeforeTernaryOperators:
+# BreakConstructorInitializers:
+# BreakInheritanceList:
+# BreakStringLiterals:
+# ColumnLimit:
+# CommentPragmas:
+# CompactNamespaces:
+# ConstructorInitializerAllOnOneLineOrOnePerLine:
+# ConstructorInitializerIndentWidth:
+ContinuationIndentWidth: 8
+# Cpp11BracedListStyle:
+# DerivePointerAlignment:
+# DisableFormat:
+# ExperimentalAutoDetectBinPacking:
+# FixNamespaceComments:
+# ForEachMacros:
+IncludeBlocks: Preserve
+# IncludeCategories:
+# IncludeIsMainRegex:
+IndentCaseLabels: false
+# IndentGotoLabels:
+# IndentPPDirectives:
+IndentWidth: 8
+IndentWrappedFunctionNames: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+Language: Cpp
+# MacroBlockBegin:
+# MacroBlockEnd:
+# MaxEmptyLinesToKeep:
+NamespaceIndentation: Inner
+# NamespaceMacros:
+# PenaltyBreakAssignment:
+# PenaltyBreakBeforeFirstCallParameter:
+# PenaltyBreakComment:
+# PenaltyBreakFirstLessLess:
+# PenaltyBreakString:
+# PenaltyBreakTemplateDeclaration:
+# PenaltyExcessCharacter:
+# PenaltyReturnTypeOnItsOwnLine:
+PointerAlignment: Left
+# RawStringFormats:
+# ReflowComments:
+# SortIncludes:
+# SortUsingDeclarations:
+SpaceAfterCStyleCast: false
+# SpaceAfterLogicalNot: false # Unknown key
+SpaceAfterTemplateKeyword: false
+SpaceBeforeAssignmentOperators: true
+# SpaceBeforeCpp11BracedList: true # Unknown key
+# SpaceBeforeCtorInitializerColon: true # Unknown key
+# SpaceBeforeInheritanceColon: true # Unknown key
+SpaceBeforeParens: ControlStatements
+# SpaceBeforeRangeBasedForLoopColon: true # Unknown key
+# SpaceInEmptyBlock: false # Unknown key
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 1
+SpacesInAngles: false
+SpacesInCStyleCastParentheses: false
+SpacesInContainerLiterals: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+Standard: Cpp11
+# StatementMacros:
+TabWidth: 8
+# TypenameMacros:
+UseTab: Always
