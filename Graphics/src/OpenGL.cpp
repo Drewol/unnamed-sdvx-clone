@@ -40,7 +40,7 @@ namespace Graphics
 			ResourceManagers::DestroyResourceManager<ResourceType::ParticleSystem>();
 
 #ifndef EMBEDDED
-			if(glBindProgramPipeline)
+			if(m_mainProgramPipeline)
 			{
 				glDeleteProgramPipelines(1, &m_mainProgramPipeline);
 			}
