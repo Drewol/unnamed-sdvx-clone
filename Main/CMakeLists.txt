@@ -79,7 +79,7 @@ if(MSVC)
 	set_target_properties(usc-game PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS /DEBUG:FASTLINK")
 	set_target_properties(usc-game PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /DEBUG:FULL")
 elseif(NOT APPLE)
-    target_compile_options(usc-game PUBLIC -Wall -Wextra -Werror -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function)
+    target_compile_options(usc-game PUBLIC -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function)
 endif(MSVC)
 
 # Dependencies
