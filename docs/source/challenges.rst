@@ -4,6 +4,8 @@ Challenge File Format
 .. |br| raw:: html
 
   <br/>
+  
+You can use this tool to easily create challenges and courses: https://itszn.github.io/usc_db_tool/
 
 USC challenges are stored in files with extension ".chal". These are JSON files with the following structure:
 
