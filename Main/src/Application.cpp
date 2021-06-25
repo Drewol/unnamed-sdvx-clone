@@ -9,6 +9,7 @@
 #include <Graphics/ResourceManagers.hpp>
 #include <Shared/Profiling.hpp>
 #include "GameConfig.hpp"
+#include "GuiUtils.hpp"
 #include "Input.hpp"
 #include "TransitionScreen.hpp"
 #include "SkinConfig.hpp"
@@ -1012,6 +1013,11 @@ bool Application::m_Init()
 		g_transition = TransitionScreen::Create();
 	}
 
+	if (g_gameConfig.GetBool(GameConfigKeys::KeepFontTexture)) {
+		BasicNuklearGui::StartFontInit();
+		m_fontBakeThread = Thread(BasicNuklearGui::BakeFontWithLock);
+	}
+
 	///TODO: check if directory exists already?
 	Path::CreateDir(Path::Absolute("screenshots"));
 	Path::CreateDir(Path::Absolute("songs"));
@@ -1312,6 +1318,9 @@ void Application::m_Cleanup()
 	Graphics::FontRes::FreeLibrary();
 	if (m_updateThread.joinable())
 		m_updateThread.join();
+
+	if (m_fontBakeThread.joinable())
+		m_fontBakeThread.join();
 
 	// Finally, save config
 	m_SaveConfig();

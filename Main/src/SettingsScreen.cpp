@@ -708,6 +708,7 @@ protected:
 		SelectionSetting(GameConfigKeys::AntiAliasing, m_aaModes, "Anti-aliasing (requires restart):");
 		SetApply(ToggleSetting(GameConfigKeys::VSync, "VSync"));
 		SetApply(ToggleSetting(GameConfigKeys::ShowFps, "Show FPS"));
+		SetApply(ToggleSetting(GameConfigKeys::KeepFontTexture, "Save font texture (settings load faster but uses more memory)"));
 
 		SectionHeader("Update");
 

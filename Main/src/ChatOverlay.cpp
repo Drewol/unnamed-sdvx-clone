@@ -17,21 +17,11 @@ void ChatOverlay::UpdateNuklearInput(SDL_Event evt)
 	m_eventQueue.push(evt);
 }
 
-void ChatOverlay::ShutdownNuklear()
-{
-    if (!m_nuklearRunning)
-        return;
-
-    g_gameWindow->OnAnyEvent.RemoveAll(this);
-    nk_sdl_shutdown();
-
-    m_nuklearRunning = false;
-}
-
-
 bool ChatOverlay::Init()
 {
-    InitNuklearIfNeeded();
+	m_backgroundFrame = false;
+
+	BasicNuklearGui::Init();
 
 	// Init the socket callbacks
 	m_multi->GetTCP().SetTopicHandler("server.chat.received", this, &ChatOverlay::m_handleChatReceived);
@@ -40,74 +30,15 @@ bool ChatOverlay::Init()
 	return true;
 }
 
-void ChatOverlay::InitNuklearIfNeeded()
-{
-    if (m_nuklearRunning) {
-        return;
-	}
-	m_nctx = nk_sdl_init((SDL_Window*)g_gameWindow->Handle());
-
-	g_gameWindow->OnAnyEvent.Add(this, &ChatOverlay::UpdateNuklearInput);
-	{
-		struct nk_font_atlas *atlas;
-		nk_sdl_font_stash_begin(&atlas);
-		struct nk_font *fallback = nk_font_atlas_add_from_file(atlas, Path::Normalize( Path::Absolute("fonts/settings/NotoSans-Regular.ttf")).c_str(), 24, 0);
-
-		NK_STORAGE const nk_rune cjk_ranges[] = {
-			0x0E3F, 0xFFFF,
-			0
-		};
-
-		struct nk_font_config cfg_cjk = nk_font_config(24);
-		cfg_cjk.merge_mode = nk_true;
-		cfg_cjk.range = cjk_ranges;
-
-		int maxSize;
-		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);
-		Logf("System max texture size: %d", Logger::Severity::Info, maxSize);
-		if (maxSize >= FULL_FONT_TEXTURE_HEIGHT && !g_gameConfig.GetBool(GameConfigKeys::LimitSettingsFont))
-		{
-			nk_font_atlas_add_from_file(atlas, Path::Normalize(Path::Absolute("fonts/settings/DroidSansFallback.ttf")).c_str(), 24, &cfg_cjk);
-		}
-		
-		usc_nk_sdl_font_stash_end();
-		nk_font_atlas_cleanup(atlas);
-
-		nk_style_set_font(m_nctx, &fallback->handle);
-	}
-	
-	m_nctx->style.text.color = nk_rgb(255, 255, 255);
-	m_nctx->style.button.border_color = nk_rgb(0, 128, 255);
-	m_nctx->style.button.padding = nk_vec2(5,5);
-	m_nctx->style.button.rounding = 0;
-	m_nctx->style.window.fixed_background = nk_style_item_color(nk_rgb(40, 40, 40));
-	m_nctx->style.slider.bar_normal = nk_rgb(20, 20, 20);
-	m_nctx->style.slider.bar_hover = nk_rgb(20, 20, 20);
-	m_nctx->style.slider.bar_active = nk_rgb(20, 20, 20);
-
-    m_nuklearRunning = true;
-}
-
 void ChatOverlay::Tick(float deltatime)
 {
-	nk_input_begin(m_nctx);
-	while (!m_eventQueue.empty())
-	{
-		nk_sdl_handle_event(&m_eventQueue.front());
-		m_eventQueue.pop();
-	}
-	nk_input_end(m_nctx);
+	BasicNuklearGui::Tick(deltatime);
 
 	if (m_isOpen && nk_window_find(m_nctx, "Multiplayer Chat") && 
 			nk_window_is_closed(m_nctx, "Multiplayer Chat"))
 	{
 		CloseChat();
 	}
-}
-
-void ChatOverlay::NKRender()
-{
-	nk_sdl_render(NK_ANTI_ALIASING_ON, MAX_VERTEX_MEMORY, MAX_ELEMENT_MEMORY);
 }
 
 void ChatOverlay::m_drawChatAlert()
@@ -272,8 +203,7 @@ void ChatOverlay::Render(float deltatime)
 		m_drawChatAlert();
 	}
 
-	g_application->ForceRender();
-	NKRender();
+	BasicNuklearGui::Render(deltatime);
 }
 
 void ChatOverlay::CloseChat()

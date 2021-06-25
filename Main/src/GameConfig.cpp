@@ -230,6 +230,12 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::UpdateChannel, "master");
 
 	Set(GameConfigKeys::EnableVisualOffset, false);
+
+#ifndef EMBEDDED
+	Set(GameConfigKeys::KeepFontTexture, true);
+#else
+	Set(GameConfigKeys::KeepFontTexture, false);
+#endif
 }
 
 void GameConfig::UpdateVersion()

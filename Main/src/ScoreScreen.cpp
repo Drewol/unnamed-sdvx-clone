@@ -916,7 +916,10 @@ public:
 				(screensetting == AutoScoreScreenshotSettings::Highscore && m_highScores.empty()) ||
 				(screensetting == AutoScoreScreenshotSettings::Highscore && m_score > (uint32)m_highScores.front()->score))
 			{
-				Capture();
+				if (!m_autoplay && !m_autoButtons)
+				{
+					Capture();
+				}
 			}
 			m_hasScreenshot = true;
 		}

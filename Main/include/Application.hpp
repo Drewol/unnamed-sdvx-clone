@@ -136,6 +136,7 @@ private:
 	Map<String, CachedJacketImage*> m_jacketImages;
 	String m_lastMapPath;
 	Thread m_updateThread;
+	Thread m_fontBakeThread;
 	class Beatmap* m_currentMap = nullptr;
 	SkinHttp m_skinHttp;
 	SkinIR m_skinIR;

@@ -20,7 +20,13 @@ void BasicNuklearGui::ShutdownNuklear()
         return;
 
     g_gameWindow->OnAnyEvent.RemoveAll(this);
-    nk_sdl_shutdown();
+    nk_sdl_shutdown_keep_font();
+
+	if (!g_gameConfig.GetBool(GameConfigKeys::KeepFontTexture)) {
+		glDeleteTextures(1, &s_fontTexture);
+		s_fontTexture = 0;
+		s_hasFontTexture = false;
+	}
 
     m_nuklearRunning = false;
 }
@@ -70,26 +76,93 @@ static void ExtendFontAtlas(struct nk_font_atlas* atlas, const std::string_view&
 	nk_font_atlas_add_from_file(atlas, fontPath.data(), pixelHeight, &cfg);
 }
 
-void BasicNuklearGui::InitNuklearFontAtlas()
+Mutex BasicNuklearGui::s_mutex;
+nk_font_atlas* BasicNuklearGui::s_atlas = nullptr;
+nk_font* BasicNuklearGui::s_font = nullptr;
+GLuint BasicNuklearGui::s_fontTexture = 0;
+bool BasicNuklearGui::s_hasFontTexture = false;
+
+void BasicNuklearGui::StartFontInit()
 {
 	// This font should cover latin and cyrillic fonts.
 	const String defaultFontPath = Path::Normalize(Path::Absolute("fonts/settings/NotoSans-Regular.ttf"));
 	const float fontSize = 24.f;
 
-	struct nk_font_atlas* atlas;
-	nk_sdl_font_stash_begin(&atlas);
+	s_atlas = new nk_font_atlas();
+	nk_atlas_font_stash_begin(s_atlas);
 
-	struct nk_font* font = nk_font_atlas_add_from_file(atlas, defaultFontPath.data(), fontSize, 0);
+	struct nk_font* font = nk_font_atlas_add_from_file(s_atlas, defaultFontPath.data(), fontSize, 0);
 
 	if (!g_gameConfig.GetBool(GameConfigKeys::LimitSettingsFont))
 	{
-		InitNuklearFontAtlasFallback(atlas, fontSize);
+		InitNuklearFontAtlasFallback(s_atlas, fontSize);
+	}
+	s_font = font;
+}
+
+int BasicNuklearGui::s_fontImageWidth = 0;
+int BasicNuklearGui::s_fontImageHeight = 0;
+
+void BasicNuklearGui::BakeFontWithLock()
+{
+	BasicNuklearGui::s_mutex.lock();
+	BakeFont();
+	BasicNuklearGui::s_mutex.unlock();
+}
+
+void BasicNuklearGui::BakeFont()
+{
+	if (s_atlas->pixel || s_hasFontTexture)
+		return;
+	usc_nk_bake_atlas(s_atlas, s_fontImageWidth, s_fontImageHeight);
+}
+
+void BasicNuklearGui::DestroyFont()
+{
+	if (s_hasFontTexture)
+	{
+		glDeleteTextures(1, &s_fontTexture);
+		s_hasFontTexture = false;
+	}
+	if (s_atlas)
+	{
+		nk_font_atlas_clear(s_atlas);
+		delete s_atlas;
+		s_atlas = nullptr;
+		s_font = nullptr;
+	}
+}
+
+void BasicNuklearGui::InitNuklearFontAtlas()
+{
+	BasicNuklearGui::s_mutex.lock();
+	if (s_atlas == nullptr)
+	{
+		StartFontInit();
 	}
 
-	usc_nk_sdl_font_stash_end();
-	nk_font_atlas_cleanup(atlas);
+	assert(s_atlas);
+	if (!s_hasFontTexture && s_atlas->pixel == nullptr)
+	{
+		// Our thread didn't work
+		Log("Baking nuklear font on main thread", Logger::Severity::Warning);
+		BakeFont();
+	}
 
-	nk_style_set_font(m_nctx, &font->handle);
+	if (!s_hasFontTexture)
+	{
+		// Also assigns the atlas to the current sdl
+		s_fontTexture = usc_nk_sdl_generate_texture(s_atlas, s_atlas->pixel, s_fontImageWidth, s_fontImageHeight);
+		s_hasFontTexture = true;
+	} 
+	else
+	{
+		usc_nk_sdl_use_atlas(s_atlas, s_fontTexture);
+	}
+	BasicNuklearGui::s_mutex.unlock();
+
+	assert(s_font);
+	nk_style_set_font(m_nctx, &s_font->handle);
 }
 
 void BasicNuklearGui::InitNuklearFontAtlasFallback(struct nk_font_atlas* atlas, float fontSize)

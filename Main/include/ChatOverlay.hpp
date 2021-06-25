@@ -4,20 +4,21 @@
 #include "Application.hpp"
 #include "Input.hpp"
 #include "GameConfig.hpp"
+#include "GuiUtils.hpp"
 
 class MultiplayerScreen;
 
 // TODO(itszn) inherit BasicNuklearGui to reduce duplciated code
-class ChatOverlay: public IApplicationTickable
+class ChatOverlay: public BasicNuklearGui
 {
 public:
-	ChatOverlay(MultiplayerScreen* m) : m_multi(m), m_nctx(), m_eventQueue() {};
+	ChatOverlay(MultiplayerScreen* m) : m_multi(m) {};
 	~ChatOverlay();
 	
 	bool Init() override;
 	void Tick(float deltaTime) override;
 	void Render(float deltaTime) override;
-	void NKRender();
+
 	void UpdateNuklearInput(SDL_Event evt);
 	void SendChatMessage(const String& message);
 	void AddMessage(const String& message);
@@ -25,8 +26,6 @@ public:
 	bool OnKeyPressedConsume(SDL_Scancode key);
 	void OpenChat();
 	void CloseChat();
-    void ShutdownNuklear();
-    void InitNuklearIfNeeded();
 	bool IsOpen() {
 		return m_isOpen;
 	}
@@ -43,11 +42,7 @@ private:
 	void m_drawWindow();
 	void m_drawChatAlert();
 
-    bool m_nuklearRunning = false;
-
 	MultiplayerScreen* m_multi = NULL;
-	struct nk_context* m_nctx = NULL;
-	std::queue<SDL_Event> m_eventQueue;
 
 	char m_chatDraft[512] = {0};
 	bool m_isOpen = false;

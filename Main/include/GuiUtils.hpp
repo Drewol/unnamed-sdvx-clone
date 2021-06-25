@@ -2,6 +2,7 @@
 #include "ApplicationTickable.hpp"
 #include "GameConfig.hpp"
 #include "Input.hpp"
+#include "Shared/Thread.hpp"
 
 class BasicNuklearGui : public IApplicationTickable
 {
@@ -17,6 +18,10 @@ public:
     void InitNuklearIfNeeded();
 	virtual bool OnKeyPressedConsume(SDL_Scancode code) { return m_isOpen; };
 
+	static void StartFontInit();
+	static void BakeFontWithLock();
+	static void DestroyFont();
+
 protected:
 	bool m_nuklearRunning = false;
 	struct nk_context* m_nctx = NULL;
@@ -29,8 +34,16 @@ protected:
 	Mesh m_bgMesh;
 
 private:
+	static Mutex s_mutex;
+	static nk_font_atlas* s_atlas;
+	static nk_font* s_font;
+	static GLuint s_fontTexture;
+	static bool s_hasFontTexture;
+	static int s_fontImageWidth;
+	static int s_fontImageHeight;
 	void InitNuklearFontAtlas();
-	void InitNuklearFontAtlasFallback(struct nk_font_atlas* atlas, float fontSize);
+	static void BakeFont();
+	static void InitNuklearFontAtlasFallback(struct nk_font_atlas* atlas, float fontSize);
 };
 
 class BasicWindow : public BasicNuklearGui
