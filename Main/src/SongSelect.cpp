@@ -180,9 +180,7 @@ public:
 		lua_pushnumber(m_lua, deltaTime);
 		if (lua_pcall(m_lua, 1, 0, 0) != 0)
 		{
-			Logf("Lua error: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
-			g_application->RemoveTickable(m_owner);
+			g_application->ScriptError("songselect/songwheel", m_lua);
 		}
 	}
 	virtual ~SelectionWheel()
@@ -346,9 +344,7 @@ private:
 		lua_pushinteger(m_lua, (uint64)m_currentlySelectedDiff + 1);
 		if (lua_pcall(m_lua, 1, 0, 0) != 0)
 		{
-			Logf("Lua error on set_diff: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error on set_diff", lua_tostring(m_lua, -1), 0);
-			assert(false);
+			g_application->ScriptError("songselect/songwheel", m_lua);
 		}
 	}
 	// Set all songs into lua
@@ -365,8 +361,7 @@ private:
 		lua_pushboolean(m_lua, true);
 		if (lua_pcall(m_lua, 1, 0, 0) != 0)
 		{
-			Logf("Lua error on songs_chaged: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error songs_changed", lua_tostring(m_lua, -1), 0);
+			g_application->ScriptError("songselect/songwheel", m_lua);
 		}
 	}
 	void m_SetCurrentItems() override
@@ -382,8 +377,7 @@ private:
 		lua_pushboolean(m_lua, false);
 		if (lua_pcall(m_lua, 1, 0, 0) != 0)
 		{
-			Logf("Lua error on songs_chaged: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error songs_changed", lua_tostring(m_lua, -1), 0);
+			g_application->ScriptError("songselect/songwheel", m_lua);
 		}
 	}
 
@@ -520,9 +514,7 @@ public:
 		lua_pushboolean(m_lua, Active);
 		if (lua_pcall(m_lua, 2, 0, 0) != 0)
 		{
-			Logf("Lua error: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
-			assert(false);
+			g_application->ScriptError("songselect/filterwheel", m_lua);
 		}
 	}
 	~FilterSelection()
@@ -592,9 +584,7 @@ public:
 		lua_pushboolean(m_lua, type == FilterType::Folder);
 		if (lua_pcall(m_lua, 2, 0, 0) != 0)
 		{
-			Logf("Lua error on set_selection: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error on set_selection", lua_tostring(m_lua, -1), 0);
-			assert(false);
+			g_application->ScriptError("songselect/filterwheel", m_lua);
 		}
 		m_currentFilters[t] = filter;
 		m_selectionWheel->SetFilter(m_currentFilters);
@@ -655,9 +645,7 @@ public:
 		lua_pushboolean(m_lua, m_selectingFolders);
 		if (lua_pcall(m_lua, 1, 0, 0) != 0)
 		{
-			Logf("Lua error on set_mode: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error on set_mode", lua_tostring(m_lua, -1), 0);
-			assert(false);
+			g_application->ScriptError("songselect/filterwheel", m_lua);
 		}
 	}
 	void OnSongsChanged()
@@ -760,8 +748,7 @@ private:
 		{
 			if (lua_pcall(m_lua, 0, 0, 0) != 0)
 			{
-				Logf("Lua error on tables_set: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-				g_gameWindow->ShowMessageBox("Lua Error on tables_set", lua_tostring(m_lua, -1), 0);
+				g_application->ScriptError("songselect/filterwheel", m_lua);
 			}
 		}
 	}
@@ -871,9 +858,7 @@ public:
 		lua_pushnumber(m_lua, m_selection + 1);
 		if (lua_pcall(m_lua, 1, 0, 0) != 0)
 		{
-			Logf("Lua error on set_selection: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error on set_selection", lua_tostring(m_lua, -1), 0);
-			assert(false);
+			g_application->ScriptError("songselect/sortwheel", m_lua);
 		}
 	}
 
@@ -884,9 +869,7 @@ public:
 		lua_pushboolean(m_lua, Active);
 		if (lua_pcall(m_lua, 2, 0, 0) != 0)
 		{
-			Logf("Lua error: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
-			assert(false);
+			g_application->ScriptError("songselect/sortwheel", m_lua);
 		}
 	}
 
@@ -925,8 +908,7 @@ private:
 		{
 			if (lua_pcall(m_lua, 0, 0, 0) != 0)
 			{
-				Logf("Lua error on tables_set: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-				g_gameWindow->ShowMessageBox("Lua Error on tables_set", lua_tostring(m_lua, -1), 0);
+				g_application->ScriptError("songselect/sortwheel", m_lua);
 			}
 		}
 	}
@@ -1611,9 +1593,7 @@ public:
 		lua_pushnumber(m_lua, deltaTime);
 		if (lua_pcall(m_lua, 1, 0, 0) != 0)
 		{
-			Logf("Lua error: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
-			assert(false);
+			g_application->ScriptError("songselect/background", m_lua);
 		}
 
 		m_selectionWheel->Render(deltaTime);

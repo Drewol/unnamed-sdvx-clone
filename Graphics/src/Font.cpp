@@ -264,7 +264,7 @@ namespace Graphics
 			TextRes* ret = new TextRes();
 			ret->mesh = MeshRes::Create(m_gl);
 
-			float monospaceWidth = size->GetCharInfo(L'_').advance;
+			float monospaceWidth = size->GetCharInfo(L'_').advance * 1.4f;
 
 			Vector<TextVertex> vertices;
 			Vector2 pen;
@@ -330,6 +330,8 @@ namespace Graphics
 
 			ret->size.y += size->lineHeight;
 
+			const CharInfo& a = size->GetCharInfo(L'0');
+			ret->size.z = a.topOffset;
 			ret->fontSize = size;
 			ret->mesh->SetData(vertices);
 			ret->mesh->SetPrimitiveType(PrimitiveType::TriangleList);

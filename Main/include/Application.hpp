@@ -68,9 +68,13 @@ public:
 	Graphics::Font LoadFont(const String& name, const bool& external = false);
 	int LoadImageJob(const String& path, Vector2i size, int placeholder, const bool& web = false);
 	void SetScriptPath(lua_State* L);
+
+
+	// Called when a pcall fails, returns true if the script was reloaded
+	bool ScriptError(const String& name, lua_State* L);
+
 	lua_State* LoadScript(const String& name, bool noError = false);
-	void ReloadScript(const String& name, lua_State* L);
-	void ShowLuaError(const String& error);
+	bool ReloadScript(const String& name, lua_State* L);
 
 	void WarnGauge();
 	int FastText(String text, float x, float y, int size, int align, const Color& color = Color::White);
@@ -78,6 +82,7 @@ public:
 	float GetRenderFPS() const;
 	Material GetFontMaterial() const;
 	Material GetGuiTexMaterial() const;
+	Material GetGuiFillMaterial() const;
 	Transform GetGUIProjection() const;
 	Transform GetCurrentGUITransform() const;
 	Rect GetCurrentGUIScissor() const;

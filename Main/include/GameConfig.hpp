@@ -182,6 +182,8 @@ DefineEnum(GameConfigKeys,
 		   KeepFontTexture,
 
 		   CurrentProfileName,
+		   FastGUI,
+		   SkinDevMode,
 
 		   // Gameplay options
 		   GaugeType,

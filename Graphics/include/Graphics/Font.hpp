@@ -20,7 +20,8 @@ namespace Graphics
 		Ref<class TextureRes> GetTexture();
 		Ref<class MeshRes> GetMesh() { return mesh; }
 		void Draw();
-		Vector2 size;
+		//width, line height, base height
+		Vector3 size;
 	};
 
 	/*

@@ -18,16 +18,16 @@ source_group("Source\\Audio" FILES ${AUDIO_SRC})
 file(GLOB AUDIO_INC "${INCROOT}/Audio/*.hpp")
 source_group("Include\\Audio" FILES ${AUDIO_INC})
 
-file(GLOB GUI_SRC "${SRCROOT}/GUI/*.cpp" "${SRCROOT}/GUI/*.hpp")
-source_group("Source\\GUI" FILES ${GUI_SRC})
+file(GLOB FAST_GUI_SRC "${SRCROOT}/FastGUI/*.cpp" "${SRCROOT}/FastGUI/*.hpp")
+source_group("Source\\FastGUI" FILES ${FAST_GUI_SRC})
 
-file(GLOB GUI_INC "${INCROOT}/GUI/*.hpp")
-source_group("Include\\GUI" FILES ${GUI_INC})
+file(GLOB FAST_GUI_INC "${INCROOT}/FastGUI/*.hpp")
+source_group("Include\\FastGUI" FILES ${FAST_GUI_INC})
 
 file(GLOB NUK_INC "${INCROOT}/nuklear/*.h")
 source_group("Include\\nuklear" FILES ${NUK_INC})
 
-set(MAIN_SRC ${SRC} ${INC} ${AUDIO_SRC} ${AUDIO_INC} ${GUI_SRC} ${GUI_INC} ${NUK_INC})
+set(MAIN_SRC ${SRC} ${INC} ${AUDIO_SRC} ${AUDIO_INC} ${FAST_GUI_SRC} ${FAST_GUI_INC} ${NUK_INC})
 
 file(GLOB RESOURCE_SRC ${CMAKE_CURRENT_SOURCE_DIR}/Resource.rc)
 source_group("" FILES ${RESOURCE_SRC})

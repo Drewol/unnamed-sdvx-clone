@@ -85,7 +85,6 @@ public:
 
 	virtual void Tick(float deltaTime)
 	{
-		if(m_tickableToLoad == nullptr) return;
 		m_transitionTimer += deltaTime;
 
 		if (m_transition == Wait && m_lastComplete)
@@ -274,7 +273,7 @@ public:
 			return;
 
 		auto rq = g_application->GetRenderQueueBase();
-		if (m_transition == Out || m_transition == End)
+		if (m_transition == Out || m_transition == End  || m_tickableToLoad == nullptr)
 		{
 			if (m_tickableToLoad)
 			{

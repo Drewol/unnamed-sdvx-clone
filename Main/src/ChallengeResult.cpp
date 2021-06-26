@@ -351,8 +351,10 @@ public:
 		lua_pushnumber(m_lua, m_scroll);
 		if (lua_pcall(m_lua, 2, 0, 0) != 0)
 		{
-			g_application->ShowLuaError(lua_tostring(m_lua, -1));
-			//assert(false);
+			if (!g_application->ScriptError("challengeresult", m_lua))
+			{
+				g_application->RemoveTickable(this);
+			}
 		}
 		m_hasRendered = true;
 	}

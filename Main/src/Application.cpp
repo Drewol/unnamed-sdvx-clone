@@ -1040,7 +1040,12 @@ void Application::m_MainLoop()
 
 		// Process changes in the list of items
 		bool restoreTop = false;
-		for (auto &ch : g_tickableChanges)
+
+		// Flush current changes from g_tickables in case another tickable needs to be added while destroying or initializing another tickable
+		Vector<TickableChange> currentChanges(g_tickableChanges);
+		g_tickableChanges.clear();
+
+		for (auto &ch : currentChanges)
 		{
 			if (ch.mode == TickableChange::Added)
 			{
@@ -1086,12 +1091,11 @@ void Application::m_MainLoop()
 			g_tickables.back()->m_Restore();
 
 		// Application should end, no more active screens
-		if (!g_tickableChanges.empty() && g_tickables.empty())
+		if (g_tickableChanges.empty() && g_tickables.empty())
 		{
 			Log("No more IApplicationTickables, shutting down", Logger::Severity::Warning);
 			return;
 		}
-		g_tickableChanges.clear();
 
 		// Determine target tick rates for update and render
 		int32 targetFPS = 120; // Default to 120 FPS
@@ -1202,7 +1206,6 @@ void Application::m_Tick()
 		g_guiState.scissor = Rect(0, 0, -1, -1);
 		g_guiState.imageTint = nvgRGB(255, 255, 255);
 		// Render all items
-		assert(!g_tickables.empty());
 		for (auto &tickable : g_tickables)
 		{
 			tickable->Render(m_deltaTime);
@@ -1522,7 +1525,20 @@ void Application::SetScriptPath(lua_State *s)
 	lua_pop(s, 1);						 // get rid of package table from top of stack
 }
 
-std::set<String> g_luaErrorsSeen;
+bool Application::ScriptError(const String& name, lua_State* L)
+{
+	Logf("Lua error: %s", Logger::Severity::Error, lua_tostring(L, -1)); //TODO: Don't spam the same message
+	if (g_gameConfig.GetBool(GameConfigKeys::SkinDevMode))
+	{
+		String message = Utility::Sprintf("Lua error: %s \n\nReload Script?", lua_tostring(L, -1));
+		if (g_gameWindow->ShowYesNoMessage("Lua Error", message)) {
+			return ReloadScript(name, L);
+		}
+	}
+
+	return false;
+}
+
 
 lua_State *Application::LoadScript(const String &name, bool noError)
 {
@@ -1558,23 +1574,11 @@ lua_State *Application::LoadScript(const String &name, bool noError)
 		lua_close(s);
 		return nullptr;
 	}
-	else
-		g_luaErrorsSeen.clear();
+
 	return s;
 }
 
-// TODO add option for this
-void Application::ShowLuaError(const String &error)
-{
-	if (g_luaErrorsSeen.find(error) != g_luaErrorsSeen.end())
-		return;
-	g_luaErrorsSeen.insert(error);
-
-	Logf("Lua error: %s", Logger::Severity::Error, *error);
-	g_gameWindow->ShowMessageBox("Lua Error", error, 0);
-}
-
-void Application::ReloadScript(const String &name, lua_State *L)
+bool Application::ReloadScript(const String &name, lua_State *L)
 {
 	SetScriptPath(L);
 	String path = "skins/" + m_skin + "/scripts/" + name + ".lua";
@@ -1589,10 +1593,9 @@ void Application::ReloadScript(const String &name, lua_State *L)
 		Logf("Lua error: %s", Logger::Severity::Error, lua_tostring(L, -1));
 		g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(L, -1), 0);
 		lua_close(L);
-		assert(false);
+		return false;
 	}
-	else
-		g_luaErrorsSeen.clear();
+	return true;
 }
 
 void Application::ReloadSkin()
@@ -1788,6 +1791,11 @@ Material Application::GetFontMaterial() const
 Material Application::GetGuiTexMaterial() const
 {
 	return m_guiTex;
+}
+
+Material Application::GetGuiFillMaterial() const
+{
+	return m_fillMaterial;
 }
 
 Transform Application::GetGUIProjection() const

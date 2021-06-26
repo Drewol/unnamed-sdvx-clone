@@ -90,9 +90,7 @@ private:
 		lua_pushnumber(m_lua, (int32)button);
 		if (lua_pcall(m_lua, 1, 1, 0) != 0)
 		{
-			Logf("Lua error on mouse_pressed: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error on mouse_pressed", lua_tostring(m_lua, -1), 0);
-			assert(false);
+			g_application->ScriptError("titlescreen", m_lua);
 		}
 		int ret = luaL_checkinteger(m_lua, 1);
 		lua_settop(m_lua, 0);
@@ -123,8 +121,7 @@ private:
 			lua_pushnumber(m_lua, (int32)buttonCode);
 			if (lua_pcall(m_lua, 1, 0, 0) != 0)
 			{
-				Logf("Lua error on button_pressed: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-				g_gameWindow->ShowMessageBox("Lua Error on button_pressed", lua_tostring(m_lua, -1), 0);
+				g_application->ScriptError("titlescreen", m_lua);
 			}
 		}
 		lua_settop(m_lua, 0);
@@ -133,7 +130,12 @@ private:
 public:
 	bool Init()
 	{
-		CheckedLoad(m_lua = g_application->LoadScript("titlescreen"));
+		m_lua = g_application->LoadScript("titlescreen");
+		if (m_lua == nullptr)
+		{
+			Settings();
+			return false;
+		}
 		m_luaBinds = new LuaBindable(m_lua, "Menu");
 		m_luaBinds->AddFunction("Exit", this, &TitleScreen_Impl::lExit);
 		m_luaBinds->AddFunction("Settings", this, &TitleScreen_Impl::lSettings);
@@ -181,9 +183,10 @@ public:
 		lua_pushnumber(m_lua, deltaTime);
 		if (lua_pcall(m_lua, 1, 0, 0) != 0)
 		{
-			Logf("Lua error: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
-			assert(false);
+			if (!g_application->ScriptError("titlescreen", m_lua)) {
+				Settings(); //Go to settings since there are no scripts there and you can change skin from there
+				g_application->RemoveTickable(this);
+			}
 		}
 	}
 	virtual void OnSuspend()
