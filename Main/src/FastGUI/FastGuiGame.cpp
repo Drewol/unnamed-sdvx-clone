@@ -260,6 +260,16 @@ bool FastGuiGame::SetGaugeColor(GaugeType type)
 		m_clearColors[1] = Color::FromHSV(20.0f, .9f, 1.0f);
 		break;
 	}
+	case GaugeType::Permissive: {
+		m_clearColors[0] = Color::FromHSV(31.0f, .91f, 0.76f);
+		m_clearColors[1] = Color::FromHSV(31.0f, .87f, 1.0f);
+		break;
+	}
+	case GaugeType::Blastive: {
+		m_clearColors[0] = Color::FromHSV(168.0f, .6f, .5f);
+		m_clearColors[1] = Color::FromHSV(168.0f, .65f, .69f);
+		break;
+	}
 
 	default:
 		Logf("Unknown GaugeType %d", Logger::Severity::Error, static_cast<int>(type));

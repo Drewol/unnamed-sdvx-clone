@@ -78,6 +78,22 @@ These options can be set globally or per chart
 
  | Force use of excessive gauge
 
+**permissive_gauge** (bool)
+
+ | Force use of permissive gauge
+
+**blastive_gauge** (bool)
+
+ | Force use of blastive gauge
+
+**gauge_level** (float)
+
+ | Set the blastive level
+
+**ars** (bool)
+
+ | Force use of ARS (backup gauge)
+
 **mirror** (bool)
 
  | Force use of mirror mode
@@ -96,6 +112,22 @@ These options can be set globally or per chart
 **allow_cmod** (bool)
 
  | If set cmod will not be allowed for the challenge and mmod will be used instead
+
+**allow_effective** (bool default true)
+
+ | If true, challenge can be started with effective gauge
+
+**allow_permissive** (bool default false)
+
+ | If true, challenge can be started with permissive gauge
+
+**allow_blastive** (bool default false)
+
+ | If true, challenge can be started with blastive gauge
+
+**allow_ars** (bool default true)
+
+ | If true, challenge can be started with backup gauge enabled
 
 **hidden_min** (float) |br|
 **sudden_min** (float)
@@ -198,7 +230,7 @@ Example:
     {
         "max_errors": null, // Do not require a max errors for this chart
         "clear": false // Do not require this chart to be cleared
-    },
+    }
     //etc
  }
 

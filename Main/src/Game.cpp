@@ -184,6 +184,9 @@ private:
 	HitWindow m_hitWindow = HitWindow::NORMAL;
 
 	FastGuiGame m_fastGui;
+	uint32 m_releaseTimes[static_cast<size_t>(Input::Button::Length)] = { 0 };
+	uint32 m_pressTimes[static_cast<size_t>(Input::Button::Length)] = { 0 };
+	uint8 m_hispeedAdjustMode = 0; // for skins, 0 = not adjusting, 1 = coarse adjustment, 2 = fine adjustment
 
 public:
 	Game_Impl(const String& mapPath, PlayOptions&& options) : m_playOptions(std::move(options))
@@ -243,6 +246,7 @@ public:
 		// In case the cursor was still hidden
 		g_gameWindow->SetCursorVisible(true); 
 		g_input.OnButtonPressed.RemoveAll(this);
+		g_input.OnButtonReleased.RemoveAll(this);
 		g_transition->OnLoadingComplete.RemoveAll(this);
 	}
 
@@ -547,6 +551,8 @@ public:
 		m_scoring.SetHitWindow(GetHitWindow());
 
 		g_input.OnButtonPressed.Add(this, &Game_Impl::m_OnButtonPressed);
+		g_input.OnButtonReleased.Add(this, &Game_Impl::m_OnButtonReleased);
+
 
 		m_track->hitEffectAutoplay = m_scoring.autoplayInfo.IsAutoplayButtons();
 
@@ -794,17 +800,27 @@ public:
 			}
 		}
 
+		m_hispeedAdjustMode = 0;
 		// Update hispeed or hidden range
 		if (g_input.GetButton(Input::Button::BT_S))
 		{
+			bool fineAdjustment = m_pressTimes[(size_t)Input::Button::BT_S] - m_releaseTimes[(size_t)Input::Button::BT_S] < 100;
+			m_hispeedAdjustMode = fineAdjustment ? 2 : 1;
 			for (int i = 0; i < 2; i++)
 			{
-				m_hispeedAdvance += g_input.GetInputLaserDir(i) / 3.0f;
+				m_hispeedAdvance += g_input.GetInputLaserDir(i) / (fineAdjustment ? 2.0f : 3.0f);
 				int hispeedSteps = static_cast<int>(truncf(m_hispeedAdvance * 10.0f));
-				m_hispeedAdvance -= 0.1f * hispeedSteps;
+				m_hispeedAdvance -= 0.1f * hispeedSteps;				
 				if (hispeedSteps != 0)
 				{
-					m_hispeed = static_cast<float>(static_cast<int>(m_hispeed * 10.0f) + hispeedSteps) / 10.0f;
+					if (fineAdjustment) {
+						float bpm = m_currentTiming->GetBPM();
+						int targetSpeed = static_cast<int>(Math::Round(bpm * m_hispeed)) + hispeedSteps;
+						m_hispeed = static_cast<float>(targetSpeed) / bpm;
+					}
+					else {
+						m_hispeed = static_cast<float>(static_cast<int>(m_hispeed * 10.0f) + hispeedSteps) / 10.0f;
+					}
 					m_hispeed = Math::Clamp(m_hispeed, 0.1f, 16.f);
 
 					if (m_saveSpeed)
@@ -2378,8 +2394,13 @@ public:
 			FinishGame();
 		}
 	}
+	void m_OnButtonReleased(Input::Button buttonCode) {
+		m_releaseTimes[(size_t)buttonCode] = SDL_GetTicks();
+	}
 	void m_OnButtonPressed(Input::Button buttonCode)
 	{
+		m_pressTimes[(size_t)buttonCode] = SDL_GetTicks();
+
 		if (m_practiceSetupDialog && m_practiceSetupDialog->IsActive())
 			return;
 
@@ -2966,6 +2987,11 @@ public:
 		lua_pushstring(L, "hispeed");
 		lua_pushnumber(L, m_hispeed);
 		lua_settable(L, -3);
+		// hispeed adjustment
+		lua_pushstring(L, "hispeedAdjust");
+		lua_pushnumber(L, m_hispeedAdjustMode);
+		lua_settable(L, -3);
+
 		// playback speed
 		lua_pushstring(L, "playbackSpeed");
 		lua_pushnumber(L, m_playOptions.playbackSpeed);
@@ -3267,6 +3293,14 @@ PlaybackOptions Game::PlaybackOptionsFromSettings()
 	GaugeTypes gaugeType = g_gameConfig.GetEnum<Enum_GaugeTypes>(GameConfigKeys::GaugeType);
 	if (gaugeType == GaugeTypes::Hard)
 		options.gaugeType = GaugeType::Hard;
+	else if (gaugeType == GaugeTypes::Permissive)
+		options.gaugeType = GaugeType::Permissive;
+	else if (gaugeType == GaugeTypes::Blastive)
+	{
+		options.gaugeType = GaugeType::Blastive;
+		options.gaugeLevel = (float)g_gameConfig.GetInt(GameConfigKeys::BlastiveLevel) / 2.0f;
+	}
+
 	options.mirror = g_gameConfig.GetBool(GameConfigKeys::MirrorChart);
 	options.random = g_gameConfig.GetBool(GameConfigKeys::RandomizeChart);
 	options.backupGauge = g_gameConfig.GetBool(GameConfigKeys::BackupGauge);

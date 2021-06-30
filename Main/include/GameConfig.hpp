@@ -187,6 +187,7 @@ DefineEnum(GameConfigKeys,
 
 		   // Gameplay options
 		   GaugeType,
+		   BlastiveLevel,
 		   MirrorChart,
 		   RandomizeChart,
 		   BackupGauge,
@@ -199,7 +200,9 @@ extern ConfigBase::KeyList GameConfigProfileSettings;
 
 DefineEnum(GaugeTypes,
 		   Normal,
-		   Hard)
+		   Hard,
+		   Permissive,
+	       Blastive)
 
 DefineEnum(SpeedMods,
 		   XMod,

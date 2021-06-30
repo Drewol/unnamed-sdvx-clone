@@ -4,6 +4,8 @@
 enum class GaugeType : uint16 {
 	Normal = 0,
 	Hard,
+	Permissive,
+	Blastive,
 };
 
 enum class AutoFlags : uint8 {
@@ -19,6 +21,7 @@ typedef struct PlaybackOptions
 	static uint32 ToLegacyFlags(const PlaybackOptions& options);
 
 	GaugeType gaugeType = GaugeType::Normal;
+	float gaugeLevel = 0;
 
 	// Per gauge type defined option, i.e. star rating
 	uint32 gaugeOption = 0;

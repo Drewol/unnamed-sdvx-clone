@@ -19,8 +19,10 @@ bin/log*
 bin/skins/*
 !bin/skins/Default
 bin/skins/Default/skin.cfg
+bin/skins/Default/nautica.json
 bin/replays
 bin/profiles
+bin/preview
 
 # Intermediate Files
 x64
@@ -59,4 +61,5 @@ Makefile
 
 # Document build files
 docs/build
+docs/source/_build
 

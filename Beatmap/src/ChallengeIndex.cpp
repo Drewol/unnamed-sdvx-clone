@@ -47,8 +47,20 @@ const Map<String, std::pair<String, String>> ChallengeIndex::ChallengeDescriptio
 		"Clear this chart"
 	}},
 	{"excessive clear", {
-		"Hard clear all charts",
-		"Hard clear this chart"
+		"Clear all charts on Excessive Rate",
+		"Clear this chart on Excessive Rate"
+	}},
+	{"permissive clear", {
+		"Clear all charts on Permissive Rate",
+		"Clear this chart on Permissive Rate"
+	}},
+	{"blastive clear", {
+		"Clear all charts on Blastive %.1f* Rate",
+		"Clear this chart on Blastive %.1f* Rate"
+	}},
+	{"permissive clear", {
+		"Play on Permissive Rate",
+		""
 	}},
 	{"min_percentage", {
 		"Get %d%% completion on each chart",
@@ -176,6 +188,13 @@ void ChallengeIndex::GenerateDescription()
 	{
 		if (j.value("excessive_gauge", false))
 			desc += "- " + ChallengeDescriptionStrings.Find("excessive clear")->first;
+		else if (j.value("permissive_gauge", false))
+			desc += "- " + ChallengeDescriptionStrings.Find("permissive clear")->first;
+		else if (j.value("blastive_gauge", false))
+		{
+			float level = j.value("gauge_level", 0.5f);
+			desc += "- " + Utility::Sprintf(*ChallengeDescriptionStrings.Find("blastive clear")->first, level);
+		}
 		else
 			desc += "- " + ChallengeDescriptionStrings.Find("clear")->first;
 
@@ -220,7 +239,8 @@ void ChallengeIndex::GenerateDescription()
 		const auto& j = o[i];
 
 		// Special case for clear overriding global clear/excessive
-		if (j.contains("clear") || j.contains("excessive_gauge"))
+		if (j.contains("clear") || j.contains("excessive_gauge") ||
+			j.contains("blastive_gauge") || j.contains("permissive_gauge"))
 		{
 			if (j.contains("clear") && !j.value("clear", false))
 			{
@@ -231,7 +251,20 @@ void ChallengeIndex::GenerateDescription()
 			else
 			{
 				bool isHard = j.value("excessive_gauge", false) || settings["global"].value("excessive_gauge", false);
-				if (isHard)
+				bool isPermissive = j.value("permissive_gauge", false) || settings["global"].value("permissive_gauge", false);
+				bool isBlastive = j.value("blastive_gauge", false) || settings["global"].value("blastive_gauge", false);
+				if (isBlastive)
+				{
+					float level = 0.5;
+					if (j.contains("gauge_level"))
+						level = j.value("gauge_level", 0.5f);
+					else
+						level = settings["global"].value("gauge_level", 0.5f);
+
+				}
+				else if (isPermissive)
+					overdesc += "  - " + ChallengeDescriptionStrings.Find("permissive clear")->second + "\n";
+				else if (isHard)
 					overdesc += "  - " + ChallengeDescriptionStrings.Find("excessive clear")->second + "\n";
 				else
 					overdesc += "  - " + ChallengeDescriptionStrings.Find("clear")->second + "\n";

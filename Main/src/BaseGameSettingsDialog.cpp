@@ -26,6 +26,11 @@ BaseGameSettingsDialog::~BaseGameSettingsDialog()
 
 void BaseGameSettingsDialog::ResetTabs()
 {
+    m_needsToResetTabs = true;
+}
+
+void BaseGameSettingsDialog::m_ResetTabs()
+{
 	for (auto& tab : m_tabs)
 	{
 		tab->settings.clear();
@@ -50,6 +55,12 @@ void BaseGameSettingsDialog::Tick(float deltaTime)
     if (!m_active)
     {
         return;
+    }
+
+    if (m_needsToResetTabs)
+    {
+        m_ResetTabs();
+        m_needsToResetTabs = false;
     }
 
     if (!m_enableFXInputs)

@@ -1400,12 +1400,17 @@ ChallengeOptions ChallengeManager::m_processOptions(nlohmann::json j)
 	ChallengeOptions out;
 	out.mirror =       m_getOptionAsBool(j,            "mirror");
 	out.excessive =    m_getOptionAsBool(j,            "excessive_gauge");
+	out.permissive  =    m_getOptionAsBool(j,          "permissive_gauge");
+	out.blastive =    m_getOptionAsBool(j,             "blastive_gauge");
+	out.gauge_level = m_getOptionAsFloat(j,            "gauge_level",    0.0, 10.0);
 	out.ars       =    m_getOptionAsBool(j,            "ars");
 	out.gauge_carry_over =    m_getOptionAsBool(j,	   "gauge_carry_over");
 	out.min_modspeed = m_getOptionAsPositiveInteger(j, "min_modspeed");
 	out.max_modspeed = m_getOptionAsPositiveInteger(j, "max_modspeed");
 	out.allow_cmod =   m_getOptionAsBool(j,            "allow_cmod");
 	out.allow_excessive =   m_getOptionAsBool(j,       "allow_excessive");
+	out.allow_permissive =   m_getOptionAsBool(j,      "allow_blastive");
+	out.allow_blastive =   m_getOptionAsBool(j,        "allow_permissive");
 	out.allow_ars =    m_getOptionAsBool(j,            "allow_ars");
 	out.hidden_min =   m_getOptionAsFloat(j,           "hidden_min",     0.0, 1.0);
 	out.sudden_min =   m_getOptionAsFloat(j,           "sudden_min",     0.0, 1.0);
@@ -1673,10 +1678,27 @@ bool ChallengeManager::m_setupNextChart()
 	GaugeTypes gaugeType = g_gameConfig.GetEnum<Enum_GaugeTypes>(GameConfigKeys::GaugeType);
 	if (gaugeType == GaugeTypes::Hard && m_currentOptions.allow_excessive.Get(true))
 		opts.gaugeType = GaugeType::Hard;
+	if (gaugeType == GaugeTypes::Permissive && m_currentOptions.allow_permissive.Get(false))
+		opts.gaugeType = GaugeType::Permissive;
+	if (gaugeType == GaugeTypes::Blastive && m_currentOptions.allow_permissive.Get(false))
+	{
+		opts.gaugeType = GaugeType::Blastive;
+		opts.gaugeLevel = (float)g_gameConfig.GetInt(GameConfigKeys::BlastiveLevel) / 2.0f;
+	}
+
 	opts.backupGauge = g_gameConfig.GetBool(GameConfigKeys::BackupGauge) && m_currentOptions.allow_ars.Get(true);
 
 	// Check if we have overrides
-	if (m_currentOptions.excessive.Get(false) || m_currentOptions.ars.Get(false))
+	if (m_currentOptions.blastive.Get(false))
+	{
+		opts.gaugeType = GaugeType::Blastive;
+		opts.gaugeLevel = m_currentOptions.gauge_level.Get(0.5);
+	}
+	else if (m_currentOptions.permissive.Get(false))
+	{
+		opts.gaugeType = GaugeType::Permissive;
+	}
+	else if (m_currentOptions.excessive.Get(false) || m_currentOptions.ars.Get(false))
 	{
 		opts.gaugeType = GaugeType::Hard;
 	}

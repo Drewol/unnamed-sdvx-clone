@@ -33,10 +33,16 @@ void GameplaySettingsDialog::InitTabs()
     if (m_multiPlayerScreen == nullptr)
     {
         gameTab->settings.push_back(CreateEnumSetting<Enum_GaugeTypes>(GameConfigKeys::GaugeType, "Gauge"));
-		gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::BackupGauge, "Backup Gauge"));
-		gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::RandomizeChart, "Random"));
-		gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::MirrorChart, "Mirror"));
-	}
+        gameTab->settings.back()->setter.AddLambda([this](const auto& data) { this->ResetTabs(); });
+        if (g_gameConfig.GetEnum<Enum_GaugeTypes>(GameConfigKeys::GaugeType) == GaugeTypes::Blastive)
+        {
+            gameTab->settings.push_back(CreateIntSetting(GameConfigKeys::BlastiveLevel, "Blastive Rate Level", { 1, 10 } ));
+            gameTab->settings.back()->intSetting.div = 2;
+        }
+        gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::BackupGauge, "Backup Gauge"));
+        gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::RandomizeChart, "Random"));
+        gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::MirrorChart, "Mirror"));
+    }
     gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::DisableBackgrounds, "Hide Backgrounds"));
     gameTab->settings.push_back(CreateEnumSetting<Enum_ScoreDisplayModes>(GameConfigKeys::ScoreDisplayMode, "Score Display"));
     if (m_songSelectScreen != nullptr)
@@ -198,7 +204,8 @@ GameplaySettingsDialog::Setting GameplaySettingsDialog::m_CreateSongOffsetSettin
     return songOffsetSetting;
 }
 
-GameplaySettingsDialog::Setting GameplaySettingsDialog::m_CreateProfileSetting(const String& profileName) {
+GameplaySettingsDialog::Setting GameplaySettingsDialog::m_CreateProfileSetting(const String& profileName)
+{
 	Setting s = std::make_unique<SettingData>(profileName, SettingType::Boolean);
 	auto getter = [profileName](SettingData& data)
 	{
@@ -208,7 +215,8 @@ GameplaySettingsDialog::Setting GameplaySettingsDialog::m_CreateProfileSetting(c
 	auto setter = [profileName](const SettingData& data)
 	{
 
-		if (data.boolSetting.val) {
+		if (data.boolSetting.val)
+        {
 			if (!Path::IsDirectory(Path::Absolute("profiles")))
 				Path::CreateDir(Path::Absolute("profiles"));
 

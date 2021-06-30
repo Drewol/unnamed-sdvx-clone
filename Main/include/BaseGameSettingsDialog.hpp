@@ -118,6 +118,7 @@ private:
     void m_OnButtonPressed(Input::Button button);
     void m_OnButtonReleased(Input::Button button);
     void m_OnKeyPressed(SDL_Scancode code);
+    void m_ResetTabs();
 
     // Set a target in open/close and apply it in the next tick because stuff
     bool m_targetActive = false;
@@ -126,6 +127,8 @@ private:
     bool m_isInitialized = false;
 
     bool m_enableFXInputs = false;
+
+    bool m_needsToResetTabs = false;
 
     int m_currentTab = 0;
     int m_currentSetting = 0;

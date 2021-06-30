@@ -12,6 +12,7 @@ The following fields are available under the ``gameplay`` table:
     int level
     float progress // 0.0 at the start of a song, 1.0 at the end
     float hispeed
+    int hispeedAdjust // 0 = not adjusting, 1 = coarse (xmod) adjustment, 2 = fine (mmod) adjustment
     float bpm
     Gauge gauge
     

@@ -94,6 +94,9 @@ struct ChallengeOptions{
 #define CHALLENGE_OPTIONS_ALL(v) \
 	v(bool, mirror) \
 	v(bool, excessive) \
+	v(bool, permissive) \
+	v(bool, blastive) \
+	v(float, gauge_level) \
     v(bool, ars) \
 	v(bool, gauge_carry_over) \
 	v(bool, use_sdvx_complete_percentage) \
@@ -107,6 +110,8 @@ struct ChallengeOptions{
 	v(uint32, slam_judge) \
 	v(bool, allow_cmod) \
     v(bool, allow_excessive) \
+    v(bool, allow_blastive) \
+    v(bool, allow_permissive) \
     v(bool, allow_ars) \
 	\
 	v(uint32, average_percentage) \

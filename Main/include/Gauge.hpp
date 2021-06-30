@@ -45,7 +45,8 @@ protected:
 
 class GaugeNormal : public Gauge {
 public:
-	GaugeNormal() = default;
+	GaugeNormal(float gainRate = 1.0f, float missDrainPercent = 0.02f) :
+		s_gainRate(gainRate), s_missDrainPercent(missDrainPercent) {};
 	~GaugeNormal() = default;
 	bool Init(MapTotals mapTotals, uint16 total, MapTime length);
 	void LongHit();
@@ -57,34 +58,64 @@ public:
 	const char* GetName() const;
 	GaugeType GetType() const;
 
-private:
+protected:
+	const float s_gainRate = 1.0f;
+	const float s_missDrainPercent = 0.02f;
+
 	float m_shortMissDrain;
 	float m_drainMultiplier;
 	float m_shortGaugeGain;
 	float m_tickGaugeGain;
 };
 
-class GaugeHard : public Gauge {
+class GaugeHard : public GaugeNormal {
 public:
-	GaugeHard() = default;
+	GaugeHard(float gainRate = 12.f / 21.f, float missDrainPercent = 0.09f) :
+		GaugeNormal(gainRate, missDrainPercent) {};
 	~GaugeHard() = default;
-	bool Init(MapTotals mapTotals, uint16 total, MapTime length);
-	void LongHit();
-	void CritHit();
-	void NearHit();
-	void LongMiss();
-	void ShortMiss();
+	bool Init(MapTotals mapTotals, uint16 total, MapTime length) override;
+	void LongMiss() override;
+	void ShortMiss() override;
 	bool GetClearState() const;
 	const char* GetName() const;
 	bool FailOut() const;
 	GaugeType GetType() const;
 
-private:
+protected:
 	float DrainMultiplier() const;
-
-	float m_shortMissDrain;
-	float m_drainMultiplier;
-	float m_shortGaugeGain;
-	float m_tickGaugeGain;
 };
 
+class GaugePermissive : public GaugeHard {
+public:
+	GaugePermissive(float gainRate = 16.f / 21.f, float missDrainPercent = 0.034f) :
+		GaugeHard(gainRate, missDrainPercent) {};
+protected:
+	const char* GetName() const;
+	GaugeType GetType() const;
+};
+
+class GaugeWithLevel : public GaugeHard {
+public:
+	GaugeWithLevel(float level, float gainRate, float missDrainPercent) :
+		GaugeHard(gainRate, missDrainPercent), m_level(level) {};
+	void LongMiss() override;
+	void ShortMiss() override;
+	uint32 GetOpts() const override;
+	float GetLevel() { return m_level; }
+protected:
+	float m_level;
+};
+
+class GaugeBlastive : public GaugeWithLevel {
+public:
+	GaugeBlastive(float level, float gainRate = 12.f / 21.f, float missDrainPercent = 0.04f) :
+		GaugeWithLevel(level, gainRate, missDrainPercent) {};
+	bool Init(MapTotals mapTotals, uint16 total, MapTime length) override;
+	void NearHit() override;
+	const char* GetName() const;
+	GaugeType GetType() const;
+protected:
+	const float s_nearDrainPercent = 0.01f;
+
+	float m_shortNearDrain;
+};
