@@ -51,7 +51,7 @@ bool Track::AsyncLoad()
 
 	// Load hit effect colors
 	Image hitColorPalette;
-	CheckedLoad(hitColorPalette = ImageRes::Create(Path::Absolute("skins/" + skin + "/textures/hitcolors.png")));
+	CheckedLoad(hitColorPalette = ImageRes::Create(Path::Absolute("skins/" + skin + "/textures/hitcolors.png")))
 	assert(hitColorPalette->GetSize().x >= 4);
 	for(uint32 i = 0; i < 4; i++)
 		hitColors[i] = hitColorPalette->GetBits()[i];
