@@ -12,7 +12,8 @@ public:
 		Boolean,
 		String,
 		Color,
-		Enum
+		Enum,
+		Blob
 	};
 
 	virtual ~IConfigEntry() = default;
@@ -90,4 +91,38 @@ public:
 		data = EnumClass::FromString(str);
 	}
 	EntryType GetType() override { return EntryType::Enum; };
+};
+
+template<size_t N>
+class BlobConfigEntry : public IConfigEntry
+{
+	//TODO: Base64?
+public:
+	std::array<uint8, N> data;
+public:
+	virtual String ToString() const override
+	{
+		String ret = "";
+
+		for (size_t i = 0; i < N; i++)
+		{
+			ret += Utility::Sprintf("%02X", data[i]);
+		}
+
+		return ret;
+	}
+	virtual void FromString(const String& str) override
+	{
+		if (str.length() != N * 2) {
+			return;
+		}
+
+		for (size_t i = 0; i < N; i++)
+		{
+			int value;
+			sscanf(str.substr(i * 2, 2).c_str(), "%02X", &value);
+			data.at(i) = value;
+		}
+	}
+	EntryType GetType() override { return EntryType::Blob; };
 };

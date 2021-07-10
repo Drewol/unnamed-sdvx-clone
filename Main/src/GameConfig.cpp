@@ -89,7 +89,6 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::Laser0Color, 200.0f);
 	Set(GameConfigKeys::Laser1Color, 330.0f);
 	Set(GameConfigKeys::SongSelSensMult, 1.0f);
-
 	Set(GameConfigKeys::EnableHiddenSudden, false);
 	Set(GameConfigKeys::HiddenCutoff, 0.0f);
 	Set(GameConfigKeys::HiddenFade, 0.2f);
@@ -148,7 +147,7 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::Key_LaserReleaseTime, 0.0f);
 
 	// Default controller settings
-	Set(GameConfigKeys::Controller_DeviceID, 0); // First device
+	SetBlob<16>(GameConfigKeys::Controller_DeviceID, { 0 }); // null device
 	Set(GameConfigKeys::Controller_BTS, 0);
 	Set(GameConfigKeys::Controller_BT0, 1);
 	Set(GameConfigKeys::Controller_BT1, 2);

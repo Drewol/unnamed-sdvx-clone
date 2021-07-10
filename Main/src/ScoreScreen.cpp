@@ -894,9 +894,9 @@ public:
 		lua_pushboolean(m_lua, m_showStats);
 		if (lua_pcall(m_lua, 2, 0, 0) != 0)
 		{
-			Logf("Lua error: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
-			assert(false);
+			if (!g_application->ScriptError("result", m_lua)) {
+				g_application->RemoveTickable(this);
+			}
 		}
 		m_hasRendered = true;
 		if (m_collDiag.IsActive())

@@ -28,6 +28,21 @@ protected:
 		{
 			m_gamePads.Add(gamePadName.data());
 		}
+
+		//Look for selected gamepad and if none are set use 0
+		m_selectedPad = 0;
+		const auto deviceId = g_gameConfig.GetBlob<16>(GameConfigKeys::Controller_DeviceID);
+		for (size_t i = 0; i < m_gamePads.size(); i++)
+		{
+			auto id = SDL_JoystickGetDeviceGUID(i);
+			if (memcmp(deviceId.data(), id.data, 16) == 0)
+			{
+				m_selectedPad = i;
+				break;
+			}
+		}
+
+
 	}
 	
 	void Save() override
@@ -36,10 +51,18 @@ protected:
 		{
 			g_gameConfig.SetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice, InputDevice::Keyboard);
 		}
+
+		if (!m_gamePads.empty())
+		{
+			std::array<uint8, 16> newId;
+			memcpy(newId.data(), SDL_JoystickGetDeviceGUID(m_selectedPad).data, 16);
+			g_gameConfig.SetBlob<16>(GameConfigKeys::Controller_DeviceID, newId);
+		}
 	}
 
 	Vector<String> m_gamePadsStr;
 	Vector<const char*> m_gamePads;
+	int m_selectedPad;
 
 	String m_controllerButtonNames[8];
 	String m_controllerLaserNames[2];
@@ -112,7 +135,14 @@ protected:
 
 		if (m_gamePads.size() > 0)
 		{
-			SelectionSetting(GameConfigKeys::Controller_DeviceID, m_gamePads, "Controller to use:");
+			int newPad = SelectionInput(m_selectedPad, m_gamePads, "Controller to use:");
+			if (newPad != m_selectedPad)
+			{
+				m_selectedPad = newPad;
+				std::array<uint8, 16> newId;
+				memcpy(newId.data(), SDL_JoystickGetDeviceGUID(m_selectedPad).data, 16);
+				g_gameConfig.SetBlob<16>(GameConfigKeys::Controller_DeviceID, newId);
+			}
 		}
 
 		LayoutRowDynamic(2, m_lineHeight * 6);
@@ -329,7 +359,7 @@ private:
 	}
 	inline void OpenButtonBind(GameConfigKeys key, bool gamepad)
 	{
-		g_application->AddTickable(ButtonBindingScreen::Create(key, gamepad, g_gameConfig.GetInt(GameConfigKeys::Controller_DeviceID), m_altBinds));
+		g_application->AddTickable(ButtonBindingScreen::Create(key, gamepad, m_selectedPad, m_altBinds));
 	}
 
 	inline void OpenCalibrateSensitivity()

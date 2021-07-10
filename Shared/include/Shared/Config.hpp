@@ -86,6 +86,11 @@ public:
 	{
 		return GetEnsure<BoolConfigEntry>(key)->data;
 	}
+	template<size_t N>
+	std::array<uint8, N> GetBlob(KeyType key) const {
+		return GetEnsure<BlobConfigEntry<N>>(key)->data;
+	}
+
 	template<typename EnumClass1>
 	typename EnumClass1::EnumType GetEnum(KeyType key) const
 	{
@@ -137,6 +142,18 @@ public:
 			m_dirty = true;
 		}
 	}
+
+	template<size_t N>
+	void SetBlob(KeyType key, std::array<uint8, N> value)
+	{
+		std::array<uint8, N>& dst = SetEnsure<BlobConfigEntry<N>>(key)->data;
+		if (memcmp(dst.data(), value.data(), N) != 0)
+		{
+			memcpy(dst.data(), value.data(), N);
+			m_dirty = true;
+		}
+	}
+
 	template<typename EnumClass1>
 	void SetEnum(KeyType key, typename EnumClass1::EnumType value)
 	{
@@ -147,6 +164,8 @@ public:
 			m_dirty = true;
 		}
 	}
+
+
 
 private:
 	// Create or returns with type checking
