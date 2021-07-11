@@ -392,6 +392,8 @@ bool MultiplayerScreen::m_handleStartPacket(nlohmann::json& packet)
 		return 0;
 	}
 
+	game->SetSongDB(m_mapDatabase);
+
 	m_suspended = true;
 
 	// Switch to the new tickable

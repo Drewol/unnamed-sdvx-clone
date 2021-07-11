@@ -39,6 +39,7 @@ public:
 	Map<int32, PracticeSetupIndex*> m_practiceSetups;
 
 	Map<String, ChartIndex*> m_chartsByHash;
+	Map<string, Vector<ChartIndex*>> m_chartDuplicates;
 	Map<String, FolderIndex*> m_foldersByPath;
 	Multimap<int32, PracticeSetupIndex*> m_practiceSetupsByChartId;
 
@@ -1037,7 +1038,8 @@ public:
 				m_SortScores(chart);
 
 				m_charts.Add(chart->id, chart);
-				m_chartsByHash.Add(chart->hash, chart);
+				m_addToChartsByHash(chart);
+
 				// Add diff to map and resort
 				folder->charts.Add(chart);
 				m_SortCharts(folder);
@@ -1123,13 +1125,23 @@ public:
 
 
 				// Check if the hash has changed...
-				if (chart->hash != e.hash && m_transferScores) {
+				if (chart->hash != e.hash && m_transferScores)
+				{
 					moveScores.BindString(1, e.hash);
 					moveScores.BindString(2, chart->hash);
 					moveScores.Step();
 					moveScores.Rewind();
 				}
-				chart->hash = e.hash;
+
+				if (chart->hash != e.hash)
+				{
+					m_removeFromChartsByHash(chart);
+
+					// Update chart hash and re-add
+					chart->hash = e.hash;
+
+					m_addToChartsByHash(chart);
+				}
 
 
 				auto itFolder = m_folders.find(chart->folderId);
@@ -1147,6 +1159,8 @@ public:
 				assert(itFolder != m_folders.end());
 
 				itFolder->second->charts.Remove(itChart->second);
+
+				m_removeFromChartsByHash(itChart->second);
 
 				for (auto s : itChart->second->scores)
 				{
@@ -1279,6 +1293,8 @@ public:
 		addScore.Rewind();
 
 		m_database.Exec("END");
+
+		m_addScoreToCharts(score);
 	}
 
 	void UpdateChallengeResult(ChallengeIndex* chal, uint32 clearMark, uint32 bestScore)
@@ -1571,9 +1587,83 @@ private:
 			"lwt INTEGER"
 			")");
 	}
+
+	void m_removeFromChartsByHash(ChartIndex* chart)
+	{
+		// Update charts by hash if needed
+		auto it = m_chartsByHash.find(chart->hash);
+		auto dups = m_chartDuplicates.Find(chart->hash);
+
+		if (it != m_chartsByHash.end() && it->second == chart)
+		{
+			m_chartsByHash.erase(it); // Remove old entry
+
+			// Promote a duplicate if exists
+			if (dups && dups->size())
+			{
+				m_chartsByHash.Add(chart->hash, dups->back());
+				dups->pop_back();
+			}
+		}
+		else
+		{
+			// Also remove from dup vectors
+			if (dups)
+				std::remove(dups->begin(), dups->end(), chart);
+		}
+	}
+
+	void m_addToChartsByHash(ChartIndex* chart)
+	{
+		if (m_chartsByHash.Find(chart->hash) != nullptr)
+		{
+			auto existing = m_chartDuplicates.Find(chart->hash);
+			if (existing)
+				existing->push_back(chart);
+			else
+				m_chartDuplicates[chart->hash] = Vector<ChartIndex*>(1, chart);
+		}
+		else
+		{
+			m_chartsByHash.Add(chart->hash, chart);
+		}
+
+	}
+
+	void m_addScoreToCharts(ScoreIndex* score)
+	{
+		// Add difficulty to map and resort difficulties
+		auto diffIt = m_chartsByHash.find(score->chartHash);
+
+		// If for whatever reason the diff that the score is attatched to is not in the db, ignore the score.
+		if (diffIt == m_chartsByHash.end()) 
+		{
+			delete score;
+			return;
+		}
+
+		diffIt->second->scores.Add(score);
+		m_SortScores(diffIt->second);
+
+		// Check for duplicates of the same chart and copy the score to those
+		auto dups = m_chartDuplicates.Find(score->chartHash);
+		if (dups != nullptr)
+		{
+			for (auto chart : *dups) {
+				ScoreIndex* scoreCopy = new ScoreIndex(); // Must be new allocation
+				*scoreCopy = *score; // Copy data from score
+				chart->scores.Add(scoreCopy);
+				m_SortScores(chart);
+			}
+		}
+	}
+
 	void m_LoadInitialData()
 	{
 		assert(!m_searching);
+
+		m_chartsByHash.clear();
+		m_chartDuplicates.clear();
 
 		// Clear search state
 		m_searchState.difficulties.clear();
@@ -1644,7 +1734,7 @@ private:
 
 			// Add existing diff
 			m_charts.Add(chart->id, chart);
-			m_chartsByHash.Add(chart->hash, chart);
+			m_addToChartsByHash(chart);
 
 			// Add difficulty to map and resort difficulties
 			auto folderIt = m_folders.find(chart->folderId);
@@ -1700,16 +1790,7 @@ private:
 			score->mirror = scoreScan.IntColumn(20) == 1;
 			score->random = scoreScan.IntColumn(21) == 1;
 
-			// Add difficulty to map and resort difficulties
-			auto diffIt = m_chartsByHash.find(score->chartHash);
-			if (diffIt == m_chartsByHash.end()) // If for whatever reason the diff that the score is attatched to is not in the db, ignore the score.
-			{
-				delete score;
-				continue;
-			}
-
-			diffIt->second->scores.Add(score);
-			m_SortScores(diffIt->second);
+			m_addScoreToCharts(score);
 		}
 
 		// Select Practice setups

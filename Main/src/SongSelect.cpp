@@ -1269,6 +1269,7 @@ public:
 					Log("Failed to start game", Logger::Severity::Error);
 					return;
 				}
+				game->SetSongDB(m_mapDatabase);
 				game->GetScoring().autoplayInfo.autoplay = autoplay;
 
 				// Transition to game
