@@ -28,6 +28,7 @@ Contents:
    bgfg
    collectiondialog
    shadedmesh
+   track
    challenges
 
 

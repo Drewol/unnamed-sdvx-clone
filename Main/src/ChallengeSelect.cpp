@@ -341,9 +341,7 @@ public:
 		lua_pushboolean(m_lua, Active);
 		if (lua_pcall(m_lua, 2, 0, 0) != 0)
 		{
-			Logf("Lua error: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
-			assert(false);
+			g_application->ScriptError("songselect/filterwheel", m_lua);
 		}
 	}
 	~ChallengeFilterSelection()
@@ -663,9 +661,7 @@ public:
 		lua_pushboolean(m_lua, Active);
 		if (lua_pcall(m_lua, 2, 0, 0) != 0)
 		{
-			Logf("Lua error: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
-			assert(false);
+			g_application->ScriptError("songselect/sortwheel", m_lua);
 		}
 	}
 
@@ -1148,9 +1144,7 @@ public:
 		lua_pushnumber(m_lua, deltaTime);
 		if (lua_pcall(m_lua, 1, 0, 0) != 0)
 		{
-			Logf("Lua error: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
-			assert(false);
+			g_application->ScriptError("songselect/background", m_lua);
 		}
 
 		m_selectionWheel->Render(deltaTime);

@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "GameConfig.hpp"
 #include "Background.hpp"
+#include "ShadedMesh.hpp"
 #include "Game.hpp"
 #include "Track.hpp"
 #include "Camera.hpp"
@@ -20,6 +21,11 @@ public:
 		{
 			delete bindable;
 			bindable = nullptr;
+		}
+		if (trackBindable)
+		{
+			delete trackBindable;
+			trackBindable = nullptr;
 		}
 		if (lua)
 		{
@@ -62,6 +68,7 @@ protected:
 	bool errored = false;
 	Vector<String> defaultBGs;
 	LuaBindable *bindable = nullptr;
+	LuaBindable *trackBindable = nullptr;
 	String folderPath;
 	lua_State *lua = nullptr;
 	Vector3 timing;
@@ -170,8 +177,12 @@ public:
 		bindable->AddFunction("GetTilt", this, &TestBackground::GetTilt);
 		bindable->AddFunction("GetScreenCenter", this, &TestBackground::GetScreenCenter);
 		bindable->AddFunction("GetClearTransition", this, &TestBackground::GetClearTransition);
+
 		bindable->Push();
 		lua_settop(lua, 0);
+
+		trackBindable = game->MakeTrackLuaBindable(lua);
+		trackBindable->Push();
 
 		String matPath = "";
 		String fname = foreground ? "fg" : "bg";

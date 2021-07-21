@@ -16,6 +16,8 @@ extern class Input g_input;
 extern class SkinConfig* g_skinConfig;
 extern class TransitionScreen* g_transition;
 
+class SharedTexture;
+
 class Application
 {
 public:
@@ -29,6 +31,8 @@ public:
 		bool loaded = false;
 		Job loadingJob;
 	};
+
+
 	void ApplySettings();
 	// Runs the application
 	int32 Run();
@@ -111,6 +115,7 @@ public:
 	Vector<String> GetUpdateAvailable();
 
 	AutoplayInfo* autoplayInfo = nullptr;
+	Map<String, Ref<SharedTexture>> sharedTextures;
 
 private:
 	bool m_LoadConfig(String profileName = "");
@@ -183,3 +188,12 @@ public:
 };
 
 void __discordJoinGame(const char* joins);
+
+class SharedTexture {
+public:
+	SharedTexture() = default;
+	~SharedTexture();
+	bool Valid();
+	int nvgTexture = 0;
+	Texture texture;
+};

@@ -333,6 +333,25 @@ void BeatmapPlayback::MakeCalibrationPlayback()
 	m_currentTiming = &m_timingPoints.front();
 }
 
+ObjectState* BeatmapPlayback::GetFirstButtonOrHoldAfterTime(MapTime time, int lane)
+{
+	// Iterate though objects
+	for (ObjectState** obj = &m_objects.front(); !IsEndObject(obj); obj++)
+	{
+		if (obj[0]->time < time)
+			continue;
+
+		MultiObjectState* mobj = (MultiObjectState*)obj[0];
+		if (obj[0]->type != ObjectType::Hold && obj[0]->type != ObjectType::Single)
+			continue;
+
+		if (mobj->button.index != lane)
+			continue;
+		return *obj;
+	}
+	return nullptr;
+}
+
 Vector<ObjectState*> BeatmapPlayback::GetObjectsInRange(MapTime range)
 {
 	static const uint32 earlyVisibility = 200;

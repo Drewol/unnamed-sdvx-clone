@@ -35,6 +35,8 @@ public:
 	// Gets all linear objects that fall within the given time range:
 	//	<curr - keepObjectDuration, curr + range>
 	Vector<ObjectState*> GetObjectsInRange(MapTime range);
+	ObjectState* GetFirstButtonOrHoldAfterTime(MapTime t, int lane);
+
 	// Duration for objects to keep being returned by GetObjectsInRange after they have passed the current time
 	MapTime keepObjectDuration = 1000;
 
