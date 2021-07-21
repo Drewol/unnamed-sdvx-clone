@@ -74,8 +74,8 @@ bool Track::AsyncLoad()
 	loader->AddTexture(buttonHoldTexture, "buttonhold.png");
 
 	// Load FX object
-	loader->AddTexture(fxbuttonTexture, "fxbutton.png");
-	loader->AddTexture(fxbuttonHoldTexture, "fxbuttonhold.png");
+	loader->AddTexture(fxButtonTexture, "fxbutton.png");
+	loader->AddTexture(fxButtonHoldTexture, "fxbuttonhold.png");
 
 	// Load Laser object
 	loader->AddTexture(laserTextures[0], "laser_l.png");
@@ -132,12 +132,12 @@ bool Track::AsyncFinalize()
 	buttonMesh = MeshGenerators::Quad(g_gl, Vector2(0.0f, 0.0f), Vector2(buttonWidth, buttonLength));
 	buttonMaterial->opaque = false;
 
-	fxbuttonTexture->SetMipmaps(true);
-	fxbuttonTexture->SetFilter(true, true, 16.0f);
-	fxbuttonHoldTexture->SetMipmaps(true);
-	fxbuttonHoldTexture->SetFilter(true, true, 16.0f);
-	fxButtonLength = fxbuttonTexture->CalculateHeight(fxButtonWidth);
-	fxbuttonMesh = MeshGenerators::Quad(g_gl, Vector2(0.0f, 0.0f), Vector2(fxButtonWidth, fxButtonLength));
+	fxButtonTexture->SetMipmaps(true);
+	fxButtonTexture->SetFilter(true, true, 16.0f);
+	fxButtonHoldTexture->SetMipmaps(true);
+	fxButtonHoldTexture->SetFilter(true, true, 16.0f);
+	fxButtonLength = fxButtonTexture->CalculateHeight(fxButtonWidth);
+	fxButtonMesh = MeshGenerators::Quad(g_gl, Vector2(0.0f, 0.0f), Vector2(fxButtonWidth, fxButtonLength));
 
 	holdButtonMaterial->opaque = false;
 
@@ -471,8 +471,8 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 			}
 			length = fxButtonLength;
 			params.SetParameter("hasSample", mobj->button.hasSample);
-			params.SetParameter("mainTex", isHold ? fxbuttonHoldTexture : fxbuttonTexture);
-			mesh = fxbuttonMesh;
+			params.SetParameter("mainTex", isHold ? fxButtonHoldTexture : fxButtonTexture);
+			mesh = fxButtonMesh;
 		}
 
 		params.SetParameter("trackPos", position);

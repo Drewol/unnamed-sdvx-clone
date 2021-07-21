@@ -2843,9 +2843,9 @@ public:
 		if (lane < 4)
 			xposition = Track::buttonTrackWidth * -0.5f + Track::buttonWidth * lane;
 		else
-			xposition = Track::buttonTrackWidth * -0.5f + Track::fxbuttonWidth *(lane - 4);
+			xposition = Track::buttonTrackWidth * -0.5f + Track::fxButtonWidth * (lane - 4);
 
-		xposition += (lane < 2? -1 : 1)* 0.5 * this->GetTrack().centerSplit * Track::buttonWidth;
+		xposition += (lane < 2 ? -1 : 1) * 0.5 * this->GetTrack().centerSplit * Track::buttonWidth;
 		lua_pushnumber(L, xposition);
 		return 1;
 	}

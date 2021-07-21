@@ -167,9 +167,9 @@ public:
 	Mesh buttonMesh;
 	Texture buttonTexture;
 	Texture buttonHoldTexture;
-	Mesh fxbuttonMesh;
-	Texture fxbuttonTexture;
-	Texture fxbuttonHoldTexture;
+	Mesh fxButtonMesh;
+	Texture fxButtonTexture;
+	Texture fxButtonHoldTexture;
 	Material holdButtonMaterial;
 	Material buttonMaterial;
 	Material trackCoverMaterial;
@@ -177,7 +177,6 @@ public:
 	Texture laserTailTextures[4]; // Entry and exit textures, both sides
 	Material laserMaterial;
 	Material blackLaserMaterial;
-	Texture laserAlertTextures[2];
 	Texture whiteTexture;
 
 	/* Overlay graphics */
