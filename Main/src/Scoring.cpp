@@ -1294,10 +1294,19 @@ void Scoring::m_UpdateLasers(float deltaTime)
 				}
 
 				positionDelta = laserTargetPositions[i] - laserPositions[i];
-				if ((inputDir == laserDir || laserDir == 0) && fabsf(positionDelta) <= m_laserDistanceLeniency)
-                    m_autoLaserTime[i] = m_autoLaserDuration;
+				if (fabsf(positionDelta) <= m_laserDistanceLeniency)
+				{
+					if (laserDir == 0)
+						m_autoLaserTime[i] = m_autoLaserDuration;
+					else if (inputDir == laserDir)
+						m_autoLaserTime[i] = m_autoLaserDurationWhileTurningInCorrectDirection;
+					else
+						m_autoLaserTime[i] -= deltaTime;
+				}
 				else
+				{
 					m_autoLaserTime[i] -= deltaTime;
+				}
 			}
 			// Lock lasers on straight parts
 			else if (laserDir == 0 && fabsf(positionDelta) <= m_laserDistanceLeniency)
