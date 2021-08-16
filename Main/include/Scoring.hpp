@@ -103,7 +103,7 @@ public:
 	// Updates the list of objects that are possible to hit
 	void Tick(float deltaTime);
 
-	float GetLaserPosition(uint32 index, float pos);
+	static float GetLaserPosition(uint32 index, float pos);
 	float GetLaserRollOutput(uint32 index);
 	// Check if any lasers are currently active
 	bool GetLaserActive();
@@ -232,6 +232,7 @@ public:
 	bool lasersAreExtend[2] = { false, false };
 	// Time since laser has been used
 	float timeSinceLaserUsed[2];
+	constexpr static const float laserOutputInterpolationDuration = 0.1f;
 private:
 	// Calculates the number of ticks for a given TP
 	double m_CalculateTicks(const TimingPoint* tp) const;
@@ -309,7 +310,7 @@ private:
 	float m_autoLaserTime[2] = { 0.0f };
 	const double m_laserDistanceLeniency = 1 / 6.;
 	const float m_autoLaserDuration = 4 / 60.f;
-	const float m_autoLaserDurationWhileTurningInCorrectDirection = 4.5f / 60.f;
+	const float m_autoLaserDurationWhileTurningInCorrectDirection = 5 / 60.f;
 	const float m_autoLaserDurationAfterSlam = 8 / 60.f;
 
 	//Ehhhh maybe

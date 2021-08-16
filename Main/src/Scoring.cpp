@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Scoring.hpp"
-#include <math.h>
+#include <cmath>
 #include <Application.hpp>
 #include "GameConfig.hpp"
 #include "Gauge.hpp"
@@ -48,7 +48,7 @@ ClearMark Scoring::CalculateBadge(const ScoreIndex& score)
 
 ClearMark Scoring::CalculateBestBadge(Vector<ScoreIndex*> scores)
 {
-	if (scores.size() < 1)
+	if (scores.empty())
 		return ClearMark::NotPlayed;
 
 	ClearMark top = ClearMark::Played;
@@ -155,14 +155,14 @@ void Scoring::Reset(const MapTimeRange& range)
 
 	if (m_options.backupGauge && m_options.gaugeType != GaugeType::Normal)
 	{
-		GaugeNormal* gauge = new GaugeNormal();
+		auto* gauge = new GaugeNormal();
 		gauge->Init(mapTotals, total, m_endTime);
 		m_gaugeStack.push_back(gauge);
 	}
 
 	if (m_options.gaugeType == GaugeType::Hard)
 	{
-		GaugeHard* gauge = new GaugeHard();
+		auto* gauge = new GaugeHard();
 		gauge->Init(mapTotals, total, m_endTime);
 		m_gaugeStack.push_back(gauge);
 	}
@@ -180,7 +180,7 @@ void Scoring::Reset(const MapTimeRange& range)
 	}
 	else 
 	{
-		GaugeNormal* gauge = new GaugeNormal();
+		auto* gauge = new GaugeNormal();
 		gauge->Init(mapTotals, total, m_endTime);
 		m_gaugeStack.push_back(gauge);
 	}
@@ -284,7 +284,6 @@ bool Scoring::GetFXActive()
 	return IsObjectHeld(4) || IsObjectHeld(5);
 }
 
-static const float laserOutputInterpolationDuration = 0.1f;
 float Scoring::GetLaserOutput()
 {
 	float f = Math::Min(1.0f, m_timeSinceOutputSet / laserOutputInterpolationDuration);
@@ -314,7 +313,7 @@ int16 Scoring::GetMedianHitDelta(bool absolute)
 			continue;
 		deltas.Add(absolute ? abs(hit->delta) : hit->delta);
 	}
-	if (deltas.size() == 0)
+	if (deltas.empty())
 		return 0;
 	std::sort(deltas.begin(), deltas.end());
 	return deltas[deltas.size() / 2];
@@ -361,17 +360,17 @@ HitStat* Scoring::m_AddOrUpdateHitStat(ObjectState* object)
 {
 	if (object->type == ObjectType::Single)
 	{
-		HitStat* stat = new HitStat(object);
+		auto* stat = new HitStat(object);
 		hitStats.Add(stat);
 		return stat;
 	}
 	else if (object->type == ObjectType::Hold)
 	{
-		HoldObjectState* hold = (HoldObjectState*)object;
+		auto* hold = (HoldObjectState*)object;
 		HitStat** foundStat = m_holdHitStats.Find(object);
 		if (foundStat)
 			return *foundStat;
-		HitStat* stat = new HitStat(object);
+		auto* stat = new HitStat(object);
 		hitStats.Add(stat);
 		m_holdHitStats.Add(object, stat);
 
@@ -389,7 +388,7 @@ HitStat* Scoring::m_AddOrUpdateHitStat(ObjectState* object)
 		HitStat** foundStat = m_holdHitStats.Find(*rootLaser);
 		if (foundStat)
 			return *foundStat;
-		HitStat* stat = new HitStat(*rootLaser);
+		auto* stat = new HitStat(*rootLaser);
 		hitStats.Add(stat);
 		m_holdHitStats.Add(object, stat);
 
@@ -469,7 +468,8 @@ bool Scoring::IsLaserIdle(uint32 index) const
 
 bool Scoring::IsFailOut() const
 {
-	if (m_gaugeStack.size() == 0)
+	// TODO: Replace with std::all_of()
+	if (m_gaugeStack.empty())
 		return true;
 
 	if (m_gaugeStack.size() == 1)
@@ -486,10 +486,8 @@ bool Scoring::IsFailOut() const
 
 Gauge* Scoring::GetTopGauge() const
 {
-	if (m_gaugeStack.size() > 0)
-	{
+	if (!m_gaugeStack.empty())
 		return m_gaugeStack.back();
-	}
 	return nullptr;
 }
 
@@ -554,7 +552,7 @@ void Scoring::m_CalculateHoldTicks(HoldObjectState* hold, Vector<MapTime>& ticks
 		ticks.Add((MapTime)tickpos);
 		tickpos += tickInterval;
 	}
-	if (ticks.size() == 0)
+	if (ticks.empty())
 	{
 		ticks.Add(hold->time + (hold->duration / 2));
 	}
@@ -573,7 +571,7 @@ void Scoring::m_CalculateLaserTicks(LaserObjectState* laserRoot, Vector<ScoreTic
 	LaserObjectState* lastSlam = nullptr;
 	auto AddTicks = [&]()
 	{
-		uint32 numTicks = (uint32)Math::Floor((double)combinedDuration / tickInterval);
+		auto numTicks = (uint32)Math::Floor((double)combinedDuration / tickInterval);
 		for (uint32 i = 0; i < numTicks; i++)
 		{
 			if (lastSlam && i == 0) // No first tick if connected to slam
@@ -625,7 +623,7 @@ void Scoring::m_CalculateLaserTicks(LaserObjectState* laserRoot, Vector<ScoreTic
 		}
 	}
 	AddTicks();
-	if (ticks.size() > 0)
+	if (!ticks.empty())
 		ticks.back().SetFlag(TickFlags::End);
 }
 void Scoring::m_OnFXBegin(HoldObjectState* obj)
@@ -639,7 +637,7 @@ void Scoring::m_OnObjectEntered(ObjectState* obj)
 	// The following code registers which ticks exist depending on the object type / duration
 	if (obj->type == ObjectType::Single)
 	{
-		ButtonObjectState* bt = (ButtonObjectState*)obj;
+		auto* bt = (ButtonObjectState*)obj;
 		ScoreTick* t = m_ticks[bt->index].Add(new ScoreTick(obj));
 		t->time = bt->time;
 		t->SetFlag(TickFlags::Button);
@@ -647,7 +645,7 @@ void Scoring::m_OnObjectEntered(ObjectState* obj)
 	}
 	else if (obj->type == ObjectType::Hold)
 	{
-        HoldObjectState* hold = (HoldObjectState*)obj;
+        auto* hold = (HoldObjectState*)obj;
 
 		// Add all hold ticks
 		Vector<MapTime> holdTicks;
@@ -668,7 +666,7 @@ void Scoring::m_OnObjectEntered(ObjectState* obj)
 	}
 	else if (obj->type == ObjectType::Laser)
 	{
-		LaserObjectState* laser = (LaserObjectState*)obj;
+		auto* laser = (LaserObjectState*)obj;
 		if (m_IsRoot(laser)) // Only register root laser objects
 		{
 			// Can cause problems if the previous laser segment hasnt ended yet for whatever reason
@@ -709,7 +707,7 @@ void Scoring::m_OnObjectLeaved(ObjectState* obj)
 {
 	if (obj->type == ObjectType::Laser)
 	{
-		LaserObjectState* laser = (LaserObjectState*)obj;
+		auto* laser = (LaserObjectState*)obj;
 		if (laser->next != nullptr)
 			return; // Only terminate holds on last of laser section
 		obj = *laser->GetRoot();
@@ -724,7 +722,7 @@ void Scoring::m_UpdateTicks()
 	// This loop checks for ticks that are missed
 	for (uint32 buttonCode = 0; buttonCode < 8; buttonCode++)
 	{
-		Input::Button button = (Input::Button) buttonCode;
+		auto button = (Input::Button) buttonCode;
 
 		// List of ticks for the current button code
 		auto& ticks = m_ticks[buttonCode];
@@ -759,7 +757,7 @@ void Scoring::m_UpdateTicks()
 						if (m_IsBeingHeld(tick) || autoplayInfo.IsAutoplayButtons())
 						{
 							m_TickHit(tick, buttonCode);
-							HitStat* stat = new HitStat(tick->object);
+							auto* stat = new HitStat(tick->object);
 							stat->time = currentTime;
 							stat->rating = ScoreHitRating::Perfect;
 							stat->hold = ((HoldObjectState*)tick->object)->duration;
@@ -771,7 +769,7 @@ void Scoring::m_UpdateTicks()
 						{
 							m_TickMiss(tick, buttonCode, 0);
 							// Add miss replay hitstat
-							HitStat* stat = new HitStat(tick->object);
+							auto* stat = new HitStat(tick->object);
 							stat->time = currentTime;
 							stat->rating = ScoreHitRating::Miss;
 							stat->hold = ((HoldObjectState*)tick->object)->duration;
@@ -798,7 +796,7 @@ void Scoring::m_UpdateTicks()
 							|| tick->HasFlag(TickFlags::Processed))
 						{
 							m_TickHit(tick, buttonCode);
-							HitStat* stat = new HitStat(tick->object);
+							auto* stat = new HitStat(tick->object);
 							stat->time = currentTime;
 							stat->rating = ScoreHitRating::Perfect;
 							hitStats.Add(stat);
@@ -813,7 +811,7 @@ void Scoring::m_UpdateTicks()
 						if (autoplayInfo.autoplay || laserDelta <= m_laserDistanceLeniency)
 						{
 							m_TickHit(tick, buttonCode);
-							HitStat* stat = new HitStat(tick->object);
+							auto* stat = new HitStat(tick->object);
 							stat->time = currentTime;
 							stat->rating = ScoreHitRating::Perfect;
 							hitStats.Add(stat);
@@ -822,7 +820,7 @@ void Scoring::m_UpdateTicks()
 						{
 							m_TickMiss(tick, buttonCode, 0);
 							// Add miss replay hitstat
-							HitStat* stat = new HitStat(tick->object);
+							auto* stat = new HitStat(tick->object);
 							stat->time = currentTime;
 							stat->rating = ScoreHitRating::Miss;
 							hitStats.Add(stat);
@@ -848,7 +846,7 @@ void Scoring::m_UpdateTicks()
 				if (tick->HasFlag(TickFlags::Hold) || tick->HasFlag(TickFlags::Laser))
 				{
 					// Add miss replay hitstat
-					HitStat* stat = new HitStat(tick->object);
+					auto* stat = new HitStat(tick->object);
 					stat->time = currentTime;
 					stat->rating = ScoreHitRating::Miss;
 					hitStats.Add(stat);
@@ -889,7 +887,7 @@ ObjectState* Scoring::m_ConsumeTick(uint32 buttonCode)
 		}
 		if (tick->HasFlag(TickFlags::Hold))
 		{
-			HoldObjectState* hos = (HoldObjectState*)hitObject;
+			auto* hos = (HoldObjectState*)hitObject;
 			hos = hos->GetRoot();
 			if (hos->time - currentTime <= hitWindow.hold)
 				m_SetHoldObject(hitObject, buttonCode);
@@ -939,7 +937,7 @@ void Scoring::m_TickHit(ScoreTick* tick, uint32 index, MapTime delta /*= 0*/)
 	}
 	else if (tick->HasFlag(TickFlags::Hold))
 	{
-		HoldObjectState* hold = (HoldObjectState*)tick->object;
+		auto* hold = (HoldObjectState*)tick->object;
 		if (hold->time + hold->duration > m_playback->GetLastTime()) // Only set active hold object if object hasn't passed yet
 			m_SetHoldObject(tick->object, index);
 
@@ -949,7 +947,7 @@ void Scoring::m_TickHit(ScoreTick* tick, uint32 index, MapTime delta /*= 0*/)
 	}
 	else if (tick->HasFlag(TickFlags::Laser))
 	{
-		LaserObjectState* object = (LaserObjectState*)tick->object;
+		auto* object = (LaserObjectState*)tick->object;
 		if (tick->HasFlag(TickFlags::Slam))
 		{
 			OnLaserSlamHit.Call((LaserObjectState*)tick->object);
@@ -1202,6 +1200,8 @@ void Scoring::m_UpdateLasers(float deltaTime)
 {
 	MapTime mapTime = m_playback->GetLastTime() + m_laserOffset;
 	bool currentlySlamNextSegmentStraight[2] = { false };
+	bool changeInDirection[2] = { false };
+	static bool previouslyTurningInCorrectDirection[2] = { false };
 
 	// Check for new laser segments in laser queue
 	for (auto it = m_laserSegmentQueue.begin(); it != m_laserSegmentQueue.end();)
@@ -1209,22 +1209,28 @@ void Scoring::m_UpdateLasers(float deltaTime)
 		// Reset laser usage timer
 		timeSinceLaserUsed[(*it)->index] = 0;
 
-		if ((*it)->time <= mapTime)
+		if ((*it)->time > mapTime)
+		{
+			it++;
+		}
+		else
 		{
 			const uint8 index = (*it)->index;
+			auto prev = m_currentLaserSegments[index];
 			// Replace the currently active segment
-			m_currentLaserSegments[index] = *it;
-			auto current = m_currentLaserSegments[index];
+			auto current = m_currentLaserSegments[index] = *it;
 			if (current != nullptr)
 			{
 				// Auto lasers unless current segment is a slam and the next is a straight laser
 				if (current->next && current->next->GetDirection() == 0 && current->flags & LaserObjectState::flag_Instant)
 					currentlySlamNextSegmentStraight[index] = true;
+
+				auto prevDirection = prev->GetDirection();
+				auto currentDirection = prev->GetDirection();
+				changeInDirection[index] = prevDirection != currentDirection;
 			}
 			it = m_laserSegmentQueue.erase(it);
-			continue;
 		}
-		it++;
 	}
 
 	for (uint32 i = 0; i < 2; i++)
@@ -1297,11 +1303,20 @@ void Scoring::m_UpdateLasers(float deltaTime)
 				if (fabsf(positionDelta) <= m_laserDistanceLeniency)
 				{
 					if (laserDir == 0)
+					{
 						m_autoLaserTime[i] = m_autoLaserDuration;
+					}
 					else if (inputDir == laserDir)
+					{
 						m_autoLaserTime[i] = m_autoLaserDurationWhileTurningInCorrectDirection;
+					}
 					else
-						m_autoLaserTime[i] -= deltaTime;
+					{
+						if (changeInDirection[i])
+							m_autoLaserTime[i] = Math::Min(m_autoLaserTime[i] - deltaTime, m_autoLaserDuration);
+						else
+							m_autoLaserTime[i] -= deltaTime;
+					}
 				}
 				else
 				{
@@ -1324,10 +1339,10 @@ void Scoring::m_UpdateLasers(float deltaTime)
 			if (incomingLaser)
 			{
 				laserPositions[i] = incomingLaser->points[0];
-				if (inputDir == incomingLaser->GetDirection())
-					m_autoLaserTime[i] = m_autoLaserDurationWhileTurningInCorrectDirection;
-				else if (inputDir == 0)
+				if (inputDir == 0)
 					m_autoLaserTime[i] = m_autoLaserDuration;
+				else if (inputDir == incomingLaser->GetDirection())
+					m_autoLaserTime[i] = m_autoLaserDurationWhileTurningInCorrectDirection;
 				else
 					m_autoLaserTime[i] = 0;
 			}
