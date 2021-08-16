@@ -468,20 +468,7 @@ bool Scoring::IsLaserIdle(uint32 index) const
 
 bool Scoring::IsFailOut() const
 {
-	// TODO: Replace with std::all_of()
-	if (m_gaugeStack.empty())
-		return true;
-
-	if (m_gaugeStack.size() == 1)
-		return m_gaugeStack.back()->FailOut();
-
-	for (auto g : m_gaugeStack)
-	{
-		// If there are any gauges left, then don't fail
-		if (!g->FailOut())
-			return false;
-	}
-	return true;
+	return std::all_of(m_gaugeStack.cbegin(), m_gaugeStack.cend(), [](Gauge *g) { return g->FailOut(); });
 }
 
 Gauge* Scoring::GetTopGauge() const
