@@ -1330,12 +1330,9 @@ void Scoring::m_UpdateLasers(float deltaTime)
 			if (incomingLaser)
 			{
 				laserPositions[i] = incomingLaser->points[0];
-				if (inputDir == 0)
-					m_autoLaserTime[i] = m_autoLaserDuration;
-				else if (inputDir == incomingLaser->GetDirection())
-					m_autoLaserTime[i] = m_autoLaserDurationWhileTurningInCorrectDirection;
-				else
-					m_autoLaserTime[i] = 0;
+				m_autoLaserTime[i] = inputDir == incomingLaser->GetDirection() || inputDir == 0
+									 ? m_autoLaserDuration
+									 : 0;
 			}
 		}
 
