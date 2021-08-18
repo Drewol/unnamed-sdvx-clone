@@ -716,9 +716,6 @@ void Scoring::m_UpdateTicks()
 		for (uint32 i = 0; i < ticks.size(); i++)
 		{
 			ScoreTick* tick = ticks[i];
-			if (tick->HasFlag(TickFlags::Processed))
-				continue;
-
 			MapTime delta = currentTime - ticks[i]->time + (tick->HasFlag(TickFlags::Laser) ? m_laserOffset : m_inputOffset);
 			bool processed = false;
 
@@ -813,6 +810,8 @@ void Scoring::m_UpdateTicks()
 			}
 			else if (tick->HasFlag(TickFlags::Slam)) // Check early for slam input
 			{
+				if (tick->HasFlag(TickFlags::Processed))
+					continue;
 				auto* laserObject = (LaserObjectState*)tick->object;
 				float dirSign = Math::Sign(laserObject->GetDirection());
 				float inputSign = Math::Sign(m_input->GetInputLaserDir(buttonCode - 6));
@@ -1207,6 +1206,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 				if (current->next && current->next->GetDirection() == 0 && current->flags & LaserObjectState::flag_Instant)
 					currentlySlamNextSegmentStraight[index] = true;
 
+				// Unused but might be useful for skin stuff?
 				auto prevDirection = prev ? prev->GetDirection() : 0;
 				auto currentDirection = current->GetDirection();
 				changeInDirection[index] = prevDirection != currentDirection;
@@ -1268,42 +1268,21 @@ void Scoring::m_UpdateLasers(float deltaTime)
 			if (inputDir != 0)
 			{
 				if ((laserDir < 0 || laserDir == 0) && positionDelta < 0)
-				{
 					laserPositions[i] = Math::Max(laserPositions[i] + input, laserTargetPositions[i]);
-				}
 				else if ((laserDir > 0 || laserDir == 0) && positionDelta > 0)
-				{
 					laserPositions[i] = Math::Min(laserPositions[i] + input, laserTargetPositions[i]);
-				}
 				else if ((laserDir < 0 && positionDelta > 0) || (laserDir > 0 && positionDelta < 0))
-				{
 					laserPositions[i] += input;
-				}
 
 				positionDelta = laserTargetPositions[i] - laserPositions[i];
 				if (fabsf(positionDelta) <= m_laserDistanceLeniency)
 				{
 					if (laserDir == 0)
-					{
 						m_autoLaserTime[i] = m_autoLaserDuration;
-					}
 					else if (inputDir == laserDir)
-					{
 						m_autoLaserTime[i] = m_autoLaserDurationWhileTurningInCorrectDirection;
-					}
 					else
-					{
-						if (changeInDirection[i])
-						{
-							float timeSinceDirectionChange = (currentSegment->time - mapTime) / 1000.f;
-							m_autoLaserTime[i] = Math::Min(m_autoLaserTime[i] - deltaTime,
-							                               m_autoLaserDuration - timeSinceDirectionChange);
-						}
-						else
-						{
-							m_autoLaserTime[i] -= deltaTime;
-						}
-					}
+						m_autoLaserTime[i] -= deltaTime;
 				}
 				else
 				{
