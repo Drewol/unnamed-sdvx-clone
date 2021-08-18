@@ -81,7 +81,7 @@ public:
 	~Scoring();
 
 	static ClearMark CalculateBadge(const ScoreIndex& score);
-	static ClearMark CalculateBestBadge(Vector<ScoreIndex*> scores);
+	static ClearMark CalculateBestBadge(const Vector<ScoreIndex*>& scores);
 
 	// Needs to be set to find out which objects are active/hittable
 	void SetPlayback(BeatmapPlayback& playback);
@@ -106,9 +106,9 @@ public:
 	static float GetLaserPosition(uint32 index, float pos);
 	float GetLaserRollOutput(uint32 index);
 	// Check if any lasers are currently active
-	bool GetLaserActive();
-	bool GetFXActive();
-	float GetLaserOutput();
+	bool GetLaserActive() const;
+	bool GetFXActive() const;
+	float GetLaserOutput() const;
 
 	float GetMeanHitDelta(bool absolute = false);
 	int16 GetMedianHitDelta(bool absolute = false);
@@ -127,7 +127,7 @@ public:
 
 	bool IsFailOut() const;
 	class Gauge* GetTopGauge() const;
-	void SetAllGaugeValues(const Vector<float>, bool zeroRest=true);
+	void SetAllGaugeValues(const Vector<float>&, bool zeroRest=true);
 	void GetAllGaugeValues(Vector<float>& out) const;
 
 	// Calculates the maximum score of the current map
@@ -191,7 +191,7 @@ public:
 	HitWindow hitWindow = HitWindow::NORMAL;
 
 	// Map total infos
-	MapTotals mapTotals;
+	MapTotals mapTotals{};
 	// Maximum accumulated score of object that have been hit or missed
 	// used to calculate accuracy up to a give point
 	uint32 currentMaxScore = 0;
@@ -210,13 +210,13 @@ public:
 	uint32 timedHits[2] = { 0 };
 
 	// Current combo
-	uint32 currentComboCounter;
+	uint32 currentComboCounter{};
 
 	// Combo state (0 = regular, 1 = full combo, 2 = perfect)
 	uint8 comboState = 2;
 
 	// Highest combo in current run
-	uint32 maxComboCounter;
+	uint32 maxComboCounter{};
 
 	// The timings of hit objects, sorted by time hit
 	// these are used for debugging
@@ -225,13 +225,13 @@ public:
 	struct AutoplayInfo autoplayInfo;
 
 	// Actual positions of the laser
-	float laserPositions[2];
+	float laserPositions[2]{};
 	// Sampled target position of the lasers in the map
 	float laserTargetPositions[2] = { 0 };
 	// Current lasers are extended
 	bool lasersAreExtend[2] = { false, false };
 	// Time since laser has been used
-	float timeSinceLaserUsed[2];
+	float timeSinceLaserUsed[2]{};
 	constexpr static const float laserOutputInterpolationDuration = 0.1f;
 private:
 	// Calculates the number of ticks for a given TP
@@ -306,15 +306,12 @@ private:
 
 	// Input values for laser [-1,1]
 	float m_laserInput[2] = { 0.0f };
-	// Decides if the coming tick should be auto completed
+	// Decides if the laser segment should be auto-played
 	float m_autoLaserTime[2] = { 0.0f };
 	const double m_laserDistanceLeniency = 1 / 6.;
 	const float m_autoLaserDuration = 4 / 60.f;
 	const float m_autoLaserDurationWhileTurningInCorrectDirection = 5 / 60.f;
 	const float m_autoLaserDurationAfterSlam = 8 / 60.f;
-
-	//Ehhhh maybe
-	const MapTime m_offsetLaserConstant = 5;
 	
 	// Saves the time when a button was hit, used to decide if a button was held before a hold object was active
 	MapTime m_buttonHitTime[6] = { 0, 0, 0, 0, 0, 0 };
@@ -342,9 +339,9 @@ private:
 	Vector<ScoreTick*> m_ticks[8];
 
 	// Hold objects
-	ObjectState* m_holdObjects[8];
+	ObjectState* m_holdObjects[8]{};
 	Set<ObjectState*> m_heldObjects;
-	bool m_prevHoldHit[6];
+	bool m_prevHoldHit[6]{};
 
 	PlaybackOptions m_options;
 	MapTimeRange m_range;
