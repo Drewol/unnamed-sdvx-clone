@@ -1206,7 +1206,6 @@ void Scoring::m_UpdateLasers(float deltaTime)
 				if (current->next && current->next->GetDirection() == 0 && current->flags & LaserObjectState::flag_Instant)
 					currentlySlamNextSegmentStraight[index] = true;
 
-				// Unused but might be useful for skin stuff?
 				auto prevDirection = prev ? prev->GetDirection() : 0;
 				auto currentDirection = current->GetDirection();
 				changeInDirection[index] = prevDirection != currentDirection;
@@ -1282,7 +1281,13 @@ void Scoring::m_UpdateLasers(float deltaTime)
 					else if (inputDir == laserDir)
 						m_autoLaserTime[i] = m_autoLaserDurationWhileTurningInCorrectDirection;
 					else
-						m_autoLaserTime[i] -= deltaTime;
+					{
+						float timeSinceDirectionChange = (currentSegment->time - mapTime) / 1000.f;
+						if (changeInDirection[i])
+							m_autoLaserTime[i] = Math::Min(m_autoLaserTime[i] - deltaTime, m_autoLaserDuration - timeSinceDirectionChange);
+						else
+							m_autoLaserTime[i] -= deltaTime;
+					}
 				}
 				else
 				{
@@ -1320,7 +1325,6 @@ void Scoring::m_UpdateLasers(float deltaTime)
 		if (autoplayInfo.autoplay || m_autoLaserTime[i] > 0)
 			laserPositions[i] = laserTargetPositions[i];
 
-		// Clamp cursor between 0 and 1
 		laserPositions[i] = Math::Clamp(laserPositions[i], 0.0f, 1.0f);
 		if (fabsf(laserPositions[i] - laserTargetPositions[i]) <= m_laserDistanceLeniency && currentSegment)
 			m_SetHoldObject(*currentSegment->GetRoot(), 6 + i);
