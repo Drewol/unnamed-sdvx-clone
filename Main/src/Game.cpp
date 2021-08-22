@@ -1242,8 +1242,6 @@ public:
 			}
 		}
 
-
-
 		if (m_practiceSetupDialog)
 			m_practiceSetupDialog->Render(deltaTime);
 	}

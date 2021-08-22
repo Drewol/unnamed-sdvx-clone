@@ -46,7 +46,7 @@ struct HitWindow
 
 	void ToLuaTable(struct lua_State* L) const;
 
-	inline HitWindow& operator= (const HitWindow& that) noexcept { perfect = that.perfect; good = that.good; hold = that.hold; miss = that.miss; slam = that.slam; return *this; }
+	inline HitWindow& operator= (const HitWindow& that) noexcept = default;
 
 	constexpr bool operator== (const HitWindow& that) const noexcept { return perfect == that.perfect && good == that.good && hold == that.hold && miss == that.miss && slam == that.slam; }
 	constexpr bool operator<= (const HitWindow& that) const noexcept { return perfect <= that.perfect && good <= that.good && hold <= that.hold && miss <= that.miss && slam <= that.slam; }
@@ -73,7 +73,7 @@ struct HitWindow
 	MapTime good = 150;
 	MapTime hold = 150;
 	MapTime miss = 300;
-	MapTime slam = 84;
+	MapTime slam = 88;
 
 	static const HitWindow NORMAL;
 	static const HitWindow HARD;
