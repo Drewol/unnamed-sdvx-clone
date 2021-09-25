@@ -246,7 +246,7 @@ AudioEffect ParseCustomEffect(const KShootEffectDefinition &def, Vector<String> 
 {
 	static EffectTypeMap defaultEffects;
 	AudioEffect effect;
-	bool typeSet = false, range = false;
+	bool typeSet = false;
 
 	Map<String, MultiParamRange> params;
 	for (const auto& s : def.parameters)
@@ -311,7 +311,6 @@ AudioEffect ParseCustomEffect(const KShootEffectDefinition &def, Vector<String> 
 					continue;
 				}
 				params.Add(s.first, pr);
-				range = true;
 			}
 			else
 			{
@@ -387,7 +386,6 @@ AudioEffect ParseCustomEffect(const KShootEffectDefinition &def, Vector<String> 
 		AssignDurationIfSet(effect.duration, "waveLength");
 		AssignFloatIfSet(effect.retrigger.gate, "rate");
 		AssignDurationIfSet(effect.retrigger.reset, "updatePeriod");
-		effect.retrigger.reset.isRange = range;
 		break;
 	case EffectType::Wobble:
 		AssignDurationIfSet(effect.duration, "waveLength");
