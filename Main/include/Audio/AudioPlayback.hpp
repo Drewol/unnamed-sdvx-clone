@@ -123,5 +123,5 @@ private:
 	HoldObjectState *m_currentHoldEffects[2] = {nullptr};
 	float m_effectMix[2] = {0.0f};
 
-	bool m_SkipEffectIfInputIsZero();
+	bool m_SkipEffectIfInputIsZero(float input);
 };

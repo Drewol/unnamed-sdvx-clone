@@ -251,15 +251,15 @@ void AudioPlayback::SetLaserEffect(EffectType type)
 		m_laserEffect = m_beatmap->GetFilter(type);
 	}
 }
-bool AudioPlayback::m_SkipEffectIfInputIsZero()
+bool AudioPlayback::m_SkipEffectIfInputIsZero(float input)
 {
-	return m_laserEffect.type == EffectType::PeakingFilter || m_laserEffect.type == EffectType::HighPassFilter
+	return input == 0 && (m_laserEffect.type == EffectType::PeakingFilter || m_laserEffect.type == EffectType::HighPassFilter
 		|| m_laserEffect.type == EffectType::LowPassFilter || m_laserEffect.type == EffectType::PitchShift
-		|| m_laserEffect.type == EffectType::Bitcrush;
+		|| m_laserEffect.type == EffectType::Bitcrush);
 }
 void AudioPlayback::SetLaserFilterInput(float input, bool active)
 {
-	if (m_laserEffect.type != EffectType::None && (active && (input != 0.0f || !m_SkipEffectIfInputIsZero())))
+	if (m_laserEffect.type != EffectType::None && active && !m_SkipEffectIfInputIsZero(input))
 	{
 		if (m_laserEffect.type == EffectType::SwitchAudio)
 		{
@@ -284,9 +284,8 @@ void AudioPlayback::SetLaserFilterInput(float input, bool active)
 
 			Ref<AudioStream> audioTrack = m_GetDSPTrack();
 
-			m_laserDSP = m_laserEffect.CreateDSP(m_playback->GetCurrentTimingPoint(),
-												 GetLaserFilterInput(),
-												 audioTrack->GetAudioSampleRate());
+			m_laserDSP = m_laserEffect.CreateDSP(m_playback->GetCurrentTimingPoint(),GetLaserFilterInput(),
+				audioTrack->GetAudioSampleRate());
 			if (!m_laserDSP)
 			{
 				Logf("Failed to create laser DSP with type %d", Logger::Severity::Warning, m_laserEffect.type);
