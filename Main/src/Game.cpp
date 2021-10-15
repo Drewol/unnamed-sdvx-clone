@@ -194,6 +194,11 @@ private:
 	uint32 m_pressTimes[static_cast<size_t>(Input::Button::Length)] = { 0 };
 	uint8 m_hispeedAdjustMode = 0; // for skins, 0 = not adjusting, 1 = coarse adjustment, 2 = fine adjustment
 
+	// Override track position
+	bool m_hasAdjustedVisualParam = false; // TODO: consider creating a dedicated flag for tainting unsaveableness
+	int8 m_currVisualParam = -1; // -1: disabled, 0-4: editing
+	std::array<std::optional<float>, 5> m_visualParamOverrides;
+
 public:
 	Game_Impl(const String& mapPath, PlayOptions&& options) : m_playOptions(std::move(options))
 	{
@@ -643,6 +648,8 @@ public:
 			}
 		}
 
+		ClearVisualParamOverrides();
+
 		if (m_practiceSetupDialog)
 		{
 			m_InitPracticeSetupDialog();
@@ -725,11 +732,8 @@ public:
 		m_transitioning = false;
 		m_scoring.Reset(m_playOptions.range);
 		m_scoring.SetInput(&g_input);
-		m_camera.pLaneZoom = m_playback.GetZoom(0);
-		m_camera.pLanePitch = m_playback.GetZoom(1);
-		m_camera.pLaneOffset = m_playback.GetZoom(2);
-		m_camera.pLaneTilt = m_playback.GetZoom(3);
-		m_track->centerSplit = m_playback.GetZoom(4);
+		
+		SetVisualParams();
 
 		for(uint32 i = 0; i < 2; i++)
 		{
@@ -922,14 +926,8 @@ public:
 		m_camera.SetSlowTilt(slowTilt);
 
 		// Set track zoom
+		SetVisualParams();
 
-		m_camera.pLaneZoom = m_playback.GetZoom(0);
-		m_camera.pLanePitch = m_playback.GetZoom(1);
-		m_camera.pLaneOffset = m_playback.GetZoom(2);
-		m_camera.pLaneTilt = m_playback.GetZoom(3);
-		m_track->centerSplit = m_playback.GetZoom(4);
-		m_camera.SetManualTilt(m_manualTiltEnabled);
-		m_camera.SetManualTiltInstant(m_playback.CheckIfManualTiltInstant());
 		m_camera.track = m_track;
 		m_camera.Tick(deltaTime,m_playback);
 		m_track->Tick(m_playback, deltaTime);
@@ -1401,11 +1399,7 @@ public:
 		m_playback.OnLaserAlertEntered.Add(this, &Game_Impl::OnLaserAlertEntered);
 		m_playback.Reset();
 
-		// Set camera start position
-		m_camera.pLaneZoom = m_playback.GetZoom(0);
-		m_camera.pLanePitch = m_playback.GetZoom(1);
-		m_camera.pLaneOffset = m_playback.GetZoom(2);
-		m_camera.pLaneTilt = m_playback.GetZoom(3);
+		SetVisualParams();
 		
 		// Enable laser slams and roll ignore behaviour
 		m_camera.SetFancyHighwayTilt(g_gameConfig.GetBool(GameConfigKeys::EnableFancyHighwayRoll));
@@ -1811,6 +1805,51 @@ public:
 		
 		// Remove self
 		g_application->RemoveTickable(this);
+	}
+
+	void ClearVisualParamOverrides()
+	{
+		if (m_isPracticeSetup || !m_introCompleted)
+		{
+			m_hasAdjustedVisualParam = false;
+		}
+
+		for (auto& visualParamOverride : m_visualParamOverrides)
+		{
+			visualParamOverride.reset();
+		}
+	}
+
+	void AdjustVisualParam(uint8 index, float delta)
+	{
+		float new_value = m_visualParamOverrides[index].value_or(m_playback.GetZoom(index)) + delta;
+		m_visualParamOverrides[index] = new_value;
+
+		m_hasAdjustedVisualParam = true;
+	}
+
+	void SetVisualParams()
+	{
+		m_camera.pLaneZoom = m_visualParamOverrides[0].value_or(m_playback.GetZoom(0));
+		m_camera.pLanePitch = m_visualParamOverrides[1].value_or(m_playback.GetZoom(1));
+		m_camera.pLaneOffset = m_visualParamOverrides[2].value_or(m_playback.GetZoom(2));
+		m_camera.pLaneTilt = m_visualParamOverrides[3].value_or(m_playback.GetZoom(3));
+
+		if (m_track)
+		{
+			m_track->centerSplit = m_visualParamOverrides[4].value_or(m_playback.GetZoom(4));
+		}
+
+		if (m_visualParamOverrides[3].has_value())
+		{
+			m_camera.SetManualTilt(true);
+			m_camera.SetManualTiltInstant(false);
+		}
+		else
+		{
+			m_camera.SetManualTilt(m_manualTiltEnabled);
+			m_camera.SetManualTiltInstant(m_playback.CheckIfManualTiltInstant());
+		}
 	}
 
 	void RenderParticles(const RenderState& rs, float deltaTime)
@@ -2323,6 +2362,42 @@ public:
 	{
 		if (!m_isPracticeSetup && g_gameConfig.GetBool(GameConfigKeys::DisableNonButtonInputsDuringPlay))
 			return;
+
+		// Ctrl + S + arrow keys: adjusting visual params
+		if (g_gameWindow->IsKeyPressed(SDL_SCANCODE_LCTRL) && g_gameWindow->IsKeyPressed(SDL_SCANCODE_S))
+		{
+			if (m_renderDebugHUD || m_isPracticeSetup || m_paused)
+			{
+				switch (code)
+				{
+				case SDL_SCANCODE_UP:
+					--m_currVisualParam;
+					break;
+				case SDL_SCANCODE_DOWN:
+					++m_currVisualParam;
+					break;
+				case SDL_SCANCODE_LEFT:
+					if(m_currVisualParam >= 0) AdjustVisualParam(m_currVisualParam, -0.1f);
+					break;
+				case SDL_SCANCODE_RIGHT:
+					if (m_currVisualParam >= 0) AdjustVisualParam(m_currVisualParam, +0.1f);
+					break;
+				default:
+					break;
+				}
+
+				if (m_currVisualParam < -1)
+				{
+					m_currVisualParam = static_cast<int8>(m_visualParamOverrides.size()-1);
+				}
+				else if (m_currVisualParam >= m_visualParamOverrides.size())
+				{
+					m_currVisualParam = -1;
+				}
+
+				return;
+			}
+		}
 
 		if (m_practiceSetupDialog && m_practiceSetupDialog->IsActive())
 		{
@@ -2971,6 +3046,7 @@ public:
 		if (IsPartialPlay()) return false;
 
 		if (!(m_scoring.hitWindow <= HitWindow::NORMAL)) return false;
+		if (m_hasAdjustedVisualParam) return false;
 
 		return true;
 	}

@@ -55,7 +55,23 @@ If something breaks in the song database, delete "maps.db". **Please note this w
 - \[Start\] when selecting filters to toggle between level and folder filters
 - \[FX-L\] + \[FX-R\] to open up game settings (Hard gauge, Random, Mirror, etc.)
 - \[TAB\] to open the Search bar on the top to search for songs
-- \[BT-B + BT-C\] Add song to collection (such as favourites)
+- \[BT-B + BT-C\] to add the song to a collection (such as favourites)
+- \[~\] to enter the practice mode
+
+### During Gameplay:
+- These keys can be disabled with a setting (`DisableNonButtonInputsDuringPlay`).
+- \[F5\] to restart the game
+- \[F8\] to show/hide the debug HUD
+- \[F9\] to reload the skin
+- \[Enter\] to skip intro/outro
+- \[Pause\] to pause/unpause
+- \[PageUp\] to advance 5 seconds
+- \[Ctrl\]+\[S\]+\[Arrow Key\] to override visual track parameters (`zoom_top`, `zoom_bottom`, ...)
+	- This is only available during one of these situations:
+		- The debug HUD is being shown
+		- During practice setup
+		- The game is paused
+	- Using this will prevent the score of the play from being saved.
 
 ## How to run:
 Just run 'usc-game' or 'usc-game_Debug' from within the 'bin' folder.
