@@ -76,7 +76,7 @@ namespace Math
 	template<typename T>
 	int RoundToInt(T t)
 	{
-		return static_cast<int>(t + 0.5);
+		return t >= 0 ? static_cast<int>(t + 0.5) : static_cast<int>(t - 0.5);
 	}
 	template<typename T>
 	T BeatInMS(T bpm)

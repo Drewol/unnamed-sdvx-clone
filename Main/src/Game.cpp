@@ -198,6 +198,12 @@ private:
 	bool m_hasAdjustedVisualParam = false; // TODO: consider creating a dedicated flag for tainting unsaveableness
 	int8 m_currVisualParam = -1; // -1: disabled, 0-4: editing
 	std::array<std::optional<float>, 5> m_visualParamOverrides;
+	std::array<String, 5> m_visualParamNames = {
+		"zoom_bottom", "zoom_top", "zoom_side", "tilt", "center_split"
+	};
+	std::array<float, 5> m_visualParamDefaultIncrement = {
+		0.01f, 0.01f, 0.01f, 0.1f/36.0f, 0.01f
+	};
 
 public:
 	Game_Impl(const String& mapPath, PlayOptions&& options) : m_playOptions(std::move(options))
@@ -1086,6 +1092,8 @@ public:
 			}
 		}
 
+		RenderVisualParamHUD();
+
 		if (m_renderDebugHUD)// Render debug hud if enabled
 		{
 			m_introCompleted = true;
@@ -1820,10 +1828,17 @@ public:
 		}
 	}
 
-	void AdjustVisualParam(uint8 index, float delta)
+	void AdjustVisualParam(uint8 index, int delta)
 	{
-		float new_value = m_visualParamOverrides[index].value_or(m_playback.GetZoom(index)) + delta;
-		m_visualParamOverrides[index] = new_value;
+		float value = m_visualParamOverrides[index].value_or(m_playback.GetZoom(index));
+		value += m_visualParamDefaultIncrement[index] * delta;
+
+		if (index != 3)
+		{
+			value = Math::RoundToInt(value*100) / 100.0f;
+		}
+
+		m_visualParamOverrides[index] = value;
 
 		m_hasAdjustedVisualParam = true;
 	}
@@ -2052,6 +2067,50 @@ public:
 		}
 
 		//g_guiRenderer->End();
+	}
+
+	void RenderVisualParamHUD()
+	{
+		if (!m_renderDebugHUD && m_currVisualParam == -1)
+		{
+			return;
+		}
+
+		const int textSize = g_resolution.y >= 600 ? 24 : 18;
+
+		auto RenderText = [&](const String& text, const Vector2& pos, const Color& color = {1.0f, 1.0f, 0.5f, 1.0f})
+		{
+			g_application->FastText(text, pos.x + 1, pos.y + 1, textSize, NVGalign::NVG_ALIGN_CENTER, Color::Black);
+			g_application->FastText(text, pos.x, pos.y, textSize, NVGalign::NVG_ALIGN_CENTER, color);
+		};
+
+		Vector2 center = Vector2(g_resolution / 2);
+
+		for (int8 i = 0; i < m_visualParamOverrides.size(); ++i)
+		{
+			String s = "";
+
+			if (m_visualParamOverrides[i].has_value())
+			{
+				if (i == 3)
+				{
+					s = Utility::Sprintf("%s = %.3f", m_visualParamNames[i], -36 * m_visualParamOverrides[i].value_or(0));
+				}
+				else
+				{
+					s = Utility::Sprintf("%s = %d", m_visualParamNames[i], Math::RoundToInt(100 * m_visualParamOverrides[i].value_or(0)));
+				}
+			}
+			else
+			{
+				s = Utility::Sprintf("%s = not set", m_visualParamNames[i]);
+			}
+
+			const Vector2 pos = center + Vector2(0.0f, static_cast<float>((i - static_cast<int8>(m_visualParamOverrides.size() / 2)) * textSize));
+			const Color& color = m_currVisualParam == i ? Color::Green : Color::White;
+
+			RenderText(s, pos, color);
+		}
 	}
 
 	void OnLaserSlam(LaserObjectState* object)
@@ -2377,10 +2436,10 @@ public:
 					++m_currVisualParam;
 					break;
 				case SDL_SCANCODE_LEFT:
-					if(m_currVisualParam >= 0) AdjustVisualParam(m_currVisualParam, -0.1f);
+					if(m_currVisualParam >= 0) AdjustVisualParam(m_currVisualParam, -10);
 					break;
 				case SDL_SCANCODE_RIGHT:
-					if (m_currVisualParam >= 0) AdjustVisualParam(m_currVisualParam, +0.1f);
+					if (m_currVisualParam >= 0) AdjustVisualParam(m_currVisualParam, 10);
 					break;
 				default:
 					break;
