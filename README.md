@@ -67,11 +67,13 @@ If something breaks in the song database, delete "maps.db". **Please note this w
 - \[Pause\] to pause/unpause
 - \[PageUp\] to advance 5 seconds
 - \[Ctrl\]+\[S\]+\[Arrow Key\] to override visual track parameters (`zoom_top`, `zoom_bottom`, ...)
-	- This is only available during one of these situations:
+	- Unless the setting `EnableVisualParamOverridesForNormalGameplay` is set, this is only available during one of these situations:
 		- The debug HUD is being shown
 		- During practice setup
 		- The game is paused
 	- Using this will prevent the score of the play from being saved.
+	- Use \[Shift\] or \[Alt\] for coarse/fine adjustments.
+	- Clear overrides with \[Ctrl\]+\[S\]+\[Backspace\].
 
 ## How to run:
 Just run 'usc-game' or 'usc-game_Debug' from within the 'bin' folder.

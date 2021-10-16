@@ -139,6 +139,7 @@ DefineEnum(GameConfigKeys,
 		   ExitPlayMethod,
 		   ExitPlayHoldDuration,
 		   DisableNonButtonInputsDuringPlay, // TODO: after enabling key customization for non-button commands, remove this.
+		   EnableVisualParamOverridesForNormalGameplay,
 
 		   LastSelected,
 		   LastSelectedChal,

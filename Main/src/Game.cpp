@@ -2436,7 +2436,7 @@ public:
 		// Ctrl + S + arrow keys: adjusting visual params
 		if (g_gameWindow->IsKeyPressed(SDL_SCANCODE_LCTRL) && g_gameWindow->IsKeyPressed(SDL_SCANCODE_S))
 		{
-			if (m_renderDebugHUD || m_isPracticeSetup || m_paused)
+			if (!IsMultiplayerGame() && !IsChallenge() && (m_renderDebugHUD || m_isPracticeSetup || m_paused || g_gameConfig.GetBool(GameConfigKeys::EnableVisualParamOverridesForNormalGameplay)))
 			{
 				int increment = (g_gameWindow->IsKeyPressed(SDL_SCANCODE_LSHIFT) ? 5 : 1) * (g_gameWindow->IsKeyPressed(SDL_SCANCODE_LALT) ? 1 : 10);
 

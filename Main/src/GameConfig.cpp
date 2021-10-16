@@ -181,6 +181,7 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::ExitPlayHoldDuration, 2000);
 
 	Set(GameConfigKeys::DisableNonButtonInputsDuringPlay, false);
+	Set(GameConfigKeys::EnableVisualParamOverridesForNormalGameplay, false);
 
 	Set(GameConfigKeys::LastSelected, 0);
 	Set(GameConfigKeys::LastSelectedChal, 0);
