@@ -28,9 +28,10 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
+#include <queue>
 #include <stack>
 #include <string>
-#include <queue>
 #include <unordered_set>
 
 #include <Shared/Shared.hpp>
