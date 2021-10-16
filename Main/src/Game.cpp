@@ -1828,12 +1828,23 @@ public:
 		}
 	}
 
-	void AdjustVisualParam(uint8 index, int delta)
+	void ClearVisualParamOverride(uint8 index)
+	{
+		m_visualParamOverrides[index].reset();
+	}
+
+	void AdjustVisualParamOverride(uint8 index, int delta)
 	{
 		float value = m_visualParamOverrides[index].value_or(m_playback.GetZoom(index));
 		value += m_visualParamDefaultIncrement[index] * delta;
 
-		if (index != 3)
+		if (index == 3)
+		{
+			// 0.1 degrees
+			const float quant = m_visualParamDefaultIncrement[3] / 10;
+			value = Math::RoundToInt(value / quant) * quant;
+		}
+		else
 		{
 			value = Math::RoundToInt(value*100) / 100.0f;
 		}
@@ -1858,7 +1869,7 @@ public:
 		if (m_visualParamOverrides[3].has_value())
 		{
 			m_camera.SetManualTilt(true);
-			m_camera.SetManualTiltInstant(false);
+			m_camera.SetManualTiltInstant(true);
 		}
 		else
 		{
@@ -2427,6 +2438,8 @@ public:
 		{
 			if (m_renderDebugHUD || m_isPracticeSetup || m_paused)
 			{
+				int increment = (g_gameWindow->IsKeyPressed(SDL_SCANCODE_LSHIFT) ? 5 : 1) * (g_gameWindow->IsKeyPressed(SDL_SCANCODE_LALT) ? 1 : 10);
+
 				switch (code)
 				{
 				case SDL_SCANCODE_UP:
@@ -2436,10 +2449,14 @@ public:
 					++m_currVisualParam;
 					break;
 				case SDL_SCANCODE_LEFT:
-					if(m_currVisualParam >= 0) AdjustVisualParam(m_currVisualParam, -10);
+					if(m_currVisualParam >= 0) AdjustVisualParamOverride(m_currVisualParam, -increment);
 					break;
 				case SDL_SCANCODE_RIGHT:
-					if (m_currVisualParam >= 0) AdjustVisualParam(m_currVisualParam, 10);
+					if (m_currVisualParam >= 0) AdjustVisualParamOverride(m_currVisualParam, increment);
+					break;
+				case SDL_SCANCODE_BACKSPACE:
+				case SDL_SCANCODE_DELETE:
+					if (m_currVisualParam >= 0) ClearVisualParamOverride(static_cast<uint8>(m_currVisualParam));
 					break;
 				default:
 					break;
