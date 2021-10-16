@@ -70,6 +70,7 @@ If something breaks in the song database, delete "maps.db". **Please note this w
 	- Unless the setting `EnableVisualParamOverridesForNormalGameplay` is set, this is only available during one of these situations:
 		- The debug HUD is being shown
 		- During practice setup
+		- During autoplay
 		- The game is paused
 	- Using this will prevent the score of the play from being saved.
 	- Use \[Shift\] or \[Alt\] for coarse/fine adjustments.

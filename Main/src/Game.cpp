@@ -2097,7 +2097,7 @@ public:
 
 		Vector2 center = Vector2(g_resolution / 2);
 
-		for (int8 i = 0; i < m_visualParamOverrides.size(); ++i)
+		for (int8 i = 0; i < static_cast<int8>(m_visualParamOverrides.size()); ++i)
 		{
 			String s = "";
 
@@ -2436,7 +2436,8 @@ public:
 		// Ctrl + S + arrow keys: adjusting visual params
 		if (g_gameWindow->IsKeyPressed(SDL_SCANCODE_LCTRL) && g_gameWindow->IsKeyPressed(SDL_SCANCODE_S))
 		{
-			if (!IsMultiplayerGame() && !IsChallenge() && (m_renderDebugHUD || m_isPracticeSetup || m_paused || g_gameConfig.GetBool(GameConfigKeys::EnableVisualParamOverridesForNormalGameplay)))
+			const bool enableVisualParamOverrides = m_renderDebugHUD || m_isPracticeSetup || m_scoring.autoplayInfo.IsAutoplayButtons() || m_paused;
+			if (!IsMultiplayerGame() && !IsChallenge() && (enableVisualParamOverrides || g_gameConfig.GetBool(GameConfigKeys::EnableVisualParamOverridesForNormalGameplay)))
 			{
 				int increment = (g_gameWindow->IsKeyPressed(SDL_SCANCODE_LSHIFT) ? 5 : 1) * (g_gameWindow->IsKeyPressed(SDL_SCANCODE_LALT) ? 1 : 10);
 
@@ -2466,7 +2467,7 @@ public:
 				{
 					m_currVisualParam = static_cast<int8>(m_visualParamOverrides.size()-1);
 				}
-				else if (m_currVisualParam >= m_visualParamOverrides.size())
+				else if (m_currVisualParam >= static_cast<int8>(m_visualParamOverrides.size()))
 				{
 					m_currVisualParam = -1;
 				}
