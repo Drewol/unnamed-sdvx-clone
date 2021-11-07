@@ -133,7 +133,7 @@ protected:
 
 		SectionHeader("Input Device");
 
-		if (m_gamePads.size() > 0)
+		if (!m_gamePads.empty())
 		{
 			int newPad = SelectionInput(m_selectedPad, m_gamePads, "Controller to use:");
 			if (newPad != m_selectedPad)
@@ -613,6 +613,7 @@ protected:
 
 		ToggleSetting(GameConfigKeys::DisableBackgrounds, "Disable song backgrounds");
 		ToggleSetting(GameConfigKeys::DelayedHitEffects, "Delayed fade button hit effects");
+		ToggleSetting(GameConfigKeys::EnableVisualOffset, "Enable visual offset");
 		FloatSetting(GameConfigKeys::DistantButtonScale, "Distant button scale", 1.0f, 5.0f);
 
 		SectionHeader("Game UI");
@@ -689,7 +690,7 @@ private:
 class SettingsPage_System : public SettingsPage
 {
 public:
-	SettingsPage_System(nk_context* nctx) : SettingsPage(nctx, "System") {}
+	explicit SettingsPage_System(nk_context* nctx) : SettingsPage(nctx, "System") {}
 
 protected:
 	void Load() override
@@ -752,7 +753,7 @@ protected:
 
 		ToggleSetting(GameConfigKeys::CheckForUpdates, "Check for updates on startup");
 
-		if (m_channels.size() > 0)
+		if (!m_channels.empty())
 		{
 			StringSelectionSetting(GameConfigKeys::UpdateChannel, m_channels, "Update Channel:");
 		}
@@ -1393,7 +1394,7 @@ public:
 			if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::LaserInputDevice) == InputDevice::Mouse)
 				g_application->FastText(Utility::Sprintf("Current Sens: %.2f, ppr: (%.0f)", sens, fabs(m_delta)), center.x, center.y + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 			else
-				g_application->FastText(Utility::Sprintf("Current Sens: %.2f", sens), center.x, center.y + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);	
+				g_application->FastText(Utility::Sprintf("Current Sens: %.2f", sens), center.x, center.y + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 
 		}
 		else
@@ -1455,4 +1456,3 @@ LaserSensCalibrationScreen* LaserSensCalibrationScreen::Create()
 	LaserSensCalibrationScreen* impl = new LaserSensCalibrationScreen_Impl();
 	return impl;
 }
-
