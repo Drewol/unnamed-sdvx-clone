@@ -220,7 +220,7 @@ void AudioPlayback::SetEffect(uint32 index, HoldObjectState *object, class Beatm
 void AudioPlayback::SetEffectEnabled(uint32 index, bool enabled)
 {
 	assert(index <= 1);
-	m_effectMix[index] = enabled ? 1.0f : 0.0f;
+	m_effectMix[index] = enabled ? m_buttonEffects[index].mix.Sample() : 0.0f;
 
 	if (m_buttonEffects[index].type == EffectType::SwitchAudio)
 	{

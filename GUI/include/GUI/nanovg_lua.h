@@ -196,15 +196,21 @@ static int lTickAnimation(lua_State* L)
 	key = luaL_checkinteger(L, 1);
 	deltatime = luaL_checknumber(L, 2);
 
-	if (!g_guiState.animations.Contains(key))
-		return 0;
+	if (!g_guiState.animations.Contains(key)) {
+		lua_pushinteger(L, -1);
+		return 1;
+	}
 
 	Ref<ImageAnimation> ia = g_guiState.animations.at(key);
-	if (!ia->LoadComplete.load())
-		return 0;
+	if (!ia->LoadComplete.load()) {
+		lua_pushinteger(L, 0);
+		return 1;
+	}
 
-	if (ia->Cancelled.load())
-		return 0;
+	if (ia->Cancelled.load()) {
+		lua_pushinteger(L, -1);
+		return 1;
+	}
 
 	ia->Timer += deltatime;
 	if (ia->Timer >= ia->SecondsPerFrame)
@@ -233,7 +239,8 @@ static int lTickAnimation(lua_State* L)
 			}
 		}
 	}
-	return 0;
+	lua_pushinteger(L, 1);
+	return 1;
 }
 
 static int LoadAnimation(lua_State* L, const char* path, float frametime, int loopcount, bool compressed)

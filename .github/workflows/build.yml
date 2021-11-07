@@ -21,6 +21,7 @@ jobs:
                 {
                 git clone https://github.com/microsoft/vcpkg.git
                 cd vcpkg
+                git checkout c0bc5e1b0ff27dd8710ee9ca18b708c0a9accce1 # pin freetype for now
                 .\bootstrap-vcpkg.bat
                 .\vcpkg.exe integrate install
                 .\vcpkg.exe install '@${{ github.workspace }}/build.windows'

@@ -37,6 +37,8 @@ namespace Graphics
 		uint32 GetFramebufferHandle();
 		void SetViewport(Vector2i size);
 		void SetViewport(Recti vp);
+		void MakeCurrent();
+		void ReleaseCurrent();
 
 		// Check if the calling thread is the thread that runs this OpenGL context
 		bool IsOpenGLThread() const;

@@ -20,12 +20,17 @@ local screenState = 0 --0 = normal, 1 = level, 2 = sorting
 local loading = true
 local downloaded = {}
 local songs = {}
+local filters = {}
 local selectedLevels = {}
+local soffset = 0
 local selectedSorting = "Uploaded"
 local lastPlaying = nil
 for i = 1, 20 do
     selectedLevels[i] = false
 end
+local searchText = gfx.CreateLabel("",5,0)
+local searchIndex = 1
+local searchInputActive = false
 
 local cachepath = path.Absolute("skins/" .. game.GetSkin() .. "/nautica.json")
 local levelcursor = 0
@@ -247,6 +252,14 @@ function render(deltaTime)
     render_hotkeys()
     render_loading()
     render_info()
+
+    local fifthX = resX/5
+    local fifthY = resY/5
+    local fourthX = resX/4
+    local fourthY = resY/4
+    --draw text search
+    soffset = soffset * 0.8
+    draw_search(fifthX*2,10, fifthX*3 + 30, fifthY/4)
 end
 
 function archive_callback(entries, id)
@@ -277,6 +290,20 @@ function archive_callback(entries, id)
     return res
 end
 
+local char_to_hex = function(c)
+  return string.format("%%%02X", string.byte(c))
+end
+
+local function urlencode(url)
+  if url == nil then
+    return
+  end
+  url = url:gsub("\n", "\r\n")
+  url = url:gsub("([^%w _%%%-%.~])", char_to_hex)
+  url = url:gsub(" ", "+")
+  return url
+end
+
 function reload_songs()
     needsReload = true
     if loading then return end
@@ -289,10 +316,26 @@ function reload_songs()
             table.insert(levelarr, i)
         end
     end
+    if filters.levels ~= nil then
+        for i,value in ipairs(filters.levels) do
+            useLevels = true
+            table.insert(levelarr, value)
+        end
+    end
     nextUrl = string.format("https://ksm.dev/app/songs?sort=%s", selectedSorting:lower())
     if useLevels then
         nextUrl = nextUrl .. "&levels=" .. table.concat(levelarr, ",")
     end
+    if filters.effector ~= nil then
+        nextUrl = nextUrl .. "&effector=" .. urlencode(filters.effector)
+    end
+    if filters.uploader ~= nil then
+        nextUrl = nextUrl .. "&uploader=" .. urlencode(filters.uploader)
+    end
+    if filters.query ~= nil then
+        nextUrl = nextUrl .. "&q=" .. urlencode(filters.query)
+    end
+
     songs = {}
     cursorPos = 0
     cursorPosX = 0
@@ -328,12 +371,18 @@ function button_pressed(button)
         if screenState == 0 then
             local song = songs[cursorPos + 1]
             if song == nil then return end
-            dlScreen.PlayPreview(encodeURI(song.preview_url), header, song.id)
-            song.status = "Playing"
-            if lastPlaying ~=nil then
+            if lastPlaying ~= nil and lastPlaying.id == song.id then
+                dlScreen.StopPreview()
                 lastPlaying.status = nil
+                lastPlaying = nil
+            else
+                dlScreen.PlayPreview(encodeURI(song.preview_url), header, song.id)
+                song.status = "Playing"
+                if lastPlaying ~=nil then
+                    lastPlaying.status = nil
+                end
+                lastPlaying = song
             end
-            lastPlaying = song
         end
         
     elseif button == game.BUTTON_FXL then
@@ -425,4 +474,46 @@ function render_sorting_selection()
         gfx.Text(opt, resX/2, y)
     end
     gfx.Restore()
+end
+
+function update_search_text(active, text)
+    searchInputActive = active
+    gfx.UpdateLabel(searchText ,string.format("Search: %s",text), 30, 0)
+end
+
+function update_search_filters(new_filters)
+    filters = new_filters
+    reload_songs()
+end
+
+local searchIndex = 1
+function draw_search(x,y,w,h)
+  gfx.Save()
+  gfx.ResetTransform()
+  soffset = soffset + (searchIndex) - (searchInputActive and 0 or 1)
+  if searchIndex ~= (searchInputActive and 0 or 1) then
+      game.PlaySample("woosh")
+  end
+  searchIndex = searchInputActive and 0 or 1
+
+  gfx.BeginPath()
+  local bgfade = 1 - (searchIndex + soffset)
+  --if not searchInputActive then bgfade = soffset end
+  gfx.FillColor(0,0,0,math.floor(150 * bgfade))
+  gfx.Rect(0,0,resX,resY)
+  gfx.Fill()
+  gfx.ForceRender()
+  local xpos = x + (searchIndex + soffset)*w
+  gfx.BeginPath()
+  gfx.RoundedRect(xpos,y,w,h,h/2)
+  gfx.FillColor(30,30,30)
+  gfx.StrokeColor(0,128,255)
+  gfx.StrokeWidth(1)
+  gfx.Fill()
+  gfx.Stroke()
+  gfx.BeginPath();
+  gfx.LoadSkinFont("NotoSans-Regular.ttf");
+  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_MIDDLE);
+  gfx.DrawLabel(searchText, xpos+10,y+(h/2), w-20)
+
 end

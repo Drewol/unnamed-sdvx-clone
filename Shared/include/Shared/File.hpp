@@ -30,6 +30,7 @@ public:
 
 	// Get the last write time of a file at a given path
 	static uint64 GetLastWriteTime(const String& path);
+	static uint64 FileTimeToUnixTimestamp(uint64 fileTime);
 };
 
 /* 

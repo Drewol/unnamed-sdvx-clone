@@ -202,6 +202,7 @@ public:
 	// search artist/title/tags for maps for any space separated terms
 	Map<int32, FolderIndex*> FindFolders(const String& search);
 	Map<int32, FolderIndex*> FindFoldersByPath(const String& search);
+	Map<int32, FolderIndex*> FindFoldersWithFilter(const String& search, const Vector<std::pair<String, String>> filter);
 	Map<int32, FolderIndex*> FindFoldersByHash(const String& hash);
 	Map<int32, FolderIndex*> FindFoldersByFolder(const String& folder);
 	Map<int32, FolderIndex*> FindFoldersByCollection(const String& collection);

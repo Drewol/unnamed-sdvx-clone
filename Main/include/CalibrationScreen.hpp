@@ -39,7 +39,7 @@ private:
 	bool m_autoCalibrate = false;
 	bool m_hasRenderedOnce = false;
 
-	void m_OnButtonPressed(Input::Button buttonCode);
-	void m_OnButtonReleased(Input::Button buttonCode);
+	void m_OnButtonPressed(Input::Button buttonCode, int32 delta);
+	void m_OnButtonReleased(Input::Button buttonCode, int32 delta);
 	float m_average(const Vector<int>& values);
 };

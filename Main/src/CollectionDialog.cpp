@@ -56,7 +56,7 @@ public:
 			}
 		}
 	}
-	void OnKeyPressed(SDL_Scancode code)
+	void OnKeyPressed(SDL_Scancode code, int32 delta)
 	{
 		SDL_Keycode key = SDL_GetKeyFromScancode(code);
 		if (key == SDLK_v)
@@ -360,7 +360,7 @@ void CollectionDialog::m_AdvanceSelection(int steps)
 	lua_settop(m_lua, 0);
 }
 
-void CollectionDialog::m_OnButtonPressed(Input::Button button)
+void CollectionDialog::m_OnButtonPressed(Input::Button button, int32 delta)
 {
 	if (!m_active || m_nameEntry->active || m_closing)
 		return;
@@ -378,7 +378,7 @@ void CollectionDialog::m_OnButtonPressed(Input::Button button)
 	lua_settop(m_lua, 0);
 }
 
-void CollectionDialog::m_OnKeyPressed(SDL_Scancode code)
+void CollectionDialog::m_OnKeyPressed(SDL_Scancode code, int32 delta)
 {
 	if (!m_active || m_closing)
 	{

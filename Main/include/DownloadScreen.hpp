@@ -4,6 +4,8 @@
 #include "Input.hpp"
 #include "PreviewPlayer.hpp"
 
+class TextInput;
+
 struct ArchiveRequest
 {
 	cpr::AsyncResponse response;
@@ -25,12 +27,13 @@ public:
 	DownloadScreen();
 	~DownloadScreen();
 	bool Init() override;
+	void OnSearchTermChanged(const String& search);
 	// Tick for tickable
 	void Tick(float deltaTime) override;
 	void Render(float deltaTime) override;
 
-	void OnKeyPressed(SDL_Scancode code) override;
-	void OnKeyReleased(SDL_Scancode code) override;
+	void OnKeyPressed(SDL_Scancode code, int32 delta) override;
+	void OnKeyReleased(SDL_Scancode code, int32 delta) override;
 private:
 	struct lua_State* m_lua;
 	LuaBindable* m_bindable;
@@ -41,14 +44,17 @@ private:
 	Thread m_archiveThread;
 	bool m_running = true;
 
+	Ref<TextInput> m_searchInput;
+
 	void m_ArchiveLoop();
-	void m_OnButtonPressed(Input::Button buttonCode);
-	void m_OnButtonReleased(Input::Button buttonCode);
+	void m_OnButtonPressed(Input::Button buttonCode, int32 delta);
+	void m_OnButtonReleased(Input::Button buttonCode, int32 delta);
 	void m_OnMouseScroll(int32 steps);
 	void m_ProcessArchiveResponses();
 	int m_Exit(struct lua_State* L);
 	int m_DownloadArchive(struct lua_State* L);
 	int m_PlayPreview(struct lua_State* L);
+	int m_StopPreview(struct lua_State* L);
 	int m_GetSongsPath(struct lua_State* L);
 	bool m_extractFile(struct archive* a, String path);
 	Map<String, String> m_mapFromLuaTable(int index);
@@ -56,4 +62,7 @@ private:
 	PreviewPlayer m_previewPlayer;
 	PreviewParams m_previewParams;
 
+	// -1 if no search update needed
+	float m_timeSinceSearchChange = -1;
+	String m_lastSearch = "";
 };

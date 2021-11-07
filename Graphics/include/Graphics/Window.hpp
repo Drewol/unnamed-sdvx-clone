@@ -2,6 +2,7 @@
 #include <Graphics/Keys.hpp>
 #include <Graphics/Gamepad.hpp>
 #include <SDL2/SDL.h>
+#define SIZE_EVENTS 64
 
 namespace Graphics
 {
@@ -81,7 +82,7 @@ namespace Graphics
 		bool GetRelativeMouseMode();
 
 		// Sets cursor to use
-		void SetCursor(Ref<class ImageRes> image, Vector2i hotspot = Vector2i(0,0));
+		void SetCursor(const Ref<class ImageRes>& image, Vector2i hotspot = Vector2i(0,0));
 		void SetCursorVisible(bool visible);
 
 		// Switches between borderless and windowed
@@ -119,10 +120,10 @@ namespace Graphics
 
 		// Show a simple message box
 		// level 0 = error, 1 = warning, 2 = info
-		void ShowMessageBox(String title, String message, int severity);
+		void ShowMessageBox(const String& title, const String& message, int severity);
 
 		// Show a simple confirmation box and get the user's choice
-		bool ShowYesNoMessage(String title, String message);
+		bool ShowYesNoMessage(const String& title, const String& message);
 
 		// Get the text currently in the clipboard
 		String GetClipboard() const;
@@ -134,8 +135,10 @@ namespace Graphics
 		// Open a gamepad within the range of the number of gamepads
 		Ref<Gamepad> OpenGamepad(int32 deviceIndex);
 
-		Delegate<SDL_Scancode> OnKeyPressed;
-		Delegate<SDL_Scancode> OnKeyReleased;
+
+
+		Delegate<SDL_Scancode, int32> OnKeyPressed;
+		Delegate<SDL_Scancode, int32> OnKeyReleased;
 		Delegate<MouseButton> OnMousePressed;
 		Delegate<MouseButton> OnMouseReleased;
 		Delegate<int32, int32> OnMouseMotion;

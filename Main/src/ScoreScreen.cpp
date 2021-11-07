@@ -109,7 +109,7 @@ private:
 		lua_pushinteger(m_lua, data);
 		lua_settable(m_lua, -3);
 	}
-	void m_OnButtonPressed(Input::Button button)
+	void m_OnButtonPressed(Input::Button button, int32 delta)
 	{
 		if (m_multiplayer && m_multiplayer->GetChatOverlay()->IsOpen())
 			return;
@@ -557,6 +557,9 @@ public:
 			{
 				m_simpleNoteHitStats.Add(shs);
 			}
+			else {
+				assert(shs.lane >= 6 || shs.hold > 0);
+			}
 		}
 
 		//this has been moved to the top so that it is instantiated in time for IR submission
@@ -811,10 +814,56 @@ public:
 				m_PushFloatToTable("timeFrac",
 					Math::Clamp(static_cast<float>(simpleHitStat.time) / (m_beatmapDuration > 0 ? m_beatmapDuration : 1), 0.0f, 1.0f));
 				m_PushIntToTable("delta", simpleHitStat.delta);
+				m_PushIntToTable("hold", 0);
 
 				lua_rawseti(m_lua, -2, i + 1);
 			}
 			lua_settable(m_lua, -3);
+
+			int index = 1;
+			lua_pushstring(m_lua, "holdHitStats");
+			lua_newtable(m_lua);
+			for (size_t i = 0; i < m_simpleHitStats.size(); ++i)
+			{
+				const SimpleHitStat simpleHitStat = m_simpleHitStats[i];
+				if (simpleHitStat.hold == 0)
+					continue;
+
+				lua_newtable(m_lua);
+				m_PushIntToTable("rating", simpleHitStat.rating);
+				m_PushIntToTable("lane", simpleHitStat.lane);
+				m_PushIntToTable("time", simpleHitStat.time);
+				m_PushFloatToTable("timeFrac",
+					Math::Clamp(static_cast<float>(simpleHitStat.time) / (m_beatmapDuration > 0 ? m_beatmapDuration : 1), 0.0f, 1.0f));
+				m_PushIntToTable("delta", simpleHitStat.delta);
+				m_PushIntToTable("hold", simpleHitStat.hold);
+
+				lua_rawseti(m_lua, -2, index++);
+			}
+			lua_settable(m_lua, -3);
+
+			index = 1;
+			lua_pushstring(m_lua, "laserHitStats");
+			lua_newtable(m_lua);
+			for (size_t i = 0; i < m_simpleHitStats.size(); ++i)
+			{
+				const SimpleHitStat simpleHitStat = m_simpleHitStats[i];
+				if (simpleHitStat.lane < 6)
+					continue;
+
+				lua_newtable(m_lua);
+				m_PushIntToTable("rating", simpleHitStat.rating);
+				m_PushIntToTable("lane", simpleHitStat.lane);
+				m_PushIntToTable("time", simpleHitStat.time);
+				m_PushFloatToTable("timeFrac",
+					Math::Clamp(static_cast<float>(simpleHitStat.time) / (m_beatmapDuration > 0 ? m_beatmapDuration : 1), 0.0f, 1.0f));
+				m_PushIntToTable("delta", simpleHitStat.delta);
+				m_PushIntToTable("hold", 0);
+
+				lua_rawseti(m_lua, -2, index++);
+			}
+			lua_settable(m_lua, -3);
+
 		}
 
 		lua_setglobal(m_lua, "result");
@@ -851,7 +900,7 @@ public:
 	}
 
 
-	virtual void OnKeyPressed(SDL_Scancode code) override
+	virtual void OnKeyPressed(SDL_Scancode code, int32 delta) override
 	{
 		if (m_multiplayer &&
 				m_multiplayer->GetChatOverlay()->OnKeyPressedConsume(code))
@@ -884,7 +933,7 @@ public:
 			lua_settop(m_lua, 0);
 		}
 	}
-	virtual void OnKeyReleased(SDL_Scancode code) override
+	virtual void OnKeyReleased(SDL_Scancode code, int32 delta) override
 	{
 	}
 	virtual void Render(float deltaTime) override
@@ -1061,7 +1110,7 @@ public:
 		}
 		Vector2i size(w, h);
 		Image screenshot = ImageRes::Screenshot(g_gl, size, { x,y });
-		String screenshotPath = "screenshots/" + Shared::Time::Now().ToString() + ".png";
+		String screenshotPath = Path::Absolute("screenshots/" + Shared::Time::Now().ToString() + ".png");
 		if (screenshot.get() != nullptr)
 		{
 			screenshot->SavePNG(screenshotPath);

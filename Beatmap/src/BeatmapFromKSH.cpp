@@ -137,6 +137,7 @@ struct MultiParam
 	{
 		Float,
 		Samples,
+		Milliseconds,
 		Int,
 	};
 	Type type;
@@ -164,22 +165,20 @@ struct MultiParamRange
 		r.isRange = isRange;
 		return r;
 	}
-	EffectParam<EffectDuration> ToDurationParam(bool isAbsolute)
+	EffectParam<EffectDuration> ToDurationParam()
 	{
 		EffectParam<EffectDuration> r;
-		if (isAbsolute)
+		if (params[0].type == MultiParam::Milliseconds)
 		{
-			if (params[0].type == MultiParam::Float)
-			{
-				r = EffectParam<EffectDuration>((int)(1000.f * params[0].fval), (int)(1000.f * params[1].fval));
-			}
-			else
-			{
-				r = EffectParam<EffectDuration>(params[0].ival, params[1].ival);
-			}
+			r = EffectParam<EffectDuration>(params[0].ival, params[1].ival);
 		}
-		else {
-			r = params[0].type == MultiParam::Float ? EffectParam<EffectDuration>(params[0].fval, params[1].fval) : EffectParam<EffectDuration>(params[0].ival, params[1].ival);
+		else if (params[0].type == MultiParam::Float)
+		{
+			r = EffectParam<EffectDuration>(params[0].fval, params[1].fval);
+		}
+		else
+		{
+			r = EffectParam<EffectDuration>((float)params[0].ival, (float)params[1].ival);
 		}
 		r.isRange = isRange;
 		return r;
@@ -209,6 +208,20 @@ static MultiParam ParseParam(const String &in)
 	{
 		ret.type = MultiParam::Samples;
 		sscanf(*in, "%i", &ret.ival);
+	}
+	else if (in.find("ms") != -1)
+	{
+		ret.type = MultiParam::Milliseconds;
+		float milliseconds = 0;
+		sscanf(*in, "%f", &milliseconds);
+		ret.ival = (int)(milliseconds);
+	}
+	else if (in.find("s") != -1)
+	{
+		ret.type = MultiParam::Milliseconds;
+		float seconds = 0;
+		sscanf(*in, "%f", &seconds);
+		ret.ival = (int)(seconds * 1000.0);
 	}
 	else if (in.find("%") != -1)
 	{
@@ -319,11 +332,11 @@ AudioEffect ParseCustomEffect(const KShootEffectDefinition &def, Vector<String> 
 			target = param->ToFloatParam();
 		}
 	};
-	auto AssignDurationIfSet = [&](EffectParam<EffectDuration> &target, const String &name, bool absolute) {
+	auto AssignDurationIfSet = [&](EffectParam<EffectDuration> &target, const String &name) {
 		auto *param = params.Find(name);
 		if (param)
 		{
-			target = param->ToDurationParam(absolute);
+			target = param->ToDurationParam();
 		}
 	};
 	auto AssignSamplesIfSet = [&](EffectParam<int32> &target, const String &name) {
@@ -354,31 +367,44 @@ AudioEffect ParseCustomEffect(const KShootEffectDefinition &def, Vector<String> 
 		AssignSamplesIfSet(effect.bitcrusher.reduction, "amount");
 		break;
 	case EffectType::Echo:
-		AssignDurationIfSet(effect.duration, "waveLength", false);
+		AssignDurationIfSet(effect.duration, "waveLength");
 		AssignFloatIfSet(effect.echo.feedback, "feedbackLevel");
 		break;
+	case EffectType::Phaser:
+		AssignDurationIfSet(effect.duration, "period");
+		AssignIntIfSet(effect.phaser.stage, "stage");
+		AssignFloatIfSet(effect.phaser.min, "loFreq");
+		AssignFloatIfSet(effect.phaser.max, "hiFreq");
+		AssignFloatIfSet(effect.phaser.q, "Q");
+		AssignFloatIfSet(effect.phaser.feedback, "feedback");
+		AssignFloatIfSet(effect.phaser.stereoWidth, "stereoWidth");
+		AssignFloatIfSet(effect.phaser.hiCutGain, "hiCutGain");
+		break;
 	case EffectType::Flanger:
-		AssignDurationIfSet(effect.duration, "period", true);
+		AssignDurationIfSet(effect.duration, "period");
 		AssignIntIfSet(effect.flanger.depth, "depth");
 		AssignIntIfSet(effect.flanger.offset, "delay");
+		AssignFloatIfSet(effect.flanger.feedback, "feedback");
+		AssignFloatIfSet(effect.flanger.stereoWidth, "stereoWidth");
+		AssignFloatIfSet(effect.flanger.volume, "volume");
 		break;
 	case EffectType::Gate:
-		AssignDurationIfSet(effect.duration, "waveLength", false);
+		AssignDurationIfSet(effect.duration, "waveLength");
 		AssignFloatIfSet(effect.gate.gate, "rate");
 		break;
 	case EffectType::Retrigger:
-		AssignDurationIfSet(effect.duration, "waveLength", false);
+		AssignDurationIfSet(effect.duration, "waveLength");
 		AssignFloatIfSet(effect.retrigger.gate, "rate");
-		AssignDurationIfSet(effect.retrigger.reset, "updatePeriod", false);
+		AssignDurationIfSet(effect.retrigger.reset, "updatePeriod");
 		break;
 	case EffectType::Wobble:
-		AssignDurationIfSet(effect.duration, "waveLength", false);
+		AssignDurationIfSet(effect.duration, "waveLength");
 		AssignFloatIfSet(effect.wobble.min, "loFreq");
 		AssignFloatIfSet(effect.wobble.max, "hiFreq");
 		AssignFloatIfSet(effect.wobble.q, "Q");
 		break;
 	case EffectType::TapeStop:
-		AssignDurationIfSet(effect.duration, "speed", false);
+		AssignDurationIfSet(effect.duration, "speed");
 		break;
 	case EffectType::SwitchAudio:
 		AssignIntIfSet(effect.switchaudio.index, "index");

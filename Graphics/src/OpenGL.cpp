@@ -169,6 +169,21 @@ namespace Graphics
 	{
 		glViewport(vp.pos.x, vp.pos.y, vp.size.x, vp.size.y);
 	}
+
+	//https://www.khronos.org/opengl/wiki/OpenGL_and_multithreading
+	void OpenGL::MakeCurrent()
+	{
+		assert(m_impl->threadId != std::this_thread::get_id());
+		SDL_GL_MakeCurrent((SDL_Window*)m_window->Handle(), m_impl->context);
+		m_impl->threadId = std::this_thread::get_id();
+
+	}
+	void OpenGL::ReleaseCurrent()
+	{
+		assert(m_impl->threadId == std::this_thread::get_id());
+		SDL_GL_MakeCurrent(NULL, NULL);
+	}
+
 	void OpenGL::SetViewport(Vector2i size)
 	{
 		glViewport(0, 0, size.x, size.y);

@@ -535,7 +535,7 @@ Same as LoadAnimation but prepends ``"skins/[skinfolder]/textures/"`` to the pat
 
 TickAnimation(int animation, float deltaTime)
 *********************************************
-Progresses the given animation.
+Progresses the given animation. Returns -1 if animation not found, 0 if the animation is still loading, and 1 if the animation is loaded.
 
 LoadSharedTexture(string key, string path)
 ******************************************

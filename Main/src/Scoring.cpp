@@ -141,7 +141,7 @@ void Scoring::Reset(const MapTimeRange& range)
 
 	// Get input offset
 	m_inputOffset = g_gameConfig.GetInt(GameConfigKeys::InputOffset);
-	m_laserOffset = g_gameConfig.GetInt(GameConfigKeys::LaserOffset);
+	m_laserOffset = g_gameConfig.GetInt(GameConfigKeys::LaserOffset) + m_offsetLaserConstant;
 	// Get bounce guard duration
 	m_bounceGuard = g_gameConfig.GetInt(GameConfigKeys::InputBounceGuard);
 
@@ -762,6 +762,7 @@ void Scoring::m_UpdateTicks()
 							HitStat* stat = new HitStat(tick->object);
 							stat->time = currentTime;
 							stat->rating = ScoreHitRating::Perfect;
+							stat->hold = ((HoldObjectState*)tick->object)->duration;
 							hitStats.Add(stat);
 
 							m_prevHoldHit[buttonCode] = true;
@@ -773,6 +774,7 @@ void Scoring::m_UpdateTicks()
 							HitStat* stat = new HitStat(tick->object);
 							stat->time = currentTime;
 							stat->rating = ScoreHitRating::Miss;
+							stat->hold = ((HoldObjectState*)tick->object)->duration;
 							hitStats.Add(stat);
 
 							m_prevHoldHit[buttonCode] = false;
@@ -869,9 +871,9 @@ void Scoring::m_UpdateTicks()
 	}
 }
 
-ObjectState* Scoring::m_ConsumeTick(uint32 buttonCode)
+ObjectState* Scoring::m_ConsumeTick(uint32 buttonCode, int32 inputDelta)
 {
-	const MapTime currentTime = m_playback->GetLastTime() + m_inputOffset;
+	const MapTime currentTime = m_playback->GetLastTime() + m_inputOffset - inputDelta;
 	assert(buttonCode < 8);
 
 	if (!m_ticks[buttonCode].empty())
@@ -1336,7 +1338,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 	m_UpdateLaserOutput(deltaTime);
 }
 
-void Scoring::m_OnButtonPressed(Input::Button buttonCode)
+void Scoring::m_OnButtonPressed(Input::Button buttonCode, int32 delta)
 {
 	// Ignore buttons on autoplay
 	if (autoplayInfo.IsAutoplayButtons())
@@ -1344,13 +1346,13 @@ void Scoring::m_OnButtonPressed(Input::Button buttonCode)
 
 	if (buttonCode < Input::Button::BT_S)
 	{
-		int32 guardDelta = m_playback->GetLastTime() - m_buttonGuardTime[(uint32)buttonCode];
+		int32 guardDelta = m_playback->GetLastTime() - m_buttonGuardTime[(uint32)buttonCode] - delta;
 		if (guardDelta < m_bounceGuard && guardDelta >= 0 && m_playback->GetLastTime() > 0.0)
 			return;
 
-		m_buttonHitTime[(uint32)buttonCode] = m_playback->GetLastTime();
-		m_buttonGuardTime[(uint32)buttonCode] = m_playback->GetLastTime();
-		ObjectState* obj = m_ConsumeTick((uint32)buttonCode);
+		m_buttonHitTime[(uint32)buttonCode] = m_playback->GetLastTime() - delta;
+		m_buttonGuardTime[(uint32)buttonCode] = m_playback->GetLastTime() - delta;
+		ObjectState* obj = m_ConsumeTick((uint32)buttonCode, delta);
 		if (!obj)
 		{
 			// Fire event for idle hits
@@ -1360,24 +1362,24 @@ void Scoring::m_OnButtonPressed(Input::Button buttonCode)
 	else if (buttonCode > Input::Button::BT_S)
 	{
 		if (buttonCode < Input::Button::LS_1Neg)
-			m_ConsumeTick(6); // Laser L
+			m_ConsumeTick(6, delta); // Laser L
 		else
-			m_ConsumeTick(7); // Laser R
+			m_ConsumeTick(7, delta); // Laser R
 	}
 }
 
-void Scoring::m_OnButtonReleased(Input::Button buttonCode)
+void Scoring::m_OnButtonReleased(Input::Button buttonCode, int32 delta)
 {
 	if (buttonCode < Input::Button::BT_S)
 	{
-		int32 guardDelta = m_playback->GetLastTime() - m_buttonGuardTime[(uint32)buttonCode];
+		int32 guardDelta = m_playback->GetLastTime() - m_buttonGuardTime[(uint32)buttonCode] - delta;
 		if (guardDelta < m_bounceGuard && guardDelta >= 0)
 		{
 			//Logf("Button %d release bounce guard hit at %dms", Logger::Severity::Info, buttonCode, m_playback->GetLastTime());
 			return;
 		}
-		m_buttonReleaseTime[(uint32)buttonCode] = m_playback->GetLastTime();
-		m_buttonGuardTime[(uint32)buttonCode] = m_playback->GetLastTime();
+		m_buttonReleaseTime[(uint32)buttonCode] = m_playback->GetLastTime() - delta;
+		m_buttonGuardTime[(uint32)buttonCode] = m_playback->GetLastTime() - delta;
 	}
 
 	//Logf("Button %d released at %dms", Logger::Severity::Info, buttonCode, m_playback->GetLastTime());

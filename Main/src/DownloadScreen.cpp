@@ -3,6 +3,7 @@
 
 #include "Application.hpp"
 #include "lua.hpp"
+#include "Shared/Time.hpp"
 #include "archive.h"
 #include "archive_entry.h"
 #include "SkinHttp.hpp"
@@ -12,6 +13,7 @@
 
 #include "Shared/StringEncodingDetector.hpp"
 #include "Shared/StringEncodingConverter.hpp"
+#include <include/Search.hpp>
 
 DownloadScreen::DownloadScreen()
 {
@@ -41,13 +43,38 @@ bool DownloadScreen::Init()
 	m_bindable->AddFunction("Exit", this, &DownloadScreen::m_Exit);
 	m_bindable->AddFunction("DownloadArchive", this, &DownloadScreen::m_DownloadArchive);
 	m_bindable->AddFunction("PlayPreview", this, &DownloadScreen::m_PlayPreview);
+	m_bindable->AddFunction("StopPreview", this, &DownloadScreen::m_StopPreview);
 	m_bindable->AddFunction("GetSongsPath", this, &DownloadScreen::m_GetSongsPath);
 	m_bindable->Push();
 	lua_settop(m_lua, 0);
 
 	m_archiveThread = Thread(&DownloadScreen::m_ArchiveLoop, this);
 
+	m_searchInput = Ref<TextInput>(new TextInput());
+	m_searchInput->OnTextChanged.Add(this, &DownloadScreen::OnSearchTermChanged);
+
 	return true;
+}
+
+void DownloadScreen::OnSearchTermChanged(const String &search)
+{
+	lua_getglobal(m_lua, "update_search_text");
+	if (lua_isfunction(m_lua, -1))
+	{
+		lua_pushboolean(m_lua, m_searchInput->active);
+		lua_pushstring(m_lua, *search);
+		if (lua_pcall(m_lua, 2, 0, 0) != 0)
+		{
+			Logf("Lua error on update_search_text: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
+			g_gameWindow->ShowMessageBox("Lua Error on update_search_text", lua_tostring(m_lua, -1), 0);
+		}
+	}
+	lua_settop(m_lua, 0);
+	if (m_lastSearch != search)
+	{
+		m_lastSearch = search;
+		m_timeSinceSearchChange = 0;
+	}
 }
 
 void DownloadScreen::Tick(float deltaTime)
@@ -71,6 +98,92 @@ void DownloadScreen::Tick(float deltaTime)
 	}
 	m_advanceSong -= advanceSongActual;
 	m_ProcessArchiveResponses();
+
+	m_searchInput->Tick();
+
+	if (m_timeSinceSearchChange >= 0)
+	{
+		m_timeSinceSearchChange += deltaTime;
+		if (m_timeSinceSearchChange > 1.5)
+		{
+			lua_getglobal(m_lua, "update_search_filters");
+			if (lua_isfunction(m_lua, -1))
+			{
+				lua_newtable(m_lua);
+
+				String raw = m_searchInput->input;
+
+				lua_pushstring(m_lua, "raw");
+				lua_pushstring(m_lua, *raw);
+				lua_settable(m_lua, -3);
+
+				String effector;
+				String uploader;
+				String level;
+
+				const String query = SearchParser::Parse(raw, {
+					{ "effector", &effector },
+					{ "uploader", &uploader },
+					{ "level",    &level    },
+				});
+
+				lua_pushstring(m_lua, "query");
+				if (query.empty())
+					lua_pushnil(m_lua);
+				else
+					lua_pushstring(m_lua, *query);
+				lua_settable(m_lua, -3);
+
+				lua_pushstring(m_lua, "effector");
+				if (effector.empty())
+					lua_pushnil(m_lua);
+				else
+					lua_pushstring(m_lua, *effector);
+				lua_settable(m_lua, -3);
+
+				lua_pushstring(m_lua, "uploader");
+				if (uploader.empty())
+					lua_pushnil(m_lua);
+				else
+					lua_pushstring(m_lua, *uploader);
+				lua_settable(m_lua, -3);
+
+				lua_pushstring(m_lua, "levels");
+				if (level.empty())
+					lua_pushnil(m_lua);
+				else
+				{
+					lua_newtable(m_lua);
+
+					for (int num = 1 ; !level.empty(); num++)
+					{
+						String unit;
+						String rest;
+						if (!level.Split(",", &unit, &rest))
+						{
+							unit = level;
+							rest = "";
+						}
+
+						lua_pushnumber(m_lua, num);
+						lua_pushstring(m_lua, *unit);
+						lua_settable(m_lua, -3);
+
+						level = rest;
+					}
+				}
+				lua_settable(m_lua, -3);
+
+				if (lua_pcall(m_lua, 1, 0, 0) != 0)
+				{
+					Logf("Lua error on update_search_filter: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
+					g_gameWindow->ShowMessageBox("Lua Error on update_search_filter", lua_tostring(m_lua, -1), 0);
+				}
+			}
+			lua_settop(m_lua, 0);
+			m_timeSinceSearchChange = -1;
+		}
+	}
 }
 
 void DownloadScreen::Render(float deltaTime)
@@ -88,19 +201,22 @@ void DownloadScreen::Render(float deltaTime)
 	}
 }
 
-void DownloadScreen::OnKeyPressed(SDL_Scancode code)
+void DownloadScreen::OnKeyPressed(SDL_Scancode code, int32 delta)
 {
-	lua_getglobal(m_lua, "key_pressed");
-	if (lua_isfunction(m_lua, -1))
-	{	
-		lua_pushnumber(m_lua, static_cast<lua_Number>(SDL_GetKeyFromScancode(code)));
-		if (lua_pcall(m_lua, 1, 0, 0) != 0)
+	if (!m_searchInput->active)
+	{
+		lua_getglobal(m_lua, "key_pressed");
+		if (lua_isfunction(m_lua, -1))
 		{
-			Logf("Lua error on key_pressed: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-			g_gameWindow->ShowMessageBox("Lua Error on key_pressed", lua_tostring(m_lua, -1), 0);
+			lua_pushnumber(m_lua, static_cast<lua_Number>(SDL_GetKeyFromScancode(code)));
+			if (lua_pcall(m_lua, 1, 0, 0) != 0)
+			{
+				Logf("Lua error on key_pressed: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
+				g_gameWindow->ShowMessageBox("Lua Error on key_pressed", lua_tostring(m_lua, -1), 0);
+			}
 		}
+		lua_settop(m_lua, 0);
 	}
-	lua_settop(m_lua, 0);
 
 	if (code == SDL_SCANCODE_UP || code == SDL_SCANCODE_DOWN)
 	{
@@ -117,9 +233,24 @@ void DownloadScreen::OnKeyPressed(SDL_Scancode code)
 		}
 		lua_settop(m_lua, 0);
 	}
+	else if (code == SDL_SCANCODE_TAB)
+	{
+		lua_getglobal(m_lua, "update_search_text");
+		if (lua_isfunction(m_lua, -1))
+		{
+			m_searchInput->SetActive(!m_searchInput->active);
+			OnSearchTermChanged(m_searchInput->input);
+		}
+		lua_settop(m_lua, 0);
+	}
+	else if (code == SDL_SCANCODE_RETURN && m_searchInput->active)
+	{
+		m_searchInput->SetActive(false);
+		OnSearchTermChanged(m_searchInput->input);
+	}
 }
 
-void DownloadScreen::OnKeyReleased(SDL_Scancode code)
+void DownloadScreen::OnKeyReleased(SDL_Scancode code, int32 delta)
 {
 	lua_getglobal(m_lua, "key_released");
 	if (lua_isfunction(m_lua, -1))
@@ -136,6 +267,28 @@ void DownloadScreen::OnKeyReleased(SDL_Scancode code)
 
 void DownloadScreen::m_ArchiveLoop()
 {
+	{
+		String preview_path = Path::Normalize(Path::Absolute("preview/"));
+		Vector<String> exts = { "mp3", "oog", "wav" };
+		Map<String, Vector<FileInfo>> previews = Files::ScanFilesRecursive(preview_path, exts, nullptr);
+		uint64 now = Shared::Time::Now().Data();
+		Log("Checking for old preview files", Logger::Severity::Info);
+		int removed = 0;
+		for (const auto& ext : exts)
+		{
+			for (const FileInfo& fi : previews[ext])
+			{
+				uint64 writeTime = File::FileTimeToUnixTimestamp(fi.lastWriteTime);
+
+				if (now - writeTime < 24 * 60 * 60)
+					continue;
+				Path::Delete(fi.fullPath);
+				removed++;
+			}
+		}
+		if (removed > 0)
+			Logf("Removed %u preview files", Logger::Severity::Info, removed);
+	}
 	while (m_running)
 	{
 		m_archiveLock.lock();
@@ -183,8 +336,11 @@ void DownloadScreen::m_ArchiveLoop()
 	}
 }
 
-void DownloadScreen::m_OnButtonPressed(Input::Button buttonCode)
+void DownloadScreen::m_OnButtonPressed(Input::Button buttonCode, int32 delta)
 {
+	if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice) == InputDevice::Keyboard && m_searchInput->active)
+		return;
+
 	lua_getglobal(m_lua, "button_pressed");
 	if (lua_isfunction(m_lua, -1))
 	{
@@ -198,7 +354,7 @@ void DownloadScreen::m_OnButtonPressed(Input::Button buttonCode)
 	lua_settop(m_lua, 0);
 }
 
-void DownloadScreen::m_OnButtonReleased(Input::Button buttonCode)
+void DownloadScreen::m_OnButtonReleased(Input::Button buttonCode, int32 delta)
 {
 	lua_getglobal(m_lua, "button_released");
 	if (lua_isfunction(m_lua, -1))
@@ -366,11 +522,6 @@ bool DownloadScreen::m_extractFile(archive * a, String path)
 	size_t size;
 	la_int64_t offset;
 	File f;
-	if (path.back() == '/') //folder
-	{
-		Path::CreateDir(path);
-		return true;
-	}
 
 	const String dot_dot_win = "..\\";
 	const String dot_dot_unix = "../";
@@ -382,6 +533,12 @@ bool DownloadScreen::m_extractFile(archive * a, String path)
 	if (path.find(dot_dot_unix) != String::npos) {
 		Logf("[Archive] Error reading chart archive: '%s' can't appear in file name '%s'", Logger::Severity::Error, dot_dot_unix.c_str(), path.c_str());
 		return false;
+	}
+
+	if (path.back() == '/') //folder
+	{
+		Path::CreateDir(path);
+		return true;
 	}
 	
 	if (!f.OpenWrite(Path::Normalize(path)))
@@ -483,5 +640,11 @@ int DownloadScreen::m_PlayPreview(lua_State* L)
 		m_previewPlayer.FadeTo(Ref<AudioStream>());
 	}
 
+	return 0;
+}
+
+int DownloadScreen::m_StopPreview(lua_State* L)
+{
+	m_previewPlayer.FadeTo(Ref<AudioStream>());
 	return 0;
 }

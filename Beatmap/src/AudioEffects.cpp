@@ -75,6 +75,7 @@ static AudioEffect CreateDefault(EffectType type)
 		ret.bitcrusher.reduction = IntRange(0, 45);
 		break;
 	case EffectType::Gate:
+		ret.mix = FloatRange(0.9f);
 		ret.gate.gate = 0.5f;
 		break;
 	case EffectType::Retrigger:
@@ -90,22 +91,32 @@ static AudioEffect CreateDefault(EffectType type)
 	case EffectType::TapeStop:
 		break;
 	case EffectType::Phaser:
+		ret.duration = TimeRange(0.5f);
+		ret.mix = FloatRange(0.5f);
+		ret.phaser.stage = IntRange(6);
 		ret.phaser.min = FloatRange(1500.0f);
 		ret.phaser.max = FloatRange(20000.0f);
+		ret.phaser.q = FloatRange(0.707f);
 		ret.phaser.feedback = FloatRange(0.35f);
-		ret.duration = TimeRange(1.f);
+		ret.phaser.stereoWidth = FloatRange(0.75f);
+		ret.phaser.hiCutGain = FloatRange(-8.0f);
 		break;
 	case EffectType::Wobble:
 		// wobble is 1/12 by default
 		ret.duration = TimeRange(1.0f / 12.0f);
+		ret.mix = FloatRange(0.8f);
 		ret.wobble.max = FloatRange(20000.0f);
 		ret.wobble.min = FloatRange(500.0f);
-		ret.wobble.q = FloatRange(2.0f);
+		ret.wobble.q = FloatRange(1.414f);
 		break;
 	case EffectType::Flanger:
-		ret.duration = TimeRange(2000);
-		ret.flanger.offset = IntRange(10);
-		ret.flanger.depth = IntRange(40);
+		ret.duration = TimeRange(2.0f);
+		ret.mix = FloatRange(0.8f);
+		ret.flanger.offset = IntRange(30);
+		ret.flanger.depth = IntRange(45);
+		ret.flanger.feedback = FloatRange(0.6f);
+		ret.flanger.stereoWidth = FloatRange(0.0f);
+		ret.flanger.volume = FloatRange(0.75f);
 		break;
 	case EffectType::SwitchAudio:
 		ret.switchaudio.index = -1;

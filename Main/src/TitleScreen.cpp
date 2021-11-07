@@ -110,7 +110,7 @@ private:
 		}
 	}
 
-	void m_OnButtonPressed(Input::Button buttonCode)
+	void m_OnButtonPressed(Input::Button buttonCode, int32 delta)
 	{
 		if (IsSuspended())
 			return;

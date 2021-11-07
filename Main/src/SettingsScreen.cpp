@@ -334,6 +334,7 @@ private:
 			break;
 		case InputDevice::Mouse:
 			laserSensKey = GameConfigKeys::Mouse_Sensitivity;
+			Label(Utility::Sprintf("Estimated PPR: %.0f", Input::EstimatePprFromSens(g_gameConfig.GetFloat(laserSensKey))));
 			break;
 		case InputDevice::Keyboard:
 		default:
@@ -724,6 +725,7 @@ protected:
 		SectionHeader("Audio");
 
 		PercentSetting(GameConfigKeys::MasterVolume, "Master volume (%.1f%%):");
+		PercentSetting(GameConfigKeys::SlamVolume, "Slam/Clap volume (%.1f%%):");
 		ToggleSetting(GameConfigKeys::MuteUnfocused, "Mute the game when unfocused");
 #ifdef _WIN32
 		ToggleSetting(GameConfigKeys::WASAPI_Exclusive, "WASAPI exclusive mode (requires restart)");
@@ -731,7 +733,7 @@ protected:
 		ToggleSetting(GameConfigKeys::PrerenderEffects, "Pre-render song effects (experimental)");
 
 		SectionHeader("Render");
-
+		SetApply(ToggleSetting(GameConfigKeys::ResponsiveInputs, "Responsive Inputs (CPU intensive)"));
 		SetApply(ToggleSetting(GameConfigKeys::Fullscreen, "Fullscreen"));
 		SetApply(ToggleSetting(GameConfigKeys::WindowedFullscreen, "Use windowed fullscreen"));
 
@@ -1254,7 +1256,7 @@ public:
 		g_application->FastText(prompt, static_cast<float>(g_resolution.x / 2), static_cast<float>(g_resolution.y / 2), 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 	}
 
-	void OnButtonPressed(uint8 key)
+	void OnButtonPressed(uint8 key, int32 delta)
 	{
 		if (!m_knobs)
 		{
@@ -1337,6 +1339,7 @@ private:
 	float m_delta = 0.f;
 	float m_currentSetting = 0.f;
 	bool m_firstStart = false;
+	MouseLockHandle m_mouseLock;
 public:
 	LaserSensCalibrationScreen_Impl()
 	{
@@ -1353,9 +1356,14 @@ public:
 		g_input.GetInputLaserDir(0); //poll because there might be something idk
 
 		if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::LaserInputDevice) == InputDevice::Controller)
+		{
 			m_currentSetting = g_gameConfig.GetFloat(GameConfigKeys::Controller_Sensitivity);
+		}
 		else
+		{
 			m_currentSetting = g_gameConfig.GetFloat(GameConfigKeys::Mouse_Sensitivity);
+			m_mouseLock = g_input.LockMouse();
+		}
 
 		g_input.OnButtonPressed.Add(this, &LaserSensCalibrationScreen_Impl::OnButtonPressed);
 		return true;
@@ -1373,11 +1381,19 @@ public:
 
 		if (m_state)
 		{
-			const float sens = 6.0f / m_delta;
+			float sens = 6.0f / m_delta;
+			if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::LaserInputDevice) == InputDevice::Mouse)
+			{
+				sens = Input::CalculateSensFromPpr(m_delta);
+			}
+
 
 			g_application->FastText("Turn left knob one revolution clockwise", center.x, center.y, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 			g_application->FastText("then press start.", center.x, center.y + 45, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
-			g_application->FastText(Utility::Sprintf("Current Sens: %.2f", sens), center.x, center.y + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
+			if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::LaserInputDevice) == InputDevice::Mouse)
+				g_application->FastText(Utility::Sprintf("Current Sens: %.2f, ppr: (%.0f)", sens, fabs(m_delta)), center.x, center.y + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
+			else
+				g_application->FastText(Utility::Sprintf("Current Sens: %.2f", sens), center.x, center.y + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);	
 
 		}
 		else
@@ -1387,7 +1403,7 @@ public:
 		}
 	}
 
-	void OnButtonPressed(Input::Button button)
+	void OnButtonPressed(Input::Button button, int32 delta)
 	{
 		if (button == Input::Button::BT_S)
 		{
@@ -1396,7 +1412,12 @@ public:
 				if (m_state)
 				{
 					// calc sens and then call delegate
-					SensSet.Call(6.0f / m_delta);
+					float sens = 6.0f / m_delta;
+					if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::LaserInputDevice) == InputDevice::Mouse)
+					{
+						sens = Input::CalculateSensFromPpr(m_delta);
+					}
+					SensSet.Call(sens);
 					g_application->RemoveTickable(this);
 				}
 				else

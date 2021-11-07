@@ -5,7 +5,7 @@
 
 // When this should change, the UpdateVersion MUST be updated to update the old config files.
 // If there's no need to update the UpdateVersion, there's no need to touch this too.
-int32 GameConfig::VERSION = 1;
+int32 GameConfig::VERSION = 2;
 
 inline static void ConvertKeyCodeToScanCode(GameConfig& config, std::vector<GameConfigKeys> keys)
 {
@@ -64,6 +64,8 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::AdjustWindowPositionOnStartup, true);
 	Set(GameConfigKeys::AntiAliasing, 1);
 	Set(GameConfigKeys::MasterVolume, 1.0f);
+	Set(GameConfigKeys::FXVolume, 1.0f);
+	Set(GameConfigKeys::SlamVolume, 1.0f);
 	Set(GameConfigKeys::ScreenX, -1);
 	Set(GameConfigKeys::ScreenY, -1);
 	Set(GameConfigKeys::VSync, false);
@@ -104,6 +106,7 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::RevertToSetupAfterScoreScreen, false);
 	Set(GameConfigKeys::DisplayPracticeInfoInGame, true);
 	Set(GameConfigKeys::AutoComputeSongOffset, false);
+	Set(GameConfigKeys::ResponsiveInputs, true);
 	SetEnum<Enum_SongOffsetUpdateMethod>(GameConfigKeys::UpdateSongOffsetAfterFirstPlay, SongOffsetUpdateMethod::None);
 	SetEnum<Enum_SongOffsetUpdateMethod>(GameConfigKeys::UpdateSongOffsetAfterEveryPlay, SongOffsetUpdateMethod::None);
 
@@ -287,6 +290,17 @@ void GameConfig::UpdateVersion()
 			GameConfigKeys::Key_BackAlt,
 		});
 
+		++configVersion;
+	}
+
+	// 1 -> 2: Convert mouse sensitivity from old range to new range.
+	if (configVersion == 1) 
+	{
+		float oldSens = GetFloat(GameConfigKeys::Mouse_Sensitivity);
+		float newSens = static_cast<float>(Input::CalculateSensFromPpr(6.0f / oldSens));
+		Logf("Recalculated mouse sensitivity: %.4f -> %.4f", Logger::Severity::Info, oldSens, newSens);
+
+		Set(GameConfigKeys::Mouse_Sensitivity, newSens);
 		++configVersion;
 	}
 

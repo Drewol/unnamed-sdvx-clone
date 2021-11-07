@@ -29,7 +29,8 @@ void Input::Init(Graphics::Window& wnd)
 
 	m_mouseAxisMapping[0] = g_gameConfig.GetInt(GameConfigKeys::Mouse_Laser0Axis);
 	m_mouseAxisMapping[1] = g_gameConfig.GetInt(GameConfigKeys::Mouse_Laser1Axis);
-	m_mouseSensitivity = g_gameConfig.GetFloat(GameConfigKeys::Mouse_Sensitivity);
+
+	m_mouseSensitivity = CalculateRealMouseSens(g_gameConfig.GetFloat(GameConfigKeys::Mouse_Sensitivity));
 
 	m_controllerAxisMapping[0] = g_gameConfig.GetInt(GameConfigKeys::Controller_Laser0Axis);
 	m_controllerAxisMapping[1] = g_gameConfig.GetInt(GameConfigKeys::Controller_Laser1Axis);
@@ -71,8 +72,17 @@ void Input::Init(Graphics::Window& wnd)
 			auto id = SDL_JoystickGetDeviceGUID(i);
 			if (memcmp(deviceId.data(), id.data, 16) == 0)
 			{
-				deviceIndex = i;
-				break;
+				deviceIndex = i; //always set device index since it is a match, but check input count in case of multiple matches
+				auto joystick = SDL_JoystickOpen(i);
+
+				int numInputs = 0;
+				numInputs += SDL_JoystickNumAxes(joystick);
+				numInputs += SDL_JoystickNumButtons(joystick);
+				numInputs += SDL_JoystickNumHats(joystick);
+
+				SDL_JoystickClose(joystick);
+				if (numInputs > 0)
+					break;
 			}
 		}
 
@@ -221,7 +231,7 @@ void Input::Update(float deltaTime)
 		m_comboHoldTimer += deltaTime;
 		if (m_comboHoldTimer >= 0.5 && !m_backSent)
 		{
-			OnButtonPressed.Call(Button::Back);
+			OnButtonPressed.Call(Button::Back, 0);
 			m_backSent = true;
 		}
 	}
@@ -287,6 +297,26 @@ float Input::GetInputLaserDir(uint32 laserIdx)
 float Input::GetAbsoluteInputLaserDir(uint32 laserIdx)
 {
 	return m_rawLaserStates[laserIdx];
+}
+
+//To give the sensitivity slider a good feel and put reasonable sensitivities in a reasonable range.
+const double Input::mouseSensVars[] = { 20.0, 0.1, 1.2 };
+
+double Input::CalculateSensFromPpr(double ppr)
+{
+	double pprSign = Math::Sign(ppr);
+
+	return pprSign * (mouseSensVars[0] / mouseSensVars[1]) / pow(fabs(ppr), 1.0 / mouseSensVars[2]);
+}
+double Input::CalculateRealMouseSens(double sensSetting)
+{
+	double sensSign = Math::Sign(sensSetting);
+	double ppr = EstimatePprFromSens(abs(sensSetting));
+	return sensSign * 6.0 / (ppr);
+}
+double Input::EstimatePprFromSens(double sens)
+{
+	return pow(mouseSensVars[0] / (fmax(sens, 0.001) * mouseSensVars[1]), mouseSensVars[2]);
 }
 void Input::m_InitKeyboardMapping()
 {
@@ -354,7 +384,7 @@ void Input::m_InitControllerMapping()
 	}
 }
 
-void Input::m_OnButtonInput(Button b, bool pressed)
+void Input::m_OnButtonInput(Button b, bool pressed, int32 delta)
 {
 	bool& state = m_buttonStates[(size_t)b];
 	if(state != pressed)
@@ -364,22 +394,22 @@ void Input::m_OnButtonInput(Button b, bool pressed)
 		{
 			if (b == Button::BT_S && m_backComboInstant && Are3BTsHeld())
 			{
-				OnButtonPressed.Call(Button::Back);
+				OnButtonPressed.Call(Button::Back, delta);
 			}
 			else if (b == Button::BT_S && m_backComboHold && Are3BTsHeld());
 			else
 			{
-				OnButtonPressed.Call(b);
+				OnButtonPressed.Call(b, delta);
 			}
 		}
 		else
 		{
-			OnButtonReleased.Call(b);
+			OnButtonReleased.Call(b, delta);
 		}
 	}
 
 	static Timer t;
-	if(b >= Button::LS_0Neg)
+	if(b >= Button::LS_0Neg && b <= Button::LS_1Pos)
 	{
 		int32 btnIdx = (int32)b - (int32)Button::LS_0Neg;
 		int32 laserIdx = btnIdx / 2;
@@ -397,34 +427,34 @@ void Input::m_OnButtonInput(Button b, bool pressed)
 	}
 }
 
-void Input::m_OnGamepadButtonPressed(uint8 button)
+void Input::m_OnGamepadButtonPressed(uint8 button, int32 delta)
 {
 	// Handle button mappings
 	auto it = m_controllerMap.equal_range(button);
 	for(auto it1 = it.first; it1 != it.second; it1++)
-		m_OnButtonInput(it1->second, true);
+		m_OnButtonInput(it1->second, true, delta);
 }
-void Input::m_OnGamepadButtonReleased(uint8 button)
+void Input::m_OnGamepadButtonReleased(uint8 button, int32 delta)
 {
 	// Handle button mappings
 	auto it = m_controllerMap.equal_range(button);
 	for(auto it1 = it.first; it1 != it.second; it1++)
-		m_OnButtonInput(it1->second, false);
+		m_OnButtonInput(it1->second, false, delta);
 }
 
-void Input::OnKeyPressed(SDL_Scancode code)
+void Input::OnKeyPressed(SDL_Scancode code, int32 delta)
 {
 	// Handle button mappings
 	auto it = m_buttonMap.equal_range(static_cast<int32>(code));
 	for(auto it1 = it.first; it1 != it.second; it1++)
-		m_OnButtonInput(it1->second, true);
+		m_OnButtonInput(it1->second, true, delta);
 }
-void Input::OnKeyReleased(SDL_Scancode code)
+void Input::OnKeyReleased(SDL_Scancode code, int32 delta)
 {
 	// Handle button mappings
 	auto it = m_buttonMap.equal_range(static_cast<int32>(code));
 	for(auto it1 = it.first; it1 != it.second; it1++)
-		m_OnButtonInput(it1->second, false);
+		m_OnButtonInput(it1->second, false, delta);
 }
 
 void Input::OnMouseMotion(int32 x, int32 y)

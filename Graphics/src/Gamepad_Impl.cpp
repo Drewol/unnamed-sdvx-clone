@@ -34,13 +34,13 @@ namespace Graphics
 		return true;
 	}
 
-	void Gamepad_Impl::HandleInputEvent(uint32 buttonIndex, uint8 newState)
+	void Gamepad_Impl::HandleInputEvent(uint32 buttonIndex, uint8 newState, int32 delta)
 	{
 		m_buttonStates[buttonIndex] = newState;
 		if(newState != 0)
-			OnButtonPressed.Call(buttonIndex);
+			OnButtonPressed.Call(buttonIndex, delta);
 		else
-			OnButtonReleased.Call(buttonIndex);
+			OnButtonReleased.Call(buttonIndex, delta);
 	}
 	void Gamepad_Impl::HandleAxisEvent(uint32 axisIndex, int16 newValue)
 	{

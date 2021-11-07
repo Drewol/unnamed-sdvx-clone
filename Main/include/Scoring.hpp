@@ -245,14 +245,14 @@ private:
 	void m_OnFXBegin(HoldObjectState* obj);
 
 	// Button event handlers
-	void m_OnButtonPressed(Input::Button buttonCode);
-	void m_OnButtonReleased(Input::Button buttonCode);
+	void m_OnButtonPressed(Input::Button buttonCode, int32 delta);
+	void m_OnButtonReleased(Input::Button buttonCode, int32 delta);
 	void m_CleanupInput();
 
 	// Updates all pending ticks
 	void m_UpdateTicks();
 	// Tries to trigger a hit event on an approaching tick
-	ObjectState* m_ConsumeTick(uint32 buttonCode);
+	ObjectState* m_ConsumeTick(uint32 buttonCode, int32 delta);
 	// Called whenether missed or not
 	void m_OnTickProcessed(ScoreTick* tick, uint32 index);
 	void m_TickHit(ScoreTick* tick, uint32 index, MapTime delta = 0);
@@ -308,8 +308,11 @@ private:
 	// Decides if the coming tick should be auto completed
 	float m_autoLaserTime[2] = { 0.0f };
 	const double m_laserDistanceLeniency = 1 / 6.;
-	const float m_autoLaserDuration = 4 / 60.f;
-	const float m_autoLaserDurationAfterSlam = 8 / 60.f;
+	const float m_autoLaserDuration = 4.5f / 60.f;
+	const float m_autoLaserDurationAfterSlam = 8.25f / 60.f;
+
+	//Ehhhh maybe
+	const MapTime m_offsetLaserConstant = 5;
 	
 	// Saves the time when a button was hit, used to decide if a button was held before a hold object was active
 	MapTime m_buttonHitTime[6] = { 0, 0, 0, 0, 0, 0 };

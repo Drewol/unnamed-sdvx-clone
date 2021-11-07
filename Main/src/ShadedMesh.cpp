@@ -88,6 +88,7 @@ int ShadedMesh::AddSharedTexture(const String& name, const String& key)
 	{
 		auto& t = g_application->sharedTextures.at(key);
 		m_textures.Add(name, t->texture);
+		SetParam(name, t->texture);
 		return 0;
 	}
 	else {
@@ -333,8 +334,10 @@ int lDraw(lua_State* L) {
 	{
 		ShadedMesh* object = *userdata;
 
+#ifndef EMBEDDED //TODO: Some other wireframe mode should be possible in both GL versions
 		if (object->IsWireframe())
 			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+#endif
 		if (ShadedMeshOnTrack* objOnTrack = dynamic_cast<ShadedMeshOnTrack*>(object))
 		{
 			objOnTrack->DrawOnTrack();
@@ -343,8 +346,10 @@ int lDraw(lua_State* L) {
 		{
 			object->Draw();
 		}
+#ifndef EMBEDDED
 		if (object->IsWireframe())
 			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+#endif
 	}
 	else {
 		luaL_error(L, "null userdata");

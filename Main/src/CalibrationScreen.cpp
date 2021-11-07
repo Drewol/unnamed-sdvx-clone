@@ -233,7 +233,7 @@ bool CalibrationScreen::GetTickRate(int32& rate)
 	return true;
 }
 
-void CalibrationScreen::m_OnButtonPressed(Input::Button buttonCode)
+void CalibrationScreen::m_OnButtonPressed(Input::Button buttonCode, int32 delta)
 {
 	if (buttonCode == Input::Button::Back) {
 		g_application->RemoveTickable(this);
@@ -247,8 +247,8 @@ void CalibrationScreen::m_OnButtonPressed(Input::Button buttonCode)
 			return;
 		}
 		m_buttonGuardTime[(uint32)buttonCode] = m_timer.Milliseconds();
-
-		int hitDelta = m_lastTime % 500 > 250 ? (m_lastTime % 500) - 500 : m_lastTime % 500;
+		int correctedTime = m_lastTime - delta;
+		int hitDelta = correctedTime % 500 > 250 ? (correctedTime % 500) - 500 : correctedTime % 500;
 		int zod = hitDelta;
 		m_zeroOffsetDeltas.Add(zod);
 		hitDelta += m_inputOffset;
@@ -276,7 +276,7 @@ void CalibrationScreen::m_OnButtonPressed(Input::Button buttonCode)
 	}
 }
 
-void CalibrationScreen::m_OnButtonReleased(Input::Button buttonCode)
+void CalibrationScreen::m_OnButtonReleased(Input::Button buttonCode, int32 delta)
 {
 	if (buttonCode < Input::Button::FX_0)
 	{

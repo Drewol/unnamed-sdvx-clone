@@ -48,8 +48,8 @@ public:
 	void Render(float deltaTime) override;
 	void ForceRender(float deltaTime) override;
 
-	void OnKeyPressed(SDL_Scancode code) override;
-	void OnKeyReleased(SDL_Scancode code) override;
+	void OnKeyPressed(SDL_Scancode code, int32 delta) override;
+	void OnKeyReleased(SDL_Scancode code, int32 delta) override;
 	void MousePressed(MouseButton button);
 
 
@@ -123,8 +123,8 @@ public:
 	}
 
 private:
-	void m_OnButtonPressed(Input::Button buttonCode);
-	void m_OnButtonReleased(Input::Button buttonCode);
+	void m_OnButtonPressed(Input::Button buttonCode, int32 delta);
+	void m_OnButtonReleased(Input::Button buttonCode, int32 delta);
 	void m_OnMouseScroll(int32 steps);
 
 	bool m_handleStartPacket(nlohmann::json& packet);

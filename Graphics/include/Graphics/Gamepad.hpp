@@ -15,7 +15,7 @@ public:
 	virtual uint32 NumAxes() const = 0;
 
 	// Gamepad button event
-	Delegate<uint8> OnButtonPressed;
+	Delegate<uint8, int32> OnButtonPressed;
 	// Gamepad button event
-	Delegate<uint8> OnButtonReleased;
+	Delegate<uint8, int32> OnButtonReleased;
 };

@@ -38,14 +38,14 @@ public:
 	~Test_Impl()
 	{
 	}
-	virtual void OnKeyPressed(SDL_Scancode code) override
+	virtual void OnKeyPressed(SDL_Scancode code, int32 delta) override
 	{
 		if(code == SDL_SCANCODE_TAB)
 		{
 			//m_settings->SetShow(!m_settings->IsShown());
 		}
 	}
-	virtual void OnKeyReleased(SDL_Scancode code) override
+	virtual void OnKeyReleased(SDL_Scancode code, int32 delta) override
 	{
 	}
 	virtual void Render(float deltaTime) override

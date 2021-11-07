@@ -143,6 +143,11 @@ uint64 File::GetLastWriteTime(const String& path)
 	#endif
 }
 
+uint64 File::FileTimeToUnixTimestamp(uint64 fileTime) {
+	return fileTime / 1000000000;
+}
+
+
 bool LoadResourceInternal(const char* name, const char* type, Buffer& out)
 {
 	return false;
