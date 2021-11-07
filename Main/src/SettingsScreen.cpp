@@ -16,7 +16,7 @@ static inline const char* GetKeyNameFromScancodeConfig(int scancode)
 class SettingsPage_Input : public SettingsPage
 {
 public:
-	SettingsPage_Input(nk_context* nctx) : SettingsPage(nctx, "Input") {}
+	explicit SettingsPage_Input(nk_context* nctx) : SettingsPage(nctx, "Input") {}
 
 protected:
 	void Load() override
@@ -54,7 +54,7 @@ protected:
 
 		if (!m_gamePads.empty())
 		{
-			std::array<uint8, 16> newId;
+			std::array<uint8, 16> newId{};
 			memcpy(newId.data(), SDL_JoystickGetDeviceGUID(m_selectedPad).data, 16);
 			g_gameConfig.SetBlob<16>(GameConfigKeys::Controller_DeviceID, newId);
 		}
@@ -62,7 +62,7 @@ protected:
 
 	Vector<String> m_gamePadsStr;
 	Vector<const char*> m_gamePads;
-	int m_selectedPad;
+	int m_selectedPad{};
 
 	String m_controllerButtonNames[8];
 	String m_controllerLaserNames[2];
@@ -139,7 +139,7 @@ protected:
 			if (newPad != m_selectedPad)
 			{
 				m_selectedPad = newPad;
-				std::array<uint8, 16> newId;
+				std::array<uint8, 16> newId{};
 				memcpy(newId.data(), SDL_JoystickGetDeviceGUID(m_selectedPad).data, 16);
 				g_gameConfig.SetBlob<16>(GameConfigKeys::Controller_DeviceID, newId);
 			}
@@ -432,7 +432,7 @@ private:
 class SettingsPage_Game : public SettingsPage
 {
 public:
-	SettingsPage_Game(nk_context* nctx) : SettingsPage(nctx, "Game") {}
+	explicit SettingsPage_Game(nk_context* nctx) : SettingsPage(nctx, "Game") {}
 
 protected:
 	void Load() override
@@ -466,7 +466,7 @@ protected:
 
 		LayoutRowDynamic(1);
 		if (nk_button_label(m_nctx, "Calibrate Offsets")) {
-			CalibrationScreen* cscreen = new CalibrationScreen(m_nctx);
+			auto* cscreen = new CalibrationScreen(m_nctx);
 			g_transition->TransitionTo(cscreen);
 			return;
 		}
@@ -558,7 +558,7 @@ private:
 class SettingsPage_Visual : public SettingsPage
 {
 public:
-	SettingsPage_Visual(nk_context* nctx) : SettingsPage(nctx, "Visual") {}
+	explicit SettingsPage_Visual(nk_context* nctx) : SettingsPage(nctx, "Visual") {}
 
 protected:
 	void Load() override
@@ -772,7 +772,7 @@ protected:
 class SettingsPage_Online : public SettingsPage
 {
 public:
-	SettingsPage_Online(nk_context* nctx) : SettingsPage(nctx, "Online") {}
+	explicit SettingsPage_Online(nk_context* nctx) : SettingsPage(nctx, "Online") {}
 	
 protected:
 	void Load() override
@@ -830,7 +830,7 @@ protected:
 class SettingsPage_Skin : public SettingsPage
 {
 public:
-	SettingsPage_Skin(nk_context* nctx) : SettingsPage(nctx, "Skin") {}
+	explicit SettingsPage_Skin(nk_context* nctx) : SettingsPage(nctx, "Skin") {}
 
 protected:
 	void Load() override
@@ -1162,7 +1162,7 @@ public:
 		}
 	}
 
-	bool Init()
+	bool Init() override
 	{
 		if (m_isGamepad)
 		{
@@ -1194,7 +1194,7 @@ public:
 		return true;
 	}
 
-	void Tick(float deltatime)
+	void Tick(float deltaTime) override
 	{
 		if (m_knobs && m_isGamepad)
 		{
@@ -1222,10 +1222,9 @@ public:
 		{
 			g_application->RemoveTickable(this);
 		}
-
 	}
 
-	void Render(float deltatime)
+	void Render(float deltaTime) override
 	{
 		String prompt = "Press the key";
 
@@ -1254,7 +1253,8 @@ public:
 
 		prompt += " for " + m_keyName + ".";
 
-		g_application->FastText(prompt, static_cast<float>(g_resolution.x / 2), static_cast<float>(g_resolution.y / 2), 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
+		g_application->FastText(prompt, static_cast<float>(g_resolution.x / 2), static_cast<float>(g_resolution.y / 2),
+								40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 	}
 
 	void OnButtonPressed(uint8 key, int32 delta)
@@ -1273,7 +1273,7 @@ public:
 			g_gameConfig.Set(m_key, code);
 			m_completed = true; // Needs to be set because pressing right alt triggers two keypresses on the same frame.
 		}
-		else if (!m_isGamepad && m_knobs)
+		else if (!m_isGamepad)
 		{
 			switch (m_key)
 			{
@@ -1314,11 +1314,11 @@ public:
 		}
 	}
 
-	virtual void OnSuspend()
+	void OnSuspend() override
 	{
 		//g_rootCanvas->Remove(m_canvas.As<GUIElementBase>());
 	}
-	virtual void OnRestore()
+	void OnRestore() override
 	{
 		//Canvas::Slot* slot = g_rootCanvas->Add(m_canvas.As<GUIElementBase>());
 		//slot->anchor = Anchors::Full;
@@ -1327,7 +1327,7 @@ public:
 
 ButtonBindingScreen* ButtonBindingScreen::Create(GameConfigKeys key, bool gamepad, int controllerIndex, bool isAlternative)
 {
-	ButtonBindingScreen_Impl* impl = new ButtonBindingScreen_Impl(key, gamepad, controllerIndex, isAlternative);
+	auto* impl = new ButtonBindingScreen_Impl(key, gamepad, controllerIndex, isAlternative);
 	return impl;
 }
 
@@ -1342,20 +1342,18 @@ private:
 	bool m_firstStart = false;
 	MouseLockHandle m_mouseLock;
 public:
-	LaserSensCalibrationScreen_Impl()
-	{
+	LaserSensCalibrationScreen_Impl() = default;
 
-	}
-
-	~LaserSensCalibrationScreen_Impl()
+	~LaserSensCalibrationScreen_Impl() override
 	{
 		g_input.OnButtonPressed.RemoveAll(this);
 	}
 
-	bool Init()
+	bool Init() override
 	{
 		g_input.GetInputLaserDir(0); //poll because there might be something idk
 
+		// Unused/defunct?
 		if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::LaserInputDevice) == InputDevice::Controller)
 		{
 			m_currentSetting = g_gameConfig.GetFloat(GameConfigKeys::Controller_Sensitivity);
@@ -1370,13 +1368,13 @@ public:
 		return true;
 	}
 
-	void Tick(float deltatime)
+	void Tick(float deltaTime) override
 	{
 		m_delta += g_input.GetAbsoluteInputLaserDir(0);
 
 	}
 
-	void Render(float deltatime)
+	void Render(float deltaTime) override
 	{
 		const Vector2 center = { static_cast<float>(g_resolution.x / 2), static_cast<float>(g_resolution.y / 2) };
 
@@ -1387,7 +1385,6 @@ public:
 			{
 				sens = Input::CalculateSensFromPpr(m_delta);
 			}
-
 
 			g_application->FastText("Turn left knob one revolution clockwise", center.x, center.y, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 			g_application->FastText("then press start.", center.x, center.y + 45, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
@@ -1440,11 +1437,11 @@ public:
 			g_application->RemoveTickable(this);
 	}
 
-	virtual void OnSuspend()
+	void OnSuspend() override
 	{
 		//g_rootCanvas->Remove(m_canvas.As<GUIElementBase>());
 	}
-	virtual void OnRestore()
+	void OnRestore() override
 	{
 		//Canvas::Slot* slot = g_rootCanvas->Add(m_canvas.As<GUIElementBase>());
 		//slot->anchor = Anchors::Full;
