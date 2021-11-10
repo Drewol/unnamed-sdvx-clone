@@ -145,6 +145,8 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::Key_Laser1PosAlt, -1);
 	Set(GameConfigKeys::Key_Back, SDL_SCANCODE_ESCAPE);
 	Set(GameConfigKeys::Key_BackAlt, -1);
+	Set(GameConfigKeys::Key_Restart, SDL_SCANCODE_F5);
+	Set(GameConfigKeys::Key_RestartAlt, -1);
 	Set(GameConfigKeys::Key_Sensitivity, 3.0f);
 	Set(GameConfigKeys::Key_LaserReleaseTime, 0.0f);
 
@@ -160,6 +162,7 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::Controller_Laser0Axis, 0);
 	Set(GameConfigKeys::Controller_Laser1Axis, 1);
 	Set(GameConfigKeys::Controller_Back, -1);
+	Set(GameConfigKeys::Controller_Restart, -1);
 	Set(GameConfigKeys::Controller_Sensitivity, 1.0f);
 	Set(GameConfigKeys::Controller_Deadzone, 0.f);
 	Set(GameConfigKeys::Controller_DirectMode, false);

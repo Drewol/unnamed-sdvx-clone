@@ -27,6 +27,7 @@ public:
 		LS_1Neg, // Right laser-	(<----|)
 		LS_1Pos, // Right laser+
 		Back,
+		Restart,
 		Length)
 
 	~Input();

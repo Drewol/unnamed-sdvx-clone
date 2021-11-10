@@ -2604,6 +2604,7 @@ void Application::SetLuaBindings(lua_State *state)
 		pushIntToTable("BUTTON_FXR", (int)Input::Button::FX_1);
 		pushIntToTable("BUTTON_STA", (int)Input::Button::BT_S);
 		pushIntToTable("BUTTON_BCK", (int)Input::Button::Back);
+		pushIntToTable("BUTTON_RST", (int)Input::Button::Restart);
 
 		lua_setglobal(state, "game");
 	}

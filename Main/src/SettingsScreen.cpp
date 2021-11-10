@@ -64,7 +64,7 @@ protected:
 	Vector<const char*> m_gamePads;
 	int m_selectedPad;
 
-	String m_controllerButtonNames[8];
+	String m_controllerButtonNames[9];
 	String m_controllerLaserNames[2];
 
 	const Vector<GameConfigKeys>* m_activeBTKeys = &m_keyboardKeys;
@@ -81,7 +81,8 @@ protected:
 		GameConfigKeys::Key_BT3,
 		GameConfigKeys::Key_FX0,
 		GameConfigKeys::Key_FX1,
-		GameConfigKeys::Key_Back
+		GameConfigKeys::Key_Back,
+		GameConfigKeys::Key_Restart
 	};
 	const Vector<GameConfigKeys> m_altKeyboardKeys = {
 		GameConfigKeys::Key_BTSAlt,
@@ -91,7 +92,8 @@ protected:
 		GameConfigKeys::Key_BT3Alt,
 		GameConfigKeys::Key_FX0Alt,
 		GameConfigKeys::Key_FX1Alt,
-		GameConfigKeys::Key_BackAlt
+		GameConfigKeys::Key_BackAlt,
+		GameConfigKeys::Key_RestartAlt
 	};
 
 	const Vector<GameConfigKeys> m_keyboardLaserKeys = {
@@ -115,7 +117,8 @@ protected:
 		GameConfigKeys::Controller_BT3,
 		GameConfigKeys::Controller_FX0,
 		GameConfigKeys::Controller_FX1,
-		GameConfigKeys::Controller_Back
+		GameConfigKeys::Controller_Back,
+		GameConfigKeys::Controller_Restart
 	};
 	const Vector<GameConfigKeys> m_controllerLaserKeys = {
 		GameConfigKeys::Controller_Laser0Axis,
@@ -180,7 +183,7 @@ protected:
 
 		SectionHeader("In-Game Key Inputs");
 
-		EnumSetting<Enum_AbortMethod>(GameConfigKeys::RestartPlayMethod, "Restart with F5:");
+		EnumSetting<Enum_AbortMethod>(GameConfigKeys::RestartPlayMethod, "Restart game with Restart:");
 		if (g_gameConfig.GetEnum<Enum_AbortMethod>(GameConfigKeys::RestartPlayMethod) == AbortMethod::Hold)
 		{
 			IntSetting(GameConfigKeys::RestartPlayHoldDuration, "Restart hold duration (ms):", 250, 10000, 250);
@@ -227,7 +230,7 @@ private:
 		const float FX_HEIGHT = BT_HEIGHT / 2;
 		const float LASER_HEIGHT = BT_HEIGHT / 2;
 
-		const float CONTROLLER_HEIGHT = LASER_HEIGHT + BT_SPACING * 2 + BT_HEIGHT + BT_SPACING + FX_HEIGHT + m_lineHeight * 5;
+		const float CONTROLLER_HEIGHT = LASER_HEIGHT + BT_SPACING * 2 + BT_HEIGHT + BT_SPACING + FX_HEIGHT + m_lineHeight * 7;
 		const float CONTROLLER_MARGIN = (m_pageInnerWidth - CONTROLLER_WIDTH) / 2;
 
 		// Center align the whole thing
@@ -308,6 +311,10 @@ private:
 			LayoutRowDynamic(1);
 			Label("Back:");
 			if (nk_button_label(m_nctx, m_controllerButtonNames[7].c_str())) OpenButtonBind((*m_activeBTKeys)[7]);
+
+			LayoutRowDynamic(1);
+			Label("Restart:");
+			if (nk_button_label(m_nctx, m_controllerButtonNames[8].c_str())) OpenButtonBind((*m_activeBTKeys)[8]);
 
 			if (!m_useBTGamepad)
 			{
@@ -399,7 +406,7 @@ private:
 	}
 	inline void UpdateControllerInputNames()
 	{
-		for (size_t i = 0; i < 8; i++)
+		for (size_t i = 0; i < 9; i++)
 		{
 			if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice) == InputDevice::Controller)
 			{

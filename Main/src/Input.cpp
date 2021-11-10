@@ -321,6 +321,8 @@ void Input::m_InitKeyboardMapping()
 	//Always bind back button
 	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_Back), Button::Back);
 	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_BackAlt), Button::Back);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_Restart), Button::Restart);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_RestartAlt), Button::Restart);
 
 	if(m_laserDevice == InputDevice::Keyboard)
 	{
@@ -351,6 +353,7 @@ void Input::m_InitControllerMapping()
 		m_controllerMap.Add(g_gameConfig.GetInt(GameConfigKeys::Controller_FX0), Button::FX_0);
 		m_controllerMap.Add(g_gameConfig.GetInt(GameConfigKeys::Controller_FX1), Button::FX_1);
 		m_controllerMap.Add(g_gameConfig.GetInt(GameConfigKeys::Controller_Back), Button::Back);
+		m_controllerMap.Add(g_gameConfig.GetInt(GameConfigKeys::Controller_Restart), Button::Restart);
 	}
 }
 

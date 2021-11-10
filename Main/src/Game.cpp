@@ -2358,19 +2358,6 @@ public:
 		{
 			m_audioPlayback.Advance(5000);
 		}
-		else if(code == SDL_SCANCODE_F5 && !IsMultiplayerGame() && !IsChallenge() && !m_isPracticeSetup)
-		{
-			AbortMethod abortMethod = g_gameConfig.GetEnum<Enum_AbortMethod>(GameConfigKeys::RestartPlayMethod);
-			if (abortMethod == AbortMethod::Press)
-			{
-				Restart();
-			}
-			else if(abortMethod == AbortMethod::Hold && !m_restartTriggerTimeSet)
-			{
-				m_restartTriggerTime = m_lastMapTime + g_gameConfig.GetInt(GameConfigKeys::RestartPlayHoldDuration);
-				m_restartTriggerTimeSet = true;
-			}
-		}
 		else if(code == SDL_SCANCODE_F8)
 		{
 			m_renderDebugHUD = !m_renderDebugHUD;
@@ -2390,11 +2377,6 @@ public:
 	{
 		if (m_practiceSetupDialog && m_practiceSetupDialog->IsActive())
 			return;
-
-		if (code == SDL_SCANCODE_F5)
-		{
-			m_restartTriggerTimeSet = false;
-		}
 	}
 
 	void TriggerManualExit()
@@ -2417,6 +2399,11 @@ public:
 	}
 	void m_OnButtonReleased(Input::Button buttonCode) {
 		m_releaseTimes[(size_t)buttonCode] = SDL_GetTicks();
+
+		if (buttonCode == Input::Button::Restart)
+		{
+			m_restartTriggerTimeSet = false;
+		}
 	}
 	void m_OnButtonPressed(Input::Button buttonCode)
 	{
@@ -2481,6 +2468,20 @@ public:
 					m_exitTriggerTime = m_lastMapTime + (MapTime)(exitPlayHoldDuration * m_audioPlayback.GetPlaybackSpeed());
 					m_exitTriggerTimeSet = true;
 				}
+			}
+		}
+		
+		if (buttonCode == Input::Button::Restart && IsSuccessfullyInitialized())
+		{
+			AbortMethod abortMethod = g_gameConfig.GetEnum<Enum_AbortMethod>(GameConfigKeys::RestartPlayMethod);
+			if (abortMethod == AbortMethod::Press)
+			{
+				Restart();
+			}
+			else if(abortMethod == AbortMethod::Hold && !m_restartTriggerTimeSet)
+			{
+				m_restartTriggerTime = m_lastMapTime + g_gameConfig.GetInt(GameConfigKeys::RestartPlayHoldDuration);
+				m_restartTriggerTimeSet = true;
 			}
 		}
 	}
