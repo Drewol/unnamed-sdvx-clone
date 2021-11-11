@@ -2373,12 +2373,6 @@ public:
 		}
 	}
 
-	void OnKeyReleased(SDL_Scancode code) override
-	{
-		if (m_practiceSetupDialog && m_practiceSetupDialog->IsActive())
-			return;
-	}
-
 	void TriggerManualExit()
 	{
 		if (IsSuccessfullyInitialized())
