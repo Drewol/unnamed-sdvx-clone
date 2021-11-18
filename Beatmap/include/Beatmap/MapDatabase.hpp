@@ -23,6 +23,8 @@ struct ScoreIndex
 	int32 score;
 	int32 crit;
 	int32 almost;
+	int32 early;
+	int32 late;
 	int32 miss;
 	float gauge;
 	GaugeType gaugeType;
