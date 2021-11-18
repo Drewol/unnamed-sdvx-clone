@@ -8,6 +8,8 @@ static void PopulateScoreJSON(nlohmann::json& json, const ScoreIndex& score, con
         {"score", score.score},
         {"crit", score.crit},
         {"near", score.almost},
+        {"early", score.early},
+        {"late", score.late},
         {"error", score.miss},
         {"gauge", score.gauge},
         {"options", {
