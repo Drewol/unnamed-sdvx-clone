@@ -90,7 +90,7 @@ public:
 	List<Event> m_pendingChanges;
 	mutex m_pendingChangesLock;
 
-	static const int32 m_version = 19;
+	static const int32 m_version = 20;
 
 public:
 	MapDatabase_Impl(MapDatabase& outer, bool transferScores) : m_outer(outer)
@@ -233,7 +233,7 @@ public:
 					}
 
 
-					DBStatement scoreScan = m_database.Query("SELECT rowid,score,crit,near,early,late,miss,gauge,gameflags,hitstats,timestamp,diffid FROM Scores WHERE diffid=?");
+					DBStatement scoreScan = m_database.Query("SELECT rowid,score,crit,near,miss,gauge,gameflags,hitstats,timestamp,diffid FROM Scores WHERE diffid=?");
 					scoreScan.BindInt(1, diffid);
 					while (scoreScan.StepRow())
 					{
@@ -242,8 +242,6 @@ public:
 						score.score = scoreScan.IntColumn(1);
 						score.crit = scoreScan.IntColumn(2);
 						score.almost = scoreScan.IntColumn(3);
-						score.early = scoreScan.IntColumn(4);
-						score.late = scoreScan.IntColumn(5);
 						score.miss = scoreScan.IntColumn(6);
 						score.gauge = (float) scoreScan.DoubleColumn(7);
 						score.gaugeOption = scoreScan.IntColumn(8);
@@ -274,7 +272,7 @@ public:
 				m_database.Exec("DROP TABLE IF EXISTS Difficulties");
 				m_CreateTables();
 
-				DBStatement addScore = m_database.Query("INSERT INTO Scores(score,crit,near,early,late,miss,gauge,gameflags,replay,timestamp,chart_hash) VALUES(?,?,?,?,?,?,?,?,?)");
+				DBStatement addScore = m_database.Query("INSERT INTO Scores(score,crit,near,miss,gauge,gameflags,replay,timestamp,chart_hash) VALUES(?,?,?,?,?,?,?,?,?)");
 				
 				m_database.Exec("BEGIN");
 				for (ScoreIndex& score : scoresToAdd)
@@ -419,6 +417,14 @@ public:
 				m_database.Exec("ALTER TABLE Scores ADD COLUMN window_slam INTEGER");
 				m_database.Exec("UPDATE Scores SET window_slam=84");
 				gotVersion = 19;
+			}
+			if (gotVersion == 19)
+			{
+				m_database.Exec("ALTER TABLE Scores ADD COLUMN early INTEGER");
+				m_database.Exec("ALTER TABLE Scores ADD COLUMN late INTEGER");
+				m_database.Exec("UPDATE Scores SET early=?");
+				m_database.Exec("UPDATE Scores SET late=?");
+				gotVersion = 20;
 			}
 			m_database.Exec(Utility::Sprintf("UPDATE Database SET `version`=%d WHERE `rowid`=1", m_version));
 
