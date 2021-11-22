@@ -24,7 +24,7 @@ Track::Track()
 
 Track::~Track()
 {
-	g_input.OnButtonReleased.Remove(this, &Track::OnButtonReleased);
+	g_input.OnButtonReleased.Remove(this, &Track::OnButtonReleasedDelta);
 
 	delete loader;
 	for (auto & i : m_laserTrackBuilder)
@@ -36,7 +36,7 @@ Track::~Track()
 
 bool Track::AsyncLoad()
 {
-	g_input.OnButtonReleased.Add(this, &Track::OnButtonReleased);
+	g_input.OnButtonReleased.Add(this, &Track::OnButtonReleasedDelta);
 
 	loader = new AsyncAssetLoader();
 	String skin = g_application->GetCurrentSkin();
@@ -823,4 +823,9 @@ void Track::OnButtonReleased(Input::Button buttonCode)
 	if (buttonIndex >= 6)
 		return;
 	m_buttonHitEffects[buttonIndex].held = false;
+}
+
+void Track::OnButtonReleasedDelta(Input::Button buttonCode, int32 delta)
+{
+	OnButtonReleased(buttonCode);
 }

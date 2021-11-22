@@ -317,7 +317,7 @@ void BaseGameSettingsDialog::m_SetTables()
     lua_setglobal(m_lua, "SettingsDiag");
 }
 
-void BaseGameSettingsDialog::m_OnButtonPressed(Input::Button button)
+void BaseGameSettingsDialog::m_OnButtonPressed(Input::Button button, int32 delta)
 {
     if (!m_active || m_closing)
         return;
@@ -343,7 +343,7 @@ void BaseGameSettingsDialog::m_OnButtonPressed(Input::Button button)
     }
 }
 
-void BaseGameSettingsDialog::m_OnButtonReleased(Input::Button button)
+void BaseGameSettingsDialog::m_OnButtonReleased(Input::Button button, int32 delta)
 {
     if (!m_active || m_closing || !m_enableFXInputs)
         return;
@@ -463,7 +463,7 @@ void BaseGameSettingsDialog::m_PressSetting()
     currentSetting->setter.Call(*currentSetting);
 }
 
-void BaseGameSettingsDialog::m_OnKeyPressed(SDL_Scancode code)
+void BaseGameSettingsDialog::m_OnKeyPressed(SDL_Scancode code, int32 delta)
 {
     if (!m_active || m_closing)
         return;

@@ -500,7 +500,7 @@ void SettingsPageCollection::Render(float deltaTime)
 	g_application->GetRenderQueueBase()->Process();
 }
 
-void SettingsPageCollection::OnKeyPressed(SDL_Scancode code)
+void SettingsPageCollection::OnKeyPressed(SDL_Scancode code, int32 delta)
 {
 	if (IsSuspended())
 	{

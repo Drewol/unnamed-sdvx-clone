@@ -13,7 +13,7 @@ namespace Graphics
 		bool Init(Graphics::Window* window, uint32 deviceIndex);
 
 		// Handles input events straight from the event loop
-		void HandleInputEvent(uint32 buttonIndex, uint8 newState);
+		void HandleInputEvent(uint32 buttonIndex, uint8 newState, int32 delta);
 		void HandleAxisEvent(uint32 axisIndex, int16 newValue);
 		void HandleHatEvent(uint32 hadIndex, uint8 newValue);
 

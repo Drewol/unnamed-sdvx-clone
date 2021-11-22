@@ -108,6 +108,8 @@ void Application::ApplySettings()
 	Logger::Get().SetLogLevel(g_gameConfig.GetEnum<Logger::Enum_Severity>(GameConfigKeys::LogLevel));
 	g_gameWindow->SetVSync(g_gameConfig.GetBool(GameConfigKeys::VSync) ? 1 : 0);
 	m_showFps = g_gameConfig.GetBool(GameConfigKeys::ShowFps);
+	m_responsiveInputs = g_gameConfig.GetBool(GameConfigKeys::ResponsiveInputs);
+
 
 	m_UpdateWindowPosAndShape();
 	m_OnWindowResized(g_gameWindow->GetWindowSize());
@@ -763,6 +765,27 @@ void Application::m_InitDiscord()
 	Discord_Initialize(DISCORD_APPLICATION_ID, &dhe, 1, nullptr);
 }
 
+SDL_semaphore* renderSema = nullptr; //TODO: move to somewhere better
+std::atomic<bool> rendering;
+void threadedRenderer() {
+	while (true)
+	{
+		SDL_SemWait(renderSema);
+
+		if (g_tickables.empty())
+		{
+			rendering.store(false);
+			return;
+		}
+
+		g_gl->MakeCurrent();
+		g_application->RenderTickables();
+		g_gl->ReleaseCurrent();
+		rendering.store(false);
+	}
+}
+
+
 bool Application::m_Init()
 {
 	ProfilerScope $("Application Setup");
@@ -1020,6 +1043,12 @@ bool Application::m_Init()
 		m_fontBakeThread = Thread(BasicNuklearGui::BakeFontWithLock);
 	}
 
+	m_responsiveInputs = g_gameConfig.GetBool(GameConfigKeys::ResponsiveInputs);
+	renderSema = SDL_CreateSemaphore(0);
+	m_renderThread = Thread(threadedRenderer);
+
+
+
 	///TODO: check if directory exists already?
 	Path::CreateDir(Path::Absolute("screenshots"));
 	Path::CreateDir(Path::Absolute("songs"));
@@ -1032,11 +1061,10 @@ void Application::m_MainLoop()
 {
 	Timer appTimer;
 	m_deltaTime = 0.5f;
-	Timer frameTimer;
 	while (true)
 	{
 		m_appTime = appTimer.SecondsAsFloat();
-		frameTimer.Restart();
+		m_frameTimer.Restart();
 		//run discord callbacks
 		Discord_RunCallbacks();
 
@@ -1101,7 +1129,7 @@ void Application::m_MainLoop()
 
 		// Determine target tick rates for update and render
 		int32 targetFPS = 120; // Default to 120 FPS
-		uint32 targetRenderTime = 0;
+		m_targetRenderTime = 0;
 		for (auto tickable : g_tickables)
 		{
 			int32 tempTarget = 0;
@@ -1111,7 +1139,7 @@ void Application::m_MainLoop()
 			}
 		}
 		if (targetFPS > 0)
-			targetRenderTime = 1000000 / targetFPS;
+			m_targetRenderTime = 1000000 / targetFPS;
 
 		// Main loop
 		float currentTime = appTimer.SecondsAsFloat();
@@ -1134,31 +1162,9 @@ void Application::m_MainLoop()
 		// processed callbacks for finished tasks
 		g_jobSheduler->Update();
 
-		//This FPS limiter seems unstable over 500fps
-		uint32 frameTime = frameTimer.Microseconds();
-		if (frameTime < targetRenderTime)
-		{
-			uint32 timeLeft = (targetRenderTime - frameTime);
-			uint32 sleepMicroSecs = (uint32)(timeLeft * m_fpsTargetSleepMult * 0.75);
-			if (sleepMicroSecs > 1000)
-			{
-				uint32 sleepStart = frameTimer.Microseconds();
-				std::this_thread::sleep_for(std::chrono::microseconds(sleepMicroSecs));
-				float actualSleep = frameTimer.Microseconds() - sleepStart;
 
-				m_fpsTargetSleepMult += ((float)timeLeft - (float)actualSleep / 0.75) / 500000.f;
-				m_fpsTargetSleepMult = Math::Clamp(m_fpsTargetSleepMult, 0.0f, 1.0f);
-			}
 
-			do
-			{
-				std::this_thread::yield();
-			} while (frameTimer.Microseconds() < targetRenderTime);
-		}
-		// Swap buffers
-		g_gl->SwapBuffers();
-
-		m_deltaTime = frameTimer.SecondsAsFloat();
+		m_deltaTime = m_frameTimer.SecondsAsFloat();
 	}
 }
 
@@ -1182,56 +1188,21 @@ void Application::m_Tick()
 	// Not minimized / Valid resolution
 	if (g_resolution.x > 0 && g_resolution.y > 0)
 	{
-		//Clear out opengl errors
-		GLenum glErr = glGetError();
-		while (glErr != GL_NO_ERROR)
+		if (m_responsiveInputs)
 		{
-			Logf("OpenGL Error: %p", Logger::Severity::Debug, glErr);
-			glErr = glGetError();
+			rendering.store(true);
+			g_gl->ReleaseCurrent();
+			SDL_SemPost(renderSema);
+			while (rendering.load()) {
+				SDL_PumpEvents();
+				std::this_thread::yield();
+			}
+			g_gl->MakeCurrent();
+		}
+		else {
+			RenderTickables();
 		}
 
-		glClearColor(0, 0, 0, 0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		nvgBeginFrame(g_guiState.vg, g_resolution.x, g_resolution.y, 1);
-		m_renderQueueBase = RenderQueue(g_gl, m_renderStateBase);
-		g_guiState.rq = &m_renderQueueBase;
-		g_guiState.t = Transform();
-		g_guiState.fontMaterial = &m_fontMaterial;
-		g_guiState.fillMaterial = &m_fillMaterial;
-		g_guiState.resolution = g_resolution;
-
-		if (g_gameConfig.GetBool(GameConfigKeys::ForcePortrait))
-			g_guiState.scissorOffset = g_gameWindow->GetWindowSize().x / 2 - g_resolution.x / 2;
-		else
-			g_guiState.scissorOffset = 0;
-
-		g_guiState.scissor = Rect(0, 0, -1, -1);
-		g_guiState.imageTint = nvgRGB(255, 255, 255);
-		// Render all items
-		for (auto &tickable : g_tickables)
-		{
-			tickable->Render(m_deltaTime);
-		}
-		m_renderStateBase.projectionTransform = GetGUIProjection();
-		if (m_showFps)
-		{
-			nvgReset(g_guiState.vg);
-			nvgBeginPath(g_guiState.vg);
-			nvgFontFace(g_guiState.vg, "fallback");
-			nvgFontSize(g_guiState.vg, 20);
-			nvgTextAlign(g_guiState.vg, NVG_ALIGN_RIGHT);
-			nvgFillColor(g_guiState.vg, nvgRGB(0, 200, 255));
-			String fpsText = Utility::Sprintf("%.1fFPS", GetRenderFPS());
-			nvgText(g_guiState.vg, g_resolution.x - 5, g_resolution.y - 5, fpsText.c_str(), 0);
-			// Visualize m_fpsTargetSleepMult for debugging
-			//nvgBeginPath(g_guiState.vg);
-			//float h = m_fpsTargetSleepMult * g_resolution.y;
-			//nvgRect(g_guiState.vg, g_resolution.x - 10, g_resolution.y - h, 10, h);
-			//nvgFill(g_guiState.vg);
-		}
-		nvgEndFrame(g_guiState.vg);
-		m_renderQueueBase.Process();
-		glCullFace(GL_FRONT);
 	}
 
 	if (m_needSkinReload)
@@ -1239,6 +1210,86 @@ void Application::m_Tick()
 		m_needSkinReload = false;
 		ReloadSkin();
 	}
+}
+
+void Application::RenderTickables()
+{
+	//Clear out opengl errors
+	GLenum glErr = glGetError();
+	while (glErr != GL_NO_ERROR)
+	{
+		Logf("OpenGL Error: %p", Logger::Severity::Debug, glErr);
+		glErr = glGetError();
+	}
+
+	glClearColor(0, 0, 0, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	nvgBeginFrame(g_guiState.vg, g_resolution.x, g_resolution.y, 1);
+	m_renderQueueBase = RenderQueue(g_gl, m_renderStateBase);
+	g_guiState.rq = &m_renderQueueBase;
+	g_guiState.t = Transform();
+	g_guiState.fontMaterial = &m_fontMaterial;
+	g_guiState.fillMaterial = &m_fillMaterial;
+	g_guiState.resolution = g_resolution;
+
+	if (g_gameConfig.GetBool(GameConfigKeys::ForcePortrait))
+		g_guiState.scissorOffset = g_gameWindow->GetWindowSize().x / 2 - g_resolution.x / 2;
+	else
+		g_guiState.scissorOffset = 0;
+
+	g_guiState.scissor = Rect(0, 0, -1, -1);
+	g_guiState.imageTint = nvgRGB(255, 255, 255);
+	// Render all items
+	for (auto& tickable : g_tickables)
+	{
+		tickable->Render(m_deltaTime);
+	}
+	m_renderStateBase.projectionTransform = GetGUIProjection();
+	if (m_showFps)
+	{
+		nvgReset(g_guiState.vg);
+		nvgBeginPath(g_guiState.vg);
+		nvgFontFace(g_guiState.vg, "fallback");
+		nvgFontSize(g_guiState.vg, 20);
+		nvgTextAlign(g_guiState.vg, NVG_ALIGN_RIGHT);
+		nvgFillColor(g_guiState.vg, nvgRGB(0, 200, 255));
+		String fpsText = Utility::Sprintf("%.1fFPS", GetRenderFPS());
+		nvgText(g_guiState.vg, g_resolution.x - 5, g_resolution.y - 5, fpsText.c_str(), 0);
+		// Visualize m_fpsTargetSleepMult for debugging
+		//nvgBeginPath(g_guiState.vg);
+		//float h = m_fpsTargetSleepMult * g_resolution.y;
+		//nvgRect(g_guiState.vg, g_resolution.x - 10, g_resolution.y - h, 10, h);
+		//nvgFill(g_guiState.vg);
+	}
+	nvgEndFrame(g_guiState.vg);
+	m_renderQueueBase.Process();
+	glCullFace(GL_FRONT);
+
+
+	//This FPS limiter seems unstable over 500fps
+	uint32 frameTime = m_frameTimer.Microseconds();
+	if (frameTime < m_targetRenderTime)
+	{
+		uint32 timeLeft = (m_targetRenderTime - frameTime);
+		uint32 sleepMicroSecs = (uint32)(timeLeft * m_fpsTargetSleepMult * 0.75);
+		if (sleepMicroSecs > 1000)
+		{
+			uint32 sleepStart = m_frameTimer.Microseconds();
+			std::this_thread::sleep_for(std::chrono::microseconds(sleepMicroSecs));
+			float actualSleep = m_frameTimer.Microseconds() - sleepStart;
+
+			m_fpsTargetSleepMult += ((float)timeLeft - (float)actualSleep / 0.75) / 500000.f;
+			m_fpsTargetSleepMult = Math::Clamp(m_fpsTargetSleepMult, 0.0f, 1.0f);
+		}
+
+		do
+		{
+			std::this_thread::yield();
+		} while (m_frameTimer.Microseconds() < m_targetRenderTime);
+	}
+	// Swap buffers
+	g_gl->SwapBuffers();
+
 }
 
 void Application::m_Cleanup()
@@ -1250,6 +1301,11 @@ void Application::m_Cleanup()
 		delete it;
 	}
 	g_tickables.clear();
+
+	SDL_SemPost(renderSema);
+	m_renderThread.join();
+	SDL_DestroySemaphore(renderSema);
+
 
 	if (g_audio)
 	{
@@ -1878,7 +1934,7 @@ int Application::IsNamedSamplePlaying(String name)
 		return -1;
 	}
 }
-void Application::m_OnKeyPressed(SDL_Scancode code)
+void Application::m_OnKeyPressed(SDL_Scancode code, int32 delta)
 {
 	// Fullscreen toggle
 	if (code == SDL_SCANCODE_RETURN)
@@ -1895,15 +1951,15 @@ void Application::m_OnKeyPressed(SDL_Scancode code)
 	// Pass key to application
 	for (auto it = g_tickables.rbegin(); it != g_tickables.rend();)
 	{
-		(*it)->OnKeyPressed(code);
+		(*it)->OnKeyPressed(code, delta);
 		break;
 	}
 }
-void Application::m_OnKeyReleased(SDL_Scancode code)
+void Application::m_OnKeyReleased(SDL_Scancode code, int32 delta)
 {
 	for (auto it = g_tickables.rbegin(); it != g_tickables.rend();)
 	{
-		(*it)->OnKeyReleased(code);
+		(*it)->OnKeyReleased(code, delta);
 		break;
 	}
 }
@@ -2640,6 +2696,8 @@ void Application::SetLuaBindings(lua_State *state)
 	//http
 	m_skinHttp.PushFunctions(state);
 }
+
+
 
 bool JacketLoadingJob::Run()
 {

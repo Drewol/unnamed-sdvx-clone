@@ -128,7 +128,8 @@ public:
 	float GetButtonPlacement(uint32 buttonIdx);
 
     void OnHoldEnter(Input::Button buttonCode);
-    void OnButtonReleased(Input::Button buttonCode);
+	void OnButtonReleased(Input::Button buttonCode);
+	void OnButtonReleasedDelta(Input::Button buttonCode, int32 delta);
 
 	// Laser positions, as shown on the overlay
 	float laserPositions[2];

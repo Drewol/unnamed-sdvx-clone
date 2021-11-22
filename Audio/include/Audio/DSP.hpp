@@ -5,6 +5,32 @@
 #include "AudioBase.hpp"
 #include <Shared/Interpolation.hpp>
 
+// Biquad Filter
+// Thanks to https://www.youtube.com/watch?v=FnpkBE4kJ6Q&list=WL&index=8 for the explanation
+// Also http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt for the coefficient formulas
+class BQF
+{
+public:
+	float b0 = 1.0f;
+	float b1 = 0.0f;
+	float b2 = 0.0f;
+	float a0 = 1.0f;
+	float a1 = 0.0f;
+	float a2 = 0.0f;
+
+	void SetLowPass(float q, float freq, float sampleRate);
+	void SetHighPass(float q, float freq, float sampleRate);
+	void SetAllPass(float q, float freq, float sampleRate);
+	void SetPeaking(float q, float freq, float gain, float sampleRate);
+	void SetHighShelf(float q, float freq, float gain, float sampleRate);
+	float Update(float in);
+private:
+	// FIR Delay buffers
+	float zb[2]{};
+	// IIR Delay buffers
+	float za[2]{};
+};
+
 class PanDSP : public DSP
 {
 public:
@@ -14,19 +40,10 @@ public:
 	virtual const char *GetName() const { return "PanDSP"; }
 };
 
-// Biquad Filter
-// Thanks to https://www.youtube.com/watch?v=FnpkBE4kJ6Q&list=WL&index=8 for the explanation
-// Also http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt for the coefficient formulas
 class BQFDSP : public DSP
 {
 public:
 	BQFDSP(uint32 sampleRate);
-	float b0 = 1.0f;
-	float b1 = 0.0f;
-	float b2 = 0.0f;
-	float a0 = 1.0f;
-	float a1 = 0.0f;
-	float a2 = 0.0f;
 
 	virtual void Process(float *out, uint32 numSamples);
 	virtual const char *GetName() const { return "BQFDSP"; }
@@ -36,17 +53,8 @@ public:
 	void SetLowPass(float q, float freq);
 	void SetHighPass(float q, float freq);
 
-	void SetPeaking(float q, float freq, float gain, float sampleRate);
-	void SetLowPass(float q, float freq, float sampleRate);
-	void SetHighPass(float q, float freq, float sampleRate);
-
 private:
-	// Delayed samples
-	static const uint32 order = 2;
-	// FIR Delay buffers
-	float zb[2][order]{};
-	// IIR Delay buffers
-	float za[2][order]{};
+	BQF m_filters[2];
 };
 
 // Combinded Low/High-pass and Peaking filter
@@ -161,7 +169,7 @@ private:
 	bool m_bufferReserved = false;
 };
 
-class WobbleDSP : public BQFDSP
+class WobbleDSP : public DSP
 {
 public:
 	WobbleDSP(uint32 sampleRate);
@@ -177,42 +185,37 @@ public:
 	virtual const char *GetName() const { return "WobbleDSP"; }
 
 private:
+	BQF m_filters[2];
 	uint32 m_length{};
 	uint32 m_currentSample = 0;
 };
 
-// Referenced http://www.musicdsp.org/files/phaser.cpp
 class PhaserDSP : public DSP
 {
 public:
 	PhaserDSP(uint32 sampleRate);
 
-	uint32 time = 0;
-
 	// Frequency range
-	float dmin = 1000.0f;
-	float dmax = 4000.0f;
-	float fb = 0.2f;	//feedback
-	float lmix = 0.33f; //local mix
+	float fmin = 1500.0f;
+	float fmax = 20000.0f;
+	float q = 0.707f;
+	float feedback = 0.35f;
+	float stereoWidth = 0.0f;
+	float hiCutGain = -8.0f;
 
 	void SetLength(double length);
+	void SetStage(uint32 stage);
 
 	virtual void Process(float *out, uint32 numSamples);
 	virtual const char *GetName() const { return "PhaserDSP"; }
 
 private:
 	uint32 m_length = 0;
-
-	// All pass filter
-	struct APF
-	{
-		float Update(float in);
-		float a1 = 0.0f;
-		float za = 0.0f;
-	};
-
-	APF filters[2][6];
+	uint32 m_stage = 6;
+	BQF m_apf[12][2];
+	BQF m_hiShelf[2];
 	float za[2] = {0.0f};
+	uint32 m_currentSample = 0;
 };
 
 class FlangerDSP : public DSP
@@ -222,6 +225,9 @@ public:
 
 	void SetLength(double length);
 	void SetDelayRange(uint32 min, uint32 max);
+	void SetFeedback(float feedback);
+	void SetStereoWidth(float stereoWidth);
+	void SetVolume(float volume);
 
 	virtual void Process(float *out, uint32 numSamples);
 	virtual const char *GetName() const { return "FlangerDSP"; }
@@ -232,6 +238,10 @@ private:
 	// Delay range
 	uint32 m_min = 0;
 	uint32 m_max = 0;
+
+	float m_feedback = 0.f;
+	float m_stereoWidth = 0.f;
+	float m_volume = 0.f;
 
 	Vector<float> m_sampleBuffer;
 	uint32 m_time = 0;

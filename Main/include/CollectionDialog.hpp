@@ -31,8 +31,8 @@ private:
 
 	void m_ChangeState();
 	void m_AdvanceSelection(int steps);
-	void m_OnButtonPressed(Input::Button button);
-	void m_OnKeyPressed(SDL_Scancode code);
+	void m_OnButtonPressed(Input::Button button, int32 delta);
+	void m_OnKeyPressed(SDL_Scancode code, int32 delta);
 	void m_OnEntryReturn(const String& name);
 
 	//Call when closing has been completed

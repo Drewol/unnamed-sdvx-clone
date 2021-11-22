@@ -66,7 +66,7 @@ private:
 		lua_pushinteger(m_lua, data);
 		lua_settable(m_lua, -3);
 	}
-	void m_OnButtonPressed(Input::Button button)
+	void m_OnButtonPressed(Input::Button button, int32 delta)
 	{
 		if ((button == Input::Button::BT_S || button == Input::Button::Back) && m_restored && !m_removed)
 		{
@@ -307,7 +307,7 @@ public:
 		m_scroll += steps;
 	}
 
-	virtual void OnKeyPressed(SDL_Scancode code) override
+	virtual void OnKeyPressed(SDL_Scancode code, int32 delta) override
 	{
 		if(code == SDL_SCANCODE_RETURN && !m_removed)
 		{
@@ -341,7 +341,7 @@ public:
 			m_scroll -= 1;
 		}
 	}
-	virtual void OnKeyReleased(SDL_Scancode code) override
+	virtual void OnKeyReleased(SDL_Scancode code, int32 delta) override
 	{
 	}
 	virtual void Render(float deltaTime) override

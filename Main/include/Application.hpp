@@ -108,6 +108,7 @@ public:
 	void CheckForUpdate();
 	void ForceRender();
 	void SetLuaBindings(struct lua_State* state);
+	void RenderTickables();
 	struct NVGcontext* GetVGContext();
 
 	//if empty: no update avaiable
@@ -116,6 +117,7 @@ public:
 
 	AutoplayInfo* autoplayInfo = nullptr;
 	Map<String, Ref<SharedTexture>> sharedTextures;
+	
 
 private:
 	bool m_LoadConfig(String profileName = "");
@@ -126,8 +128,8 @@ private:
 	void m_MainLoop();
 	void m_Tick();
 	void m_Cleanup();
-	void m_OnKeyPressed(SDL_Scancode code);
-	void m_OnKeyReleased(SDL_Scancode code);
+	void m_OnKeyPressed(SDL_Scancode code, int32 delta);
+	void m_OnKeyReleased(SDL_Scancode code, int32 delta);
 	void m_UpdateWindowPosAndShape();
 	void m_UpdateWindowPosAndShape(int32 monitorId, bool fullscreen, bool ensureInBound);
 	void m_OnWindowResized(const Vector2i& newSize);
@@ -150,6 +152,8 @@ private:
 	class Beatmap* m_currentMap = nullptr;
 	SkinHttp m_skinHttp;
 	SkinIR m_skinIR;
+	Timer m_frameTimer;
+	uint32 m_targetRenderTime;
 
 	float m_deltaTime;
 	float m_fpsTargetSleepMult = 1.0f;
@@ -172,6 +176,9 @@ private:
 	int m_multiRoomSize = 0;
 	int m_multiRoomCount = 0;
 	bool m_gaugeRemovedWarn = true;
+	bool m_responsiveInputs = true;
+
+	Thread m_renderThread;
 };
 
 class JacketLoadingJob : public JobBase

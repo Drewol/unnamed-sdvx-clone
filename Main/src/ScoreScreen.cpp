@@ -109,7 +109,7 @@ private:
 		lua_pushinteger(m_lua, data);
 		lua_settable(m_lua, -3);
 	}
-	void m_OnButtonPressed(Input::Button button)
+	void m_OnButtonPressed(Input::Button button, int32 delta)
 	{
 		if (m_multiplayer && m_multiplayer->GetChatOverlay()->IsOpen())
 			return;
@@ -900,7 +900,7 @@ public:
 	}
 
 
-	virtual void OnKeyPressed(SDL_Scancode code) override
+	virtual void OnKeyPressed(SDL_Scancode code, int32 delta) override
 	{
 		if (m_multiplayer &&
 				m_multiplayer->GetChatOverlay()->OnKeyPressedConsume(code))
@@ -933,7 +933,7 @@ public:
 			lua_settop(m_lua, 0);
 		}
 	}
-	virtual void OnKeyReleased(SDL_Scancode code) override
+	virtual void OnKeyReleased(SDL_Scancode code, int32 delta) override
 	{
 	}
 	virtual void Render(float deltaTime) override
@@ -1110,7 +1110,7 @@ public:
 		}
 		Vector2i size(w, h);
 		Image screenshot = ImageRes::Screenshot(g_gl, size, { x,y });
-		String screenshotPath = "screenshots/" + Shared::Time::Now().ToString() + ".png";
+		String screenshotPath = Path::Absolute("screenshots/" + Shared::Time::Now().ToString() + ".png");
 		if (screenshot.get() != nullptr)
 		{
 			screenshot->SavePNG(screenshotPath);

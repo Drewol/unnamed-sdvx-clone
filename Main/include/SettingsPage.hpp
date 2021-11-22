@@ -154,7 +154,7 @@ public:
 
 	void Render(float deltaTime) override;
 
-	void OnKeyPressed(SDL_Scancode code) override;
+	void OnKeyPressed(SDL_Scancode code, int32 delta) override;
 
 	void Exit();
 

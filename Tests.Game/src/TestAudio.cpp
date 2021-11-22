@@ -56,9 +56,9 @@ Test("Audio.Music.Phaser")
 			TestMusicPlayer::Init(songPath, startOffset);
 
 			phaser = new PhaserDSP(song->GetAudioSampleRate());
-			phaser->dmin = 800.0f;
-			phaser->dmax = 1000.0f;
-			phaser->fb = 0.8f;
+			phaser->fmin = 800.0f;
+			phaser->fmax = 1000.0f;
+			phaser->feedback = 0.8f;
 			song->AddDSP(phaser);
 			phaser->SetLength(1000);
 		}

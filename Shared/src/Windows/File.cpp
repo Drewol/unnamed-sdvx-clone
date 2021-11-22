@@ -155,6 +155,11 @@ uint64 File::GetLastWriteTime(const String& path)
 	return (uint64&)ftWrite;
 }
 
+// Windows uses 100 nanosecond intervals
+uint64 File::FileTimeToUnixTimestamp(uint64 fileTime) {
+	return (fileTime / 10000000) - 11644473600;
+}
+
 static bool LoadResourceInternal(const char* name, const char* type, Buffer& out)
 {
 	HMODULE module = GetModuleHandle(nullptr);

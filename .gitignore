@@ -6,6 +6,9 @@
 *.lib
 *.exe
 *.a
+bin/usc-game
+bin/Tests.Game
+bin/Tests.Shared
 
 # Memory dump files
 *.dmp

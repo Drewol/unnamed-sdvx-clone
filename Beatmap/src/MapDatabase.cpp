@@ -653,37 +653,58 @@ public:
 
 		return res;
 	}
-	
-	Map<int32, FolderIndex*> FindFolders(const String& searchString)
+
+	Map<int32, FolderIndex*> FindFoldersWithFilter(const String& searchString, const Vector<std::pair<String, String>> filters)
 	{
 		WString test = Utility::ConvertToWString(searchString);
-		String stmt = "SELECT DISTINCT folderId FROM Charts WHERE";
+		String stmt = "SELECT DISTINCT folderId FROM Charts";
 
-		Vector<String> terms = searchString.Explode(" ");
-		int32 i = 0;
-		for(auto term : terms)
-		{
-			if(i > 0)
-				stmt += " AND";
-			stmt += String(" (artist LIKE ?") +
-				" OR title LIKE ?" +
-				" OR path LIKE ?" +
-				" OR effector LIKE ?" +
-				" OR artist_translit LIKE ?" +
-				" OR title_translit LIKE ?)";
-			i++;
-		}
-		DBStatement search = m_database.Query(stmt);
+		String conds = "";
 
-		i = 1;
-		for (auto term : terms)
-		{
-			// Bind all the terms
-			for (int j = 0; j < 6; j++)
+		Vector<String> binds;
+
+		if (!searchString.empty()) {
+			Vector<String> terms = searchString.Explode(" ");
+			for (const auto& term : terms)
 			{
-				search.BindString(i+j, "%" + term + "%");
+				if (term.empty())
+					continue;
+
+				if (!conds.empty())
+					conds += " AND";
+				conds += String(" (artist LIKE ?") +
+					" OR title LIKE ?" +
+					" OR path LIKE ?" +
+					" OR effector LIKE ?" +
+					" OR artist_translit LIKE ?" +
+					" OR title_translit LIKE ?)";
+
+				for (int j = 0; j < 6; j++)
+					binds.push_back("%" + term + "%");
 			}
-			i+=6;
+		}
+
+		for (const auto& filter : filters)
+		{
+			if (filter.second.empty())
+				continue;
+
+			if(!conds.empty())
+				conds += " AND";
+			conds += " (" + filter.first + " == ?)";
+			binds.push_back(filter.second);
+		}
+
+		if (!conds.empty())
+			stmt += " WHERE" + conds;
+
+	 	DBStatement search = m_database.Query(stmt);
+
+		int32 num = 1;
+		for (const auto& bind : binds)
+		{
+			search.BindString(num, bind);
+			num++;
 		}
 
 		Map<int32, FolderIndex*> res;
@@ -697,8 +718,12 @@ public:
 			}
 		}
 
-
 		return res;
+	}
+	
+	Map<int32, FolderIndex*> FindFolders(const String& searchString)
+	{
+		return FindFoldersWithFilter(searchString, {});
 	}
 
 	Vector<String> GetCollections()
@@ -2246,6 +2271,10 @@ void MapDatabase::StopSearching()
 Map<int32, FolderIndex*> MapDatabase::FindFoldersByPath(const String& search)
 {
 	return m_impl->FindFoldersByPath(search);
+}
+Map<int32, FolderIndex*> MapDatabase::FindFoldersWithFilter(const String& search, const Vector<std::pair<String, String>> filter)
+{
+	return m_impl->FindFoldersWithFilter(search, filter);
 }
 Map<int32, ChallengeIndex*> MapDatabase::FindChallenges(const String& search)
 {

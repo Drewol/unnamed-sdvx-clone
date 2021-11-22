@@ -245,14 +245,14 @@ private:
 	void m_OnFXBegin(HoldObjectState* obj);
 
 	// Button event handlers
-	void m_OnButtonPressed(Input::Button buttonCode);
-	void m_OnButtonReleased(Input::Button buttonCode);
+	void m_OnButtonPressed(Input::Button buttonCode, int32 delta);
+	void m_OnButtonReleased(Input::Button buttonCode, int32 delta);
 	void m_CleanupInput();
 
 	// Updates all pending ticks
 	void m_UpdateTicks();
 	// Tries to trigger a hit event on an approaching tick
-	ObjectState* m_ConsumeTick(uint32 buttonCode);
+	ObjectState* m_ConsumeTick(uint32 buttonCode, int32 delta);
 	// Called whenether missed or not
 	void m_OnTickProcessed(ScoreTick* tick, uint32 index);
 	void m_TickHit(ScoreTick* tick, uint32 index, MapTime delta = 0);
