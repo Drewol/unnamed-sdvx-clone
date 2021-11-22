@@ -198,6 +198,7 @@ public:
 				m_PushIntToTable("goods", score->almost);
 				m_PushIntToTable("earlies", score->early);
 				m_PushIntToTable("lates", score->late);
+				m_PushIntToTable("combo", score->combo);
 				m_PushIntToTable("misses", score->miss);
 				m_PushIntToTable("timestamp", score->timestamp);
 				m_PushIntToTable("badge", static_cast<int>(Scoring::CalculateBadge(*score)));

@@ -2517,6 +2517,7 @@ public:
 		scoreData.almost = m_scoring.categorizedHits[1];
 		scoreData.early = m_scoring.timedHits[0];
 		scoreData.late = m_scoring.timedHits[1];
+		scoreData.combo = m_scoring.maxComboCounter;
 		scoreData.crit = m_scoring.categorizedHits[2];
 		scoreData.gaugeType = g->GetType();
 		scoreData.gaugeOption = g->GetOpts();

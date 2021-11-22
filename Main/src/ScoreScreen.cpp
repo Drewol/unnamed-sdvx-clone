@@ -264,6 +264,7 @@ private:
 		newScore->almost = m_categorizedHits[1];
 		newScore->early = m_timedHits[0];
 		newScore->late = m_timedHits[1];
+		newScore->combo = m_maxCombo;
 		newScore->miss = m_categorizedHits[0];
 		newScore->gauge = m_finalGaugeValue;
 
@@ -398,6 +399,7 @@ public:
 		m_scoredata.almost = m_categorizedHits[1];
 		m_scoredata.early = m_timedHits[0];
 		m_scoredata.late = m_timedHits[1];
+		m_scoredata.combo = m_maxCombo;
 		m_scoredata.miss = m_categorizedHits[0];
 		m_scoredata.gauge = m_finalGaugeValue;
 		m_scoredata.gaugeType = m_gaugeType;
@@ -458,6 +460,7 @@ public:
 		m_scoredata.almost = m_categorizedHits[1];
 		m_scoredata.early = m_timedHits[0];
 		m_scoredata.late = m_timedHits[1];
+		m_scoredata.combo = m_maxCombo;
 		m_scoredata.miss = m_categorizedHits[0];
 		m_scoredata.gauge = m_finalGaugeValue;
 		m_scoredata.gaugeType = m_gaugeType;
@@ -772,6 +775,7 @@ public:
 				m_PushIntToTable("goods", score->almost);
 				m_PushIntToTable("earlies", score->early);
 				m_PushIntToTable("lates", score->late);
+				m_PushIntToTable("combo", score->combo);
 				m_PushIntToTable("misses", score->miss);
 				m_PushIntToTable("timestamp", score->timestamp);
 				m_PushIntToTable("badge", static_cast<int>(Scoring::CalculateBadge(*score)));
