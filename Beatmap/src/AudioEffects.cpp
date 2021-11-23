@@ -16,9 +16,15 @@ EffectDuration EffectDuration::Lerp(const EffectDuration &lhs, const EffectDurat
 {
 	assert(rhs.type == lhs.type);
 	if (lhs.type == Type::Rate)
-		return lhs.rate + (lhs.rate - rhs.rate) * time;
+	{
+		// Assumes rate is never above 1
+		float interp = (1 / rhs.rate) * time;
+		return interp == 0 ? lhs.rate : fmin(1.f, 1 / interp);
+	}
 	else
-		return (int32)(lhs.duration + (float)(lhs.duration - rhs.duration) * time);
+	{
+		return (int32) (lhs.duration + (float) (lhs.duration - rhs.duration) * time);
+	}
 }
 uint32 EffectDuration::Absolute(double noteDuration)
 {

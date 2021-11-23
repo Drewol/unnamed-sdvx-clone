@@ -274,7 +274,7 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 
 				// Split up parameters
 				Vector<String> paramsString = strings[2].Explode(";");
-				for(auto param : paramsString)
+				for(const auto& param : paramsString)
 				{
 					String k, v;
 					if(!param.Split("=", &k, &v))
@@ -295,7 +295,7 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 				}
 				else
 				{
-					Logf("Unkown define statement in ksh @%d: \"%s\"", Logger::Severity::Warning, lineNumber, line);
+					Logf("Unknown define statement in ksh @%d: \"%s\"", Logger::Severity::Warning, lineNumber, line);
 				}
 			}
 			else if(line.Split("=", &k, &v))

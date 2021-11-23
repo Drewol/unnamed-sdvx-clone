@@ -419,7 +419,7 @@ AudioEffect ParseCustomEffect(const KShootEffectDefinition &def, Vector<String> 
 	}
 
 	return effect;
-};
+}
 
 bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 {
@@ -444,19 +444,19 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 	}
 
 	// Add all the custom effect types
-	for (auto it = kshootMap.fxDefines.begin(); it != kshootMap.fxDefines.end(); it++)
+	for (auto & fxDefine : kshootMap.fxDefines)
 	{
-		EffectType type = effectTypeMap.FindOrAddEffectType(it->first);
+		EffectType type = effectTypeMap.FindOrAddEffectType(fxDefine.first);
 		if (m_customEffects.Contains(type))
 			continue;
-		m_customEffects.Add(type, ParseCustomEffect(it->second, m_switchablePaths));
+		m_customEffects.Add(type, ParseCustomEffect(fxDefine.second, m_switchablePaths));
 	}
-	for (auto it = kshootMap.filterDefines.begin(); it != kshootMap.filterDefines.end(); it++)
+	for (auto & filterDefine : kshootMap.filterDefines)
 	{
-		EffectType type = filterTypeMap.FindOrAddEffectType(it->first);
+		EffectType type = filterTypeMap.FindOrAddEffectType(filterDefine.first);
 		if (m_customFilters.Contains(type))
 			continue;
-		m_customFilters.Add(type, ParseCustomEffect(it->second, m_switchablePaths));
+		m_customFilters.Add(type, ParseCustomEffect(filterDefine.second, m_switchablePaths));
 	}
 
 	auto ParseFilterType = [&](const String &str) {
@@ -982,7 +982,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 			}
 			else
 			{
-				Logf("[KSH]Unkown map parameter at %d:%d: %s", Logger::Severity::Warning, it.GetTime().block, it.GetTime().tick, p.first);
+				Logf("[KSH] Unknown map parameter at %d:%d: %s", Logger::Severity::Warning, it.GetTime().block, it.GetTime().tick, p.first);
 			}
 			tickSettingIndex++;
 		}
@@ -1156,7 +1156,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 					}
 					else
 					{
-						// Hold are always on a high enough snap to make suere they are seperate when needed
+						// Hold are always on a high enough snap to make sure they are separate when needed
 						if (c == '2')
 						{
 							state->fineSnap = false;
@@ -1381,13 +1381,11 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 		currentTick += (tickResolution * 4 * lastTimingPoint->numerator / lastTimingPoint->denominator) / block.ticks.size();
 	}
 
-	for (int i = 0; i < sizeof(firstControlPoints) / sizeof(ZoomControlPoint *); i++)
+	for (auto point : firstControlPoints)
 	{
-		ZoomControlPoint *point = firstControlPoints[i];
-		if (!point)
-			continue;
+		if (!point) continue;
 
-		ZoomControlPoint *dup = new ZoomControlPoint();
+		auto *dup = new ZoomControlPoint();
 		dup->index = point->index;
 		dup->zoom = point->zoom;
 		dup->time = INT32_MIN;
@@ -1396,7 +1394,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 	}
 
 	//Add chart end event
-	EventObjectState *evt = new EventObjectState();
+	auto *evt = new EventObjectState();
 	evt->time = lastMapTime + 2000;
 	evt->key = EventKey::ChartEnd;
 	m_objectStates.Add(*evt);

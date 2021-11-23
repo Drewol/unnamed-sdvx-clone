@@ -84,13 +84,12 @@ bool AudioPlayback::Init(class BeatmapPlayback &playback, const String &mapRootP
 		return true;
 	}
 
-
 	auto switchablePaths = m_beatmap->GetSwitchablePaths();
 
 	// Load switchable audio tracks
-	for (auto it = switchablePaths.begin(); it != switchablePaths.end(); ++it)
+	for (auto & switchablePath : switchablePaths)
 	{
-		audioPath = Path::Normalize(m_beatmapRootPath + Path::sep + *it);
+		audioPath = Path::Normalize(m_beatmapRootPath + Path::sep + switchablePath);
 		audioPath.TrimBack(' ');
 
 		SwitchableAudio switchable;
@@ -125,9 +124,11 @@ void AudioPlayback::Play()
 	m_music->Play();
 	if (m_fxtrack)
 		m_fxtrack->Play();
-	for (auto it = m_switchables.begin(); it != m_switchables.end(); ++it)
-		if (it->m_audio)
-			it->m_audio->Play();
+	for (auto & m_switchable : m_switchables)
+	{
+		if (m_switchable.m_audio)
+			m_switchable.m_audio->Play();
+	}
 
 	m_paused = false;
 }
@@ -251,15 +252,15 @@ void AudioPlayback::SetLaserEffect(EffectType type)
 		m_laserEffect = m_beatmap->GetFilter(type);
 	}
 }
-bool AudioPlayback::m_SkipEffectIfInputIsZero()
+bool AudioPlayback::m_SkipEffectIfInputIsZero(float input)
 {
-	return m_laserEffect.type == EffectType::PeakingFilter || m_laserEffect.type == EffectType::HighPassFilter
+	return input == 0 && (m_laserEffect.type == EffectType::PeakingFilter || m_laserEffect.type == EffectType::HighPassFilter
 		|| m_laserEffect.type == EffectType::LowPassFilter || m_laserEffect.type == EffectType::PitchShift
-		|| m_laserEffect.type == EffectType::Bitcrush;
+		|| m_laserEffect.type == EffectType::Bitcrush);
 }
 void AudioPlayback::SetLaserFilterInput(float input, bool active)
 {
-	if (m_laserEffect.type != EffectType::None && (active && (input != 0.0f || !m_SkipEffectIfInputIsZero())))
+	if (m_laserEffect.type != EffectType::None && active && !m_SkipEffectIfInputIsZero(input))
 	{
 		if (m_laserEffect.type == EffectType::SwitchAudio)
 		{
@@ -284,9 +285,8 @@ void AudioPlayback::SetLaserFilterInput(float input, bool active)
 
 			Ref<AudioStream> audioTrack = m_GetDSPTrack();
 
-			m_laserDSP = m_laserEffect.CreateDSP(m_playback->GetCurrentTimingPoint(),
-												 GetLaserFilterInput(),
-												 audioTrack->GetAudioSampleRate());
+			m_laserDSP = m_laserEffect.CreateDSP(m_playback->GetCurrentTimingPoint(),GetLaserFilterInput(),
+				audioTrack->GetAudioSampleRate());
 			if (!m_laserDSP)
 			{
 				Logf("Failed to create laser DSP with type %d", Logger::Severity::Warning, m_laserEffect.type);
@@ -415,9 +415,11 @@ void AudioPlayback::SetPlaybackSpeed(float speed)
 	m_music->PlaybackSpeed = speed;
 	if (m_fxtrack)
 		m_fxtrack->PlaybackSpeed = speed;
-	for (auto it = m_switchables.begin(); it != m_switchables.end(); ++it)
-		if (it->m_audio)
-			it->m_audio->PlaybackSpeed = speed;
+	for (auto & m_switchable : m_switchables)
+	{
+		if (m_switchable.m_audio)
+			m_switchable.m_audio->PlaybackSpeed = speed;
+	}
 }
 float AudioPlayback::GetPlaybackSpeed() const
 {
@@ -428,9 +430,11 @@ void AudioPlayback::SetVolume(float volume)
 	m_music->SetVolume(volume);
 	if (m_fxtrack)
 		m_fxtrack->SetVolume(volume);
-	for (auto it = m_switchables.begin(); it != m_switchables.end(); ++it)
-		if (it->m_audio)
-			it->m_audio->SetVolume(volume);
+	for (auto & m_switchable : m_switchables)
+	{
+		if (m_switchable.m_audio)
+			m_switchable.m_audio->SetVolume(volume);
+	}
 }
 void AudioPlayback::m_CleanupDSP(DSP *&ptr)
 {

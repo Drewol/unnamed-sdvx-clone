@@ -34,7 +34,7 @@ DSP *GameAudioEffect::CreateDSP(const TimingPoint &tp, float filterInput, uint32
 	case EffectType::LowPassFilter:
 	case EffectType::HighPassFilter:
 	{
-		// Don't set anthing for biquad Filters
+		// Don't set anything for biquad Filters
 		BQFDSP *bqfDSP = new BQFDSP(sampleRate);
 		ret = bqfDSP;
 		break;
@@ -92,8 +92,7 @@ DSP *GameAudioEffect::CreateDSP(const TimingPoint &tp, float filterInput, uint32
 	{
 		FlangerDSP *fl = new FlangerDSP(sampleRate);
 		fl->SetLength(actualLength);
-		fl->SetDelayRange(abs(flanger.offset.Sample(filterInput)),
-						  abs(flanger.depth.Sample(filterInput)));
+		fl->SetDelayRange(abs(flanger.offset.Sample(filterInput)), abs(flanger.depth.Sample(filterInput)));
 		fl->SetFeedback(flanger.feedback.Sample(filterInput));
 		fl->SetStereoWidth(flanger.stereoWidth.Sample(filterInput));
 		fl->SetVolume(flanger.volume.Sample(filterInput));

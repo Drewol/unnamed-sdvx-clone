@@ -253,7 +253,7 @@ void GateDSP::SetLength(double length)
 void GateDSP::SetGating(float gating)
 {
 	gating = Math::Clamp(gating, 0.f, 1.f);
-	float flength = (float)m_length;
+	auto flength = (float)m_length;
 	m_gating = gating;
 	m_halfway = (uint32)(flength * gating);
 	const float fadeDuration = Math::Min(0.05f, gating * 0.5f);
