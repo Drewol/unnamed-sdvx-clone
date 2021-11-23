@@ -194,6 +194,7 @@ protected:
 
 		ToggleSetting(GameConfigKeys::DisableNonButtonInputsDuringPlay, "Disable non-buttons during gameplay");
 		ToggleSetting(GameConfigKeys::PracticeSetupNavEnabled, "Enable navigation inputs for the practice setup");
+		ToggleSetting(GameConfigKeys::EnableVisualParamOverridesForNormalGameplay, "Enable overriding visual(camera) parameters during normal gameplay");
 	}
 
 private:
