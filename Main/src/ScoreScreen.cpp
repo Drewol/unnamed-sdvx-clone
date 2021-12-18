@@ -1055,6 +1055,7 @@ public:
 
 						} catch(nlohmann::json::parse_error& e) {
 							Log("Parsing JSON returned from IR failed.", Logger::Severity::Error);
+							m_irState = IR::ResponseState::RequestFailure;
 						}
 					}
 
