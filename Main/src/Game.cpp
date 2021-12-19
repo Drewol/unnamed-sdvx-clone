@@ -2621,11 +2621,63 @@ public:
 		m_practiceSetupRange = m_playOptions.range;
 		m_playOptions.range = { 0, 0 };
 
-		m_playOptions.loopOnSuccess = false;
-		m_playOptions.loopOnFail = true;
+		m_playOptions.playbackSpeed = g_gameConfig.GetInt(GameConfigKeys::DefaultPlaybackSpeed) / 100.0f;
 
+		m_playOptions.loopOnSuccess = g_gameConfig.GetBool(GameConfigKeys::DefaultLoopOnSuccess);
+		m_playOptions.incSpeedOnSuccess = g_gameConfig.GetBool(GameConfigKeys::DefaultIncSpeedOnSuccess);
+		m_playOptions.incSpeedAmount = g_gameConfig.GetInt(GameConfigKeys::DefaultIncSpeedAmount) / 100.0f;
+		m_playOptions.incStreak = g_gameConfig.GetInt(GameConfigKeys::DefaultIncStreak);
+
+		m_playOptions.loopOnFail = g_gameConfig.GetBool(GameConfigKeys::DefaultLoopOnSuccess);
+		m_playOptions.decSpeedOnFail = g_gameConfig.GetBool(GameConfigKeys::DefaultDecSpeedOnFail);
+		m_playOptions.decSpeedAmount = g_gameConfig.GetInt(GameConfigKeys::DefaultDecSpeedAmount) / 100.0f;
+		m_playOptions.minPlaybackSpeed = g_gameConfig.GetInt(GameConfigKeys::DefaultMinPlaybackSpeed) / 100.0f;
+
+		m_playOptions.enableMaxRewind = g_gameConfig.GetBool(GameConfigKeys::DefaultEnableMaxRewind);
+		m_playOptions.maxRewindMeasure = g_gameConfig.GetInt(GameConfigKeys::DefaultMaxRewindMeasure);
+
+		switch (static_cast<GameFailCondition::Type>(g_gameConfig.GetInt(GameConfigKeys::DefaultFailConditionType)))
+		{
+		case GameFailCondition::Type::Score:
+			m_playOptions.failCondition = std::make_unique<GameFailCondition::Score>(g_gameConfig.GetInt(GameConfigKeys::DefaultFailConditionScore)); break;
+		case GameFailCondition::Type::Grade:
+			m_playOptions.failCondition = std::make_unique<GameFailCondition::Grade>(static_cast<GradeMark>(g_gameConfig.GetInt(GameConfigKeys::DefaultFailConditionGrade))); break;
+		case GameFailCondition::Type::Miss:
+			m_playOptions.failCondition = std::make_unique<GameFailCondition::MissCount>(g_gameConfig.GetInt(GameConfigKeys::DefaultFailConditionMiss)); break;
+		case GameFailCondition::Type::MissAndNear:
+			m_playOptions.failCondition = std::make_unique<GameFailCondition::MissAndNearCount>(g_gameConfig.GetInt(GameConfigKeys::DefaultFailConditionMissNear)); break;
+		case GameFailCondition::Type::Gauge:
+			m_playOptions.failCondition = std::make_unique<GameFailCondition::Gauge>(g_gameConfig.GetInt(GameConfigKeys::DefaultFailConditionGauge)); break;
+		default:
+			m_playOptions.failCondition = nullptr; break;
+		}
+		
 		m_playOnDialogClose = true;
 		m_triggerPause = true;
+	}
+
+	inline void m_GetPracticeSetupIndex(PracticeSetupIndex& practiceSetup) const
+	{
+		practiceSetup.loopSuccess = m_playOptions.loopOnSuccess ? 1 : 0;
+		practiceSetup.loopFail = m_playOptions.loopOnFail ? 1 : 0;
+		practiceSetup.rangeBegin = m_practiceSetupRange.begin;
+		practiceSetup.rangeEnd = m_practiceSetupRange.end;
+		practiceSetup.failCondType = static_cast<int32>(
+			m_playOptions.failCondition ? m_playOptions.failCondition->GetType() : GameFailCondition::Type::None
+			);
+		practiceSetup.failCondValue = m_playOptions.failCondition ? m_playOptions.failCondition->GetThreshold() : 0;
+		practiceSetup.playbackSpeed = m_playOptions.playbackSpeed;
+
+		practiceSetup.incSpeedOnSuccess = m_playOptions.incSpeedOnSuccess ? 1 : 0;
+		practiceSetup.incSpeed = m_playOptions.incSpeedAmount;
+		practiceSetup.incStreak = m_playOptions.incStreak;
+
+		practiceSetup.decSpeedOnFail = m_playOptions.decSpeedOnFail ? 1 : 0;
+		practiceSetup.decSpeed = m_playOptions.decSpeedAmount;
+		practiceSetup.minPlaybackSpeed = m_playOptions.minPlaybackSpeed;
+
+		practiceSetup.maxRewind = m_playOptions.enableMaxRewind ? 1 : 0;
+		practiceSetup.maxRewindMeasure = m_playOptions.maxRewindMeasure;
 	}
 
 	void LoadPracticeSetupIndex()
@@ -2633,7 +2685,10 @@ public:
 		if (!m_db) return;
 		assert(m_isPracticeMode);
 
-		Vector<PracticeSetupIndex*> practiceSetups = m_db->GetOrAddPracticeSetups(m_chartIndex->id);
+		PracticeSetupIndex currPracticeSetupIndex;
+		m_GetPracticeSetupIndex(currPracticeSetupIndex);
+
+		Vector<PracticeSetupIndex*> practiceSetups = m_db->GetOrAddPracticeSetups(m_chartIndex->id, currPracticeSetupIndex);
 		if (practiceSetups.empty()) return;
 
 		const PracticeSetupIndex* practiceSetup = practiceSetups.front();
@@ -2664,31 +2719,14 @@ public:
 		if (!m_db) return;
 		assert(m_isPracticeMode);
 
-		Vector<PracticeSetupIndex*> practiceSetups = m_db->GetOrAddPracticeSetups(m_chartIndex->id);
+		PracticeSetupIndex currPracticeSetupIndex;
+		m_GetPracticeSetupIndex(currPracticeSetupIndex);
+
+		Vector<PracticeSetupIndex*> practiceSetups = m_db->GetOrAddPracticeSetups(m_chartIndex->id, currPracticeSetupIndex);
 		if (practiceSetups.empty()) return;
 
 		PracticeSetupIndex* practiceSetup = practiceSetups.front();
-
-		practiceSetup->loopSuccess = m_playOptions.loopOnSuccess ? 1 : 0;
-		practiceSetup->loopFail = m_playOptions.loopOnFail ? 1 : 0;
-		practiceSetup->rangeBegin = m_practiceSetupRange.begin;
-		practiceSetup->rangeEnd = m_practiceSetupRange.end;
-		practiceSetup->failCondType = static_cast<int32>(
-			m_playOptions.failCondition ? m_playOptions.failCondition->GetType() : GameFailCondition::Type::None
-		);
-		practiceSetup->failCondValue = m_playOptions.failCondition ? m_playOptions.failCondition->GetThreshold() : 0;
-		practiceSetup->playbackSpeed = m_playOptions.playbackSpeed;
-
-		practiceSetup->incSpeedOnSuccess = m_playOptions.incSpeedOnSuccess ? 1 : 0;
-		practiceSetup->incSpeed = m_playOptions.incSpeedAmount;
-		practiceSetup->incStreak = m_playOptions.incStreak;
-
-		practiceSetup->decSpeedOnFail = m_playOptions.decSpeedOnFail ? 1 : 0;
-		practiceSetup->decSpeed = m_playOptions.decSpeedAmount;
-		practiceSetup->minPlaybackSpeed = m_playOptions.minPlaybackSpeed;
-
-		practiceSetup->maxRewind = m_playOptions.enableMaxRewind ? 1 : 0;
-		practiceSetup->maxRewindMeasure = m_playOptions.maxRewindMeasure;
+		m_GetPracticeSetupIndex(*practiceSetup);
 
 		m_db->UpdatePracticeSetup(practiceSetup);
 	}

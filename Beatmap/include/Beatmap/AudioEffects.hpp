@@ -201,6 +201,17 @@ struct AudioEffect
 		} wobble;
 		struct
 		{
+			// Time to fully reduce volume
+			EffectParam<EffectDuration> attackTime;
+			// Time to keep volume at maximum reduced value
+			EffectParam<EffectDuration> holdTime;
+			// Time to restore volume
+			EffectParam<EffectDuration> releaseTime;
+			// Ratio to reduce volume by
+			EffectParam<float> ratio;
+		} sidechain;
+		struct
+		{
 			// Ammount of echo (0-1)
 			EffectParam<float> feedback;
 		} echo;

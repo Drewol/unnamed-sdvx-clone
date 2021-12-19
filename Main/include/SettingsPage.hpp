@@ -89,9 +89,17 @@ protected:
 		return false;
 	}
 
-	int SelectionInput(int val, const Vector<const char*>& options, const std::string_view& label);
-	bool SelectionSetting(GameConfigKeys key, const Vector<const char*>& options, const std::string_view& label);
-	bool StringSelectionSetting(GameConfigKeys key, const Vector<String>& options, const std::string_view& label);
+	template<typename ConstCharVec>
+	std::enable_if_t<std::is_same_v<typename ConstCharVec::value_type, const char*>, int>
+	SelectionInput(int val, const ConstCharVec& options, const std::string_view& label);
+
+	template<typename ConstCharVec>
+	std::enable_if_t<std::is_same_v<typename ConstCharVec::value_type, const char*>, bool>
+	SelectionSetting(GameConfigKeys key, const ConstCharVec& options, const std::string_view& label);
+
+	template<typename StringVec>
+	std::enable_if_t<std::is_same_v<typename StringVec::value_type, const char*> || std::is_same_v<typename StringVec::value_type::const_pointer, const char*>, bool>
+	StringSelectionSetting(GameConfigKeys key, const StringVec& options, const std::string_view& label);
 
 	int IntInput(int val, const std::string_view& label, int min, int max, int step = 1, float perPixel = 1.0f);
 	bool IntSetting(GameConfigKeys key, const std::string_view& label, int min, int max, int step = 1, float perPixel = 1.0f);
@@ -206,3 +214,86 @@ private:
 	void OnMousePressed(MouseButton button);
 	int GetPageIndFromMousePos(const Vector2i& mousePos) const;
 };
+
+template<typename ConstCharVec>
+std::enable_if_t<std::is_same_v<typename ConstCharVec::value_type, const char*>, int>
+SettingsPage::SelectionInput(int val, const ConstCharVec& options, const std::string_view& label)
+{
+	assert(options.size() > 0);
+
+	if (0 <= val && val < static_cast<int>(options.size()))
+	{
+		Label(label);
+
+		nk_combobox(m_nctx, const_cast<const char**>(options.data()), static_cast<int>(options.size()), &val, m_lineHeight, m_comboBoxSize);
+		UpdateLayoutMaxY((m_lineHeight + 5) * std::min(static_cast<int>(options.size()), 7));
+	} 
+	else
+	{
+		std::stringstream str;
+		str << std::string(label) << " [currently set to an unknown value " << val << "]";
+
+		Label(str.str().data());
+		str.clear();
+
+		if (nk_button_label(m_nctx, "Press this button to reset."))
+		{
+			val = 0;
+		}
+	}
+
+	return val;
+}
+
+template<typename ConstCharVec>
+std::enable_if_t<std::is_same_v<typename ConstCharVec::value_type, const char*>, bool>
+SettingsPage::SelectionSetting(GameConfigKeys key, const ConstCharVec& options, const std::string_view& label)
+{
+	assert(options.size() > 0);
+
+	const int value = g_gameConfig.GetInt(key);
+	const int newValue = SelectionInput(value, options, label);
+
+	if (newValue != value)
+	{
+		g_gameConfig.Set(key, newValue);
+		return true;
+	}
+
+	return false;
+}
+
+template<typename StringVec>
+std::enable_if_t<std::is_same_v<typename StringVec::value_type, const char*> || std::is_same_v<typename StringVec::value_type::const_pointer, const char*>, bool>
+SettingsPage::StringSelectionSetting(GameConfigKeys key, const StringVec& options, const std::string_view& label)
+{
+	String value = g_gameConfig.GetString(key);
+	int selection = 0;
+
+	const auto stringSearch = std::find(options.begin(), options.end(), value);
+	if (stringSearch != options.end())
+	{
+		selection = static_cast<int>(stringSearch - options.begin());
+	}
+
+	Vector<const char*> displayData;
+	for (const auto& s : options)
+	{
+		if constexpr (std::is_same_v<typename StringVec::value_type, const char*>)
+		{
+			displayData.Add(s);
+		}
+		else
+		{
+			displayData.Add(s.data());
+		}
+	}
+
+	const int newSelection = SelectionInput(selection, displayData, label);
+
+	if (newSelection != selection) {
+		g_gameConfig.Set(key, options[newSelection]);
+		return true;
+	}
+	return false;
+}

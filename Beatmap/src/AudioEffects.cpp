@@ -109,6 +109,13 @@ static AudioEffect CreateDefault(EffectType type)
 		ret.wobble.min = FloatRange(500.0f);
 		ret.wobble.q = FloatRange(1.414f);
 		break;
+	case EffectType::SideChain:
+		ret.duration = TimeRange(1.0f / 4.0f);
+		ret.sidechain.attackTime = TimeRange(10);
+		ret.sidechain.holdTime = TimeRange(50);
+		ret.sidechain.releaseTime = TimeRange(1.0f / 16.0f);
+		ret.sidechain.ratio = FloatRange(5.0f);
+		break;
 	case EffectType::Flanger:
 		ret.duration = TimeRange(2.0f);
 		ret.mix = FloatRange(0.8f);

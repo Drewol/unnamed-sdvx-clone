@@ -490,8 +490,6 @@ protected:
 		ToggleSetting(GameConfigKeys::SkipScore, "Skip score screen on manual exit");
 		EnumSetting<Enum_AutoScoreScreenshotSettings>(GameConfigKeys::AutoScoreScreenshot, "Automatically capture score screenshots:");
 
-		ToggleSetting(GameConfigKeys::RevertToSetupAfterScoreScreen, "Revert to the practice setup after the score screen is shown");
-
 		EnumSetting<Enum_SongOffsetUpdateMethod>(GameConfigKeys::UpdateSongOffsetAfterFirstPlay, "Based on hit stats, update song offset for first:");
 		EnumSetting<Enum_SongOffsetUpdateMethod>(GameConfigKeys::UpdateSongOffsetAfterEveryPlay, "After having updated first time, update song offset for every:");
 
@@ -765,6 +763,59 @@ protected:
 		{
 			g_application->ApplySettings();
 		}
+	}
+};
+
+class SettingsPage_Practice : public SettingsPage
+{
+public:
+	SettingsPage_Practice(nk_context* nctx) : SettingsPage(nctx, "Practice") {}
+
+protected:
+	void Load() override {}
+	void Save() override {}
+
+protected:
+	void RenderContents() override
+	{
+		SectionHeader("Settings");
+		IntSetting(GameConfigKeys::PracticeLeadInTime, "Lead-in time (ms)", 250, 10000, 250);
+		ToggleSetting(GameConfigKeys::PracticeSetupNavEnabled, "Enable navigation inputs for the setup");
+		ToggleSetting(GameConfigKeys::RevertToSetupAfterScoreScreen, "Revert to the setup after the result is shown");
+		ToggleSetting(GameConfigKeys::DisplayPracticeInfoInGame, "Show practice-mode info during gameplay");
+
+		SectionHeader("Defaults for Playback and Loop Control");
+		IntSetting(GameConfigKeys::DefaultPlaybackSpeed, "Playback speed (%)", 25, 100);
+
+		Separator();
+
+		ToggleSetting(GameConfigKeys::DefaultLoopOnSuccess, "Loop on success");
+		ToggleSetting(GameConfigKeys::DefaultIncSpeedOnSuccess, "Increase speed on success");
+		IntSetting(GameConfigKeys::DefaultIncSpeedAmount, "Increment (%p)", 1, 10);
+		IntSetting(GameConfigKeys::DefaultIncStreak, "Required streaks", 1, 10);
+		
+		Separator();
+
+		ToggleSetting(GameConfigKeys::DefaultLoopOnSuccess, "Loop on fail");
+		ToggleSetting(GameConfigKeys::DefaultDecSpeedOnFail, "Decrease speed on fail");
+		IntSetting(GameConfigKeys::DefaultDecSpeedAmount, "Decrement (%p)", 1, 10);
+		IntSetting(GameConfigKeys::DefaultMinPlaybackSpeed, "Minimum speed (%)", 25, 100);
+
+		Separator();
+
+		ToggleSetting(GameConfigKeys::DefaultEnableMaxRewind, "Set maximum amount of rewinding on fail");
+		IntSetting(GameConfigKeys::DefaultMaxRewindMeasure, "Amount in # of measures", 0, 20);
+
+		SectionHeader("Defaults for Mission");
+		SelectionSetting(GameConfigKeys::DefaultFailConditionType, GameFailCondition::TYPE_STR, "Fail Condition");
+
+		Separator();
+
+		IntSetting(GameConfigKeys::DefaultFailConditionScore, "Score less than", 800 * 10000, 1000 * 10000, 10000);
+		SelectionSetting(GameConfigKeys::DefaultFailConditionGrade, GRADE_MARK_STR, "Grade less than");
+		IntSetting(GameConfigKeys::DefaultFailConditionMiss, "Miss more than", 0, 100);
+		IntSetting(GameConfigKeys::DefaultFailConditionMissNear, "Miss+Near more than", 0, 100);
+		IntSetting(GameConfigKeys::DefaultFailConditionGauge, "Gauge less than", 0, 100);
 	}
 };
 
@@ -1099,6 +1150,7 @@ protected:
 		pages.emplace_back(std::make_unique<SettingsPage_Game>(m_nctx));
 		pages.emplace_back(std::make_unique<SettingsPage_Visual>(m_nctx));
 		pages.emplace_back(std::make_unique<SettingsPage_System>(m_nctx));
+		pages.emplace_back(std::make_unique<SettingsPage_Practice>(m_nctx));
 		pages.emplace_back(std::make_unique<SettingsPage_Online>(m_nctx));
 		pages.emplace_back(std::make_unique<SettingsPage_Skin>(m_nctx));
 	}

@@ -216,7 +216,7 @@ public:
 	FolderIndex* GetFolder(int32 idx);
 	Vector<String> GetCollections();
 	Vector<String> GetCollectionsForMap(int32 mapid);
-	Vector<PracticeSetupIndex*> GetOrAddPracticeSetups(int32 chartId);
+	Vector<PracticeSetupIndex*> GetOrAddPracticeSetups(int32 chartId, const PracticeSetupIndex& defaultOptions);
 
 	// Get a random chart
 	ChartIndex* GetRandomChart();

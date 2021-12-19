@@ -403,6 +403,13 @@ AudioEffect ParseCustomEffect(const KShootEffectDefinition &def, Vector<String> 
 		AssignFloatIfSet(effect.wobble.max, "hiFreq");
 		AssignFloatIfSet(effect.wobble.q, "Q");
 		break;
+	case EffectType::SideChain:
+		AssignDurationIfSet(effect.duration, "period");
+		AssignDurationIfSet(effect.sidechain.attackTime, "attackTime");
+		AssignDurationIfSet(effect.sidechain.holdTime, "holdTime");
+		AssignDurationIfSet(effect.sidechain.releaseTime, "releaseTime");
+		AssignFloatIfSet(effect.sidechain.ratio, "ratio");
+		break;
 	case EffectType::TapeStop:
 		AssignDurationIfSet(effect.duration, "speed");
 		break;

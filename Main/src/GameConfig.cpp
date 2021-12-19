@@ -104,13 +104,33 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::DisableBackgrounds, false);
 	Set(GameConfigKeys::LeadInTime, 3000);
 	Set(GameConfigKeys::PracticeLeadInTime, 1500);
-	Set(GameConfigKeys::PracticeSetupNavEnabled, true);
-	Set(GameConfigKeys::RevertToSetupAfterScoreScreen, false);
-	Set(GameConfigKeys::DisplayPracticeInfoInGame, true);
 	Set(GameConfigKeys::AutoComputeSongOffset, false);
 	Set(GameConfigKeys::ResponsiveInputs, true);
 	SetEnum<Enum_SongOffsetUpdateMethod>(GameConfigKeys::UpdateSongOffsetAfterFirstPlay, SongOffsetUpdateMethod::None);
 	SetEnum<Enum_SongOffsetUpdateMethod>(GameConfigKeys::UpdateSongOffsetAfterEveryPlay, SongOffsetUpdateMethod::None);
+
+	Set(GameConfigKeys::PracticeSetupNavEnabled, true);
+	Set(GameConfigKeys::RevertToSetupAfterScoreScreen, false);
+	Set(GameConfigKeys::DisplayPracticeInfoInGame, true);
+
+	Set(GameConfigKeys::DefaultPlaybackSpeed, 100);
+	Set(GameConfigKeys::DefaultLoopOnSuccess, true);
+	Set(GameConfigKeys::DefaultLoopOnFail, true);
+	Set(GameConfigKeys::DefaultIncSpeedOnSuccess, false);
+	Set(GameConfigKeys::DefaultIncSpeedAmount, 2);
+	Set(GameConfigKeys::DefaultIncStreak, 1);
+	Set(GameConfigKeys::DefaultDecSpeedOnFail, false);
+	Set(GameConfigKeys::DefaultDecSpeedAmount, 2);
+	Set(GameConfigKeys::DefaultMinPlaybackSpeed, 50);
+	Set(GameConfigKeys::DefaultEnableMaxRewind, false);
+	Set(GameConfigKeys::DefaultMaxRewindMeasure, 1);
+
+	Set(GameConfigKeys::DefaultFailConditionType, 0);
+	Set(GameConfigKeys::DefaultFailConditionScore, (int32) MAX_SCORE);
+	Set(GameConfigKeys::DefaultFailConditionGrade, 0);
+	Set(GameConfigKeys::DefaultFailConditionMiss, 0);
+	Set(GameConfigKeys::DefaultFailConditionMissNear, 0);
+	Set(GameConfigKeys::DefaultFailConditionGauge, 0);
 
 	SetEnum<Logger::Enum_Severity>(GameConfigKeys::LogLevel, Logger::Severity::Normal);
 

@@ -12,6 +12,7 @@ elseif(WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     message(FATAL_ERROR "Could not find vcpkg root")
 endif()
 
+option(BUILD_SHARED_LIBS "Build libraries as shared libraries" OFF)
 
 project(USC VERSION 0.5.0)
 if(WIN32 AND ${CMAKE_VERSION} VERSION_GREATER "3.12")

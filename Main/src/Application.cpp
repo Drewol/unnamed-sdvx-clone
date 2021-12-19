@@ -2703,7 +2703,7 @@ bool JacketLoadingJob::Run()
 	// Create loading task
 	if (web)
 	{
-		auto response = cpr::Get(imagePath);
+		auto response = cpr::Get(cpr::Url(imagePath));
 		if (response.error.code != cpr::ErrorCode::OK || response.status_code >= 300)
 		{
 			return false;

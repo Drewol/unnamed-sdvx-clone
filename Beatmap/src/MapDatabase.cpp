@@ -758,7 +758,7 @@ public:
 		return res;
 	}
 
-	Vector<PracticeSetupIndex*> GetOrAddPracticeSetups(int32 chartId)
+	Vector<PracticeSetupIndex*> GetOrAddPracticeSetups(int32 chartId, const PracticeSetupIndex& defaultOptions)
 	{
 		Vector<PracticeSetupIndex*> res;
 
@@ -770,29 +770,11 @@ public:
 
 		if (res.empty())
 		{
-			PracticeSetupIndex* practiceSetup = new PracticeSetupIndex();
+			PracticeSetupIndex* practiceSetup = new PracticeSetupIndex(defaultOptions);
 			practiceSetup->id = -1;
 			practiceSetup->chartId = chartId;
 
 			practiceSetup->setupTitle = "";
-			practiceSetup->loopSuccess = 0;
-			practiceSetup->loopFail = 1;
-			practiceSetup->rangeBegin = 0;
-			practiceSetup->rangeEnd = 0;
-			practiceSetup->failCondType = 0;
-			practiceSetup->failCondValue = 0;
-			practiceSetup->playbackSpeed = 1.0;
-
-			practiceSetup->incSpeedOnSuccess = 0;
-			practiceSetup->incSpeed = 0.0;
-			practiceSetup->incStreak = 1;
-
-			practiceSetup->decSpeedOnFail = 0;
-			practiceSetup->decSpeed = 0.0;
-			practiceSetup->minPlaybackSpeed = 0.1;
-
-			practiceSetup->maxRewind = 0;
-			practiceSetup->maxRewindMeasure = 1;
 
 			UpdateOrAddPracticeSetup(practiceSetup);
 			res.emplace_back(practiceSetup);
@@ -2331,9 +2313,9 @@ Vector<String> MapDatabase::GetCollectionsForMap(int32 mapid)
 {
 	return m_impl->GetCollectionsForMap(mapid);
 }
-Vector<PracticeSetupIndex*> MapDatabase::GetOrAddPracticeSetups(int32 chartId)
+Vector<PracticeSetupIndex*> MapDatabase::GetOrAddPracticeSetups(int32 chartId, const PracticeSetupIndex& defaultOptions)
 {
-	return m_impl->GetOrAddPracticeSetups(chartId);
+	return m_impl->GetOrAddPracticeSetups(chartId, defaultOptions);
 }
 void MapDatabase::AddOrRemoveToCollection(const String& name, int32 mapid)
 {

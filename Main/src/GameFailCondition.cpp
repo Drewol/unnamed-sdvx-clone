@@ -4,7 +4,7 @@
 #include "Scoring.hpp"
 #include "Gauge.hpp"
 
-const char* GameFailCondition::TYPE_STR[6] = { "None", "Score", "Grade", "Miss", "MissAndNear", "Gauge" };
+const std::array<const char*, 6> GameFailCondition::TYPE_STR = { "None", "Score", "Grade", "Miss", "MissAndNear", "Gauge" };
 
 bool GameFailCondition::Score::IsFailed(const Scoring& scoring) const
 {
