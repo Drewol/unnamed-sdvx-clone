@@ -13,6 +13,114 @@ static inline const char* GetKeyNameFromScancodeConfig(int scancode)
 	return SDL_GetKeyName(SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(scancode)));
 }
 
+static const String GetKeyNameFromConfigKey(GameConfigKeys key) {
+	// Oh, you like SDVX? Name every possible key bindings for it!
+	switch (key) {
+		case GameConfigKeys::Controller_BTS:
+		case GameConfigKeys::Key_BTS:
+		case GameConfigKeys::Key_BTSAlt:
+			return "Start";
+		case GameConfigKeys::Controller_Back:
+		case GameConfigKeys::Key_Back:
+		case GameConfigKeys::Key_BackAlt:
+			return "Back";
+
+		case GameConfigKeys::Controller_BT0:
+		case GameConfigKeys::Key_BT0:
+		case GameConfigKeys::Key_BT0Alt:
+			return "BT-A";
+		case GameConfigKeys::Controller_BT1:
+		case GameConfigKeys::Key_BT1:
+		case GameConfigKeys::Key_BT1Alt:
+			return "BT-B";
+		case GameConfigKeys::Controller_BT2:
+		case GameConfigKeys::Key_BT2:
+		case GameConfigKeys::Key_BT2Alt:
+			return "BT-C";
+		case GameConfigKeys::Controller_BT3:
+		case GameConfigKeys::Key_BT3:
+		case GameConfigKeys::Key_BT3Alt:
+			return "BT-D";
+
+		case GameConfigKeys::Controller_FX0:
+		case GameConfigKeys::Key_FX0:
+		case GameConfigKeys::Key_FX0Alt:
+			return "FX-L";
+		case GameConfigKeys::Controller_FX1:
+		case GameConfigKeys::Key_FX1:
+		case GameConfigKeys::Key_FX1Alt:
+			return "FX-R";
+
+		case GameConfigKeys::Controller_Laser0Axis:
+			return "Left Laser";
+		case GameConfigKeys::Controller_Laser1Axis:
+			return "Right Laser";
+
+		case GameConfigKeys::Key_SongSelect_Up:
+			return "Previous song";
+		case GameConfigKeys::Key_SongSelect_Down:
+			return "Next song";
+		case GameConfigKeys::Key_SongSelect_FastUp:
+			return "Previous song (jump)";
+		case GameConfigKeys::Key_SongSelect_FastDown:
+			return "Next song (jump)";
+		case GameConfigKeys::Key_SongSelect_Easier:
+			return "Difficulty easier";
+		case GameConfigKeys::Key_SongSelect_Harder:
+			return "Difficulty header";
+		case GameConfigKeys::Key_SongSelect_Collections:
+			return "Edit song collections";
+		case GameConfigKeys::Key_SongSelect_Random:
+			return "Random song";
+		case GameConfigKeys::Key_SongSelect_ReloadSongs:
+			return "Reload song database";
+		case GameConfigKeys::Key_SongSelect_Demo:
+			return "Start demo mode";
+		case GameConfigKeys::Key_SongSelect_OpenEditor:
+			return "Open song in editor";
+		case GameConfigKeys::Key_SongSelect_OpenDirectory:
+			return "Open songs directory";
+		case GameConfigKeys::Key_SongSelect_OpenSearch:
+			return "Open songs search";
+		case GameConfigKeys::Key_SongSelect_CloseSearch:
+			return "Close songs search";
+		case GameConfigKeys::Key_SongSelect_StartPractice:
+			return "Start song in practice mode";
+
+		case GameConfigKeys::Key_Game_Bailout:
+			return "End practice mode";
+		case GameConfigKeys::Key_Game_Pause:
+			return "Pause";
+		case GameConfigKeys::Key_Game_SkipIntro:
+			return "Skip intro/outro";
+		case GameConfigKeys::Key_Game_Advance:
+			return "Jump 5s forwards";
+		case GameConfigKeys::Key_Game_Restart:
+			return "Restart";
+		case GameConfigKeys::Key_Game_DebugHUD:
+			return "Toggle debug HUD";
+
+		case GameConfigKeys::Key_Result_Continue:
+			return "Return to song select";
+		case GameConfigKeys::Key_Result_Screenshot:
+			return "Save screenshot";
+
+		case GameConfigKeys::Key_ReloadSkin:
+			return "Reload skin";
+		case GameConfigKeys::Key_ScrollLeft:
+			return "Scroll left";
+		case GameConfigKeys::Key_ScrollRight:
+			return "Scroll right";
+		case GameConfigKeys::Key_ScrollUp:
+			return "Scroll up";
+		case GameConfigKeys::Key_ScrollDown:
+			return "Scroll down";
+
+		default:
+			return Enum_GameConfigKeys::ToString(key);
+	}
+}
+
 class SettingsPage_Input : public SettingsPage
 {
 public:
@@ -44,7 +152,7 @@ protected:
 
 
 	}
-	
+
 	void Save() override
 	{
 		if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice) == InputDevice::Mouse)
@@ -73,6 +181,11 @@ protected:
 	bool m_useLaserGamepad = false;
 	bool m_altBinds = false;
 
+	const Vector<GameConfigKeys>* m_activeSongSelectKeys = &m_songSelectKeys;
+	const Vector<GameConfigKeys>* m_activeGameKeys = &m_gameKeys;
+	const Vector<GameConfigKeys>* m_activeResultKeys = &m_resultKeys;
+	const Vector<GameConfigKeys>* m_activeMiscKeys = &m_miscKeys;
+
 	const Vector<GameConfigKeys> m_keyboardKeys = {
 		GameConfigKeys::Key_BTS,
 		GameConfigKeys::Key_BT0,
@@ -92,6 +205,42 @@ protected:
 		GameConfigKeys::Key_FX0Alt,
 		GameConfigKeys::Key_FX1Alt,
 		GameConfigKeys::Key_BackAlt
+	};
+	const Vector<GameConfigKeys> m_songSelectKeys = {
+		GameConfigKeys::Key_SongSelect_Up,
+		GameConfigKeys::Key_SongSelect_Down,
+		GameConfigKeys::Key_SongSelect_FastUp,
+		GameConfigKeys::Key_SongSelect_FastDown,
+		GameConfigKeys::Key_SongSelect_Easier,
+		GameConfigKeys::Key_SongSelect_Harder,
+		GameConfigKeys::Key_SongSelect_Collections,
+		GameConfigKeys::Key_SongSelect_Random,
+		GameConfigKeys::Key_SongSelect_ReloadSongs,
+		GameConfigKeys::Key_SongSelect_Demo,
+		GameConfigKeys::Key_SongSelect_OpenEditor,
+		GameConfigKeys::Key_SongSelect_OpenDirectory,
+		GameConfigKeys::Key_SongSelect_OpenSearch,
+		GameConfigKeys::Key_SongSelect_CloseSearch,
+		GameConfigKeys::Key_SongSelect_StartPractice
+	};
+	const Vector<GameConfigKeys> m_gameKeys = {
+		GameConfigKeys::Key_Game_Bailout,
+		GameConfigKeys::Key_Game_Pause,
+		GameConfigKeys::Key_Game_SkipIntro,
+		GameConfigKeys::Key_Game_Advance,
+		GameConfigKeys::Key_Game_Restart,
+		GameConfigKeys::Key_Game_DebugHUD
+	};
+	const Vector<GameConfigKeys> m_resultKeys = {
+		GameConfigKeys::Key_Result_Continue,
+		GameConfigKeys::Key_Result_Screenshot
+	};
+	const Vector<GameConfigKeys> m_miscKeys = {
+		GameConfigKeys::Key_ReloadSkin,
+		GameConfigKeys::Key_ScrollLeft,
+		GameConfigKeys::Key_ScrollRight,
+		GameConfigKeys::Key_ScrollUp,
+		GameConfigKeys::Key_ScrollDown,
 	};
 
 	const Vector<GameConfigKeys> m_keyboardLaserKeys = {
@@ -194,6 +343,9 @@ protected:
 
 		ToggleSetting(GameConfigKeys::DisableNonButtonInputsDuringPlay, "Disable non-buttons during gameplay");
 		ToggleSetting(GameConfigKeys::PracticeSetupNavEnabled, "Enable navigation inputs for the practice setup");
+
+		SectionHeader("UI Controls");
+		RenderUIControlsSettings();
 	}
 
 private:
@@ -346,6 +498,28 @@ private:
 		FloatSetting(GameConfigKeys::SongSelSensMult, "Song select sensitivity multiplier", 0.0f, 20.0f, 0.1f);
 
 		if (nk_button_label(m_nctx, "Calibrate Laser Sensitivity")) OpenCalibrateSensitivity();
+	}
+
+	inline void RenderUIControlsSettings()
+	{
+		_RenderSingleUIControlsSettings(0, "Song select (and downloads)", m_songSelectKeys, m_activeSongSelectKeys);
+		_RenderSingleUIControlsSettings(1, "In-game", m_gameKeys, m_activeGameKeys);
+		_RenderSingleUIControlsSettings(2, "Results", m_resultKeys, m_activeResultKeys);
+		_RenderSingleUIControlsSettings(3, "Misc", m_miscKeys, m_activeMiscKeys);
+	}
+	inline void _RenderSingleUIControlsSettings(int index, const char* name, Vector<GameConfigKeys> keys, const Vector<GameConfigKeys>* activeKeys)
+	{
+		if (nk_tree_push_id(m_nctx, NK_TREE_NODE, name, NK_MINIMIZED, index))
+		{
+			LayoutRowDynamic(2, m_lineHeight);
+			for (size_t i = 0; i < keys.size(); i++)
+			{
+				Label(GetKeyNameFromConfigKey(keys[i]) + ":");
+				if (nk_button_label(m_nctx, GetKeyNameFromScancodeConfig(g_gameConfig.GetInt((*activeKeys)[i]))))
+					OpenButtonBind((*activeKeys)[i]);
+			}
+			nk_tree_pop(m_nctx);
+		}
 	}
 
 	inline void OpenLaserBind(GameConfigKeys axis)
@@ -575,7 +749,7 @@ protected:
 			g_gameConfig.SetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice, InputDevice::Keyboard);
 		}
 	}
-	
+
 	std::array<float, 2> m_laserColors = { 200.0f, 330.0f };
 
 	void RenderContents() override
@@ -793,7 +967,7 @@ protected:
 		ToggleSetting(GameConfigKeys::DefaultIncSpeedOnSuccess, "Increase speed on success");
 		IntSetting(GameConfigKeys::DefaultIncSpeedAmount, "Increment (%p)", 1, 10);
 		IntSetting(GameConfigKeys::DefaultIncStreak, "Required streaks", 1, 10);
-		
+
 		Separator();
 
 		ToggleSetting(GameConfigKeys::DefaultLoopOnSuccess, "Loop on fail");
@@ -823,7 +997,7 @@ class SettingsPage_Online : public SettingsPage
 {
 public:
 	SettingsPage_Online(nk_context* nctx) : SettingsPage(nctx, "Online") {}
-	
+
 protected:
 	void Load() override
 	{
@@ -1047,7 +1221,7 @@ private:
 
 		nk_labelf(m_nctx, nk_text_alignment::NK_TEXT_LEFT, setting.label.data(), value);
 		nk_slider_float(m_nctx, setting.floatSetting.min, &value, setting.floatSetting.max, step);
-		
+
 		if (prevValue != value) {
 			m_skinConfig->Set(setting.key, value);
 			return true;
@@ -1169,7 +1343,7 @@ private:
 
 	GameConfigKeys m_key;
 	String m_keyName;
-	
+
 	bool m_isGamepad;
 	int m_gamepadIndex;
 	bool m_completed = false;
@@ -1186,27 +1360,7 @@ public:
 		m_knobs = (key == GameConfigKeys::Controller_Laser0Axis || key == GameConfigKeys::Controller_Laser1Axis);
 		m_isAlt = isAlt;
 
-		// Oh, you like SDVX? Name every possible key bindings for it!
-		switch (m_key)
-		{
-		case GameConfigKeys::Controller_BTS: case GameConfigKeys::Key_BTS: case GameConfigKeys::Key_BTSAlt: m_keyName = "Start"; break;
-		case GameConfigKeys::Controller_Back: case GameConfigKeys::Key_Back: case GameConfigKeys::Key_BackAlt: m_keyName = "Back"; break;
-
-		case GameConfigKeys::Controller_BT0: case GameConfigKeys::Key_BT0: case GameConfigKeys::Key_BT0Alt: m_keyName = "BT-A"; break;
-		case GameConfigKeys::Controller_BT1: case GameConfigKeys::Key_BT1: case GameConfigKeys::Key_BT1Alt: m_keyName = "BT-B"; break;
-		case GameConfigKeys::Controller_BT2: case GameConfigKeys::Key_BT2: case GameConfigKeys::Key_BT2Alt: m_keyName = "BT-C"; break;
-		case GameConfigKeys::Controller_BT3: case GameConfigKeys::Key_BT3: case GameConfigKeys::Key_BT3Alt: m_keyName = "BT-D"; break;
-
-		case GameConfigKeys::Controller_FX0: case GameConfigKeys::Key_FX0: case GameConfigKeys::Key_FX0Alt: m_keyName = "FX-L"; break;
-		case GameConfigKeys::Controller_FX1: case GameConfigKeys::Key_FX1: case GameConfigKeys::Key_FX1Alt: m_keyName = "FX-R"; break;
-
-		case GameConfigKeys::Controller_Laser0Axis: m_keyName = "Left Laser"; break;
-		case GameConfigKeys::Controller_Laser1Axis: m_keyName = "Right Laser"; break;
-		default:
-			m_keyName = Enum_GameConfigKeys::ToString(key);
-			break;
-		}
-
+		m_keyName = GetKeyNameFromConfigKey(m_key);
 		if (isAlt)
 		{
 			m_keyName += " (alt)";
@@ -1317,7 +1471,7 @@ public:
 		}
 	}
 
-	void OnKeyPressed(SDL_Scancode code, int32 delta) override
+	virtual void OnKeyPressed(SDL_Scancode code, int32 delta)
 	{
 		if (!m_isGamepad && !m_knobs)
 		{
@@ -1353,7 +1507,7 @@ public:
 				g_application->RemoveTickable(this);
 			}
 		}
-		
+
 		if (m_isGamepad && code == SDL_Scancode::SDL_SCANCODE_ESCAPE)
 		{
 			if (m_gamepad)
@@ -1445,7 +1599,7 @@ public:
 			if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::LaserInputDevice) == InputDevice::Mouse)
 				g_application->FastText(Utility::Sprintf("Current Sens: %.2f, ppr: (%.0f)", sens, fabs(m_delta)), center.x, center.y + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 			else
-				g_application->FastText(Utility::Sprintf("Current Sens: %.2f", sens), center.x, center.y + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);	
+				g_application->FastText(Utility::Sprintf("Current Sens: %.2f", sens), center.x, center.y + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 
 		}
 		else

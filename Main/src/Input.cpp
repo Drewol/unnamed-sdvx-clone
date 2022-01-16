@@ -41,7 +41,7 @@ void Input::Init(Graphics::Window& wnd)
 	m_backComboInstant = g_gameConfig.GetEnum<Enum_ButtonComboModeSettings>(GameConfigKeys::UseBackCombo) == ButtonComboModeSettings::Instant;
 
 	switch (g_gameConfig.GetEnum<Enum_LaserAxisOption>(GameConfigKeys::InvertLaserInput)) {
-	
+
 	case LaserAxisOption::Left:
 		m_laserDirections[0] = -1.0f;
 		m_laserDirections[1] = 1.0f;
@@ -157,7 +157,7 @@ void Input::Update(float deltaTime)
 				m_rawKeyLaserStates[i] = 0.0f;
 				continue;
 			}
-			
+
 			m_laserStates[i] = m_mouseSensitivity * m_mousePos[m_mouseAxisMapping[i]];
 			m_rawLaserStates[i] = m_mousePos[m_mouseAxisMapping[i]];
 			m_mousePos[m_mouseAxisMapping[i]] = 0;
@@ -335,7 +335,7 @@ void Input::m_InitKeyboardMapping()
 
 		m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_FX0), Button::FX_0);
 		m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_FX1), Button::FX_1);
-		
+
 		// Alternate button mappings
 		m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_BTSAlt), Button::BT_S);
 
@@ -366,6 +366,36 @@ void Input::m_InitKeyboardMapping()
 		m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_Laser1NegAlt), Button::LS_1Neg);
 		m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_Laser1PosAlt), Button::LS_1Pos);
 	}
+
+	// Always bind auxillary controls
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_SongSelect_Up), Button::SongSelect_Up);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_SongSelect_Down), Button::SongSelect_Down);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_SongSelect_FastUp), Button::SongSelect_FastUp);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_SongSelect_FastDown), Button::SongSelect_FastDown);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_SongSelect_Easier), Button::SongSelect_Easier);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_SongSelect_Harder), Button::SongSelect_Harder);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_SongSelect_Collections), Button::SongSelect_Collections);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_SongSelect_Random), Button::SongSelect_Random);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_SongSelect_ReloadSongs), Button::SongSelect_ReloadSongs);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_SongSelect_Demo), Button::SongSelect_Demo);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_SongSelect_OpenEditor), Button::SongSelect_OpenEditor);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_SongSelect_OpenDirectory), Button::SongSelect_OpenDirectory);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_SongSelect_OpenSearch), Button::SongSelect_OpenSearch);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_SongSelect_CloseSearch), Button::SongSelect_CloseSearch);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_SongSelect_StartPractice), Button::SongSelect_StartPractice);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_Game_Bailout), Button::Game_Bailout);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_Game_Pause), Button::Game_Pause);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_Game_SkipIntro), Button::Game_SkipIntro);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_Game_Advance), Button::Game_Advance);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_Game_Restart), Button::Game_Restart);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_Game_DebugHUD), Button::Game_DebugHUD);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_Result_Continue), Button::Result_Continue);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_Result_Screenshot), Button::Result_Screenshot);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_ReloadSkin), Button::ReloadSkin);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_ScrollLeft), Button::ScrollLeft);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_ScrollRight), Button::ScrollRight);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_ScrollUp), Button::ScrollUp);
+	m_buttonMap.Add(g_gameConfig.GetInt(GameConfigKeys::Key_ScrollDown), Button::ScrollDown);
 }
 
 void Input::m_InitControllerMapping()

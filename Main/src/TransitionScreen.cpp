@@ -199,7 +199,7 @@ public:
 		if (m_songlua)
 		{
 			ChartIndex* chart = next->GetChartIndex();
-			
+
 			if (chart)
 			{
 				String path = Path::RemoveLast(chart->path);

@@ -247,7 +247,7 @@ private:
 			}
 		}
 		else {
-			
+
 			for (auto& chal : collection)
 			{
 				m_PushChalToLua(chal.second, ++chalIndex);
@@ -958,6 +958,73 @@ public:
 				}
 			}
 		}
+
+		if (m_filterSelection->Active)
+		{
+			switch (buttonCode) {
+				case Input::Button::SongSelect_Down:
+					m_filterSelection->AdvanceSelection(1);
+					break;
+				case Input::Button::SongSelect_Up:
+					m_filterSelection->AdvanceSelection(-1);
+					break;
+			}
+		}
+		else if (m_sortSelection->Active)
+		{
+			switch (buttonCode) {
+				case Input::Button::SongSelect_Down:
+					m_sortSelection->AdvanceSelection(1);
+					break;
+				case Input::Button::SongSelect_Up:
+					m_sortSelection->AdvanceSelection(-1);
+					break;
+			}
+		} else {
+			switch (buttonCode) {
+				case Input::Button::SongSelect_Down:
+					m_selectionWheel->AdvanceSelection(1);
+					break;
+				case Input::Button::SongSelect_Up:
+					m_selectionWheel->AdvanceSelection(-1);
+					break;
+				case Input::Button::SongSelect_FastDown:
+					m_selectionWheel->AdvancePage(1);
+					break;
+				case Input::Button::SongSelect_FastUp:
+					m_selectionWheel->AdvancePage(-1);
+					break;
+				case Input::Button::ScrollLeft:
+					m_selectionWheel->m_scrollAmount -= 1.0;
+					m_selectionWheel->m_SetLuaItemIndex();
+					break;
+				case Input::Button::ScrollRight:
+					m_selectionWheel->m_scrollAmount += 1.0;
+					m_selectionWheel->m_SetLuaItemIndex();
+					break;
+				case Input::Button::SongSelect_Random:
+					m_selectionWheel->SelectRandom();
+					break;
+				case Input::Button::SongSelect_ReloadSongs:
+					m_mapDatabase->StartSearching();
+					OnSearchTermChanged(m_searchInput->input);
+					break;
+				case Input::Button::ReloadSkin:
+					m_selectionWheel->ReloadScript();
+					m_filterSelection->ReloadScript();
+					g_application->ReloadScript("songselect/background", m_lua);
+					break;
+				case Input::Button::SongSelect_OpenDirectory:
+					Path::ShowInFileBrowser(m_selectionWheel->GetSelection()->path);
+					break;
+				case Input::Button::SongSelect_OpenSearch:
+					m_searchInput->SetActive(!m_searchInput->active);
+					break;
+				case Input::Button::SongSelect_CloseSearch:
+					if (m_searchInput->active) m_searchInput->SetActive(false);
+					break;
+			}
+		}
 	}
 
 	void m_OnButtonReleased(Input::Button buttonCode, int32 delta)
@@ -1020,82 +1087,13 @@ public:
 
 		if (m_filterSelection->Active)
 		{
-			if (code == SDL_SCANCODE_DOWN)
-			{
-				m_filterSelection->AdvanceSelection(1);
-			}
-			else if (code == SDL_SCANCODE_UP)
-			{
-				m_filterSelection->AdvanceSelection(-1);
-			}
 		}
 		else if (m_sortSelection->Active)
 		{
-			if (code == SDL_SCANCODE_DOWN)
-			{
-				m_sortSelection->AdvanceSelection(1);
-			}
-			else if (code == SDL_SCANCODE_UP)
-			{
-				m_sortSelection->AdvanceSelection(-1);
-			}
 		}
 		else
 		{
-			if (code == SDL_SCANCODE_DOWN)
-			{
-				m_selectionWheel->AdvanceSelection(1);
-			}
-			else if (code == SDL_SCANCODE_UP)
-			{
-				m_selectionWheel->AdvanceSelection(-1);
-			}
-			else if (code == SDL_SCANCODE_PAGEDOWN)
-			{
-				m_selectionWheel->AdvancePage(1);
-			}
-			else if (code == SDL_SCANCODE_PAGEUP)
-			{
-				m_selectionWheel->AdvancePage(-1);
-			}
-			else if (code == SDL_SCANCODE_LEFT)
-			{
-				m_selectionWheel->m_scrollAmount -= 1.0;
-				m_selectionWheel->m_SetLuaItemIndex();
-			}
-			else if (code == SDL_SCANCODE_RIGHT)
-			{
-				m_selectionWheel->m_scrollAmount += 1.0;
-				m_selectionWheel->m_SetLuaItemIndex();
-			}
-			else if (code == SDL_SCANCODE_F5)
-			{
-				m_mapDatabase->StartSearching();
-				OnSearchTermChanged(m_searchInput->input);
-			}
-			else if (code == SDL_SCANCODE_F2)
-			{
-				m_selectionWheel->SelectRandom();
-			}
-			else if (code == SDL_SCANCODE_F9)
-			{
-				m_selectionWheel->ReloadScript();
-				m_filterSelection->ReloadScript();
-				g_application->ReloadScript("songselect/background", m_lua);
-			}
-			else if (code == SDL_SCANCODE_F12)
-			{
-				Path::ShowInFileBrowser(m_selectionWheel->GetSelection()->path);
-			}
-			else if (code == SDL_SCANCODE_TAB)
-			{
-				m_searchInput->SetActive(!m_searchInput->active);
-			}
-			else if (code == SDL_SCANCODE_RETURN && m_searchInput->active)
-			{
-				m_searchInput->SetActive(false);
-			}
-			else if (code == SDL_SCANCODE_DELETE)
+			if (code == SDL_SCANCODE_DELETE)
 			{
 				ChallengeIndex* chal = m_selectionWheel->GetSelection();
 				String name = chal->title;
@@ -1660,7 +1658,7 @@ bool ChallengeManager::m_setupNextChart()
 	m_currentChart = m_chal->charts[m_chartIndex];
 	m_currentOptions = m_globalOpts.Merge(m_opts[m_chartIndex]);
 
-	if (m_currentOptions.min_modspeed.Get(0) > 
+	if (m_currentOptions.min_modspeed.Get(0) >
 		m_currentOptions.max_modspeed.Get(INT_MAX))
 	{
 		Log("Skipping setting 'max_modspeed': must be more than 'min_modspeed'", Logger::Severity::Warning);

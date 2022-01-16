@@ -150,6 +150,29 @@ private:
 			loadScoresFromMultiplayer();
 			updateLuaData();
 		}
+
+		switch (button) {
+			case Input::Button::Result_Continue:
+				g_application->RemoveTickable(this);
+				m_removed = true;
+				break;
+			case Input::Button::Result_Screenshot:
+				Capture();
+				break;
+			case Input::Button::ReloadSkin:
+				g_application->ReloadScript("result", m_lua);
+				lua_getglobal(m_lua, "result_set");
+				if (lua_isfunction(m_lua, -1))
+				{
+					if (lua_pcall(m_lua, 0, 0, 0) != 0)
+					{
+						Logf("Lua error: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
+						g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
+					}
+				}
+				lua_settop(m_lua, 0);
+				break;
+		}
 	}
 
 	void m_PushIRScores()
@@ -754,7 +777,7 @@ public:
 				lua_pushinteger(m_lua, scoreIndex++);
 				lua_newtable(m_lua);
 				m_PushFloatToTable("gauge", score->gauge);
-				
+
 				m_PushIntToTable("gauge_type", (uint32)score->gaugeType);
 				m_PushIntToTable("gauge_option", score->gaugeOption);
 				m_PushIntToTable("random", score->random);
@@ -902,36 +925,6 @@ public:
 
 	void OnKeyPressed(SDL_Scancode code, int32 delta) override
 	{
-		if (m_multiplayer &&
-				m_multiplayer->GetChatOverlay()->OnKeyPressedConsume(code))
-			return;
-
-		if (m_collDiag.IsActive())
-			return;
-
-		if(code == SDL_SCANCODE_RETURN && !m_removed)
-		{
-			g_application->RemoveTickable(this);
-			m_removed = true;
-		}
-		if (code == SDL_SCANCODE_F12)
-		{
-			Capture();
-		}
-		if (code == SDL_SCANCODE_F9)
-		{
-			g_application->ReloadScript("result", m_lua);
-			lua_getglobal(m_lua, "result_set");
-			if (lua_isfunction(m_lua, -1))
-			{
-				if (lua_pcall(m_lua, 0, 0, 0) != 0)
-				{
-					Logf("Lua error: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-					g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
-				}
-			}
-			lua_settop(m_lua, 0);
-		}
 	}
 	void OnKeyReleased(SDL_Scancode code, int32 delta) override
 	{
@@ -1037,7 +1030,7 @@ public:
 										//don't really care about the return of this, if it fails it's not the end of the world
 										IR::PostReplay(m_irResponseJson["body"]["sendReplay"].get<String>(), m_replayPath).get();
 									}
-								}			
+								}
 							}
 
 

@@ -217,37 +217,6 @@ void DownloadScreen::OnKeyPressed(SDL_Scancode code, int32 delta)
 		}
 		lua_settop(m_lua, 0);
 	}
-
-	if (code == SDL_SCANCODE_UP || code == SDL_SCANCODE_DOWN)
-	{
-		int dir = (code == SDL_SCANCODE_UP) ? -1 : 1;
-		lua_getglobal(m_lua, "advance_selection");
-		if (lua_isfunction(m_lua, -1))
-		{
-			lua_pushnumber(m_lua, dir);
-			if (lua_pcall(m_lua, 1, 0, 0) != 0)
-			{
-				Logf("Lua error on advance_selection: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-				g_gameWindow->ShowMessageBox("Lua Error on advance_selection", lua_tostring(m_lua, -1), 0);
-			}
-		}
-		lua_settop(m_lua, 0);
-	}
-	else if (code == SDL_SCANCODE_TAB)
-	{
-		lua_getglobal(m_lua, "update_search_text");
-		if (lua_isfunction(m_lua, -1))
-		{
-			m_searchInput->SetActive(!m_searchInput->active);
-			OnSearchTermChanged(m_searchInput->input);
-		}
-		lua_settop(m_lua, 0);
-	}
-	else if (code == SDL_SCANCODE_RETURN && m_searchInput->active)
-	{
-		m_searchInput->SetActive(false);
-		OnSearchTermChanged(m_searchInput->input);
-	}
 }
 
 void DownloadScreen::OnKeyReleased(SDL_Scancode code, int32 delta)
@@ -339,7 +308,8 @@ void DownloadScreen::m_ArchiveLoop()
 void DownloadScreen::m_OnButtonPressed(Input::Button buttonCode, int32 delta)
 {
 	if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice) == InputDevice::Keyboard && m_searchInput->active)
-		return;
+		if (buttonCode != Input::Button::SongSelect_OpenSearch && buttonCode != Input::Button::SongSelect_CloseSearch)
+			return;
 
 	lua_getglobal(m_lua, "button_pressed");
 	if (lua_isfunction(m_lua, -1))
@@ -352,6 +322,40 @@ void DownloadScreen::m_OnButtonPressed(Input::Button buttonCode, int32 delta)
 		}
 	}
 	lua_settop(m_lua, 0);
+
+	int dir;
+	switch (buttonCode) {
+		case Input::Button::SongSelect_Up:
+		case Input::Button::SongSelect_Down:
+			dir = (buttonCode == Input::Button::SongSelect_Up) ? -1 : 1;
+			lua_getglobal(m_lua, "advance_selection");
+			if (lua_isfunction(m_lua, -1))
+			{
+				lua_pushnumber(m_lua, dir);
+				if (lua_pcall(m_lua, 1, 0, 0) != 0)
+				{
+					Logf("Lua error on advance_selection: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
+					g_gameWindow->ShowMessageBox("Lua Error on advance_selection", lua_tostring(m_lua, -1), 0);
+				}
+			}
+			lua_settop(m_lua, 0);
+			break;
+		case Input::Button::SongSelect_OpenSearch:
+			lua_getglobal(m_lua, "update_search_text");
+			if (lua_isfunction(m_lua, -1))
+			{
+				m_searchInput->SetActive(!m_searchInput->active);
+				OnSearchTermChanged(m_searchInput->input);
+			}
+			lua_settop(m_lua, 0);
+			break;
+		case Input::Button::SongSelect_CloseSearch:
+			if (m_searchInput->active) {
+				m_searchInput->SetActive(false);
+				OnSearchTermChanged(m_searchInput->input);
+			}
+			break;
+	}
 }
 
 void DownloadScreen::m_OnButtonReleased(Input::Button buttonCode, int32 delta)
@@ -423,13 +427,13 @@ void DownloadScreen::m_ProcessArchiveResponses()
 			lua_settable(m_lua, -3);
 			archive_read_data_skip(ar.a);
 		}
-		
+
 		if (archive_read_free(ar.a) != ARCHIVE_OK)
 		{
 			Log("Error closing handle for downloaded chart archive", Logger::Severity::Error);
 		}
 		lua_pushstring(m_lua, ar.id.c_str());
-		
+
 		if (readError)
 		{
 			Log("Error reading downloaded chart archive", Logger::Severity::Error);
@@ -459,7 +463,7 @@ void DownloadScreen::m_ProcessArchiveResponses()
 			ar.a = archive_read_new();
 			archive_read_support_filter_all(ar.a);
 			archive_read_support_format_all(ar.a);
-			
+
 			if (archive_read_open_memory(ar.a, ar.data.data(), ar.data.size()) != ARCHIVE_OK)
 			{
 				Log("Error opening downloaded chart archive for extraction", Logger::Severity::Error);
@@ -481,7 +485,7 @@ void DownloadScreen::m_ProcessArchiveResponses()
 				Log("Error closing archive handle after extracting", Logger::Severity::Error);
 			}
 		}
-		
+
 		lua_settop(m_lua, 0);
 		luaL_unref(m_lua, LUA_REGISTRYINDEX, ar.callback);
 
@@ -540,7 +544,7 @@ bool DownloadScreen::m_extractFile(archive * a, String path)
 		Path::CreateDir(path);
 		return true;
 	}
-	
+
 	if (!f.OpenWrite(Path::Normalize(path)))
 	{
 		return false;

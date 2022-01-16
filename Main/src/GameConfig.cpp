@@ -171,6 +171,35 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::Key_Sensitivity, 3.0f);
 	Set(GameConfigKeys::Key_LaserReleaseTime, 0.0f);
 
+	Set(GameConfigKeys::Key_SongSelect_Up, SDL_SCANCODE_UP),
+	Set(GameConfigKeys::Key_SongSelect_Down, SDL_SCANCODE_DOWN),
+	Set(GameConfigKeys::Key_SongSelect_FastUp, SDL_SCANCODE_PAGEUP),
+	Set(GameConfigKeys::Key_SongSelect_FastDown, SDL_SCANCODE_PAGEDOWN),
+	Set(GameConfigKeys::Key_SongSelect_Easier, SDL_SCANCODE_LEFT),
+	Set(GameConfigKeys::Key_SongSelect_Harder, SDL_SCANCODE_RIGHT),
+	Set(GameConfigKeys::Key_SongSelect_Collections, SDL_SCANCODE_F1),
+	Set(GameConfigKeys::Key_SongSelect_Random, SDL_SCANCODE_F2),
+	Set(GameConfigKeys::Key_SongSelect_ReloadSongs, SDL_SCANCODE_F5),
+	Set(GameConfigKeys::Key_SongSelect_Demo, SDL_SCANCODE_F8),
+	Set(GameConfigKeys::Key_SongSelect_OpenEditor, SDL_SCANCODE_F11),
+	Set(GameConfigKeys::Key_SongSelect_OpenDirectory, SDL_SCANCODE_F12),
+	Set(GameConfigKeys::Key_SongSelect_OpenSearch, SDL_SCANCODE_TAB),
+	Set(GameConfigKeys::Key_SongSelect_CloseSearch, SDL_SCANCODE_RETURN),
+	Set(GameConfigKeys::Key_SongSelect_StartPractice, SDL_SCANCODE_GRAVE),
+	Set(GameConfigKeys::Key_Game_Bailout, SDL_SCANCODE_BACKSPACE),
+	Set(GameConfigKeys::Key_Game_Pause, SDL_SCANCODE_PAUSE),
+	Set(GameConfigKeys::Key_Game_SkipIntro, SDL_SCANCODE_RETURN),
+	Set(GameConfigKeys::Key_Game_Advance, SDL_SCANCODE_PAGEUP),
+	Set(GameConfigKeys::Key_Game_Restart, SDL_SCANCODE_F5),
+	Set(GameConfigKeys::Key_Game_DebugHUD, SDL_SCANCODE_F8),
+	Set(GameConfigKeys::Key_Result_Continue, SDL_SCANCODE_RETURN),
+	Set(GameConfigKeys::Key_Result_Screenshot, SDL_SCANCODE_F12),
+	Set(GameConfigKeys::Key_ReloadSkin, SDL_SCANCODE_F9),
+	Set(GameConfigKeys::Key_ScrollLeft, SDL_SCANCODE_LEFT),
+	Set(GameConfigKeys::Key_ScrollRight, SDL_SCANCODE_RIGHT),
+	Set(GameConfigKeys::Key_ScrollUp, SDL_SCANCODE_UP),
+	Set(GameConfigKeys::Key_ScrollDown, SDL_SCANCODE_DOWN),
+
 	// Default controller settings
 	SetBlob<16>(GameConfigKeys::Controller_DeviceID, { 0 }); // null device
 	Set(GameConfigKeys::Controller_BTS, 0);
@@ -314,7 +343,7 @@ void GameConfig::UpdateVersion()
 	}
 
 	// 1 -> 2: Convert mouse sensitivity from old range to new range.
-	if (configVersion == 1) 
+	if (configVersion == 1)
 	{
 		float oldSens = GetFloat(GameConfigKeys::Mouse_Sensitivity);
 		float newSens = static_cast<float>(Input::CalculateSensFromPpr(6.0f / oldSens));
@@ -376,6 +405,35 @@ ConfigBase::KeyList GameConfigProfileSettings = {
 	Key(Key_BackAlt),
 	Key(Key_Sensitivity),
 	Key(Key_LaserReleaseTime),
+
+	Key(Key_SongSelect_Up),
+	Key(Key_SongSelect_Down),
+	Key(Key_SongSelect_FastUp),
+	Key(Key_SongSelect_FastDown),
+	Key(Key_SongSelect_Easier),
+	Key(Key_SongSelect_Harder),
+	Key(Key_SongSelect_Collections),
+	Key(Key_SongSelect_Random),
+	Key(Key_SongSelect_ReloadSongs),
+	Key(Key_SongSelect_Demo),
+	Key(Key_SongSelect_OpenEditor),
+	Key(Key_SongSelect_OpenDirectory),
+	Key(Key_SongSelect_OpenSearch),
+	Key(Key_SongSelect_CloseSearch),
+	Key(Key_SongSelect_StartPractice),
+	Key(Key_Game_Bailout),
+	Key(Key_Game_Pause),
+	Key(Key_Game_SkipIntro),
+	Key(Key_Game_Advance),
+	Key(Key_Game_Restart),
+	Key(Key_Game_DebugHUD),
+	Key(Key_Result_Continue),
+	Key(Key_Result_Screenshot),
+	Key(Key_ReloadSkin),
+	Key(Key_ScrollLeft),
+	Key(Key_ScrollRight),
+	Key(Key_ScrollUp),
+	Key(Key_ScrollDown),
 
 	Key(Controller_DeviceID),
 	Key(Controller_BTS),

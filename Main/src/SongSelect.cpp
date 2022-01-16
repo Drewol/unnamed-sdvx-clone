@@ -130,7 +130,7 @@ const float PreviewPlayer::m_fadeDelayDuration = 0.5f;
 
 /*
 	Song selection wheel
-*/ 
+*/
 using SongItemSelectionWheel = ItemSelectionWheel<SongSelectIndex, FolderIndex>;
 class SelectionWheel : public SongItemSelectionWheel
 {
@@ -1255,7 +1255,8 @@ public:
 			return;
 
 		if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice) == InputDevice::Keyboard && m_searchInput->active)
-			return;
+			if (buttonCode != Input::Button::SongSelect_OpenSearch && buttonCode != Input::Button::SongSelect_CloseSearch)
+				return;
 
 		m_timeSinceButtonPressed[buttonCode] = 0;
 
@@ -1357,6 +1358,81 @@ public:
 				}
 			}
 		}
+
+		if (m_filterSelection->Active) {
+			switch (buttonCode) {
+				case Input::Button::SongSelect_Down:
+					m_filterSelection->AdvanceSelection(1);
+					break;
+				case Input::Button::SongSelect_Up:
+					m_filterSelection->AdvanceSelection(-1);
+					break;
+			}
+		} else if (m_sortSelection->Active) {
+			switch (buttonCode) {
+				case Input::Button::SongSelect_Down:
+					m_sortSelection->AdvanceSelection(1);
+					break;
+				case Input::Button::SongSelect_Up:
+					m_sortSelection->AdvanceSelection(-1);
+					break;
+			}
+		} else {
+			switch (buttonCode) {
+				case Input::Button::SongSelect_Down:
+					m_selectionWheel->AdvanceSelection(1);
+					break;
+				case Input::Button::SongSelect_Up:
+					m_selectionWheel->AdvanceSelection(-1);
+					break;
+				case Input::Button::SongSelect_FastDown:
+					m_selectionWheel->AdvancePage(1);
+					break;
+				case Input::Button::SongSelect_FastUp:
+					m_selectionWheel->AdvancePage(-1);
+					break;
+				case Input::Button::SongSelect_Easier:
+					m_selectionWheel->AdvanceDifficultySelection(-1);
+					break;
+				case Input::Button::SongSelect_Harder:
+					m_selectionWheel->AdvanceDifficultySelection(1);
+					break;
+				case Input::Button::SongSelect_Collections:
+					if (m_hasCollDiag)
+						m_collDiag.Open(GetCurrentSelectedChart());
+					break;
+				case Input::Button::SongSelect_Random:
+					m_selectionWheel->SelectRandom();
+					break;
+				case Input::Button::SongSelect_ReloadSongs:
+					m_mapDatabase->StartSearching();
+					OnSearchTermChanged(m_searchInput->input);
+					break;
+				case Input::Button::SongSelect_Demo:
+					StartDemo();
+					break;
+				case Input::Button::ReloadSkin:
+					m_selectionWheel->ReloadScript();
+					m_filterSelection->ReloadScript();
+					g_application->ReloadScript("songselect/background", m_lua);
+					break;
+				case Input::Button::SongSelect_OpenEditor:
+					OpenEditor();
+					break;
+				case Input::Button::SongSelect_OpenDirectory:
+					Path::ShowInFileBrowser(m_selectionWheel->GetSelection()->path);
+					break;
+				case Input::Button::SongSelect_OpenSearch:
+					m_searchInput->SetActive(!m_searchInput->active);
+					break;
+				case Input::Button::SongSelect_CloseSearch:
+					if (m_searchInput->active) m_searchInput->SetActive(false);
+					break;
+				case Input::Button::SongSelect_StartPractice:
+					m_settDiag.onPressPractice.Call();
+					break;
+			}
+		}
 	}
 
 	void m_OnButtonReleased(Input::Button buttonCode, int32 delta)
@@ -1419,116 +1495,9 @@ public:
 		if (m_collDiag.IsActive() || m_settDiag.IsActive())
 			return;
 
-		if (m_filterSelection->Active)
+		if (!(m_filterSelection->Active || m_sortSelection->Active))
 		{
-			if (code == SDL_SCANCODE_DOWN)
-			{
-				m_filterSelection->AdvanceSelection(1);
-			}
-			else if (code == SDL_SCANCODE_UP)
-			{
-				m_filterSelection->AdvanceSelection(-1);
-			}
-		}
-		else if (m_sortSelection->Active)
-		{
-			if (code == SDL_SCANCODE_DOWN)
-			{
-				m_sortSelection->AdvanceSelection(1);
-			}
-			else if (code == SDL_SCANCODE_UP)
-			{
-				m_sortSelection->AdvanceSelection(-1);
-			}
-		}
-		else
-		{
-			if (code == SDL_SCANCODE_DOWN)
-			{
-				m_selectionWheel->AdvanceSelection(1);
-			}
-			else if (code == SDL_SCANCODE_UP)
-			{
-				m_selectionWheel->AdvanceSelection(-1);
-			}
-			else if (code == SDL_SCANCODE_PAGEDOWN)
-			{
-				m_selectionWheel->AdvancePage(1);
-			}
-			else if (code == SDL_SCANCODE_PAGEUP)
-			{
-				m_selectionWheel->AdvancePage(-1);
-			}
-			else if (code == SDL_SCANCODE_LEFT)
-			{
-				m_selectionWheel->AdvanceDifficultySelection(-1);
-			}
-			else if (code == SDL_SCANCODE_RIGHT)
-			{
-				m_selectionWheel->AdvanceDifficultySelection(1);
-			}
-			else if (code == SDL_SCANCODE_F5)
-			{
-				m_mapDatabase->StartSearching();
-				OnSearchTermChanged(m_searchInput->input);
-			}
-			else if (code == SDL_SCANCODE_F1 && m_hasCollDiag)
-			{
-				m_collDiag.Open(GetCurrentSelectedChart());
-			}
-			else if (code == SDL_SCANCODE_F2)
-			{
-				m_selectionWheel->SelectRandom();
-			}
-			else if (code == SDL_SCANCODE_F8 && m_multiplayer == nullptr) // start demo mode
-			{
-				ChartIndex *chart = m_mapDatabase->GetRandomChart();
-				PlaybackOptions opts;
-				Game *game = Game::Create(chart, opts);
-				if (!game)
-				{
-					Log("Failed to start game", Logger::Severity::Error);
-					return;
-				}
-				game->GetScoring().autoplayInfo.autoplay = true;
-				game->SetDemoMode(true);
-				game->SetSongDB(m_mapDatabase);
-				m_suspended = true;
-
-				// Transition to game
-				g_transition->TransitionTo(game);
-			}
-			else if (code == SDL_SCANCODE_F9)
-			{
-				m_selectionWheel->ReloadScript();
-				m_filterSelection->ReloadScript();
-				g_application->ReloadScript("songselect/background", m_lua);
-			}
-			else if (code == SDL_SCANCODE_F11)
-			{
-				String paramFormat = g_gameConfig.GetString(GameConfigKeys::EditorParamsFormat);
-				String path = Path::Normalize(g_gameConfig.GetString(GameConfigKeys::EditorPath));
-				String param = Utility::Sprintf(paramFormat.c_str(),
-												Utility::Sprintf("\"%s\"", Path::Absolute(GetCurrentSelectedChart()->path)));
-				Path::Run(path, param.GetData());
-			}
-			else if (code == SDL_SCANCODE_F12)
-			{
-				Path::ShowInFileBrowser(m_selectionWheel->GetSelection()->path);
-			}
-			else if (code == SDL_SCANCODE_TAB)
-			{
-				m_searchInput->SetActive(!m_searchInput->active);
-			}
-			else if (code == SDL_SCANCODE_RETURN && m_searchInput->active)
-			{
-				m_searchInput->SetActive(false);
-			}
-			else if (code == SDL_SCANCODE_GRAVE)
-			{
-				m_settDiag.onPressPractice.Call();
-			}
-			else if (code == SDL_SCANCODE_LSHIFT || code == SDL_SCANCODE_RSHIFT )
+			if (code == SDL_SCANCODE_LSHIFT || code == SDL_SCANCODE_RSHIFT )
 			{
 				m_shiftDown |= (code == SDL_SCANCODE_LSHIFT? 1 : 2);
 			}
@@ -1733,6 +1702,34 @@ public:
 	{
 		return m_selectionWheel->GetSelectedChart();
 	}
+
+private:
+	void StartDemo() {
+		ChartIndex* chart = m_mapDatabase->GetRandomChart();
+		PlaybackOptions opts;
+		Game* game = Game::Create(chart, opts);
+		if (!game)
+		{
+			Log("Failed to start game", Logger::Severity::Error);
+			return;
+		}
+		game->GetScoring().autoplayInfo.autoplay = true;
+		game->SetDemoMode(true);
+		game->SetSongDB(m_mapDatabase);
+		m_suspended = true;
+
+		// Transition to game
+		g_transition->TransitionTo(game);
+	}
+
+	void OpenEditor() {
+		String paramFormat = g_gameConfig.GetString(GameConfigKeys::EditorParamsFormat);
+		String path = Path::Normalize(g_gameConfig.GetString(GameConfigKeys::EditorPath));
+		String param = Utility::Sprintf(paramFormat.c_str(),
+			Utility::Sprintf("\"%s\"", Path::Absolute(GetCurrentSelectedChart()->path)));
+		Path::Run(path, param.GetData());
+	}
+
 };
 
 SongSelect *SongSelect::Create(MultiplayerScreen *multiplayer)

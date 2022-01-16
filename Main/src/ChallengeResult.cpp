@@ -73,6 +73,35 @@ private:
 			g_application->RemoveTickable(this);
 			m_removed = true;
 		}
+
+		switch (button) {
+			case Input::Button::Result_Continue:
+				g_application->RemoveTickable(this);
+				m_removed = true;
+				break;
+			case Input::Button::Result_Screenshot:
+				Capture();
+				break;
+			case Input::Button::ReloadSkin:
+				g_application->ReloadScript("challengeresult", m_lua);
+				lua_getglobal(m_lua, "result_set");
+				if (lua_isfunction(m_lua, -1))
+				{
+					if (lua_pcall(m_lua, 0, 0, 0) != 0)
+					{
+						Logf("Lua error: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
+						g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
+					}
+				}
+				lua_settop(m_lua, 0);
+				break;
+			case Input::Button::ScrollDown:
+				m_scroll += 1;
+				break;
+			case Input::Button::ScrollUp:
+				m_scroll += 1;
+				break;
+		}
 	}
 public:
 
@@ -309,37 +338,6 @@ public:
 
 	void OnKeyPressed(SDL_Scancode code, int32 delta) override
 	{
-		if(code == SDL_SCANCODE_RETURN && !m_removed)
-		{
-			g_application->RemoveTickable(this);
-			m_removed = true;
-		}
-		if (code == SDL_SCANCODE_F12)
-		{
-			Capture();
-		}
-		if (code == SDL_SCANCODE_F9)
-		{
-			g_application->ReloadScript("challengeresult", m_lua);
-			lua_getglobal(m_lua, "result_set");
-			if (lua_isfunction(m_lua, -1))
-			{
-				if (lua_pcall(m_lua, 0, 0, 0) != 0)
-				{
-					Logf("Lua error: %s", Logger::Severity::Error, lua_tostring(m_lua, -1));
-					g_gameWindow->ShowMessageBox("Lua Error", lua_tostring(m_lua, -1), 0);
-				}
-			}
-			lua_settop(m_lua, 0);
-		}
-		if (code == SDL_SCANCODE_DOWN)
-		{
-			m_scroll += 1;
-		}
-		else if (code == SDL_SCANCODE_UP)
-		{
-			m_scroll -= 1;
-		}
 	}
 	void OnKeyReleased(SDL_Scancode code, int32 delta) override
 	{
@@ -438,7 +436,7 @@ public:
 			screenshot->SavePNG(screenshotPath);
 			screenshot.reset();
 		}
-		else 
+		else
 		{
 			screenshotPath = "Failed to capture screenshot";
 		}

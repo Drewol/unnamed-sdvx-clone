@@ -22,12 +22,41 @@ public:
 		FX_0,
 		FX_1,
         BT_S, //Start Button
-		LS_0Neg, // Left laser- 
+		LS_0Neg, // Left laser-
 		LS_0Pos, // Left laser+		(|---->)
 		LS_1Neg, // Right laser-	(<----|)
 		LS_1Pos, // Right laser+
 		Back,
-		Length)
+		SongSelect_Up,
+		SongSelect_Down,
+		SongSelect_FastUp,
+		SongSelect_FastDown,
+		SongSelect_Easier,
+		SongSelect_Harder,
+		SongSelect_Collections,
+		SongSelect_Random,
+		SongSelect_ReloadSongs,
+		SongSelect_Demo,
+		SongSelect_OpenEditor,
+		SongSelect_OpenDirectory,
+		SongSelect_OpenSearch,
+		SongSelect_CloseSearch,
+		SongSelect_StartPractice,
+		Game_Bailout,
+		Game_Pause,
+		Game_SkipIntro,
+		Game_Advance,
+		Game_Restart,
+		Game_DebugHUD,
+		Result_Continue,
+		Result_Screenshot,
+		ReloadSkin,
+		ScrollLeft,
+		ScrollRight,
+		ScrollUp,
+		ScrollDown,
+		Length
+	)
 
 	~Input();
 	void Init(Graphics::Window& wnd);
