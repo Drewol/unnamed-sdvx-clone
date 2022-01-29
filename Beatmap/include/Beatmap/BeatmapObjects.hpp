@@ -22,7 +22,7 @@ using MapTime = int32;
 struct MapTimeRange
 {
 	constexpr MapTimeRange() noexcept : begin(0), end(0) {}
-	explicit constexpr MapTimeRange(MapTime begin) noexcept : begin(begin), end(0) {}
+	explicit constexpr MapTimeRange(MapTime begin) noexcept : begin(begin), end(begin) {}
 	constexpr MapTimeRange(MapTime begin, MapTime end) noexcept : begin(begin), end(end) {}
 
 	constexpr MapTimeRange(const MapTimeRange&) noexcept = default;

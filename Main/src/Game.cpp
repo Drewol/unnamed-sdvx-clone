@@ -292,7 +292,8 @@ public:
 		{
 			m_renderDebugHUD = true;
 		}
-				
+		
+		m_playOptions.range = m_GetWholeRange();
 		m_endTime = m_beatmap->GetLastObjectTime();
 
 		if (IsMultiplayerGame())
@@ -401,7 +402,7 @@ public:
 		m_globalOffset = g_gameConfig.GetInt(GameConfigKeys::GlobalOffset);
 		m_tempOffset = 0;
 
-		InitPlaybacks(0);
+		InitPlaybacks(m_lastMapTime);
 
 		m_saveSpeed = g_gameConfig.GetBool(GameConfigKeys::AutoSaveSpeed);
 		m_renderFastGui = g_gameConfig.GetBool(GameConfigKeys::FastGUI);
@@ -426,7 +427,9 @@ public:
 		m_particleSystem = ParticleSystemRes::Create(g_gl);
 
 		if (m_isPracticeSetup)
+		{
 			m_practiceSetupDialog = std::make_unique<PracticeModeSettingsDialog>(*this, m_lastMapTime, m_tempOffset, m_playOptions, m_practiceSetupRange);
+		}
 		
 		return true;
 	}
@@ -1168,6 +1171,18 @@ public:
 		return true;
 	}
 
+	MapTimeRange m_GetWholeRange() const
+	{
+		if (m_beatmap)
+		{
+			return MapTimeRange{m_beatmap->GetFirstObjectTime(std::numeric_limits<int>::min())};
+		}
+		else
+		{
+			return MapTimeRange{0};
+		}
+	}
+
 	// Wait before start of map
 	MapTime GetPlayStartTime()
 	{
@@ -1881,7 +1896,7 @@ public:
 				}
 				else if (IsPartialPlay())
 				{
-					notStorableReason += "PartialPlay";
+					notStorableReason = "PartialPlay";
 				}
 
 				textPos.y += RenderText(Utility::Sprintf("Score not storable: %s", notStorableReason), textPos, Color::Red).y;
@@ -2563,8 +2578,7 @@ public:
 
 		m_scoring.autoplayInfo.autoplay = true;
 
-		m_practiceSetupRange = m_playOptions.range;
-		m_playOptions.range = { 0, 0 };
+		m_practiceSetupRange = m_playOptions.range = m_GetWholeRange();
 
 		m_playOptions.playbackSpeed = g_gameConfig.GetInt(GameConfigKeys::DefaultPlaybackSpeed) / 100.0f;
 
@@ -2722,7 +2736,7 @@ public:
 
 		m_track->hitEffectAutoplay = true;
 
-		m_playOptions.range = { 0, 0 };
+		m_playOptions.range = m_GetWholeRange();
 		m_playOnDialogClose = true;
 
 		m_audioPlayback.Pause();
@@ -2805,10 +2819,9 @@ public:
 		Restart();
 	}
 
-	constexpr bool IsPartialPlay() const noexcept
+	bool IsPartialPlay() const
 	{
-		if (m_playOptions.range.begin > 0) return true;
-		return m_playOptions.range.HasEnd();
+		return !m_playOptions.range.Includes(m_GetWholeRange());
 	}
 	
 	inline HitWindow GetHitWindow() const

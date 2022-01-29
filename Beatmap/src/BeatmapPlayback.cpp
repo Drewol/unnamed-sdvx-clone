@@ -17,8 +17,6 @@ bool BeatmapPlayback::Reset(MapTime initTime, MapTime start)
 	Logf("Resetting BeatmapPlayback, InitTime = %d, Start = %d", Logger::Severity::Debug, initTime, start);
 	m_playbackTime = initTime;
 
-	// Ensure that nothing could go wrong when the start is 0
-	if (start <= 0) start = std::numeric_limits<decltype(start)>::min();
 	m_playRange = { start, start };
 
 	m_currObject = m_beatmap->GetFirstObjectState();
