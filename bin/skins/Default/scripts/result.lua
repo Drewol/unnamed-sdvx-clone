@@ -36,6 +36,7 @@ game.LoadSkinSample("applause")
 local played = false
 local shotTimer = 0;
 local shotPath = "";
+local shotType = "screenshot"
 game.LoadSkinSample("shutter")
 local highScores = nil
 
@@ -46,8 +47,11 @@ local hitHistogram = {}
 local hitMinDelta = 0
 local hitMaxDelta = 0
 
-local hitWindowPerfect = 46
-local hitWindowGood = 92
+local NORMAL_HIT_WINDOW_PERFECT = 46
+local NORMAL_HIT_WINDOW_GOOD = 150
+
+local hitWindowPerfect = NORMAL_HIT_WINDOW_PERFECT
+local hitWindowGood = NORMAL_HIT_WINDOW_GOOD
 
 local clearTextBase = "" -- Used to determind the type of clear
 local clearText = ""
@@ -121,12 +125,18 @@ function drawLine(x1,y1,x2,y2,w,r,g,b)
 end
 
 function getScoreBadgeDesc(s)
-    if s.badge == 1 then
-        if s.gauge_type ~= 0 then return "crash"
-        else return string.format("%.1f%%", s.gauge * 100)
+    if s.badge ~= nil then
+        if s.badge == 1 then
+            if s.gauge_type ~= 0 then return "crash"
+            else return string.format("%.1f%%", s.gauge * 100)
+            end
+        elseif 2 <= s.badge and s.badge <= 4 and s.misses < 10 then
+            return string.format("%d-%d", s.goods, s.misses)
         end
-    elseif 2 <= s.badge and s.badge <= 4 and s.misses < 10 then
-        return string.format("%d-%d", s.goods, s.misses)
+    elseif s.lamp ~= nil then
+        if 2 <= s.lamp and s.lamp <= 4 and s.error < 10 then
+            return string.format("%d-%d", s.near, s.error)
+        end
     end
     return ""
 end
@@ -279,8 +289,8 @@ result_set = function()
 
     hasHitStat = result.noteHitStats ~= nil and #result.noteHitStats > 0
 
-    hitWindowPerfect = 46
-    hitWindowGood = 92
+    hitWindowPerfect = NORMAL_HIT_WINDOW_PERFECT
+    hitWindowGood = NORMAL_HIT_WINDOW_GOOD
     critText = "CRIT"
     nearText = "NEAR"
 
@@ -288,7 +298,7 @@ result_set = function()
         hitWindowPerfect = result.hitWindow.perfect
         hitWindowGood = result.hitWindow.good
 
-        if hitWindowPerfect ~= 46 or hitWindowGood ~= 92 then
+        if hitWindowPerfect ~= NORMAL_HIT_WINDOW_PERFECT or hitWindowGood ~= NORMAL_HIT_WINDOW_GOOD then
             critText = string.format("%02dms CRIT", hitWindowPerfect)
             nearText = string.format("%02dms NEAR", hitWindowGood)
         end
@@ -323,7 +333,11 @@ draw_shotnotif = function(x,y)
     gfx.Stroke()
     gfx.FillColor(255,255,255)
     gfx.FontSize(15)
-    gfx.Text("Screenshot saved to:", 3,5)
+    if shotType == "screenshot" then
+        gfx.Text("Screenshot saved to:", 3,5)
+    else
+        gfx.Text("Replay saved to:", 3,5)
+    end
     gfx.Text(shotPath, 3,20)
     gfx.Restore()
 end
@@ -439,7 +453,8 @@ draw_ir = function(full)
                 gfx.BeginPath()
                 gfx.FontSize(15)
                 gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_BOTTOM)
-                gfx.Text("todo", 55, 52)
+
+                gfx.Text(getScoreBadgeDesc(s), 55, 52)
             end
         end
 
@@ -1356,5 +1371,12 @@ end
 screenshot_captured = function(path)
     shotTimer = 10;
     shotPath = path;
+    shotType = "screenshot";
     game.PlaySample("shutter")
+end
+
+replay_saved = function(path)
+    shotTimer = 10;
+    shotPath = path;
+    shotType = "replay";
 end

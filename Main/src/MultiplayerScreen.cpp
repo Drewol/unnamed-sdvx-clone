@@ -955,6 +955,7 @@ void MultiplayerScreen::SendFinalScore(class Game* game, ClearMark clearState)
 	packet["gauge"] = gauge->GetValue();
 	packet["early"] = scoring.timedHits[0];
 	packet["late"] = scoring.timedHits[1];
+	packet["combo"] = scoring.maxComboCounter;
 	packet["miss"] = scoring.categorizedHits[0];
 	packet["near"] = scoring.categorizedHits[1];
 	packet["crit"] = scoring.categorizedHits[2];

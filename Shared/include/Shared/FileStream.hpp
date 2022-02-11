@@ -21,7 +21,7 @@ class FileReader : public FileStreamBase
 {
 public:
 	FileReader() = default;
-	FileReader(File& file);
+	FileReader(File& file) : FileStreamBase(file, true) {};
 	virtual size_t Serialize(void* data, size_t len);
 };
 
@@ -30,6 +30,7 @@ class FileWriter : public FileStreamBase
 {
 public:
 	FileWriter() = default;
-	FileWriter(File& file);
+	FileWriter(File& file) : FileStreamBase(file, false) {};
 	virtual size_t Serialize(void* data, size_t len);
 };
+

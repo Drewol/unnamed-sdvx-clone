@@ -14,6 +14,7 @@ public:
     void InitTabs() override;
     void OnAdvanceTab() override;
 
+    Delegate<> onPressReplay;
     Delegate<> onPressAutoplay;
     Delegate<> onPressPractice;
     Delegate<int> onSongOffsetChange;

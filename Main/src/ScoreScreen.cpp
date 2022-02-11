@@ -35,6 +35,8 @@ private:
 	bool m_showStats;
 	ClearMark m_badge;
 	uint32 m_score;
+	uint32 m_hitScore;
+	uint32 m_maxHitScore;
 	uint32 m_maxCombo;
 	uint32 m_categorizedHits[3];
 	float m_finalGaugeValue;
@@ -210,6 +212,63 @@ private:
 		lua_settable(m_lua, -3);
 	}
 
+	void m_SaveReplay(bool alert=false)
+	{
+		if (m_badge == ClearMark::NotPlayed)
+			return;
+
+		if (g_gameConfig.GetBool(GameConfigKeys::UseLegacyReplay))
+		{
+			File replayFile;
+			if (replayFile.OpenWrite(m_replayPath))
+			{
+				FileWriter fw(replayFile);
+				fw.SerializeObject(m_simpleHitStats);
+				fw.Serialize(&(m_hitWindow.perfect), 4);
+				fw.Serialize(&(m_hitWindow.good), 4);
+				fw.Serialize(&(m_hitWindow.hold), 4);
+				fw.Serialize(&(m_hitWindow.miss), 4);
+				fw.Serialize(&m_hitWindow.slam, 4);
+			}
+			return;
+		}
+
+		Replay* replay = new Replay();
+		replay->AttachChartInfo(m_chartIndex);
+		replay->AttachScoreInfo(&m_scoredata);
+		replay->AttachJudgementEvents(m_simpleHitStats);
+		replay->SetHitWindow(m_hitWindow);
+		replay->SetOffsets(ReplayOffsets(
+			g_gameConfig.GetInt(GameConfigKeys::GlobalOffset),
+			g_gameConfig.GetInt(GameConfigKeys::InputOffset),
+			g_gameConfig.GetInt(GameConfigKeys::LaserOffset),
+			m_chartIndex->custom_offset
+		));
+		auto& scoreInfo = replay->GetScoreInfo();
+		scoreInfo.maxHitScore = m_maxHitScore;
+		scoreInfo.maxHitScore = m_hitScore;
+		scoreInfo.chain = m_maxCombo;
+		replay->DoneInit();
+
+		bool good = replay->Save(m_replayPath);
+
+		if (!alert)
+			return;
+
+		String relpath = Path::Normalize("replays/" + m_chartHash + "/" + Shared::Time::Now().ToString() + ".urf");
+
+		lua_getglobal(m_lua, "replay_saved");
+		if (lua_isfunction(m_lua, -1))
+		{
+			if (good)
+				lua_pushstring(m_lua, *relpath);
+			else
+				lua_pushstring(m_lua, "Failed to save replay");
+			lua_call(m_lua, 1, 0);
+		}
+		lua_settop(m_lua, 0);
+	}
+
 	void m_AddNewScore(class Game* game)
 	{
 		ScoreIndex* newScore = new ScoreIndex();
@@ -217,6 +276,7 @@ private:
 
 		// If chart file can't be opened, use existing hash.
 		String hash = chart->hash;
+
 
 		File chartFile;
 		if (chartFile.OpenRead(chart->path))
@@ -246,22 +306,21 @@ private:
 
 		Path::CreateDir(Path::Absolute("replays/" + hash));
 		m_replayPath = Path::Normalize(Path::Absolute("replays/" + chart->hash + "/" + Shared::Time::Now().ToString() + ".urf"));
-		File replayFile;
 
-		if (replayFile.OpenWrite(m_replayPath))
+		AutoSaveReplaySettings replaySetting = g_gameConfig.GetEnum<Enum_AutoSaveReplaySettings>(GameConfigKeys::AutoSaveReplay);
+		if (replaySetting == AutoSaveReplaySettings::Always ||
+			(replaySetting == AutoSaveReplaySettings::Highscore && m_highScores.empty()) ||
+			(replaySetting == AutoSaveReplaySettings::Highscore && m_score > (uint32)m_highScores.front()->score))
 		{
-			FileWriter fw(replayFile);
-			fw.SerializeObject(m_simpleHitStats);
-			fw.Serialize(&(m_hitWindow.perfect), 4);
-			fw.Serialize(&(m_hitWindow.good), 4);
-			fw.Serialize(&(m_hitWindow.hold), 4);
-			fw.Serialize(&(m_hitWindow.miss), 4);
-			fw.Serialize(&m_hitWindow.slam, 4);
+			m_SaveReplay();
 		}
 
 		newScore->score = m_score;
 		newScore->crit = m_categorizedHits[2];
 		newScore->almost = m_categorizedHits[1];
+		newScore->early = m_timedHits[0];
+		newScore->late = m_timedHits[1];
+		newScore->combo = m_maxCombo;
 		newScore->miss = m_categorizedHits[0];
 		newScore->gauge = m_finalGaugeValue;
 
@@ -382,7 +441,20 @@ public:
 		Gauge* gauge = scoring.GetTopGauge();
 		// Calculate hitstats
 		memcpy(m_categorizedHits, scoring.categorizedHits, sizeof(scoring.categorizedHits));
-		m_score = scoring.CalculateCurrentScore();
+
+		Replay* replay = game->GetCurrentReplay();
+		ScoreIndex* score = replay ? replay->GetScoreIndex() : nullptr;
+
+		if (score)
+		{
+			m_score = score->score;
+	 	}
+		else
+		{
+			m_score = scoring.CalculateCurrentScore();
+		}
+		m_hitScore = scoring.currentHitScore;
+		m_maxHitScore = scoring.currentMaxScore;
 		m_maxCombo = scoring.maxComboCounter;
 		m_finalGaugeValue = gauge->GetValue();
 		m_gaugeOption = gauge->GetOpts();
@@ -394,6 +466,9 @@ public:
 		memcpy(m_categorizedHits, scoring.categorizedHits, sizeof(scoring.categorizedHits));
 		m_scoredata.crit = m_categorizedHits[2];
 		m_scoredata.almost = m_categorizedHits[1];
+		m_scoredata.early = m_timedHits[0];
+		m_scoredata.late = m_timedHits[1];
+		m_scoredata.combo = m_maxCombo;
 		m_scoredata.miss = m_categorizedHits[0];
 		m_scoredata.gauge = m_finalGaugeValue;
 		m_scoredata.gaugeType = m_gaugeType;
@@ -452,6 +527,9 @@ public:
 		m_scoredata.score = data["score"];
 		m_scoredata.crit = m_categorizedHits[2];
 		m_scoredata.almost = m_categorizedHits[1];
+		m_scoredata.early = m_timedHits[0];
+		m_scoredata.late = m_timedHits[1];
+		m_scoredata.combo = m_maxCombo;
 		m_scoredata.miss = m_categorizedHits[0];
 		m_scoredata.gauge = m_finalGaugeValue;
 		m_scoredata.gaugeType = m_gaugeType;
@@ -524,41 +602,83 @@ public:
 			loadScoresFromGame(game);
 		}
 
-		for (HitStat* stat : scoring.hitStats)
+		if (Replay* replay = game->GetCurrentReplay())
 		{
-			if (!stat->forReplay)
-				continue;
-			SimpleHitStat shs;
-			if (stat->object)
-			{
-				if (stat->object->type == ObjectType::Hold)
+			m_autoplay = true;
+
+			if (replay->filePath != "")
+				m_replayPath = replay->filePath;
+
+			auto& judgements = replay->GetJudgements();
+			for (size_t i = 0; i < judgements.size(); i++) {
+				const auto& j = judgements[i];
+
+				SimpleHitStat shs;
+				j.ToSimpleHitStat(shs);
+
+				m_simpleHitStats.Add(shs);
+
+				switch (j.GetType())
 				{
-					shs.lane = ((HoldObjectState*)stat->object)->index;
-				}
-				else if (stat->object->type == ObjectType::Single)
-				{
-					shs.lane = ((ButtonObjectState*)stat->object)->index;
-				}
-				else
-				{
-					shs.lane = ((LaserObjectState*)stat->object)->index + 6;
+				case HitStatType::Unknown:
+					if (j.lane >= 6 || j.delta == 0) //Heuristic
+						break;
+					m_simpleNoteHitStats.Add(shs);
+					break;
+				case HitStatType::Button:
+					m_simpleNoteHitStats.Add(shs);
+					break;
+				default:
+					break;
 				}
 			}
-
-			shs.rating = (int8)stat->rating;
-			shs.time = stat->time;
-			shs.delta = stat->delta;
-			shs.hold = stat->hold;
-			shs.holdMax = stat->holdMax;
-
-			m_simpleHitStats.Add(shs);
-
-			if (stat->object && stat->object->type == ObjectType::Single)
+		}
+		else
+		{
+			for (HitStat* stat : scoring.hitStats)
 			{
-				m_simpleNoteHitStats.Add(shs);
-			}
-			else {
-				assert(shs.lane >= 6 || shs.hold > 0);
+				if (!stat->forReplay)
+					continue;
+				SimpleHitStat shs;
+				if (stat->object)
+				{
+					if (stat->object->type == ObjectType::Hold)
+					{
+						shs.lane = ((HoldObjectState*)stat->object)->index;
+						shs.type = (uint8)HitStatType::Hold;
+					}
+					else if (stat->object->type == ObjectType::Single)
+					{
+						shs.lane = ((ButtonObjectState*)stat->object)->index;
+						shs.type = (uint8)HitStatType::Button;
+					}
+					else
+					{
+						auto* obj = (LaserObjectState*)stat->object;
+						shs.lane = obj->index + 6;
+						if (obj->flag_Instant)
+							shs.type = (uint8)HitStatType::Slam;
+						else
+							shs.type = (uint8)HitStatType::Laser;
+					}
+				}
+
+				shs.rating = (int8)stat->rating;
+				shs.time = stat->time;
+				shs.delta = stat->delta;
+				shs.hold = stat->hold;
+				shs.holdMax = stat->holdMax;
+
+				m_simpleHitStats.Add(shs);
+
+
+				if (stat->object && stat->object->type == ObjectType::Single)
+				{
+					m_simpleNoteHitStats.Add(shs);
+				}
+				else {
+					assert(shs.lane >= 6 || shs.hold > 0);
+				}
 			}
 		}
 
@@ -764,6 +884,9 @@ public:
 				m_PushIntToTable("score", score->score);
 				m_PushIntToTable("perfects", score->crit);
 				m_PushIntToTable("goods", score->almost);
+				m_PushIntToTable("earlies", score->early);
+				m_PushIntToTable("lates", score->late);
+				m_PushIntToTable("combo", score->combo);
 				m_PushIntToTable("misses", score->miss);
 				m_PushIntToTable("timestamp", score->timestamp);
 				m_PushIntToTable("badge", static_cast<int>(Scoring::CalculateBadge(*score)));
@@ -918,6 +1041,10 @@ public:
 		{
 			Capture();
 		}
+		if (code == SDL_SCANCODE_F11)
+		{
+			m_SaveReplay(true);
+		}
 		if (code == SDL_SCANCODE_F9)
 		{
 			g_application->ReloadScript("result", m_lua);
@@ -1032,10 +1159,10 @@ public:
 								if(!g_gameConfig.GetBool(GameConfigKeys::IRLowBandwidth))
 								{
 									//and server wants us to send replay
-									if(m_irResponseJson["body"].find("sendReplay") != m_irResponseJson["body"].end() && m_irResponseJson["body"]["sendReplay"].is_string())
+									if(m_irResponseJson.find("body") != m_irResponseJson.end() && m_irResponseJson["body"].find("sendReplay") != m_irResponseJson["body"].end() && m_irResponseJson["body"]["sendReplay"].is_string())
 									{
 										//don't really care about the return of this, if it fails it's not the end of the world
-										IR::PostReplay(m_irResponseJson["body"]["sendReplay"].get<String>(), m_replayPath).get();
+										IR::PostReplay(m_irResponseJson["body"]["sendReplay"].get<String>(), m_replayPath);
 									}
 								}			
 							}
@@ -1043,6 +1170,7 @@ public:
 
 						} catch(nlohmann::json::parse_error& e) {
 							Log("Parsing JSON returned from IR failed.", Logger::Severity::Error);
+							m_irState = IR::ResponseState::RequestFailure;
 						}
 					}
 
@@ -1110,7 +1238,9 @@ public:
 		}
 		Vector2i size(w, h);
 		Image screenshot = ImageRes::Screenshot(g_gl, size, { x,y });
-		String screenshotPath = Path::Absolute("screenshots/" + Shared::Time::Now().ToString() + ".png");
+		String relpath = "screenshots/" + Shared::Time::Now().ToString() + ".png";
+		String screenshotPath = Path::Absolute(relpath);
+		relpath = Path::Normalize(relpath);
 		if (screenshot.get() != nullptr)
 		{
 			screenshot->SavePNG(screenshotPath);
@@ -1118,13 +1248,13 @@ public:
 		}
 		else
 		{
-			screenshotPath = "Failed to capture screenshot";
+			relpath = "Failed to capture screenshot";
 		}
 
 		lua_getglobal(m_lua, "screenshot_captured");
 		if (lua_isfunction(m_lua, -1))
 		{
-			lua_pushstring(m_lua, *screenshotPath);
+			lua_pushstring(m_lua, *relpath);
 			lua_call(m_lua, 1, 0);
 		}
 		lua_settop(m_lua, 0);

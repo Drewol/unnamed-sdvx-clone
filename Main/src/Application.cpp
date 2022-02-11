@@ -131,7 +131,18 @@ int32 Application::Run()
 		// Play the map specified in the command line
 		if (m_commandLine.size() > 1 && m_commandLine[1].front() != '-')
 		{
-			Game *game = LaunchMap(m_commandLine[1]);
+			Game* game = nullptr;
+			String& p = m_commandLine[1];
+			bool isReplay = false;
+			if (p.length() > 4 && p.substr(p.length() - 3) == "urf")
+			{
+				isReplay = true;
+				game = LaunchReplay(p);
+			}
+			else
+			{
+				game = LaunchMap(p);
+			}
 			if (!game)
 			{
 				Logf("LaunchMap(%s) failed", Logger::Severity::Error, m_commandLine[1]);
@@ -139,7 +150,7 @@ int32 Application::Run()
 			else
 			{
 				auto &cmdLine = g_application->GetAppCommandLine();
-				if (cmdLine.Contains("-autoplay") || cmdLine.Contains("-auto"))
+				if (!isReplay && (cmdLine.Contains("-autoplay") || cmdLine.Contains("-auto")))
 				{
 					game->GetScoring().autoplayInfo.autoplay = true;
 				}
@@ -1395,6 +1406,26 @@ class Game *Application::LaunchMap(const String &mapPath)
 	g_transition->TransitionTo(game);
 	return game;
 }
+class Game* Application::LaunchReplay(const String& replayPath, MapDatabase** database /*= nullptr*/)
+{
+	Replay* replay = Replay::Load(replayPath);
+	if (!replay)
+	{
+		g_gameWindow->ShowMessageBox("Failed to load replay", "Failed to load replay file, it may be corrupted or for a newer version of USC", 0);
+		return nullptr;
+	}
+	ChartIndex* chart = replay->FindChart(database);
+	if (!chart)
+	{
+		g_gameWindow->ShowMessageBox("Failed to load replay", "Could not find a matching chart for this replay", 0);
+		return nullptr;
+	}
+	PlaybackOptions opt;
+	Game* game = Game::Create(chart, opt);
+	game->InitPlayReplay(replay);
+	g_transition->TransitionTo(game);
+	return game;
+}
 void Application::Shutdown()
 {
 	g_gameWindow->Close();
@@ -2142,7 +2173,8 @@ static int lGetButton(lua_State *L /* int button */)
 {
     int button = luaL_checkinteger(L, 1);
     if (g_application->autoplayInfo
-        && (g_application->autoplayInfo->IsAutoplayButtons()) && button < 6)
+        && (g_application->autoplayInfo->IsAutoplayButtons() || g_application->autoplayInfo->IsReplayingButtons())
+		&& button < 6)
         lua_pushboolean(L, g_application->autoplayInfo->buttonAnimationTimer[button] > 0);
     else
         lua_pushboolean(L, g_input.GetButton((Input::Button)button));

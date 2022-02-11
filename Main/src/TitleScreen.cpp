@@ -24,6 +24,7 @@ class TitleScreen_Impl : public TitleScreen
 private:
 	lua_State* m_lua = nullptr;
 	LuaBindable* m_luaBinds = nullptr;
+	MapDatabase* m_mapDatabase = nullptr;
 
 	void Exit()
 	{
@@ -38,6 +39,12 @@ private:
 
 	void Start()
 	{
+		// Only have one open at a time
+		if (m_mapDatabase)
+		{
+			delete m_mapDatabase;
+			m_mapDatabase = nullptr;
+		}
 		g_transition->TransitionTo(SongSelect::Create());
 	}
 
@@ -110,6 +117,17 @@ private:
 		}
 	}
 
+	void m_OnFileDropped(const char* file)
+	{
+		if (IsSuspended())
+			return;
+		String path = file;
+		String ext = Path::GetExtension(path);
+		if (ext != "urf")
+			return;
+		g_application->LaunchReplay(path, &m_mapDatabase);
+	}
+
 	void m_OnButtonPressed(Input::Button buttonCode, int32 delta)
 	{
 		if (IsSuspended())
@@ -150,6 +168,7 @@ public:
 		lua_settop(m_lua, 0);
 		g_gameWindow->OnMousePressed.Add(this, &TitleScreen_Impl::MousePressed);
 		g_input.OnButtonPressed.Add(this, &TitleScreen_Impl::m_OnButtonPressed);
+		g_gameWindow->OnFileDropped.Add(this, &TitleScreen_Impl::m_OnFileDropped);
 		return true;
 	}
 	
@@ -161,6 +180,7 @@ public:
 	~TitleScreen_Impl()
 	{
 		g_gameWindow->OnMousePressed.RemoveAll(this);
+		g_gameWindow->OnFileDropped.RemoveAll(this);
 		g_input.OnButtonPressed.RemoveAll(this);
 		if (m_lua)
 		{
@@ -171,6 +191,11 @@ public:
 		{
 			delete m_luaBinds;
 			m_luaBinds = nullptr;
+		}
+		if (m_mapDatabase)
+		{
+			delete m_mapDatabase;
+			m_mapDatabase = nullptr;
 		}
 	}
 

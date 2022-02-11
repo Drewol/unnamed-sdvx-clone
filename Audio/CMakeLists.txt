@@ -37,12 +37,11 @@ target_include_directories(Audio PRIVATE
     ${PCHROOT}
 )
 
-if(UNIX AND NOT APPLE)
-    target_compile_options(Audio PUBLIC -Wall -Wextra -Werror -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-unused-value) 
-    if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        target_compile_options(Audio PUBLIC -Wno-maybe-uninitialized) 
-    endif(CMAKE_BUILD_TYPE STREQUAL "Release")
-endif(UNIX AND NOT APPLE)
+#set_werror(Audio)
+#Special case for audio
+#if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" AND USC_GNU_WERROR)
+#    target_compile_options(Audio PUBLIC -Wall -Wextra -Werror -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-maybe-uninitialized)
+#endif()
 
 # Dependencies
 ## Local Dependencies

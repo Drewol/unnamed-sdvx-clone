@@ -27,7 +27,7 @@ jobs:
                 .\vcpkg.exe install '@${{ github.workspace }}/build.windows'
                 }
             - name: cmake
-              run: cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake -G "Visual Studio 16 2019" -A x64 .
+              run: cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake -G "Visual Studio 17 2022" -A x64 .
             - name: Setup MSBuild.exe
               uses: microsoft/Setup-MSBuild@v1.0.2
             - name: MSBuild
@@ -60,7 +60,7 @@ jobs:
                 sudo apt-get update
                 sudo apt-get install g++ libegl1-mesa-dev libfreetype6-dev libogg-dev libvorbis-dev libsdl2-dev libarchive-dev zlib1g-dev libjpeg-dev libpng-dev
             - name: cmake
-              run: cmake -DCMAKE_BUILD_TYPE=Release .
+              run: cmake -DCMAKE_BUILD_TYPE=Release -DUSC_GNU_WERROR=On .
             - name: make
               run: make
             - name: Prepare for bundling AppImage

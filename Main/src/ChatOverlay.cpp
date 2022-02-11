@@ -19,6 +19,7 @@ void ChatOverlay::UpdateNuklearInput(SDL_Event evt)
 
 bool ChatOverlay::Init()
 {
+	m_canSuspend = false;
 	m_backgroundFrame = false;
 
 	BasicNuklearGui::Init();

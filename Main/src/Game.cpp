@@ -24,6 +24,7 @@
 #include "GameConfig.hpp"
 #include <Shared/Time.hpp>
 #include "Gauge.hpp"
+#include "Replay.hpp"
 #include "FastGUI/FastGuiGame.hpp"
 
 #include "PracticeModeSettingsDialog.hpp"
@@ -78,6 +79,7 @@ private:
 	bool m_renderFastGui = false;
 
 
+
 	MultiplayerScreen* m_multiplayer = nullptr;
 	ChallengeManager* m_challengeManager = nullptr;
 
@@ -104,6 +106,10 @@ private:
 	float m_modSpeed = 400;
 
 	bool m_delayedHitEffects;
+
+	bool m_isPlayingReplay = false;
+	bool m_setFinalReplayScore = false;
+	Replay* m_replayForPlayback = nullptr;
 
 	// Texture of the map jacket image, if available
 	Image m_jacketImage;
@@ -175,7 +181,8 @@ private:
 	bool m_manualExit = false;
 	bool m_showCover = true;
 
-	Vector<ScoreReplay> m_scoreReplays;
+	// TODO(itszn) this probably should be heap allocated so we can reference them safely
+	Vector<Replay*> m_scoreReplays;
 	MapDatabase* m_db;
 	std::unordered_set<const ObjectState*> m_hiddenObjects;
 	std::unordered_set<const ObjectState*> m_permanentlyHiddenObjects;
@@ -223,6 +230,11 @@ public:
 
 	~Game_Impl()
 	{
+		m_scoring.SetReplayForPlayback(nullptr);
+		for (Replay* r : m_scoreReplays)
+			delete r;
+		m_scoreReplays.clear();
+
         delete m_track;
 		delete m_background;
 		delete m_foreground;
@@ -347,25 +359,84 @@ public:
 
 		// Load replays
 		if (m_chartIndex)
+		{
+			int index = 0;
 			for (ScoreIndex* score : m_chartIndex->scores)
 			{
-				File replayFile;
-				if (replayFile.OpenRead(score->replayPath)) {
-					ScoreReplay& replay = m_scoreReplays.Add(ScoreReplay());
-					replay.maxScore = score->score;
-					FileReader replayReader(replayFile);
-					replayReader.SerializeObject(replay.replay);
-
-					if (replayReader.Tell() + 16 <= replayReader.GetSize())
+				Replay* replay = nullptr;
+				if (m_replayForPlayback)
+				{
+					auto& si = m_replayForPlayback->GetScoreInfo();
+					if (m_replayForPlayback->filePath == score->replayPath
+						|| (si.IsInitialized() && si.MatchesScore(score))
+					)
 					{
-						replayReader.Serialize(&(replay.hitWindow.perfect), 4);
-						replayReader.Serialize(&(replay.hitWindow.good), 4);
-						replayReader.Serialize(&(replay.hitWindow.hold), 4);
-						replayReader.Serialize(&(replay.hitWindow.miss), 4);
-						replayReader.Serialize(&replay.hitWindow.slam, 4);
+						replay = m_replayForPlayback;
 					}
 				}
+				if (!replay)
+				{
+					replay = Replay::Load(
+						score->replayPath,
+						(index == 0 && !m_replayForPlayback)?
+						Replay::ReplayType::Normal : Replay::ReplayType::NoInput
+					);
+				}
+
+				if (!replay)
+				{
+					Logf("Failed to load replay '%s'", Logger::Severity::Info, *(score->replayPath));
+					continue;
+				}
+
+				replay->AttachChartInfo(m_chartIndex);
+				replay->AttachScoreInfo(score);
+
+				m_scoreReplays.push_back(replay);
+
+				if (index == 0 && m_isPlayingReplay && m_replayForPlayback == nullptr)
+				{
+					m_replayForPlayback = replay;
+				}
+
+				index++;
+
+				// Only load top 10
+				if (index >= 10)
+					break;
 			}
+
+			if (m_isPlayingReplay && m_scoreReplays.size() == 0 && m_replayForPlayback == nullptr)
+			{
+				Log("Could not find replay to playback!", Logger::Severity::Error);
+				return false;
+			}
+		}
+
+		if (m_replayForPlayback)
+		{
+			auto& replay = m_replayForPlayback;
+			replay->InitializePlayback();
+			m_hitWindow = replay->GetHitWindow();
+			m_scoring.SetReplayForPlayback(replay);
+
+			auto& offs = replay->GetOffsets();
+			if (offs.IsInitialized())
+			{
+				m_globalOffset = offs.global;
+				m_songOffset = offs.song;
+			}
+
+			auto& si = replay->GetScoreInfo();
+			if (si.IsInitialized())
+			{
+				m_playOptions.playbackOptions.gaugeType = si.gaugeType;
+				m_playOptions.playbackOptions.gaugeOption = si.gaugeOption;
+				m_playOptions.playbackOptions.mirror = si.mirror;
+			}
+			if (m_chartIndex && !replay->GetChartInfo().IsInitialized())
+				replay->AttachChartInfo(m_chartIndex);
+		}
 
         m_delayedHitEffects = g_gameConfig.GetBool(GameConfigKeys::DelayedHitEffects);
 
@@ -380,7 +451,7 @@ public:
 		m_songOffset = 0;
 
 		// Compute chart offset
-		if (g_gameConfig.GetBool(GameConfigKeys::AutoComputeSongOffset) && m_scoreReplays.empty()) {
+		if (g_gameConfig.GetBool(GameConfigKeys::AutoComputeSongOffset) && m_scoreReplays.empty() && m_chartIndex->custom_offset == 0) {
 			if (OffsetComputer(m_audioPlayback).Compute(m_songOffset) && m_chartIndex)
 			{
 				Logf("Setting the chart offset of '%s' to %d (previously %d)", Logger::Severity::Info, m_chartIndex->title, m_songOffset, m_chartIndex->custom_offset);
@@ -533,7 +604,8 @@ public:
 		g_input.OnButtonReleased.Add(this, &Game_Impl::m_OnButtonReleased);
 
 
-		m_track->hitEffectAutoplay = m_scoring.autoplayInfo.IsAutoplayButtons();
+		m_track->hitEffectAutoplay |= m_scoring.autoplayInfo.IsAutoplayButtons();
+		m_track->hitEffectAutoplay |= m_scoring.autoplayInfo.IsReplayingButtons();
 
 		if (GetPlaybackOptions().random || GetPlaybackOptions().mirror)
 		{
@@ -575,6 +647,7 @@ public:
 	// Restart map
 	void Restart()
 	{
+		m_setFinalReplayScore = false;
 		m_paused = false;
 		m_triggerPause = false;
 		m_playOnDialogClose = true;
@@ -645,9 +718,7 @@ public:
 
 		for (auto& replay : m_scoreReplays)
 		{
-			replay.currentScore = 0;
-			replay.currentMaxScore = 0;
-			replay.nextHitStat = 0;
+			replay->Restart();
 		}
 
 		m_particleSystem->Reset();
@@ -1110,6 +1181,11 @@ public:
 			}
 			if (m_ended)
 			{
+				if (m_isPlayingReplay && !m_setFinalReplayScore)
+				{
+					m_setFinalReplayScore = true;
+					m_scoring.SetScoreForReplay();
+				}
 				// Render Lua Outro
 				lua_getglobal(m_lua, "render_outro");
 				if (lua_isfunction(m_lua, -1))
@@ -1438,10 +1514,17 @@ public:
 		}
 
 
+		MapTime lastTimeForScoring = m_playback.GetLastTime();
+		for (auto& replay : m_scoreReplays)
+		{
+			replay->UpdateToTime(lastTimeForScoring);
+		}
+
 		// Update scoring
 		if (!m_ended)
 		{
 			m_scoring.Tick(deltaTime);
+
 		}
 
 		// Get the current timing point
@@ -1455,6 +1538,7 @@ public:
 		{
 			m_lastMapTime = playbackPositionMs;
 		}
+
 
 		SetGameplayLua(m_lua);
 		
@@ -1546,6 +1630,8 @@ public:
 		}
 		else
 		{
+			if (m_isPlayingReplay)
+				m_scoring.SetScoreForReplay();
 			FinishGame();
 		}
 	}
@@ -1560,6 +1646,8 @@ public:
 		}
 		else
 		{
+			if (m_isPlayingReplay)
+				m_scoring.SetScoreForReplay();
 			FinishGame();
 		}
 	}
@@ -1822,8 +1910,7 @@ public:
 		};
 
 		const TimingPoint& tp = m_playback.GetCurrentTimingPoint();
-
-		Vector2 textPos = Vector2i(5, 0);
+		Vector2 textPos = Vector2i(5, 5);
 
 		// Chart info
 		{
@@ -1851,7 +1938,7 @@ public:
 			}
 
 			textPos.y += RenderText(Utility::Sprintf(
-				"Playback speeed: %.3f (option set to %.3f)", GetPlaybackSpeed(), m_playOptions.playbackSpeed
+				"Playback speed: %.3f (option set to %.3f)", GetPlaybackSpeed(), m_playOptions.playbackSpeed
 			), textPos, m_playOptions.playbackSpeed < 1.0f ? Color::Red : Color::Yellow).y;
 
 			textPos.y += RenderText(Utility::Sprintf(
@@ -1913,6 +2000,29 @@ public:
 				"Score: %d/%d (Max: %d) = %d",
 				m_scoring.currentHitScore, m_scoring.currentMaxScore, m_scoring.mapTotals.maxScore, m_scoring.CalculateCurrentScore()
 			), textPos).y;
+
+			if (m_isPlayingReplay)
+			{
+				auto& replay = m_replayForPlayback;
+				auto rs = replay->CurrentScore();
+				auto rm = replay->CurrentMaxScore();
+
+				auto s = m_scoring.currentHitScore;
+				auto m = m_scoring.currentMaxScore;
+
+				textPos.y += RenderText(Utility::Sprintf("Replay: %d/%d %s", 
+					rs, rm, 
+					(replay->GetType() == Replay::ReplayType::Legacy? "[legacy]":"")
+				), textPos).y;
+				textPos.y += RenderText(Utility::Sprintf("Replay score is off by: %d (%d)",
+					rs - s,
+					rm - m
+				), textPos).y;
+				textPos.y += RenderText(Utility::Sprintf("Replay: %s",
+					*replay->filePath
+				), textPos).y;
+			}
+			m_scoring.RenderDebugHUD(deltaTime, textPos);
 
 
 			if (const Gauge* gauge = m_scoring.GetTopGauge())
@@ -2060,7 +2170,7 @@ public:
 		{
 			if (m_fxSamples[st->sampleIndex])
 			{
-				m_fxSamples[st->sampleIndex]->SetVolume(st->sampleVolume*m_fxVolume);
+				m_fxSamples[st->sampleIndex]->SetVolume(st->sampleVolume * m_fxVolume * m_slamVolume);
 				m_fxSamples[st->sampleIndex]->Play();
 			}
 		}
@@ -2246,7 +2356,7 @@ public:
 		}
 		else if(key == EventKey::SlamVolume)
 		{
-			m_slamSample->SetVolume(data.floatVal*m_slamVolume*m_fxVolume);
+			m_slamSample->SetVolume(data.floatVal * m_slamVolume * m_fxVolume);
 		}
 		else if (key == EventKey::ChartEnd)
 		{
@@ -2289,7 +2399,7 @@ public:
 
 	void OnKeyPressed(SDL_Scancode code, int32 delta) override
 	{
-		if (!m_isPracticeSetup && g_gameConfig.GetBool(GameConfigKeys::DisableNonButtonInputsDuringPlay))
+		if (!m_isPracticeSetup && !m_isPlayingReplay && g_gameConfig.GetBool(GameConfigKeys::DisableNonButtonInputsDuringPlay))
 			return;
 
 		if (m_practiceSetupDialog && m_practiceSetupDialog->IsActive())
@@ -2297,7 +2407,7 @@ public:
 			if (code != SDL_SCANCODE_F8) return;
 		}
 
-		if (m_isPracticeSetup && m_isPracticeSetupNavEnabled)
+		if ((m_isPracticeSetup && m_isPracticeSetupNavEnabled) || m_isPlayingReplay)
 		{
 			assert(!IsMultiplayerGame());
 
@@ -2310,6 +2420,13 @@ public:
 			case SDL_SCANCODE_UP:
 			case SDL_SCANCODE_DOWN:
 			{
+				if (m_isPlayingReplay && code == SDL_SCANCODE_UP)
+				{
+					// Use this to be kinder to the replay
+					m_audioPlayback.Advance(2000);
+					return;
+				}
+
 				const MapTime increment = 2000 * (code == SDL_SCANCODE_UP ? 1 : -1);
 
 				JumpTo(Math::Clamp(m_lastMapTime + increment, 0, m_endTime));
@@ -2482,6 +2599,9 @@ public:
 		auto opts = GetPlaybackOptions();
 		scoreData.miss = m_scoring.categorizedHits[0];
 		scoreData.almost = m_scoring.categorizedHits[1];
+		scoreData.early = m_scoring.timedHits[0];
+		scoreData.late = m_scoring.timedHits[1];
+		scoreData.combo = m_scoring.maxComboCounter;
 		scoreData.crit = m_scoring.categorizedHits[2];
 		scoreData.gaugeType = g->GetType();
 		scoreData.gaugeOption = g->GetOpts();
@@ -2613,6 +2733,18 @@ public:
 		
 		m_playOnDialogClose = true;
 		m_triggerPause = true;
+	}
+
+	// Needs to be called before AsyncLoad
+	void InitPlayReplay(Replay* replay)
+	{
+		m_isPlayingReplay = true;
+		m_setFinalReplayScore = false;
+		m_scoring.autoplayInfo.replay = true;
+		if (replay)
+		{
+			m_replayForPlayback = replay;
+		}
 	}
 
 	inline void m_GetPracticeSetupIndex(PracticeSetupIndex& practiceSetup) const
@@ -2962,6 +3094,7 @@ public:
 	{
 		if (m_scoring.autoplayInfo.IsAutoplayButtons()) return false;
 		if (m_isPracticeSetup) return false;
+		if (m_isPlayingReplay) return false;
 
 		// GetPlaybackSpeed() returns 0 on end of a song
 		if (m_playOptions.playbackSpeed < 1.0f) return false;
@@ -3004,6 +3137,10 @@ public:
 	virtual bool IsChallenge() const
 	{
 		return m_challengeManager != nullptr;
+	}
+	virtual Replay* GetCurrentReplay() const override
+	{
+		return m_replayForPlayback;
 	}
 	ChartIndex* GetChartIndex() override
 	{
@@ -3048,27 +3185,26 @@ public:
 		// Update score replays
 		lua_getfield(L, -1, "scoreReplays");
 		int replayCounter = 1;
+		int replayIndex = 0;
 		for (auto& replay: m_scoreReplays)
 		{
-			if (replay.replay.size() > 0)
-			{
-				while (replay.nextHitStat < replay.replay.size()
-					&& replay.replay[replay.nextHitStat].time < m_lastMapTime)
-				{
-					SimpleHitStat shs = replay.replay[replay.nextHitStat];
-					if (shs.rating < 3)
-					{
-						replay.currentMaxScore += 2;
-						replay.currentScore += shs.rating;
-					}
-					replay.nextHitStat++;
-				}
+			// If replaying, skip the index that we are replaying on
+			if (m_isPlayingReplay && replay->IsPlaying()) {
+				replayIndex++;
+				continue;
 			}
 			lua_pushnumber(L, replayCounter);
 			lua_newtable(L);
 
 			lua_pushstring(L, "maxScore");
-			lua_pushnumber(L, replay.maxScore);
+			if (ScoreIndex* s = replay->GetScoreIndex())
+			{
+				lua_pushnumber(L, replay->GetScoreIndex()->score);
+			}
+			else
+			{
+				lua_pushnumber(L, 10000000);
+			}
 			lua_settable(L, -3);
 
 			lua_pushstring(L, "currentScore");
@@ -3077,6 +3213,7 @@ public:
 
 			lua_settable(L, -3);
 			replayCounter++;
+			replayIndex++;
 		}
 		lua_setfield(L, -1, "scoreReplays");
 
@@ -3304,6 +3441,83 @@ public:
 
 		lua_pushstring(L, "multiplayer");
 		lua_pushboolean(L, m_multiplayer != nullptr);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "replay");
+		if (m_isPlayingReplay)
+		{
+			lua_newtable(L);
+
+			lua_pushstring(L, "score");
+			{
+				if (auto* score = m_replayForPlayback->GetScoreIndex())
+				{
+					lua_newtable(L);
+					pushFloatToTable("gauge", score->gauge);
+
+					pushIntToTable("gauge_type", (uint32)score->gaugeType);
+					pushIntToTable("gauge_option", score->gaugeOption);
+					pushIntToTable("random", score->random);
+					pushIntToTable("mirror", score->mirror);
+					pushIntToTable("auto_flags", (uint32)score->autoFlags);
+
+					pushStringToTable("name", score->userName);
+					pushStringToTable("uid", score->userId);
+
+					pushIntToTable("score", score->score);
+					pushIntToTable("perfects", score->crit);
+					pushIntToTable("goods", score->almost);
+					pushIntToTable("misses", score->miss);
+					pushIntToTable("timestamp", score->timestamp);
+					pushIntToTable("badge", static_cast<int>(Scoring::CalculateBadge(*score)));
+					lua_pushstring(L, "hitWindow");
+					HitWindow(score->hitWindowPerfect, score->hitWindowGood, score->hitWindowHold, score->hitWindowSlam).ToLuaTable(L);
+					lua_settable(L, -3);
+				}
+				else if (m_replayForPlayback->GetScoreInfo().IsInitialized())
+				{
+					auto& score = m_replayForPlayback->GetScoreInfo();
+					lua_newtable(L);
+					pushFloatToTable("gauge", score.gauge);
+
+					pushIntToTable("gauge_type", (uint32)score.gaugeType);
+					pushIntToTable("gauge_option", score.gaugeOption);
+					pushIntToTable("random", score.random);
+					pushIntToTable("mirror", score.mirror);
+
+					lua_pushstring(L, "auto_flags");
+					lua_pushnil(L);
+					lua_settable(L, -3);
+
+					pushStringToTable("name", score.userName);
+					pushStringToTable("uid", score.userId);
+
+					pushIntToTable("score", score.score);
+					pushIntToTable("perfects", score.crit);
+					pushIntToTable("goods", score.almost);
+					pushIntToTable("misses", score.miss);
+					pushIntToTable("timestamp", score.timestamp);
+					// TODO fill this in
+					//pushIntToTable("badge", static_cast<int>(Scoring::CalculateBadge(*score)));
+					lua_pushstring(L, "badge");
+					lua_pushnil(L);
+					lua_settable(L, -3);
+					lua_pushstring(L, "hitWindow");
+					m_replayForPlayback->GetHitWindow().ToLuaTable(L);
+					lua_settable(L, -3);
+
+				}
+				else
+				{
+					lua_pushnil(L);
+				}
+			}
+			lua_settable(L, -3);
+		}
+		else
+		{
+			lua_pushnil(L);
+		}
 		lua_settable(L, -3);
 
 		lua_pushstring(L, "hitWindow");

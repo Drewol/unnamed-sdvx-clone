@@ -41,6 +41,7 @@ public:
 	void SetCommandLine(const char* cmdLine);
 
 	class Game* LaunchMap(const String& mapPath);
+	class Game* LaunchReplay(const String& replayPath, MapDatabase** database = nullptr);
 	void Shutdown();
 
 	void AddTickable(class IApplicationTickable* tickable, class IApplicationTickable* insertBefore = nullptr);

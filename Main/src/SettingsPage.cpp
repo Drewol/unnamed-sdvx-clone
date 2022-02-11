@@ -367,6 +367,69 @@ protected:
 			Save();
 			return;
 		}
+		if (nk_button_label(m_nctx, "Create new profile"))
+		{
+			BasicPrompt* w = new BasicPrompt(
+				"Create New Profile",
+				"Enter name for profile\n(This will copy your current profile)",
+				"Create Profile");
+			w->OnResult.Add(this, &SettingsPage_Profile::m_createNewProfile);
+			w->Focus();
+			g_application->AddTickable(w);
+		}
+	}
+protected:
+	void m_createNewProfile(bool valid, char* data)
+	{
+		if (!valid || strlen(data) == 0)
+			return;
+
+		String profile = String(data);
+		// Validate filename (this is windows specific but is a subperset of linux)
+		// https://stackoverflow.com/questions/4814040/allowed-characters-in-filename/35352640#35352640
+		// TODO we could probably make a general function under Path::
+		profile.erase(std::remove_if(profile.begin(), profile.end(),
+			[](unsigned char x) {
+				switch (x) {
+				case '\0':
+				case '\\':
+				case '/':
+				case ':':
+				case '*':
+				case '"':
+				case '<':
+				case '>':
+				case '|':
+				case '\n':
+				case '\r':
+					return true;
+				default:
+					return false;
+				}
+			}
+		), profile.end());
+
+		if (profile == "." || profile == "..")
+			return;
+		if (profile[0] == ' '
+			|| profile[profile.length() - 1] == ' '
+			|| profile[profile.length() - 1] == '.')
+			return;
+
+		if (!Path::IsDirectory(Path::Absolute("profiles")))
+			Path::CreateDir(Path::Absolute("profiles"));
+
+
+		// Save old setting
+		g_application->ApplySettings();
+
+		// Update with new profile name
+		g_gameConfig.Set(GameConfigKeys::CurrentProfileName, profile);
+
+		// Now save as new profile
+		g_application->ApplySettings();
+
+		Load();
 	}
 };
 
