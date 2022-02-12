@@ -12,6 +12,19 @@ uniform float hiddenFadeWindow;
 uniform float suddenCutoff;
 uniform float suddenFadeWindow;
 
+// The OpenGL standard leave the case when `edge0 >= edge1` undefined,
+// so this function was made to remove the ambiguity when `edge0 >= edge1`.
+// Note that the case when `edge0 > edge1` should be avoided.
+float smoothstep_fix(float edge0, float edge1, float x)
+{
+    if(edge0 >= edge1)
+    {
+        return x < edge0 ? 0.0 : x > edge1 ? 1.0 : 0.5;
+    }
+
+    return smoothstep(edge0, edge1, x);
+}
+
 void main()
 {	
 	#ifdef EMBEDDED
@@ -21,13 +34,13 @@ void main()
 	
 	float off = 1.0 - (fsTex.y * 2.0);
     if (hiddenCutoff < suddenCutoff) {
-        float hidden = 1.0 - smoothstep(hiddenCutoff - hiddenFadeWindow, hiddenCutoff, off);
-        float sudden = 1.0 - smoothstep(suddenCutoff + suddenFadeWindow, suddenCutoff, off);
+        float hidden = 1.0 - smoothstep_fix(hiddenCutoff - hiddenFadeWindow, hiddenCutoff, off);
+        float sudden = smoothstep_fix(suddenCutoff, suddenCutoff + suddenFadeWindow, off);
         target.a = min(hidden + sudden, 1.0);
     }
     else {
-        float hidden = smoothstep(hiddenCutoff + hiddenFadeWindow, hiddenCutoff, off);
-        float sudden = smoothstep(suddenCutoff - suddenFadeWindow, suddenCutoff, off);
+        float hidden = 1.0 - smoothstep_fix(hiddenCutoff, hiddenCutoff + hiddenFadeWindow, off);
+        float sudden = smoothstep_fix(suddenCutoff - suddenFadeWindow, suddenCutoff, off);
         target.a = hidden * sudden;
     }
 	#endif
