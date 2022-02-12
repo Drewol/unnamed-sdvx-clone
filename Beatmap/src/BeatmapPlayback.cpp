@@ -387,23 +387,49 @@ void BeatmapPlayback::GetObjectsInViewRange(float numBeats, Vector<ObjectState*>
 	}
 }
 
+inline MapTime GetLastBarPosition(const TimingPoint& tp, MapTime currTime, /* out*/ uint64& measureNo)
+{
+	MapTime offset = currTime - tp.time;
+	if (offset < 0) offset = 0;
+
+	measureNo = static_cast<uint64>(static_cast<double>(offset) / tp.GetBarDuration());
+
+	return tp.time + static_cast<MapTime>(measureNo * tp.GetBarDuration());
+}
+
+// Arbitrary cutoff
+constexpr uint64 MAX_DISP_BAR_COUNT = 1000;
+
 void BeatmapPlayback::GetBarPositionsInViewRange(float numBeats, Vector<float>& barPositions) const
 {
+	uint64 measureNo = 0;
+	MapTime currTime = 0;
+
+	if (m_isCalibration)
+	{
+		const TimingPoint& ctp = m_calibrationTiming;
+		currTime = GetLastBarPosition(ctp, m_playbackTime, measureNo);
+
+		while (barPositions.size() < MAX_DISP_BAR_COUNT)
+		{
+			barPositions.Add(TimeToViewDistance(currTime));
+			currTime = ctp.time + static_cast<MapTime>(++measureNo * ctp.GetBarDuration());
+
+			if (currTime - m_playbackTime >= ctp.beatDuration * numBeats)
+			{
+				return;
+			}
+		}
+
+		return;
+	}
+
 	Beatmap::TimingPointsIterator tp = m_SelectTimingPoint(m_playbackTime);
 	assert(!IsEndTiming(tp));
 
-	uint64 measureNo = 0;
+	currTime = GetLastBarPosition(*tp, m_playbackTime, measureNo);
 
-	{
-		MapTime offset = m_playbackTime - tp->time;
-		if (offset < 0) offset = 0;
-
-		measureNo = static_cast<uint64>(static_cast<double>(offset) / tp->GetBarDuration());
-	}
-
-	MapTime currTime = tp->time + static_cast<MapTime>(measureNo * tp->GetBarDuration());
-
-	while (true)
+	while (barPositions.size() < MAX_DISP_BAR_COUNT)
 	{
 		barPositions.Add(TimeToViewDistance(currTime));
 		
@@ -417,13 +443,7 @@ void BeatmapPlayback::GetBarPositionsInViewRange(float numBeats, Vector<float>& 
 			measureNo = 0;
 		}
 
-		// Arbitrary cutoff
-		if (measureNo >= 1000)
-		{
-			return;
-		}
-
-		if (m_beatmap->GetBeatCountWithScrollSpeedApplied(m_playbackTime, currTime, tp) >= numBeats)
+		if (GetViewDistance(m_playbackTime, currTime) >= numBeats)
 		{
 			return;
 		}
@@ -555,6 +575,8 @@ bool BeatmapPlayback::CheckIfManualTiltInstant()
 
 Beatmap::TimingPointsIterator BeatmapPlayback::m_SelectTimingPoint(MapTime time, bool allowReset) const
 {
+	assert(!m_isCalibration);
+
 	return m_beatmap->GetTimingPoint(time, m_currentTiming, !allowReset);
 }
 
