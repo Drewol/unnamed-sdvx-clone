@@ -4,6 +4,10 @@ add_subdirectory(lua-5.3.5)
 #cpr test programs
 option(CPR_BUILD_TESTS "Set to ON to build cpr tests." OFF)
 set(CPR_ENABLE_SSL ON)
+#TODO: Don't have two curl builds in the game build
+#if(MSVC)
+#    set(CPR_FORCE_USE_SYSTEM_CURL ON) #curl should be available through vcpkg
+#endif(MSVC)
 add_subdirectory(cpr)
 target_include_directories(cpr PUBLIC ${CPR_INCLUDE_DIRS})
 

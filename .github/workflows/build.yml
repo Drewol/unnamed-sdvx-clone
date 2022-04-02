@@ -11,20 +11,19 @@ jobs:
             - name: Checkout submodules
               run: git submodule update --init --recursive
             - name: Cache vcpkg
-              uses: actions/cache@v1
+              uses: actions/cache@v2
               with:
-                path: vcpkg
-                key: ${{ runner.os }}-vcpkg-${{ hashFiles('build.windows') }}
+                path: |
+                  vcpkg
+                  vcpkg_installed
+                key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
             - name: vcpkg
               run: |
                 if(!(Test-Path .\vcpkg))
                 {
                 git clone https://github.com/microsoft/vcpkg.git
                 cd vcpkg
-                git checkout c0bc5e1b0ff27dd8710ee9ca18b708c0a9accce1 # pin freetype for now
                 .\bootstrap-vcpkg.bat
-                .\vcpkg.exe integrate install
-                .\vcpkg.exe install '@${{ github.workspace }}/build.windows'
                 }
             - name: cmake
               run: cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake -G "Visual Studio 17 2022" -A x64 .
@@ -95,7 +94,9 @@ jobs:
             - name: Install packages
               run: brew install freetype libvorbis sdl2 libpng jpeg libarchive
             - name: cmake
-              run: cmake . -DLibArchive_LIBRARY=/usr/local/opt/libarchive/lib/libarchive.dylib -DLibArchive_INCLUDE_DIR=/usr/local/opt/libarchive/include -DCMAKE_BUILD_TYPE=Release
+              run: |
+                eval "$(brew shellenv)"
+                cmake . -DLibArchive_LIBRARY=$HOMEBREW_PREFIX/opt/libarchive/lib/libarchive.dylib -DLibArchive_INCLUDE_DIR=$HOMEBREW_PREFIX/opt/libarchive/include -DCMAKE_BUILD_TYPE=Release
             - name: make
               run: make
             - name: Upload artifact
