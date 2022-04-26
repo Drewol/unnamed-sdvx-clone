@@ -1709,6 +1709,7 @@ bool ChallengeManager::m_setupNextChart()
 		Log("Failed to start game", Logger::Severity::Error);
 		return false;
 	}
+	game->SetSongDB(m_challengeSelect->GetMapDatabase());
 
 	if (m_currentOptions.gauge_carry_over.Get(false) && m_lastGauges.size() > 0)
 	{

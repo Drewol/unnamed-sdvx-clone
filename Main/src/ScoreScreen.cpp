@@ -23,7 +23,7 @@
 class ScoreScreen_Impl : public ScoreScreen
 {
 private:
-	MapDatabase m_mapDatabase;
+	MapDatabase* m_mapDatabase = nullptr;
 	// Things for score screen
 	Graphics::Font m_specialFont;
 	Sample m_applause;
@@ -342,7 +342,10 @@ private:
 		newScore->hitWindowMiss = m_hitWindow.miss;
 		newScore->hitWindowSlam = m_hitWindow.slam;
 
-		m_mapDatabase.AddScore(newScore);
+		// This adds the score to the chart
+		m_mapDatabase->AddScore(newScore);
+
+		assert(m_mapDatabase != nullptr);
 
 		if (g_gameConfig.GetString(GameConfigKeys::IRBaseURL) != "")
 		{
@@ -375,12 +378,6 @@ private:
 				}
 			}
 		}
-
-		chart->scores.Add(newScore);
-		chart->scores.Sort([](ScoreIndex* a, ScoreIndex* b)
-			{
-				return a->score > b->score;
-			});
 
 		// Update chart song offset
 		bool updateSongOffset = false;
@@ -429,7 +426,7 @@ private:
 			chart->custom_offset = oldOffset + m_medianHitDelta[0];
 
 			Logf("Updating song offset %d -> %d based on hitstat", Logger::Severity::Info, oldOffset, chart->custom_offset);
-			m_mapDatabase.UpdateChartOffset(chart);
+			m_mapDatabase->UpdateChartOffset(chart);
 		}
 	}
 
@@ -559,8 +556,9 @@ public:
 	}
 
 	ScoreScreen_Impl(class Game* game, MultiplayerScreen* multiplayer,
-		String uid, Vector<nlohmann::json> const* multistats, ChallengeManager* manager)
+		String uid, Vector<nlohmann::json> const* multistats, ChallengeManager* manager, MapDatabase* db)
 	{
+		m_mapDatabase = db;
 		m_challengeManager = manager;
 		m_displayIndex = 0;
 		m_selfDisplayIndex = 0;
@@ -1012,7 +1010,7 @@ public:
 			return false;
 
 		updateLuaData();
-		m_collDiag.Init(&m_mapDatabase);
+		m_collDiag.Init(m_mapDatabase);
 		g_input.OnButtonPressed.Add(this, &ScoreScreen_Impl::m_OnButtonPressed);
 
 		return true;
@@ -1260,22 +1258,25 @@ public:
 		lua_settop(m_lua, 0);
 	}
 
+
 };
 
-ScoreScreen* ScoreScreen::Create(class Game* game)
+ScoreScreen* ScoreScreen::Create(class Game* game, MapDatabase* db)
 {
-	ScoreScreen_Impl* impl = new ScoreScreen_Impl(game, nullptr, "", nullptr, nullptr);
+	ScoreScreen_Impl* impl = new ScoreScreen_Impl(game, nullptr, "", nullptr, nullptr, db);
 	return impl;
 }
 
-ScoreScreen* ScoreScreen::Create(class Game* game, ChallengeManager* manager)
+ScoreScreen* ScoreScreen::Create(class Game* game, ChallengeManager* manager, MapDatabase* db)
 {
-	ScoreScreen_Impl* impl = new ScoreScreen_Impl(game, nullptr, "", nullptr, manager);
+	ScoreScreen_Impl* impl = new ScoreScreen_Impl(game, nullptr, "", nullptr, manager, db);
 	return impl;
 }
 
-ScoreScreen* ScoreScreen::Create(class Game* game, String uid, Vector<nlohmann::json> const* stats, MultiplayerScreen* multi)
+ScoreScreen* ScoreScreen::Create(class Game* game, String uid, Vector<nlohmann::json> const* stats, MultiplayerScreen* multi, MapDatabase* db)
 {
-	ScoreScreen_Impl* impl = new ScoreScreen_Impl(game, multi, uid, stats, nullptr);
+	ScoreScreen_Impl* impl = new ScoreScreen_Impl(game, multi, uid, stats, nullptr, db);
 	return impl;
 }
+
+

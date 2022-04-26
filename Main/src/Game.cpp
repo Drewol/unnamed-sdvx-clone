@@ -1575,21 +1575,25 @@ public:
 		}
 		else
 		{
+			assert(m_db != nullptr);
 			// Transition to score screen
 			if (IsMultiplayerGame())
 			{
-				g_transition->TransitionTo(ScoreScreen::Create(
+				ScoreScreen* scoreScreen = ScoreScreen::Create(
 					this, m_multiplayer->GetUserId(),
-					m_multiplayer->GetFinalStats(), m_multiplayer));
+					m_multiplayer->GetFinalStats(), m_multiplayer, m_db);
+				g_transition->TransitionTo(scoreScreen);
 			}
 			else if (m_challengeManager != nullptr)
 			{
-				g_transition->TransitionTo(ScoreScreen::Create(
-					this, m_challengeManager));
+				ScoreScreen* scoreScreen = ScoreScreen::Create(
+					this, m_challengeManager, m_db);
+				g_transition->TransitionTo(scoreScreen);
 			}
 			else
 			{
-				g_transition->TransitionTo(ScoreScreen::Create(this));
+				ScoreScreen* scoreScreen = ScoreScreen::Create(this, m_db);
+				g_transition->TransitionTo(scoreScreen);
 			}
 			m_transitioning = true;
 		}
