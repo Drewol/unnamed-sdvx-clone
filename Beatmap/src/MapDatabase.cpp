@@ -90,7 +90,7 @@ public:
 	List<Event> m_pendingChanges;
 	mutex m_pendingChangesLock;
 
-	static const int32 m_version = 19;
+	static const int32 m_version = 20;
 
 public:
 	MapDatabase_Impl(MapDatabase& outer, bool transferScores) : m_outer(outer)
@@ -416,6 +416,16 @@ public:
 				m_database.Exec("UPDATE Scores SET window_slam=84");
 				gotVersion = 19;
 			}
+			if (gotVersion == 19)
+			{
+				m_database.Exec("ALTER TABLE Scores ADD COLUMN early INTEGER");
+				m_database.Exec("ALTER TABLE Scores ADD COLUMN late INTEGER");
+				m_database.Exec("ALTER TABLE Scores ADD COLUMN combo INTEGER");
+				m_database.Exec("UPDATE Scores SET early=?");
+				m_database.Exec("UPDATE Scores SET late=?");
+				m_database.Exec("UPDATE Scores SET combo=?");
+				gotVersion = 20;
+			}
 			m_database.Exec(Utility::Sprintf("UPDATE Database SET `version`=%d WHERE `rowid`=1", m_version));
 
 			m_outer.OnDatabaseUpdateDone.Call();
@@ -443,7 +453,13 @@ public:
 				delete c.mapData;
 		}
 	}
-
+	void LoadDatabaseWithoutSearching()
+	{
+		// Apply previous diff to prevent duplicated entry 
+		Update();
+		// Create initial data set to compare to when evaluating if a file is added/removed/updated
+		m_LoadInitialData();
+	}
 	void StartSearching()
 	{
 		if(m_searching)
@@ -748,7 +764,7 @@ public:
 		return res;
 	}
 
-	Vector<PracticeSetupIndex*> GetOrAddPracticeSetups(int32 chartId)
+	Vector<PracticeSetupIndex*> GetOrAddPracticeSetups(int32 chartId, const PracticeSetupIndex& defaultOptions)
 	{
 		Vector<PracticeSetupIndex*> res;
 
@@ -760,29 +776,11 @@ public:
 
 		if (res.empty())
 		{
-			PracticeSetupIndex* practiceSetup = new PracticeSetupIndex();
+			PracticeSetupIndex* practiceSetup = new PracticeSetupIndex(defaultOptions);
 			practiceSetup->id = -1;
 			practiceSetup->chartId = chartId;
 
 			practiceSetup->setupTitle = "";
-			practiceSetup->loopSuccess = 0;
-			practiceSetup->loopFail = 1;
-			practiceSetup->rangeBegin = 0;
-			practiceSetup->rangeEnd = 0;
-			practiceSetup->failCondType = 0;
-			practiceSetup->failCondValue = 0;
-			practiceSetup->playbackSpeed = 1.0;
-
-			practiceSetup->incSpeedOnSuccess = 0;
-			practiceSetup->incSpeed = 0.0;
-			practiceSetup->incStreak = 1;
-
-			practiceSetup->decSpeedOnFail = 0;
-			practiceSetup->decSpeed = 0.0;
-			practiceSetup->minPlaybackSpeed = 0.1;
-
-			practiceSetup->maxRewind = 0;
-			practiceSetup->maxRewindMeasure = 1;
 
 			UpdateOrAddPracticeSetup(practiceSetup);
 			res.emplace_back(practiceSetup);
@@ -858,7 +856,7 @@ public:
 		DBStatement removeChallenge = m_database.Query("DELETE FROM Challenges WHERE rowid=?");
 		DBStatement removeFolder = m_database.Query("DELETE FROM Folders WHERE rowid=?");
 		DBStatement scoreScan = m_database.Query("SELECT "
-			"rowid,score,crit,near,miss,gauge,auto_flags,replay,timestamp,chart_hash,user_name,user_id,local_score,window_perfect,window_good,window_hold,window_miss,window_slam,gauge_type,gauge_opt,mirror,random "
+			"rowid,score,crit,near,early,late,combo,miss,gauge,auto_flags,replay,timestamp,chart_hash,user_name,user_id,local_score,window_perfect,window_good,window_hold,window_miss,window_slam,gauge_type,gauge_opt,mirror,random "
 			"FROM Scores WHERE chart_hash=?");
 		DBStatement moveScores = m_database.Query("UPDATE Scores set chart_hash=? where chart_hash=?");
 
@@ -1034,27 +1032,30 @@ public:
 					score->score = scoreScan.IntColumn(1);
 					score->crit = scoreScan.IntColumn(2);
 					score->almost = scoreScan.IntColumn(3);
-					score->miss = scoreScan.IntColumn(4);
-					score->gauge = (float)scoreScan.DoubleColumn(5);
-					score->autoFlags = (AutoFlags)scoreScan.IntColumn(6);
-					score->replayPath = scoreScan.StringColumn(7);
+					score->early = scoreScan.IntColumn(4);
+					score->late = scoreScan.IntColumn(5);
+					score->combo = scoreScan.IntColumn(6);
+					score->miss = scoreScan.IntColumn(7);
+					score->gauge = (float)scoreScan.DoubleColumn(8);
+					score->autoFlags = (AutoFlags)scoreScan.IntColumn(9);
+					score->replayPath = scoreScan.StringColumn(10);
 
-					score->timestamp = scoreScan.Int64Column(8);
-					score->chartHash = scoreScan.StringColumn(9);
-					score->userName = scoreScan.StringColumn(10);
-					score->userId = scoreScan.StringColumn(11);
-					score->localScore = scoreScan.IntColumn(12);
+					score->timestamp = scoreScan.Int64Column(11);
+					score->chartHash = scoreScan.StringColumn(12);
+					score->userName = scoreScan.StringColumn(13);
+					score->userId = scoreScan.StringColumn(14);
+					score->localScore = scoreScan.IntColumn(15);
 
-					score->hitWindowPerfect = scoreScan.IntColumn(13);
-					score->hitWindowGood = scoreScan.IntColumn(14);
-					score->hitWindowHold = scoreScan.IntColumn(15);
-					score->hitWindowMiss = scoreScan.IntColumn(16);
-					score->hitWindowSlam = scoreScan.IntColumn(17);
+					score->hitWindowPerfect = scoreScan.IntColumn(16);
+					score->hitWindowGood = scoreScan.IntColumn(17);
+					score->hitWindowHold = scoreScan.IntColumn(18);
+					score->hitWindowMiss = scoreScan.IntColumn(19);
+					score->hitWindowSlam = scoreScan.IntColumn(20);
 
-					score->gaugeType = (GaugeType)scoreScan.IntColumn(18);
-					score->gaugeOption = scoreScan.IntColumn(19);
-					score->mirror = scoreScan.IntColumn(20) == 1;
-					score->random = scoreScan.IntColumn(21) == 1;
+					score->gaugeType = (GaugeType)scoreScan.IntColumn(21);
+					score->gaugeOption = scoreScan.IntColumn(22);
+					score->mirror = scoreScan.IntColumn(23) == 1;
+					score->random = scoreScan.IntColumn(24) == 1;
 					chart->scores.Add(score);
 				}
 				scoreScan.Rewind();
@@ -1274,31 +1275,34 @@ public:
 	void AddScore(ScoreIndex* score)
 	{
 		DBStatement addScore = m_database.Query("INSERT INTO "
-			"Scores(score,crit,near,miss,gauge,auto_flags,replay,timestamp,chart_hash,user_name,user_id,local_score,window_perfect,window_good,window_hold,window_miss,window_slam,gauge_type,gauge_opt,mirror,random) "
-			"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+			"Scores(score,crit,near,early,late,combo,miss,gauge,auto_flags,replay,timestamp,chart_hash,user_name,user_id,local_score,window_perfect,window_good,window_hold,window_miss,window_slam,gauge_type,gauge_opt,mirror,random) "
+			"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
 		m_database.Exec("BEGIN");
 		addScore.BindInt(1, score->score);
 		addScore.BindInt(2, score->crit);
 		addScore.BindInt(3, score->almost);
-		addScore.BindInt(4, score->miss);
-		addScore.BindDouble(5, score->gauge);
-		addScore.BindInt(6, (int32)score->autoFlags);
-		addScore.BindString(7, score->replayPath);
-		addScore.BindInt64(8, score->timestamp);
-		addScore.BindString(9, score->chartHash);
-		addScore.BindString(10, score->userName);
-		addScore.BindString(11, score->userId);
-		addScore.BindInt(12, score->localScore);
-		addScore.BindInt(13, score->hitWindowPerfect);
-		addScore.BindInt(14, score->hitWindowGood);
-		addScore.BindInt(15, score->hitWindowHold);
-		addScore.BindInt(16, score->hitWindowMiss);
-		addScore.BindInt(17, score->hitWindowSlam);
-		addScore.BindInt(18, (int32)score->gaugeType);
-		addScore.BindInt(19, score->gaugeOption);
-		addScore.BindInt(20, score->mirror ? 1 : 0);
-		addScore.BindInt(21, score->random ? 1 : 0);
+		addScore.BindInt(4, score->early);
+		addScore.BindInt(5, score->late);
+		addScore.BindInt(6, score->combo);
+		addScore.BindInt(7, score->miss);
+		addScore.BindDouble(8, score->gauge);
+		addScore.BindInt(9, (int32)score->autoFlags);
+		addScore.BindString(10, score->replayPath);
+		addScore.BindInt64(11, score->timestamp);
+		addScore.BindString(12, score->chartHash);
+		addScore.BindString(13, score->userName);
+		addScore.BindString(14, score->userId);
+		addScore.BindInt(15, score->localScore);
+		addScore.BindInt(16, score->hitWindowPerfect);
+		addScore.BindInt(17, score->hitWindowGood);
+		addScore.BindInt(18, score->hitWindowHold);
+		addScore.BindInt(19, score->hitWindowMiss);
+		addScore.BindInt(20, score->hitWindowSlam);
+		addScore.BindInt(21, (int32)score->gaugeType);
+		addScore.BindInt(22, score->gaugeOption);
+		addScore.BindInt(23, score->mirror ? 1 : 0);
+		addScore.BindInt(24, score->random ? 1 : 0);
 
 		addScore.Step();
 		addScore.Rewind();
@@ -1453,6 +1457,21 @@ public:
 		std::advance(it, selection);
 		return it->second;
 	}
+	const auto& GetFolderMap()
+	{
+		assert(!m_searching); // Unsafe when searching
+		return m_folders;
+	}
+	const auto& GetChartMap()
+	{
+		assert(!m_searching); // Unsafe when searching
+		return m_charts;
+	}
+	const auto& GetChallengeMap()
+	{
+		assert(!m_searching); // Unsafe when searching
+		return m_challenges;
+	}
 
 	// TODO: Research thread pausing more
 	// ugly but should work
@@ -1537,6 +1556,9 @@ private:
 			"(score INTEGER,"
 			"crit INTEGER,"
 			"near INTEGER,"
+			"early INTEGER,"
+			"late INTEGER,"
+			"combo INTEGER,"
 			"miss INTEGER,"
 			"gauge REAL,"
 			"gauge_type INTEGER,"
@@ -1693,7 +1715,7 @@ private:
 
 		// Select Scores
 		DBStatement scoreScan = m_database.Query("SELECT "
-			"rowid,score,crit,near,miss,gauge,auto_flags,replay,timestamp,chart_hash,user_name,user_id,local_score,window_perfect,window_good,window_hold,window_miss,window_slam,gauge_type,gauge_opt,mirror,random "
+			"rowid,score,crit,near,early,late,combo,miss,gauge,auto_flags,replay,timestamp,chart_hash,user_name,user_id,local_score,window_perfect,window_good,window_hold,window_miss,window_slam,gauge_type,gauge_opt,mirror,random "
 			"FROM Scores");
 		
 		while (scoreScan.StepRow())
@@ -1703,27 +1725,30 @@ private:
 			score->score = scoreScan.IntColumn(1);
 			score->crit = scoreScan.IntColumn(2);
 			score->almost = scoreScan.IntColumn(3);
-			score->miss = scoreScan.IntColumn(4);
-			score->gauge = (float) scoreScan.DoubleColumn(5);
-			score->autoFlags = (AutoFlags)scoreScan.IntColumn(6);
-			score->replayPath = scoreScan.StringColumn(7);
+			score->early = scoreScan.IntColumn(4);
+			score->late = scoreScan.IntColumn(5);
+			score->combo = scoreScan.IntColumn(6);
+			score->miss = scoreScan.IntColumn(7);
+			score->gauge = (float) scoreScan.DoubleColumn(8);
+			score->autoFlags = (AutoFlags)scoreScan.IntColumn(9);
+			score->replayPath = scoreScan.StringColumn(10);
 
-			score->timestamp = scoreScan.Int64Column(8);
-			score->chartHash = scoreScan.StringColumn(9);
-			score->userName = scoreScan.StringColumn(10);
-			score->userId = scoreScan.StringColumn(11);
-			score->localScore = scoreScan.IntColumn(12);
+			score->timestamp = scoreScan.Int64Column(11);
+			score->chartHash = scoreScan.StringColumn(12);
+			score->userName = scoreScan.StringColumn(13);
+			score->userId = scoreScan.StringColumn(14);
+			score->localScore = scoreScan.IntColumn(15);
 
-			score->hitWindowPerfect = scoreScan.IntColumn(13);
-			score->hitWindowGood = scoreScan.IntColumn(14);
-			score->hitWindowHold = scoreScan.IntColumn(15);
-			score->hitWindowMiss = scoreScan.IntColumn(16);
-			score->hitWindowSlam = scoreScan.IntColumn(17);
+			score->hitWindowPerfect = scoreScan.IntColumn(16);
+			score->hitWindowGood = scoreScan.IntColumn(17);
+			score->hitWindowHold = scoreScan.IntColumn(18);
+			score->hitWindowMiss = scoreScan.IntColumn(19);
+			score->hitWindowSlam = scoreScan.IntColumn(20);
 
-			score->gaugeType = (GaugeType)scoreScan.IntColumn(18);
-			score->gaugeOption = scoreScan.IntColumn(19);
-			score->mirror = scoreScan.IntColumn(20) == 1;
-			score->random = scoreScan.IntColumn(21) == 1;
+			score->gaugeType = (GaugeType)scoreScan.IntColumn(21);
+			score->gaugeOption = scoreScan.IntColumn(22);
+			score->mirror = scoreScan.IntColumn(23) == 1;
+			score->random = scoreScan.IntColumn(24) == 1;
 
 			// Add difficulty to map and resort difficulties
 			auto diffIt = m_chartsByHash.find(score->chartHash);
@@ -2309,9 +2334,9 @@ Vector<String> MapDatabase::GetCollectionsForMap(int32 mapid)
 {
 	return m_impl->GetCollectionsForMap(mapid);
 }
-Vector<PracticeSetupIndex*> MapDatabase::GetOrAddPracticeSetups(int32 chartId)
+Vector<PracticeSetupIndex*> MapDatabase::GetOrAddPracticeSetups(int32 chartId, const PracticeSetupIndex& defaultOptions)
 {
-	return m_impl->GetOrAddPracticeSetups(chartId);
+	return m_impl->GetOrAddPracticeSetups(chartId, defaultOptions);
 }
 void MapDatabase::AddOrRemoveToCollection(const String& name, int32 mapid)
 {
@@ -2324,6 +2349,10 @@ void MapDatabase::AddSearchPath(const String& path)
 void MapDatabase::RemoveSearchPath(const String& path)
 {
 	m_impl->RemoveSearchPath(path);
+}
+void MapDatabase::LoadDatabaseWithoutSearching()
+{
+	m_impl->LoadDatabaseWithoutSearching();
 }
 void MapDatabase::UpdateChartOffset(const ChartIndex* chart)
 {
@@ -2344,6 +2373,18 @@ void MapDatabase::UpdateChallengeResult(ChallengeIndex* chal, uint32 clearMark, 
 ChartIndex* MapDatabase::GetRandomChart()
 {
 	return m_impl->GetRandomChart();
+}
+const std::map<int32, FolderIndex *>& MapDatabase::GetFolderMap()
+{
+	return m_impl->GetFolderMap();
+}
+const std::map<int32, ChartIndex *>& MapDatabase::GetChartMap()
+{
+	return m_impl->GetChartMap();
+}
+const std::map<int32, ChallengeIndex *>& MapDatabase::GetChallengeMap()
+{
+	return m_impl->GetChallengeMap();
 }
 void MapDatabase::SetChartUpdateBehavior(bool transferScores) {
 	m_transferScores = transferScores;

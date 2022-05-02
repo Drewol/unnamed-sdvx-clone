@@ -77,4 +77,29 @@ struct HitWindow
 
 	static const HitWindow NORMAL;
 	static const HitWindow HARD;
+
+	static bool StaticSerialize(BinaryStream& stream, HitWindow*& obj)
+	{
+		if (obj == nullptr)
+			return false;
+
+		stream << obj->perfect;
+		stream << obj->good;
+		stream << obj->hold;
+		stream << obj->miss;
+		stream << obj->slam;
+
+		return stream.IsOk();
+	}
+};
+
+// A type enum that can be used for replays
+enum class HitStatType : uint8
+{
+	Unknown = 0,
+	Button,
+	Laser,
+	Slam,
+	Hold,
+	_TYPE_MAX,
 };

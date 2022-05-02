@@ -6,6 +6,7 @@
 #include "GameFailCondition.hpp"
 #include "HitStat.hpp"
 
+class Replay;
 class MultiplayerScreen;
 class ChallengeManager;
 
@@ -25,17 +26,6 @@ enum class GameFlags : uint32
 
 	AutoLaser = 0b100000,
 End};
-
-struct ScoreReplay
-{
-	int32 currentScore = 0; //< Current score; updated during playback
-	int32 currentMaxScore = 0; //< Current max possible score; updated during playback
-	int32 maxScore = 0;
-	size_t nextHitStat = 0;
-	Vector<SimpleHitStat> replay;
-
-	HitWindow hitWindow = HitWindow::NORMAL;
-};
 
 GameFlags operator|(const GameFlags& a, const GameFlags& b);
 GameFlags operator&(const GameFlags& a, const GameFlags& b);
@@ -124,6 +114,9 @@ public:
 	virtual struct lua_State* GetLuaState() = 0;
 	// Set demo mode
 	virtual void SetDemoMode(bool value) = 0; 
+	// Init replay mode (call before AsyncLoad) if replay is null, plays best score
+	virtual void InitPlayReplay(Replay* replay=nullptr) = 0;
+
 	// Set song db for random song selection and practice mode setups
 	virtual void SetSongDB(class MapDatabase* db) = 0;
 	// The folder that contians the map
@@ -138,8 +131,10 @@ public:
 
 	virtual int GetRetryCount() const = 0;
 	virtual String GetMissionStr() const = 0;
+	virtual Replay* GetCurrentReplay() const = 0;
 
 	virtual void SetGauge(float) = 0;
+
 
 	virtual void SetAllGaugeValues(const Vector<float> values) = 0;
 

@@ -273,19 +273,21 @@ class SidechainDSP : public DSP
 public:
 	SidechainDSP(uint32 sampleRate);
 
-	// Set sidechain length in samples
 	void SetLength(double length);
+	void SetAttackTime(double length);
+	void SetHoldTime(double length);
+	void SetReleaseTime(double length);
 
-	// Volume multiplier for the sidechaing
-	float amount = 0.25f;
-
-	Interpolation::CubicBezier curve{};
+	float ratio = 5.0f;
 
 	virtual void Process(float *out, uint32 numSamples);
 	virtual const char *GetName() const { return "SidechainDSP"; }
 
 private:
 	uint32 m_length = 0;
+	uint32 m_attackTime = 0;
+	uint32 m_holdTime = 0;
+	uint32 m_releaseTime = 0;
 	size_t m_time = 0;
 };
 

@@ -41,6 +41,7 @@ public:
 	void SetCommandLine(const char* cmdLine);
 
 	class Game* LaunchMap(const String& mapPath);
+	class Game* LaunchReplay(const String& replayPath, MapDatabase** database = nullptr);
 	void Shutdown();
 
 	void AddTickable(class IApplicationTickable* tickable, class IApplicationTickable* insertBefore = nullptr);
@@ -136,6 +137,7 @@ private:
 	void m_OnWindowMoved(const Vector2i& newPos);
 	void m_OnFocusChanged(bool focused);
 	void m_unpackSkins();
+	void m_loadResponsiveInputSetting();
 
 	RenderState m_renderStateBase;
 	RenderQueue m_renderQueueBase;
@@ -177,6 +179,7 @@ private:
 	int m_multiRoomCount = 0;
 	bool m_gaugeRemovedWarn = true;
 	bool m_responsiveInputs = true;
+	int m_responsiveInputsSleep = 1;
 
 	Thread m_renderThread;
 };

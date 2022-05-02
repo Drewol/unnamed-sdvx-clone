@@ -232,7 +232,8 @@ void ChallengeIndex::GenerateDescription()
 	desc += "\n";
 
 	const auto& o = settings["overrides"];
-	unsigned int maxNum = std::min<size_t>(std::min<size_t>((size_t)totalNumCharts, charts.size()), o.size());
+	unsigned int maxNum = static_cast<unsigned int>(std::min(std::min((size_t)totalNumCharts, charts.size()), o.size()));
+
 	for (unsigned int i = 0; i < maxNum; i++)
 	{
 		String overdesc = "";
@@ -298,7 +299,7 @@ void ChallengeIndex::FindCharts(MapDatabase* db, const nlohmann::json& chartsToF
 		return;
 	}
 
-	totalNumCharts = chartsToFind.size();
+	totalNumCharts = static_cast<int32>(chartsToFind.size());
 	for (auto& el : chartsToFind.items())
 	{
 		ChartIndex* chart = nullptr;

@@ -47,6 +47,7 @@ void GameplaySettingsDialog::InitTabs()
     gameTab->settings.push_back(CreateEnumSetting<Enum_ScoreDisplayModes>(GameConfigKeys::ScoreDisplayMode, "Score Display"));
     if (m_songSelectScreen != nullptr)
     {
+        gameTab->settings.push_back(CreateButton("Replay Best Score", [this](const auto&) { onPressReplay.Call(); }));
         gameTab->settings.push_back(CreateButton("Autoplay", [this](const auto&) { onPressAutoplay.Call(); }));
         gameTab->settings.push_back(CreateButton("Practice", [this](const auto&) { onPressPractice.Call(); }));
     }

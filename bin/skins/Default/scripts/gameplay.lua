@@ -435,6 +435,20 @@ function render(deltaTime)
         then play_mode = "Practice Setup"
     elseif gameplay.autoplay
         then play_mode = "Autoplay"
+    elseif gameplay.replay ~= nil and gameplay.replay.score ~= nil then
+        local name = gameplay.replay.score.name
+        local timestamp = gameplay.replay.score.timestamp
+        if name ~= "" then
+            if timestamp > 0 then
+                play_mode = "Watching replay by " .. name .. " from " .. os.date("%Y-%m-%d", timestamp)
+            else
+                play_mode = "Watching replay by " .. name
+            end
+        elseif timestamp > 0 then
+            play_mode = "Watching replay from " .. os.date("%Y-%m-%d", timestamp)
+        else
+            play_mode = "Watching replay"
+        end
     elseif gameplay.playbackSpeed ~= nil and gameplay.playbackSpeed < 1
         then play_mode = string.format("Speed: x%.2f", gameplay.playbackSpeed)
     elseif gameplay.hitWindow ~= nil and gameplay.hitWindow.type == 0

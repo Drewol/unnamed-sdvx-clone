@@ -57,9 +57,6 @@ namespace Graphics
 	{
 	};
 
-	// Defined in Shader.cpp
-	extern uint32 shaderStageMap[];
-
 	class Material_Impl : public MaterialRes
 	{
 	public:

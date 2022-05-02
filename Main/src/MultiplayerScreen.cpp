@@ -580,7 +580,7 @@ void MultiplayerScreen::m_changeDifficulty(int offset)
 
 }
 
-void  MultiplayerScreen::GetMapBPMForSpeed(String path, struct MultiplayerBPMInfo& info)
+void MultiplayerScreen::GetMapBPMForSpeed(String path, struct MultiplayerBPMInfo& info)
 {
 	path = Path::Normalize(path);
 	if (!Path::FileExists(path))
@@ -592,93 +592,23 @@ void  MultiplayerScreen::GetMapBPMForSpeed(String path, struct MultiplayerBPMInf
 	}
 
 	// Load map
-	Beatmap* newMap = new Beatmap();
+	Beatmap newMap;
 	File mapFile;
 	if (!mapFile.OpenRead(path))
 	{
 		Logf("Could not read path for beatmap: %s", Logger::Severity::Error, path);
-		delete newMap;
 		info = { 0, 0, 0, 0 };
 		return;
 	}
+
 	FileReader reader(mapFile);
-	if (!newMap->Load(reader))
+	if (!newMap.Load(reader))
 	{
-		delete newMap;
 		info = { 0, 0, 0, 0 };
 		return;
 	}
 
-	// Most of this code is copied from Game.cpp to match its calculations
-
-	double useBPM = -1;
-
-	const BeatmapSettings& mapSettings = newMap->GetMapSettings();
-
-	info.start = newMap->GetLinearTimingPoints().front()->GetBPM();
-
-	ObjectState* const* lastObj = &newMap->GetLinearObjects().back();
-	while ((*lastObj)->type == ObjectType::Event && lastObj != &newMap->GetLinearObjects().front())
-	{
-		lastObj--;
-	}
-
-	MapTime lastObjectTime = (*lastObj)->time;
-	if ((*lastObj)->type == ObjectType::Hold)
-	{
-		HoldObjectState* lastHold = (HoldObjectState*)(*lastObj);
-		lastObjectTime += lastHold->duration;
-	}
-	else if ((*lastObj)->type == ObjectType::Laser)
-	{
-		LaserObjectState* lastHold = (LaserObjectState*)(*lastObj);
-		lastObjectTime += lastHold->duration;
-	}
-
-	{
-		Map<double, MapTime> bpmDurations;
-		const Vector<TimingPoint*>& timingPoints = newMap->GetLinearTimingPoints();
-		MapTime lastMT = mapSettings.offset;
-		MapTime largestMT = -1;
-		double lastBPM = -1;
-
-		info.min = -1;
-		info.max = -1;
-
-		for (TimingPoint* tp : timingPoints)
-		{
-			double thisBPM = tp->GetBPM();
-
-			if (info.max == -1 || thisBPM > info.max)
-				info.max = thisBPM;
-
-			if (info.min == -1 || thisBPM < info.min)
-				info.min = thisBPM;
-
-			if (!bpmDurations.count(lastBPM))
-			{
-				bpmDurations[lastBPM] = 0;
-			}
-			MapTime timeSinceLastTP = tp->time - lastMT;
-			bpmDurations[lastBPM] += timeSinceLastTP;
-			if (bpmDurations[lastBPM] > largestMT)
-			{
-				useBPM = lastBPM;
-				largestMT = bpmDurations[lastBPM];
-			}
-			lastMT = tp->time;
-			lastBPM = thisBPM;
-		}
-		bpmDurations[lastBPM] += lastObjectTime - lastMT;
-
-		if (bpmDurations[lastBPM] > largestMT)
-		{
-			useBPM = lastBPM;
-		}
-		info.mode = useBPM;
-	}
-
-	delete newMap;
+	newMap.GetBPMInfo(info.start, info.min, info.max, info.mode);
 }
 
 ChartIndex* MultiplayerScreen::GetCurrentSelectedChart() const
@@ -1025,6 +955,7 @@ void MultiplayerScreen::SendFinalScore(class Game* game, ClearMark clearState)
 	packet["gauge"] = gauge->GetValue();
 	packet["early"] = scoring.timedHits[0];
 	packet["late"] = scoring.timedHits[1];
+	packet["combo"] = scoring.maxComboCounter;
 	packet["miss"] = scoring.categorizedHits[0];
 	packet["near"] = scoring.categorizedHits[1];
 	packet["crit"] = scoring.categorizedHits[2];

@@ -151,76 +151,6 @@ bool SettingsPage::ToggleSetting(GameConfigKeys key, const std::string_view& lab
 	}
 }
 
-int SettingsPage::SelectionInput(int val, const Vector<const char*>& options, const std::string_view& label)
-{
-	assert(options.size() > 0);
-
-	if (0 <= val && val < static_cast<int>(options.size()))
-	{
-		Label(label);
-
-		nk_combobox(m_nctx, const_cast<const char**>(options.data()), static_cast<int>(options.size()), &val, m_lineHeight, m_comboBoxSize);
-		UpdateLayoutMaxY((m_lineHeight + 5) * static_cast<int>(options.size()));
-	}
-	else
-	{
-		std::stringstream str;
-		str << std::string(label) << " [currently set to an unknown value " << val << "]";
-
-		Label(str.str().data());
-		str.clear();
-
-		if (nk_button_label(m_nctx, "Press this button to reset."))
-		{
-			val = 0;
-		}
-	}
-
-	return val;
-}
-
-bool SettingsPage::SelectionSetting(GameConfigKeys key, const Vector<const char*>& options, const std::string_view& label)
-{
-	assert(options.size() > 0);
-
-	const int value = g_gameConfig.GetInt(key);
-	const int newValue = SelectionInput(value, options, label);
-
-	if (newValue != value)
-	{
-		g_gameConfig.Set(key, newValue);
-		return true;
-	}
-
-	return false;
-}
-
-bool SettingsPage::StringSelectionSetting(GameConfigKeys key, const Vector<String>& options, const std::string_view& label)
-{
-	String value = g_gameConfig.GetString(key);
-	int selection = 0;
-
-	const auto stringSearch = std::find(options.begin(), options.end(), value);
-	if (stringSearch != options.end())
-	{
-		selection = static_cast<int>(stringSearch - options.begin());
-	}
-
-	Vector<const char*> displayData;
-	for (const String& s : options)
-	{
-		displayData.Add(s.data());
-	}
-
-	const int newSelection = SelectionInput(selection, displayData, label);
-
-	if (newSelection != selection) {
-		g_gameConfig.Set(key, options[newSelection]);
-		return true;
-	}
-	return false;
-}
-	
 int SettingsPage::IntInput(int val, const std::string_view& label, int min, int max, int step, float perPixel)
 {
 	const int oldState = nk_get_property_state(m_nctx, label.data());
@@ -437,6 +367,69 @@ protected:
 			Save();
 			return;
 		}
+		if (nk_button_label(m_nctx, "Create new profile"))
+		{
+			BasicPrompt* w = new BasicPrompt(
+				"Create New Profile",
+				"Enter name for profile\n(This will copy your current profile)",
+				"Create Profile");
+			w->OnResult.Add(this, &SettingsPage_Profile::m_createNewProfile);
+			w->Focus();
+			g_application->AddTickable(w);
+		}
+	}
+protected:
+	void m_createNewProfile(bool valid, char* data)
+	{
+		if (!valid || strlen(data) == 0)
+			return;
+
+		String profile = String(data);
+		// Validate filename (this is windows specific but is a subperset of linux)
+		// https://stackoverflow.com/questions/4814040/allowed-characters-in-filename/35352640#35352640
+		// TODO we could probably make a general function under Path::
+		profile.erase(std::remove_if(profile.begin(), profile.end(),
+			[](unsigned char x) {
+				switch (x) {
+				case '\0':
+				case '\\':
+				case '/':
+				case ':':
+				case '*':
+				case '"':
+				case '<':
+				case '>':
+				case '|':
+				case '\n':
+				case '\r':
+					return true;
+				default:
+					return false;
+				}
+			}
+		), profile.end());
+
+		if (profile == "." || profile == "..")
+			return;
+		if (profile[0] == ' '
+			|| profile[profile.length() - 1] == ' '
+			|| profile[profile.length() - 1] == '.')
+			return;
+
+		if (!Path::IsDirectory(Path::Absolute("profiles")))
+			Path::CreateDir(Path::Absolute("profiles"));
+
+
+		// Save old setting
+		g_application->ApplySettings();
+
+		// Update with new profile name
+		g_gameConfig.Set(GameConfigKeys::CurrentProfileName, profile);
+
+		// Now save as new profile
+		g_application->ApplySettings();
+
+		Load();
 	}
 };
 

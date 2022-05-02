@@ -677,6 +677,21 @@ void SidechainDSP::SetLength(double length)
 	m_length = (uint32)flength;
 	m_time = 0;
 }
+void SidechainDSP::SetAttackTime(double length)
+{
+	double flength = length / 1000.0 * m_sampleRate;
+	m_attackTime = (uint32)flength;
+}
+void SidechainDSP::SetHoldTime(double length)
+{
+	double flength = length / 1000.0 * m_sampleRate;
+	m_holdTime = (uint32)flength;
+}
+void SidechainDSP::SetReleaseTime(double length)
+{
+	double flength = length / 1000.0 * m_sampleRate;
+	m_releaseTime = (uint32)flength;
+}
 void SidechainDSP::Process(float *out, uint32 numSamples)
 {
 	if (m_length == 0)
@@ -684,21 +699,31 @@ void SidechainDSP::Process(float *out, uint32 numSamples)
 
 	const uint32 startSample = GetStartSample();
 	const uint32 currentSample = GetCurrentSample();
-
 	for (uint32 i = 0; i < numSamples; i++)
 	{
 		if (currentSample + i < startSample)
 		{
 			continue;
 		}
-		float r = (float)m_time / (float)m_length;
-		// FadeIn
-		const float fadeIn = 0.08f;
-		if (r < fadeIn)
-			r = 1.0f - r / fadeIn;
+		float volume;
+		if (m_time < m_attackTime)
+		{
+			volume = 1.0f - ((float)m_time / (float)m_attackTime);
+		}
+		else if (m_time < m_attackTime + m_holdTime)
+		{
+			volume = 0.0f;
+		}
+		else if (m_time < m_attackTime + m_holdTime + m_releaseTime)
+		{
+			volume = ((float)(m_time - m_attackTime - m_holdTime) / (float)m_releaseTime);
+		}
 		else
-			r = curve((r - fadeIn) / (1.0f - fadeIn));
-		float sampleGain = 1.0f - amount * (1.0f - r);
+		{
+			volume = 1.0f;
+		}
+		// range from 1/ratio (volume=0) to 1 (volume=1)
+		float sampleGain = mix * ((1.0f/ratio) + (1.0f - 1.0f/ratio)*volume) + (1.0f - mix);
 		out[i * 2 + 0] *= sampleGain;
 		out[i * 2 + 1] *= sampleGain;
 		if (++m_time > m_length)

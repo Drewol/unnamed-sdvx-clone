@@ -291,41 +291,8 @@ void Track::Tick(class BeatmapPlayback& playback, float deltaTime)
 	trackViewRange = Vector2((float)currentTime, 0.0f);
 	trackViewRange.y = trackViewRange.x + GetViewRange();
 
-	// Update ticks separating bars to draw
-	auto tickTime = (double)currentTime;
-	MapTime rangeEnd = currentTime + playback.ViewDistanceToDuration(m_viewRange);
-	const TimingPoint* tp = playback.GetTimingPointAt((MapTime)tickTime);
-	double stepTime = tp->GetBarDuration(); // Every xth note based on signature
-
-	// Overflow on first tick
-	double firstOverflow = fmod((double)tickTime - tp->time, stepTime);
-	if(fabs(firstOverflow) > 1)
-		tickTime -= firstOverflow;
-
 	m_barTicks.clear();
-
-	// Add first tick
-	m_barTicks.Add(playback.TimeToViewDistance((MapTime)tickTime));
-
-	while (tickTime < rangeEnd)
-	{
-		double next = tickTime + stepTime;
-
-		const TimingPoint* tpNext = playback.GetTimingPointAt((MapTime)tickTime);
-		if(tpNext != tp)
-		{
-			tp = tpNext;
-			tickTime = tp->time;
-			stepTime = tp->GetBarDuration(); // Every xth note based on signature
-		}
-		else
-		{
-			tickTime = next;
-		}
-
-		// Add tick
-		m_barTicks.Add(playback.TimeToViewDistance((MapTime)tickTime));
-	}
+	playback.GetBarPositionsInViewRange(m_viewRange, m_barTicks);
 
 	// Update track hide status
 	m_trackHide += m_trackHideSpeed * deltaTime;
@@ -344,6 +311,21 @@ void Track::Tick(class BeatmapPlayback& playback, float deltaTime)
 	}
 }
 
+auto Track::m_GetObjectPosition(BeatmapPlayback& playback, ObjectState *obj)
+{
+	struct result {float position; bool dontUseScrollSpeedForPos;};
+	float visualOffset = m_GetBaseVisualOffsetForObject(obj);
+
+	const bool dontUseScrollSpeedForPos =
+			obj->type == ObjectType::Hold ? ((MultiObjectState*)obj)->hold.GetRoot()->time <= playback.GetLastTime()
+			                              : obj->type == ObjectType::Laser && obj->time <= playback.GetLastTime();
+
+	float position = dontUseScrollSpeedForPos ? playback.TimeToViewDistanceIgnoringScrollSpeed(obj->time) : playback.TimeToViewDistance(obj->time);
+	position = position / m_viewRange + visualOffset;
+
+	return result {position, dontUseScrollSpeedForPos};
+}
+
 void Track::DrawLaserBase(RenderQueue& rq, class BeatmapPlayback& playback, const Vector<ObjectState*>& objects)
 {
 	for (auto obj : objects)
@@ -354,7 +336,7 @@ void Track::DrawLaserBase(RenderQueue& rq, class BeatmapPlayback& playback, cons
 		auto* laser = (LaserObjectState*)obj;
 		if ((laser->flags & LaserObjectState::flag_Extended) != 0 || m_trackHide > 0.f)
 		{
-			float position = m_GetObjectPosition(playback, obj);
+			auto [position, _] = m_GetObjectPosition(playback, obj);
 
 			Mesh laserMesh = m_laserTrackBuilder[laser->index]->GenerateTrackMesh(playback, laser);
 
@@ -419,7 +401,8 @@ void Track::DrawBase(class RenderQueue& rq)
 void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, ObjectState* obj, bool active, const std::unordered_set<MapTime> chipFXTimes[2])
 {
 	// Calculate height based on time on current track
-	float position = m_GetObjectPosition(playback, obj);
+	auto result = m_GetObjectPosition(playback, obj);
+	auto position = result.position; auto dontUseScrollSpeedForPos = result.dontUseScrollSpeedForPos; // Should just be able to use binding decl., but C++ says no
 
 	if (obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
 	{
@@ -495,7 +478,25 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 		float scale;
 		if (isHold) // Hold Note?
 		{
-			float trackScale = (playback.DurationToViewDistanceAtTime(mobj->time, mobj->hold.duration) / m_viewRange) / length;
+			float trackScale = 0.0f;
+			if (dontUseScrollSpeedForPos)
+			{
+				if (mobj->time + mobj->hold.duration <= playback.GetLastTime())
+				{
+					trackScale = playback.ToViewDistanceIgnoringScrollSpeed(mobj->time, mobj->hold.duration);
+				}
+				else
+				{
+					const float remainingDistance = playback.TimeToViewDistance(mobj->time + mobj->hold.duration);
+					trackScale = Math::Max(0.0f, remainingDistance) - playback.TimeToViewDistanceIgnoringScrollSpeed(mobj->time);
+				}
+			}
+			else
+			{
+				trackScale = playback.ToViewDistance(mobj->time, mobj->hold.duration);
+			}
+
+			trackScale /= m_viewRange * length;
 			scale = trackScale * trackLength;
 
 			params.SetParameter("trackScale", trackScale);
@@ -765,20 +766,6 @@ void Track::OnButtonReleasedDelta(Input::Button buttonCode, int32 delta)
 void Track::EnableVisualOffset(bool setting)
 {
 	m_enableVisualOffset = setting;
-}
-
-float Track::m_GetObjectPosition(BeatmapPlayback& playback, ObjectState *obj)
-{
-	float visualOffset = m_GetBaseVisualOffsetForObject(obj);
-
-	if (obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
-		return playback.TimeToViewDistance(obj->time) / m_viewRange + visualOffset;
-	else // laser
-	{
-		// Calculate height based on time on current track
-		float posMult = trackLength / (m_viewRange * laserSpeedOffset);
-		return playback.TimeToViewDistance(obj->time) * posMult + visualOffset;
-	}
 }
 
 float Track::m_GetBaseVisualOffsetForObject(ObjectState* obj) const

@@ -1,5 +1,7 @@
 # Main Project
 
+
+
 set(SRCROOT ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Find files used for project
@@ -18,3 +20,11 @@ set_output_postfixes(Tests.Shared)
 # Dependencies
 target_link_libraries(Tests.Shared Shared)
 target_link_libraries(Tests.Shared Tests)
+
+find_package(ZLIB REQUIRED)
+if(ZLIB_FOUND)
+    target_compile_definitions(Tests.Shared PRIVATE ZLIB_FOUND=${ZLIB_FOUND})
+    target_link_libraries(Tests.Shared ${ZLIB_LIBRARIES})
+    target_include_directories(Tests.Shared SYSTEM PRIVATE ${ZLIB_INCLUDE_DIRS})
+endif()
+

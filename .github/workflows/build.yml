@@ -1,5 +1,5 @@
 name: Build
-on: [push]
+on: [push, workflow_dispatch]
 jobs:
     windows_build:
         name: Windows build
@@ -11,23 +11,22 @@ jobs:
             - name: Checkout submodules
               run: git submodule update --init --recursive
             - name: Cache vcpkg
-              uses: actions/cache@v1
+              uses: actions/cache@v2
               with:
-                path: vcpkg
-                key: ${{ runner.os }}-vcpkg-${{ hashFiles('build.windows') }}
+                path: |
+                  vcpkg
+                  vcpkg_installed
+                key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
             - name: vcpkg
               run: |
                 if(!(Test-Path .\vcpkg))
                 {
                 git clone https://github.com/microsoft/vcpkg.git
                 cd vcpkg
-                git checkout c0bc5e1b0ff27dd8710ee9ca18b708c0a9accce1 # pin freetype for now
                 .\bootstrap-vcpkg.bat
-                .\vcpkg.exe integrate install
-                .\vcpkg.exe install '@${{ github.workspace }}/build.windows'
                 }
             - name: cmake
-              run: cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake -G "Visual Studio 16 2019" -A x64 .
+              run: cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake -G "Visual Studio 17 2022" -A x64 .
             - name: Setup MSBuild.exe
               uses: microsoft/Setup-MSBuild@v1.0.2
             - name: MSBuild
@@ -60,7 +59,7 @@ jobs:
                 sudo apt-get update
                 sudo apt-get install g++ libegl1-mesa-dev libfreetype6-dev libogg-dev libvorbis-dev libsdl2-dev libarchive-dev zlib1g-dev libjpeg-dev libpng-dev
             - name: cmake
-              run: cmake -DCMAKE_BUILD_TYPE=Release .
+              run: cmake -DCMAKE_BUILD_TYPE=Release -DUSC_GNU_WERROR=On .
             - name: make
               run: make
             - name: Prepare for bundling AppImage
@@ -72,12 +71,15 @@ jobs:
               run: |
                 ./linuxdeploy-x86_64.AppImage --custom-apprun appimage/AppRun -d appimage/usc-game.desktop -i appimage/usc-game.png -e bin/usc-game --appdir usc-appdir --output appimage
                 mv usc-game*.AppImage bin/usc-game.AppImage
+                chmod +x bin/usc-game.AppImage
                 rm bin/usc-game bin/Tests.*
+            - name: Pack everything into .tar.gz archive
+              run: cd bin && tar -czvf ../Game_linux_AppImage.tar.gz *
             - name: Upload artifact
               uses: actions/upload-artifact@master
               with:
                 name: Game_linux_AppImage
-                path: bin
+                path: Game_linux_AppImage.tar.gz
     macos_build:
         name: macOS build
         runs-on: macos-latest
@@ -92,7 +94,9 @@ jobs:
             - name: Install packages
               run: brew install freetype libvorbis sdl2 libpng jpeg libarchive
             - name: cmake
-              run: cmake . -DLibArchive_LIBRARY=/usr/local/opt/libarchive/lib/libarchive.dylib -DLibArchive_INCLUDE_DIR=/usr/local/opt/libarchive/include -DCMAKE_BUILD_TYPE=Release
+              run: |
+                eval "$(brew shellenv)"
+                cmake . -DLibArchive_LIBRARY=$HOMEBREW_PREFIX/opt/libarchive/lib/libarchive.dylib -DLibArchive_INCLUDE_DIR=$HOMEBREW_PREFIX/opt/libarchive/include -DCMAKE_BUILD_TYPE=Release
             - name: make
               run: make
             - name: Upload artifact

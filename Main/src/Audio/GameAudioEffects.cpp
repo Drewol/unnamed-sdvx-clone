@@ -104,8 +104,10 @@ DSP *GameAudioEffect::CreateDSP(const TimingPoint &tp, float filterInput, uint32
 	{
 		SidechainDSP *sc = new SidechainDSP(sampleRate);
 		sc->SetLength(actualLength);
-		sc->amount = 1.0f;
-		sc->curve = Interpolation::CubicBezier(0.39, 0.575, 0.565, 1);
+		sc->SetAttackTime(sidechain.attackTime.Sample(filterInput).Absolute(noteDuration));
+		sc->SetHoldTime(sidechain.holdTime.Sample(filterInput).Absolute(noteDuration));
+		sc->SetReleaseTime(sidechain.releaseTime.Sample(filterInput).Absolute(noteDuration));
+		sc->ratio = sidechain.ratio.Sample(filterInput);
 		ret = sc;
 		break;
 	}

@@ -407,6 +407,15 @@ namespace Graphics
 						m_textComposition.selectionLength = evt.edit.length;
 						outer.OnTextComposition.Call(m_textComposition);
 					}
+					else if (evt.type == SDL_EventType::SDL_DROPFILE)
+					{
+						const char* file = evt.drop.file;
+						if (file != nullptr)
+						{
+							outer.OnFileDropped.Call(evt.drop.file);
+							SDL_free(evt.drop.file);
+						}
+					}
 					outer.OnAnyEvent.Call(evt);
 				}
 			}

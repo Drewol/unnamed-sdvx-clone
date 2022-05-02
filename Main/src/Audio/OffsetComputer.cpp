@@ -70,7 +70,7 @@ bool OffsetComputer::Compute(int& outOffset)
 		return false;
 	}
 
-	Logf("OffsetComputer::Compute: Using %d beats starting from %d...", Logger::Severity::Info,
+	Logf("OffsetComputer::Compute: Using %d beats starting from %d...", Logger::Severity::Debug,
 		m_beats.size(), m_beats[0].time);
 
 	m_offsetCenter = outOffset;
@@ -141,10 +141,10 @@ void OffsetComputer::ReadBeats()
 	int maxBeatsBeginInd = 0;
 	int maxBeatsCount = 0;
 
-	const Vector<TimingPoint*>& timingPoints = m_beatmap.GetLinearTimingPoints();
+	const Vector<TimingPoint>& timingPoints = m_beatmap.GetTimingPoints();
 	int timingPointInd = 0;
 
-	for (const ObjectState* object : m_beatmap.GetLinearObjects())
+	for (const auto& object : m_beatmap.GetObjectStates())
 	{
 		MapTime currBeat = lastBeat;
 		switch (object->type)
@@ -171,15 +171,15 @@ void OffsetComputer::ReadBeats()
 		{
 			if (timingPointInd + 1 < static_cast<int>(timingPoints.size()))
 			{
-				if (timingPoints[timingPointInd + 1]->time <= currBeat)
+				if (timingPoints[timingPointInd + 1].time <= currBeat)
 					++timingPointInd;
 			}
 
-			const TimingPoint* timingPoint = timingPoints[timingPointInd];
-			const double barDuration = timingPoint->GetBarDuration();
-			const double beatDuration = barDuration / timingPoint->numerator;
+			const TimingPoint& timingPoint = timingPoints[timingPointInd];
+			const double barDuration = timingPoint.GetBarDuration();
+			const double beatDuration = barDuration / timingPoint.numerator;
 
-			double timingOffset = static_cast<double>(currBeat - timingPoint->time);
+			double timingOffset = static_cast<double>(currBeat - timingPoint.time);
 
 			weight = static_cast<float>(GetBeatWeight(timingOffset / barDuration) * 0.75 + GetBeatWeight(timingOffset / beatDuration) * 0.25);
 		}

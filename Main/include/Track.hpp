@@ -207,7 +207,7 @@ public:
     float scrollSpeed = 0;
 
 private:
-	float m_GetObjectPosition(BeatmapPlayback& playback, ObjectState* obj);
+	auto m_GetObjectPosition(BeatmapPlayback& playback, ObjectState* obj);
 	float m_GetBaseVisualOffsetForObject(ObjectState* obj) const;
 
 	// Laser track generators

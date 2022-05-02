@@ -108,9 +108,7 @@ void Application::ApplySettings()
 	Logger::Get().SetLogLevel(g_gameConfig.GetEnum<Logger::Enum_Severity>(GameConfigKeys::LogLevel));
 	g_gameWindow->SetVSync(g_gameConfig.GetBool(GameConfigKeys::VSync) ? 1 : 0);
 	m_showFps = g_gameConfig.GetBool(GameConfigKeys::ShowFps);
-	m_responsiveInputs = g_gameConfig.GetBool(GameConfigKeys::ResponsiveInputs);
-
-
+	m_loadResponsiveInputSetting();
 	m_UpdateWindowPosAndShape();
 	m_OnWindowResized(g_gameWindow->GetWindowSize());
 	m_SaveConfig();
@@ -131,7 +129,18 @@ int32 Application::Run()
 		// Play the map specified in the command line
 		if (m_commandLine.size() > 1 && m_commandLine[1].front() != '-')
 		{
-			Game *game = LaunchMap(m_commandLine[1]);
+			Game* game = nullptr;
+			String& p = m_commandLine[1];
+			bool isReplay = false;
+			if (p.length() > 4 && p.substr(p.length() - 3) == "urf")
+			{
+				isReplay = true;
+				game = LaunchReplay(p);
+			}
+			else
+			{
+				game = LaunchMap(p);
+			}
 			if (!game)
 			{
 				Logf("LaunchMap(%s) failed", Logger::Severity::Error, m_commandLine[1]);
@@ -139,7 +148,7 @@ int32 Application::Run()
 			else
 			{
 				auto &cmdLine = g_application->GetAppCommandLine();
-				if (cmdLine.Contains("-autoplay") || cmdLine.Contains("-auto"))
+				if (!isReplay && (cmdLine.Contains("-autoplay") || cmdLine.Contains("-auto")))
 				{
 					game->GetScoring().autoplayInfo.autoplay = true;
 				}
@@ -421,6 +430,41 @@ void Application::m_unpackSkins()
 		{
 			Path::Delete(fi.fullPath);
 		}
+	}
+}
+
+void Application::m_loadResponsiveInputSetting()
+{
+	QualityLevel responsiveInputSetting = g_gameConfig.GetEnum<Enum_QualityLevel>(GameConfigKeys::ResponsiveInputs);
+	switch (responsiveInputSetting)
+	{
+	case QualityLevel::Off:
+		m_responsiveInputs = false;
+		break;
+	case QualityLevel::Low:
+		m_responsiveInputs = true;
+		m_responsiveInputsSleep = 4;
+		break;
+	case QualityLevel::Medium:
+		m_responsiveInputs = true;
+		m_responsiveInputsSleep = 3;
+		break;
+	case QualityLevel::High:
+		m_responsiveInputs = true;
+		m_responsiveInputsSleep = 2;
+		break;
+	case QualityLevel::Ultra:
+		m_responsiveInputs = true;
+		m_responsiveInputsSleep = 1;
+		break;
+	case QualityLevel::Max:
+		m_responsiveInputs = true;
+		m_responsiveInputsSleep = 0;
+		break;
+	default:
+		m_responsiveInputs = false;
+		g_gameConfig.SetEnum<Enum_QualityLevel>(GameConfigKeys::ResponsiveInputs, QualityLevel::Off);
+		break;
 	}
 }
 
@@ -882,6 +926,7 @@ bool Application::m_Init()
 		{
 			if (cl == "-convertmaps")
 			{
+				// Note: this feature should be re-implemented. See `Beatmap.cpp`.
 				m_allowMapConversion = true;
 			}
 			else if (cl == "-mute")
@@ -1042,8 +1087,7 @@ bool Application::m_Init()
 		BasicNuklearGui::StartFontInit();
 		m_fontBakeThread = Thread(BasicNuklearGui::BakeFontWithLock);
 	}
-
-	m_responsiveInputs = g_gameConfig.GetBool(GameConfigKeys::ResponsiveInputs);
+	m_loadResponsiveInputSetting();
 	renderSema = SDL_CreateSemaphore(0);
 	m_renderThread = Thread(threadedRenderer);
 
@@ -1195,7 +1239,12 @@ void Application::m_Tick()
 			SDL_SemPost(renderSema);
 			while (rendering.load()) {
 				SDL_PumpEvents();
-				std::this_thread::yield();
+				if (m_responsiveInputsSleep) {
+					std::this_thread::sleep_for(std::chrono::milliseconds(m_responsiveInputsSleep));
+				}
+				else {
+					std::this_thread::yield();
+				}
 			}
 			g_gl->MakeCurrent();
 		}
@@ -1391,6 +1440,26 @@ class Game *Application::LaunchMap(const String &mapPath)
 {
 	PlaybackOptions opt;
 	Game *game = Game::Create(mapPath, opt);
+	g_transition->TransitionTo(game);
+	return game;
+}
+class Game* Application::LaunchReplay(const String& replayPath, MapDatabase** database /*= nullptr*/)
+{
+	Replay* replay = Replay::Load(replayPath);
+	if (!replay)
+	{
+		g_gameWindow->ShowMessageBox("Failed to load replay", "Failed to load replay file, it may be corrupted or for a newer version of USC", 0);
+		return nullptr;
+	}
+	ChartIndex* chart = replay->FindChart(database);
+	if (!chart)
+	{
+		g_gameWindow->ShowMessageBox("Failed to load replay", "Could not find a matching chart for this replay", 0);
+		return nullptr;
+	}
+	PlaybackOptions opt;
+	Game* game = Game::Create(chart, opt);
+	game->InitPlayReplay(replay);
 	g_transition->TransitionTo(game);
 	return game;
 }
@@ -2141,7 +2210,8 @@ static int lGetButton(lua_State *L /* int button */)
 {
     int button = luaL_checkinteger(L, 1);
     if (g_application->autoplayInfo
-        && (g_application->autoplayInfo->IsAutoplayButtons()) && button < 6)
+        && (g_application->autoplayInfo->IsAutoplayButtons() || g_application->autoplayInfo->IsReplayingButtons())
+		&& button < 6)
         lua_pushboolean(L, g_application->autoplayInfo->buttonAnimationTimer[button] > 0);
     else
         lua_pushboolean(L, g_input.GetButton((Input::Button)button));
@@ -2703,7 +2773,7 @@ bool JacketLoadingJob::Run()
 	// Create loading task
 	if (web)
 	{
-		auto response = cpr::Get(imagePath);
+		auto response = cpr::Get(cpr::Url(imagePath));
 		if (response.error.code != cpr::ErrorCode::OK || response.status_code >= 300)
 		{
 			return false;

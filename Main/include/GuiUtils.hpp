@@ -7,7 +7,7 @@
 class BasicNuklearGui : public IApplicationTickable
 {
 public:
-	BasicNuklearGui() : m_nctx() {};
+	BasicNuklearGui() {};
 	~BasicNuklearGui();
 	bool Init() override;
 	void Tick(float deltaTime) override;
@@ -22,9 +22,12 @@ public:
 	static void BakeFontWithLock();
 	static void DestroyFont();
 
+	bool CanSuspend() { return m_canSuspend;  }
+
 protected:
+	bool m_canSuspend = true;
 	bool m_nuklearRunning = false;
-	struct nk_context* m_nctx = NULL;
+	static struct nk_context* m_nctx;
 	std::queue<SDL_Event> m_eventQueue;
 	// Are we consuming text
 	bool m_isOpen = true;
@@ -33,6 +36,8 @@ protected:
 	Texture m_fromTexture;
 	Mesh m_bgMesh;
 
+
+	static Vector<BasicNuklearGui*> s_basicGuiStack;
 private:
 	static Mutex s_mutex;
 	static nk_font_atlas* s_atlas;
@@ -58,9 +63,14 @@ public:
 	void Close();
 
 	virtual void DrawWindow() {};
-	virtual void OnClose() {};
+	Delegate<bool> OnClose;
+	Delegate<float> OnTick;
 
 protected:
+	virtual void m_onClose() {
+		OnClose.Call(true);
+	};
+
 	// Configurable
 	int m_windowFlag = NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE | NK_WINDOW_CLOSABLE;
 	String m_name;
@@ -75,22 +85,40 @@ bool nk_edit_isfocused(struct nk_context* ctx);
 
 class BasicPrompt : public BasicWindow {
 public:
-	BasicPrompt(String title, String body, String submitText = "Submit")
-		: BasicWindow(title), m_text(body), m_submitText(submitText) { };
+	BasicPrompt(String title, String body, String submitText = "Submit", String defaultValue = "")
+		: BasicWindow(title), m_text(body), m_submitText(submitText)
+	{
+		strncpy(m_data, *defaultValue, 254);
+	};
 	bool Init() override;
 	virtual bool OnKeyPressedConsume(SDL_Scancode code) override;
 	void DrawWindow() override;
-	void OnClose() override;
-
 	void Focus() { m_forceFocus = true; }
 
 	Delegate<bool, char*> OnResult;
 
 protected:
+	void m_onClose() override;
+
 	String m_text;
 	String m_submitText;
 	char m_data[255] = { 0 };
 	bool m_submitted = false;
+	bool m_closing = false;
 	bool m_forceFocus = false;
+	bool m_shrinkWindow = true;
+};
+
+class BasicTextWindow : public BasicWindow {
+public:
+	BasicTextWindow(String title, String body)
+		: BasicWindow(title), m_text(body) {};
+	bool Init() override;
+	void DrawWindow() override;
+	void SetText(String s) { m_nextText = s; }
+
+protected:
+	String m_text;
+	String m_nextText;
 	bool m_shrinkWindow = true;
 };

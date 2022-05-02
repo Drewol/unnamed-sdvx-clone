@@ -521,11 +521,11 @@ void AudioPlayback::m_PreRenderDSPTrack()
 {
 	ProfilerScope $("Pre-rendering FX effects");
 	Vector<DSP *> DSPs;
-	for (auto chartObj : m_playback->GetBeatmap().GetLinearObjects())
+	for (const auto& chartObj : m_playback->GetBeatmap().GetObjectStates())
 	{
 		if (chartObj->type == ObjectType::Hold)
 		{
-			HoldObjectState *holdObj = (HoldObjectState *)chartObj;
+			HoldObjectState *holdObj = (HoldObjectState *) chartObj.get();
 			if (holdObj->effectType != EffectType::None)
 			{
 				//Add DSP

@@ -11,7 +11,7 @@ public:
 		None, Score, Grade, Miss, MissAndNear, Gauge
 	};
 
-	const static char* TYPE_STR[6];
+	const static std::array<const char*, 6> TYPE_STR;
 
 	GameFailCondition() noexcept = default;
 	virtual bool IsFailed(const Scoring&) const { return false; }

@@ -64,8 +64,9 @@ public:
 	{
 		T* tempObj = &obj;
 		bool r = T::StaticSerialize(*this, tempObj);
-		if (IsReading())
+		if (IsReading() && tempObj != &obj)
 		{
+			// If StaticSerialize allocated a new value, copy the data instead
 			obj = *tempObj;
 			delete tempObj;
 		}
@@ -76,8 +77,7 @@ public:
 	template<typename T>
 	typename std::enable_if<!std::is_pointer<T>::value && std::is_trivially_copyable<T>::value, bool>::type SerializeObject(T& obj)
 	{
-		Serialize(&obj, sizeof(obj));
-		return true;
+		return Serialize(&obj, sizeof(obj)) == sizeof(obj);
 	}
 
 	// Reads or writes data based on the stream's mode of operation
@@ -88,11 +88,13 @@ public:
 	virtual void SeekReverse(size_t pos)
 	{
 		Seek(GetSize() - pos);
+		m_isOk = true;
 	}
 	// Seeks relative from current position
 	virtual void Skip(size_t pos)
 	{
 		Seek(Tell() + pos);
+		m_isOk = true;
 	}
 	// Tells the position of the stream
 	virtual size_t Tell() const = 0;
@@ -104,8 +106,13 @@ public:
 	// this template operator just routes everything to SerlializeObject
 	template<typename T> BinaryStream& operator<<(T& obj)
 	{
-		SerializeObject(obj);
+		m_isOk = SerializeObject(obj);
 		return *this;
+	}
+	// Check if stream operator<< was successfull
+	bool IsOk() const
+	{
+		return m_isOk;
 	}
 
 	bool IsReading() const 
@@ -118,6 +125,7 @@ public:
 	}
 protected:
 	bool m_isReading;
+	bool m_isOk = true;
 };
 
 template<typename T>
@@ -128,11 +136,15 @@ bool BinaryStream::SerializeObject(Vector<T>& obj)
 		obj.clear();
 		uint32 len;
 		*this << len; 
+		if (!m_isOk)
+			return false;
 		for(uint32 i = 0; i < len; i++)
 		{
 			T v;
 			bool ok = SerializeObject(v);
 			assert(ok);
+			if (!ok)
+				return false;
 			obj.push_back(v);
 		}
 	}
@@ -140,10 +152,14 @@ bool BinaryStream::SerializeObject(Vector<T>& obj)
 	{
 		uint32 len = (uint32)obj.size();
 		*this << len;
+		if (!m_isOk)
+			return false;
 		for(uint32 i = 0; i < len; i++)
 		{
 			bool ok = SerializeObject(obj[i]);
 			assert(ok);
+			if (!ok)
+				return false;
 		}
 	}
 	return true;
@@ -156,6 +172,8 @@ bool BinaryStream::SerializeObject(Map<K, V>& obj)
 		obj.clear();
 		uint32 len;
 		*this << len;
+		if (!m_isOk)
+			return false;
 		for(uint32 i = 0; i < len; i++)
 		{
 			K k;
@@ -164,6 +182,8 @@ bool BinaryStream::SerializeObject(Map<K, V>& obj)
 			ok = ok && SerializeObject(k);
 			ok = ok && SerializeObject(v);
 			assert(ok);
+			if (!ok)
+				return false;
 			obj.Add(k, v);
 		}
 	}
@@ -171,12 +191,16 @@ bool BinaryStream::SerializeObject(Map<K, V>& obj)
 	{
 		uint32 len = (uint32)obj.size();
 		*this << len;
+		if (!m_isOk)
+			return false;
 		for(auto& p : obj)
 		{
 			bool ok = true;
 			ok = ok && SerializeObject(const_cast<K&>(p.first));
 			ok = ok && SerializeObject(p.second);
 			assert(ok);
+			if (!ok)
+				return false;
 		}
 	}
 	return true;

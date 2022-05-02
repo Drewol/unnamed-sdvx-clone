@@ -112,7 +112,7 @@ struct TObjectState<void> : public ObjectTypeData_Base
 	TObjectState() : ObjectTypeData_Base(ObjectType::Invalid){};
 
 	// Sort object states by their time and other properties
-	static void SortArray(Vector<TObjectState<void> *> &arr);
+	static void SortArray(std::vector<std::unique_ptr<TObjectState<void>>>& arr);
 
 	// Always allow casting from typeless object to Union State object
 	operator MultiObjectState *() { return (MultiObjectState *)this; }
@@ -180,9 +180,14 @@ struct SpinStruct
 struct ObjectTypeData_Laser
 {
 	// Retrieves the starting laser point
-	TObjectState<ObjectTypeData_Laser> *GetRoot();
+	TObjectState<ObjectTypeData_Laser>* GetRoot();
+	inline const TObjectState<ObjectTypeData_Laser>* GetRoot() const
+	{
+		return const_cast<ObjectTypeData_Laser*>(this)->GetRoot();
+	}
+
 	// Ending point of laser
-	TObjectState<ObjectTypeData_Laser> *GetTail();
+	TObjectState<ObjectTypeData_Laser>* GetTail();
 	float GetDirection() const;
 	float SamplePosition(MapTime time) const;
 	// Convert extended range to normal range
@@ -300,50 +305,22 @@ struct TimingPoint
 	double GetBarDuration() const { return GetWholeNoteLength() * ((double)numerator / (double)denominator); }
 	double GetBPM() const { return 60000.0 / beatDuration; }
 
-	// Position in ms when this timing point appears
+	/// Position in ms when this timing point appears
 	MapTime time = 0;
-	// Beat duration of a 4th note in milliseconds
-	//	this is a double so the least precision is lost
-	//	can be cast back to integer format once is has been multiplied by the amount of beats you want the length of.
-	// Calculated by taking (60000.0 / BPM)
+	/// Beat duration of a 4th note in milliseconds (equals 60000.0 / BPM)
 	double beatDuration;
-	// Upper part of the time signature
-	// how many beats per bar
+	/// Upper part of the time signature (how many beats per bar)
 	uint8 numerator = 4;
-	// Lower part of the time signature
-	// the note value (4th, 3th, 8th notes, etc.) for a beat
+	/// Lower part of the time signature (the note value (4th, 3th, 8th notes, etc.) for a beat)
 	uint8 denominator = 4;
+	/// Multiplier for tickrates (x 2^tickrateOffset)
 	int8 tickrateOffset = 0;
 };
 
-struct LaneHideTogglePoint
-{
-	// Position in ms when to hide or show the lane
+struct LaneHideTogglePoint {
+	/// Position in ms when to hide or show the lane
 	MapTime time;
 
-	// How long the transition to/from hidden should take in 1/192nd notes
+	/// How long the transition to/from hidden should take in 1/192nd notes
 	uint32 duration = 192;
-};
-
-// Control point for track zoom levels
-struct ZoomControlPoint
-{
-	MapTime time;
-	// What zoom to control
-	// 0 = bottom
-	// 1 = top
-	uint8 index = 0;
-	// The zoom value
-	// in the range -1 to 1
-	// 1 being fully zoomed in
-	float zoom = 0.0f;
-	// Used to check if a manual tilt assignment is instant
-	bool instant = false;
-};
-
-// Chart stop object
-struct ChartStop
-{
-	MapTime time;
-	MapTime duration;
 };

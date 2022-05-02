@@ -6,8 +6,9 @@
 struct SimpleHitStat
 {
 	// 0 = miss, 1 = near, 2 = crit, 3 = idle
-	int8 rating;
-	int8 lane;
+	uint8 rating:3;
+	uint8 type:5; // We use this to save info about a tick
+	uint8 lane;
 	int32 time;
 	int32 delta;
 	// Hold state
@@ -16,6 +17,8 @@ struct SimpleHitStat
 	// This is the amount of total ticks in this hold sequence
 	uint32 holdMax = 0;
 };
+// Need to ensure it is the same size as old replays use this
+static_assert(sizeof(SimpleHitStat) == 20);
 
 struct ScoreIndex
 {
@@ -23,6 +26,9 @@ struct ScoreIndex
 	int32 score;
 	int32 crit;
 	int32 almost;
+	int32 early;
+	int32 late;
+	int32 combo;
 	int32 miss;
 	float gauge;
 	GaugeType gaugeType;
@@ -197,6 +203,7 @@ public:
 	void PauseSearching();
 	void ResumeSearching();
 	void StopSearching();
+	void LoadDatabaseWithoutSearching();
 
 	// Finds maps using the search query provided
 	// search artist/title/tags for maps for any space separated terms
@@ -213,10 +220,15 @@ public:
 	FolderIndex* GetFolder(int32 idx);
 	Vector<String> GetCollections();
 	Vector<String> GetCollectionsForMap(int32 mapid);
-	Vector<PracticeSetupIndex*> GetOrAddPracticeSetups(int32 chartId);
+	Vector<PracticeSetupIndex*> GetOrAddPracticeSetups(int32 chartId, const PracticeSetupIndex& defaultOptions);
 
 	// Get a random chart
 	ChartIndex* GetRandomChart();
+
+	const std::map<int32, FolderIndex *>& GetFolderMap();
+	const std::map<int32, ChartIndex *>& GetChartMap();
+	const std::map<int32, ChallengeIndex *>& GetChallengeMap();
+
 
 	//Attempts to add to collection, if that fails attempt to remove from collection
 	void AddOrRemoveToCollection(const String& name, int32 mapid);

@@ -54,6 +54,12 @@ target_include_directories(Shared SYSTEM PRIVATE ${LibArchive_INCLUDE_DIRS})
 
 target_link_libraries(Shared cc-common)
 
+find_package(ZLIB REQUIRED)
+if(ZLIB_FOUND)
+    target_compile_definitions(Shared PRIVATE ZLIB_FOUND=${ZLIB_FOUND})
+    target_include_directories(Shared SYSTEM PRIVATE ${ZLIB_INCLUDE_DIRS})
+endif()
+
 # Enable multiprocess compiling
 if(MSVC)
     target_compile_options(Shared PRIVATE /MP)

@@ -453,6 +453,9 @@ private:
 				m_PushIntToTable("score", score->score);
 				m_PushIntToTable("perfects", score->crit);
 				m_PushIntToTable("goods", score->almost);
+				m_PushIntToTable("earlies", score->early);
+				m_PushIntToTable("lates", score->late);
+				m_PushIntToTable("combo", score->combo);
 				m_PushIntToTable("misses", score->miss);
 				m_PushIntToTable("timestamp", score->timestamp);
 				m_PushIntToTable("badge", static_cast<int>(Scoring::CalculateBadge(*score)));
@@ -1033,6 +1036,7 @@ public:
 		g_input.OnButtonPressed.Add(this, &SongSelect_Impl::m_OnButtonPressed);
 		g_input.OnButtonReleased.Add(this, &SongSelect_Impl::m_OnButtonReleased);
 		g_gameWindow->OnMouseScroll.Add(this, &SongSelect_Impl::m_OnMouseScroll);
+		g_gameWindow->OnFileDropped.Add(this, &SongSelect_Impl::m_OnFileDropped);
 
 		if (!m_selectionWheel->Init())
 			return false;
@@ -1089,6 +1093,41 @@ public:
 			}
 
 			game->GetScoring().autoplayInfo.autoplay = true;
+
+			if(m_settDiag.IsActive()) m_settDiag.Close();
+			m_suspended = true;
+
+			// Transition to game
+			g_transition->TransitionTo(game);
+		});
+
+		m_settDiag.onPressReplay.AddLambda([this]() {
+			if (m_multiplayer != nullptr) return;
+
+			ChartIndex* chart = GetCurrentSelectedChart();
+			if (chart == nullptr) return;
+
+			if (chart->scores.size() == 0) return;
+
+			bool hasReplay = false;
+			for (ScoreIndex* score : chart->scores)
+			{
+				if (!Path::FileExists(score->replayPath))
+					continue;
+				hasReplay = true;
+				break;
+			}
+
+			if (!hasReplay)
+				return;
+
+			Game* game = Game::Create(chart, Game::PlaybackOptionsFromSettings());
+			if (!game)
+			{
+				Log("Failed to start game", Logger::Severity::Error);
+				return;
+			}
+			game->InitPlayReplay();
 
 			if(m_settDiag.IsActive()) m_settDiag.Close();
 			m_suspended = true;
@@ -1157,6 +1196,7 @@ public:
 		g_input.OnButtonPressed.RemoveAll(this);
 		g_input.OnButtonReleased.RemoveAll(this);
 		g_gameWindow->OnMouseScroll.RemoveAll(this);
+		g_gameWindow->OnFileDropped.RemoveAll(this);
 
 		if (m_lua)
 			g_application->DisposeLua(m_lua);
@@ -1270,6 +1310,7 @@ public:
 					// When we are in multiplayer, just report the song and exit instead
 					m_multiplayer->SetSelectedMap(folder, GetCurrentSelectedChart());
 
+					m_suspended = true;
 					g_application->RemoveTickable(this);
 					return;
 				}
@@ -1387,6 +1428,16 @@ public:
 			default:
 			break;
 		}
+	}
+	void m_OnFileDropped(const char* file)
+	{
+		if (IsSuspended())
+			return;
+		String path = file;
+		String ext = Path::GetExtension(path);
+		if (ext != "urf")
+			return;
+		g_application->LaunchReplay(path, &m_mapDatabase);
 	}
 	void m_OnMouseScroll(int32 steps)
 	{
@@ -1510,6 +1561,12 @@ public:
 				String param = Utility::Sprintf(paramFormat.c_str(),
 												Utility::Sprintf("\"%s\"", Path::Absolute(GetCurrentSelectedChart()->path)));
 				Path::Run(path, param.GetData());
+			}
+			else if (code == SDL_SCANCODE_F12 && m_shiftDown)
+			{
+				String& hash = m_selectionWheel->GetSelectedChart()->hash;
+				String replayPath = Path::Normalize(Path::Absolute("replays/" + hash + "/"));
+				Path::ShowInFileBrowser(replayPath);
 			}
 			else if (code == SDL_SCANCODE_F12)
 			{

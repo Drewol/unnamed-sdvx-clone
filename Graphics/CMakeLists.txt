@@ -50,12 +50,14 @@ if(UNIX)
         find_library(OPEN_GL OpenGL)
         target_link_libraries(Graphics ${OPEN_GL})
     else(APPLE)
-        target_compile_options(Graphics PUBLIC -Wall -Wextra -Werror -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function)
         target_link_libraries(Graphics GL)
         find_package(X11 REQUIRED)
         include_directories(${X11_INCLUDE_DIR})
     endif(APPLE)
 endif(UNIX)
+
+
+set_werror(Graphics)
 
 target_link_libraries(Graphics cc-common)
 

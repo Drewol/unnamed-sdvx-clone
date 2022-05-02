@@ -3,6 +3,9 @@
 
 namespace Graphics
 {
+#ifndef EMBEDDED
+	extern const uint32 shaderStageMap[];
+#endif
 	/* Enum of supported shader types */
 	enum class ShaderType
 	{

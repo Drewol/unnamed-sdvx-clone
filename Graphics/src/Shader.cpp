@@ -6,19 +6,19 @@
 namespace Graphics
 {
 #ifdef EMBEDDED
-	uint32 typeMap[] =
+	const uint32 typeMap[] =
 	{
 		GL_VERTEX_SHADER,
 		GL_FRAGMENT_SHADER,
 	};
 #else
-	uint32 typeMap[] =
+	const uint32 typeMap[] =
 	{
 		GL_VERTEX_SHADER,
 		GL_FRAGMENT_SHADER,
 		GL_GEOMETRY_SHADER,
 	};
-	uint32 shaderStageMap[] =
+	const uint32 shaderStageMap[] =
 	{
 		GL_VERTEX_SHADER_BIT,
 		GL_FRAGMENT_SHADER_BIT,

@@ -2,24 +2,27 @@
 #include "BeatmapObjects.hpp"
 
 // Object array sorting
-void TObjectState<void>::SortArray(Vector<ObjectState*>& arr)
+void TObjectState<void>::SortArray(std::vector<std::unique_ptr<ObjectState>>& arr)
 {
-	arr.Sort([](const ObjectState* l, const ObjectState* r)
+	std::sort(arr.begin(), arr.end(), [](const auto& l, const auto& r)
 	{
 		if(l->time == r->time)
 		{
 			// sort events on the same tick by their index
 			if (l->type == ObjectType::Event && r->type == ObjectType::Event)
-				return ((EventObjectState*)l)->interTickIndex < ((EventObjectState*)r)->interTickIndex;
+				return ((EventObjectState*) l.get())->interTickIndex < ((EventObjectState*) r.get())->interTickIndex;
 
 			// Sort laser slams to come first
-			bool ls = l->type == ObjectType::Laser && (((LaserObjectState*)l)->flags & LaserObjectState::flag_Instant);
-			bool rs = r->type == ObjectType::Laser && (((LaserObjectState*)r)->flags & LaserObjectState::flag_Instant);
+			const bool ls = l->type == ObjectType::Laser && (((LaserObjectState*)l.get())->flags & LaserObjectState::flag_Instant);
+			const bool rs = r->type == ObjectType::Laser && (((LaserObjectState*)r.get())->flags & LaserObjectState::flag_Instant);
+
 			return ls > rs;
 		}
+
 		return l->time < r->time;
 	});
 }
+
 TObjectState<ObjectTypeData_Hold>* ObjectTypeData_Hold::GetRoot()
 {
 	TObjectState<ObjectTypeData_Hold>* ptr = (TObjectState<ObjectTypeData_Hold>*)this;
@@ -108,7 +111,80 @@ TrackRollBehaviour operator|(const TrackRollBehaviour& l, const TrackRollBehavio
 {
 	return (TrackRollBehaviour)((uint8)l | (uint8)r);
 }
+
 TrackRollBehaviour operator&(const TrackRollBehaviour& l, const TrackRollBehaviour& r)
 {
 	return (TrackRollBehaviour)((uint8)l & (uint8)r);
+}
+
+bool MultiObjectState::StaticSerialize(BinaryStream& stream, MultiObjectState*& obj)
+{
+	uint8 type = 0;
+	if (stream.IsReading())
+	{
+		// Read type and create appropriate object
+		stream << type;
+		switch ((ObjectType)type) 
+		{
+		case ObjectType::Single:
+			obj = (MultiObjectState*)new ButtonObjectState();
+			break;
+		case ObjectType::Hold:
+			obj = (MultiObjectState*)new HoldObjectState();
+			break;
+		case ObjectType::Laser:
+			obj = (MultiObjectState*)new LaserObjectState();
+			break;
+		case ObjectType::Event:
+			obj = (MultiObjectState*)new EventObjectState();
+			break;
+		}
+	}
+	else
+	{
+		// Write type
+		type = (uint8)obj->type;
+		stream << type;
+	}
+
+	// Pointer is always initialized here, serialize data
+	stream << obj->time; // Time always set
+	switch (obj->type) 
+	{
+	case ObjectType::Single:
+		stream << obj->button.index;
+		break;
+	case ObjectType::Hold:
+		stream << obj->hold.index;
+		stream << obj->hold.duration;
+		stream << (uint16&)obj->hold.effectType;
+		stream << (int16&)obj->hold.effectParams[0];
+		stream << (int16&)obj->hold.effectParams[1];
+		break;
+	case ObjectType::Laser:
+		stream << obj->laser.index;
+		stream << obj->laser.duration;
+		stream << obj->laser.points[0];
+		stream << obj->laser.points[1];
+		stream << obj->laser.flags;
+		break;
+	case ObjectType::Event:
+		stream << (uint8&)obj->event.key;
+		stream << *&obj->event.data;
+		break;
+	}
+
+	return true;
+}
+
+bool TimingPoint::StaticSerialize(BinaryStream& stream, TimingPoint*& out)
+{
+	if (stream.IsReading())
+		out = new TimingPoint();
+
+	stream << out->time;
+	stream << out->beatDuration;
+	stream << out->numerator;
+
+	return true;
 }

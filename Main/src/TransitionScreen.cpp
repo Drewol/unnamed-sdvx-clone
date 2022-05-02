@@ -74,16 +74,16 @@ public:
 			nvgDeleteImage(g_application->GetVGContext(), m_jacketImg);
 	}
 
-	virtual void RemoveAllOnComplete(void *handle)
+	void RemoveAllOnComplete(void *handle) override
 	{
 		m_handlesToRemove.Add(handle);
 	}
-	virtual void RemoveOnComplete(DelegateHandle handle)
+	void RemoveOnComplete(DelegateHandle handle) override
 	{
 		m_lamdasToRemove.Add(handle);
 	}
 
-	virtual void Tick(float deltaTime)
+	void Tick(float deltaTime) override
 	{
 		m_transitionTimer += deltaTime;
 
@@ -106,7 +106,7 @@ public:
 		}
 		m_lastComplete = m_loadComplete;
 	}
-	virtual void OnSuspend()
+	void OnSuspend() override
 	{
 		if (m_tickableToLoad && m_transition == End)
 		{
@@ -115,7 +115,7 @@ public:
 		}
 	}
 
-	virtual bool Init()
+	bool Init() override
 	{
 		if (m_initialized)
 			return true;
@@ -153,7 +153,7 @@ public:
 		return true;
 	}
 
-	virtual void TransitionTo(IAsyncLoadableApplicationTickable *next, bool noCancel, IApplicationTickable* before)
+	void TransitionTo(IAsyncLoadableApplicationTickable *next, bool noCancel, IApplicationTickable* before) override
 	{
 		m_isGame = false;
 		m_InitTransition(next);
@@ -181,7 +181,7 @@ public:
 		g_application->AddTickable(this, before);
 	}
 
-	virtual void TransitionTo(Game* next, IApplicationTickable* before)
+	void TransitionTo(Game* next, IApplicationTickable* before) override
 	{
 		m_isGame = true;
 		m_canCancel = true;
@@ -261,7 +261,7 @@ public:
 		g_application->AddTickable(this, before);
 	}
 
-	void Render(float deltaTime)
+	void Render(float deltaTime) override
 	{
 		lua_State *lua = m_lua;
 		if (m_isGame)
@@ -411,7 +411,7 @@ public:
 		return true;
 	}
 
-	void OnKeyPressed(SDL_Scancode code)
+	void OnKeyPressed(SDL_Scancode code, int32 delta) override
 	{
 		if (code == SDL_SCANCODE_ESCAPE && !m_stopped && m_canCancel)
 		{

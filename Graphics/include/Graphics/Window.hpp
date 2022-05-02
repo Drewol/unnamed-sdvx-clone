@@ -154,6 +154,7 @@ namespace Graphics
 		Delegate<const Vector2i&> OnResized;
 		Delegate<const Vector2i&> OnMoved;
 		Delegate<bool> OnFocusChanged;
+		Delegate<const char*> OnFileDropped;
 
 	private:
 		class Window_Impl* m_impl;

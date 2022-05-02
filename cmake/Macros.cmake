@@ -26,3 +26,9 @@ macro(set_output_postfixes projectName)
         OUTPUT_NAME_DEBUG ${projectName}_Debug
         OUTPUT_NAME_RELEASE ${projectName})
 endmacro(set_output_postfixes)
+
+macro(set_werror projectName)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" AND USC_GNU_WERROR)
+        target_compile_options(${projectName} PUBLIC -Wall -Wextra -Werror -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function)
+    endif()
+endmacro(set_werror)

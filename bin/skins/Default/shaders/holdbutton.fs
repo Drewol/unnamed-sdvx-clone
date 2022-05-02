@@ -29,20 +29,34 @@ void main()
 	target.xyz = target.xyz * (1.0 + objectGlow * 0.3);
     target.a = min(1.0, target.a + target.a * objectGlow * 0.9);
 }
+
 #else
+
+// The OpenGL standard leave the case when `edge0 >= edge1` undefined,
+// so this function was made to remove the ambiguity when `edge0 >= edge1`.
+// Note that the case when `edge0 > edge1` should be avoided.
+float smoothstep_fix(float edge0, float edge1, float x)
+{
+    if(edge0 >= edge1)
+    {
+        return x < edge0 ? 0.0 : x > edge1 ? 1.0 : 0.5;
+    }
+
+    return smoothstep(edge0, edge1, x);
+}
 
 float hide()
 {
     float off = trackPos + position.y * trackScale;
 
     if (hiddenCutoff > suddenCutoff) {
-        float sudden = smoothstep(suddenCutoff, suddenCutoff - suddenFadeWindow, off);
-        float hidden = smoothstep(hiddenCutoff, hiddenCutoff + hiddenFadeWindow, off);
+        float sudden = 1.0 - smoothstep_fix(suddenCutoff - suddenFadeWindow, suddenCutoff, off);
+        float hidden = smoothstep_fix(hiddenCutoff, hiddenCutoff + hiddenFadeWindow, off);
         return min(hidden + sudden, 1.0);
     }
 
-    float sudden = smoothstep(suddenCutoff + suddenFadeWindow, suddenCutoff, off);
-    float hidden = smoothstep(hiddenCutoff - hiddenFadeWindow, hiddenCutoff, off);
+    float sudden = 1.0 - smoothstep_fix(suddenCutoff, suddenCutoff + suddenFadeWindow, off);
+    float hidden = smoothstep_fix(hiddenCutoff - hiddenFadeWindow, hiddenCutoff, off);
 
     return hidden * sudden;
 }

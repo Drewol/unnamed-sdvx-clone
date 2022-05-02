@@ -2,21 +2,12 @@
 add_subdirectory(lua-5.3.5)
 
 #cpr test programs
-option(BUILD_CPR_TESTS "Set to ON to build cpr tests." OFF)
-option(USE_SYSTEM_CURL 
-       "If ON, this project will look in the system paths for an installed curl library" 
-       ON)
-
-if(WIN32)
-    option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" OFF)
-    option(CMAKE_USE_WINSSL "enable Windows native SSL/TLS" ON)
-elseif(APPLE)
-    set(CURL_CA_PATH "none" CACHE STRING "CURL CA Path")
-    option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" OFF)
-    option(CMAKE_USE_DARWINSSL "enable MacOS native SSL/TLS" ON)
-endif()
-set(SSL_ENABLED ON)
-
+option(CPR_BUILD_TESTS "Set to ON to build cpr tests." OFF)
+set(CPR_ENABLE_SSL ON)
+#TODO: Don't have two curl builds in the game build
+#if(MSVC)
+#    set(CPR_FORCE_USE_SYSTEM_CURL ON) #curl should be available through vcpkg
+#endif(MSVC)
 add_subdirectory(cpr)
 target_include_directories(cpr PUBLIC ${CPR_INCLUDE_DIRS})
 

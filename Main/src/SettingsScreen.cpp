@@ -489,8 +489,8 @@ protected:
 		SectionHeader("After Playing");
 		ToggleSetting(GameConfigKeys::SkipScore, "Skip score screen on manual exit");
 		EnumSetting<Enum_AutoScoreScreenshotSettings>(GameConfigKeys::AutoScoreScreenshot, "Automatically capture score screenshots:");
-
-		ToggleSetting(GameConfigKeys::RevertToSetupAfterScoreScreen, "Revert to the practice setup after the score screen is shown");
+		EnumSetting<Enum_AutoSaveReplaySettings>(GameConfigKeys::AutoSaveReplay, "Automatically save replay:");
+		ToggleSetting(GameConfigKeys::UseLegacyReplay, "Use legacy replay format");
 
 		EnumSetting<Enum_SongOffsetUpdateMethod>(GameConfigKeys::UpdateSongOffsetAfterFirstPlay, "Based on hit stats, update song offset for first:");
 		EnumSetting<Enum_SongOffsetUpdateMethod>(GameConfigKeys::UpdateSongOffsetAfterEveryPlay, "After having updated first time, update song offset for every:");
@@ -734,7 +734,7 @@ protected:
 		ToggleSetting(GameConfigKeys::PrerenderEffects, "Pre-render song effects (experimental)");
 
 		SectionHeader("Render");
-		SetApply(ToggleSetting(GameConfigKeys::ResponsiveInputs, "Responsive Inputs (CPU intensive)"));
+		SetApply(EnumSetting<Enum_QualityLevel>(GameConfigKeys::ResponsiveInputs, "Responsive Inputs (CPU intensive)"));
 		SetApply(ToggleSetting(GameConfigKeys::Fullscreen, "Fullscreen"));
 		SetApply(ToggleSetting(GameConfigKeys::WindowedFullscreen, "Use windowed fullscreen"));
 
@@ -747,7 +747,20 @@ protected:
 		SetApply(ToggleSetting(GameConfigKeys::ShowFps, "Show FPS"));
 		SetApply(ToggleSetting(GameConfigKeys::KeepFontTexture, "Save font texture (settings load faster but uses more memory)"));
 
-
+		SectionHeader("Replays");
+#ifdef ZLIB_FOUND
+		ToggleSetting(GameConfigKeys::UseCompressedReplay, "Compress replays when possible");
+#endif
+		if (nk_button_label(m_nctx, "Prune extra replays"))
+		{
+            BasicPrompt* w = new BasicPrompt(
+                "Prune Extra Replays",
+                "How many replays per song would you like\nto keep? (>=1)",
+                "Prune Replays","3");
+			w->OnResult.Add(this, &SettingsPage_System::m_pruneReplaysCheck);
+            w->Focus();
+            g_application->AddTickable(w);
+		}
 
 		SectionHeader("Update");
 
@@ -766,6 +779,188 @@ protected:
 		{
 			g_application->ApplySettings();
 		}
+
+		if (m_readyToPrune && m_mapDatabase && !m_replayPruneWindow)
+		{
+			m_replayPruneWindow = new BasicTextWindow(
+				"Pruning Extra Replays",
+				"Pruned 0 replays so far...");
+			g_application->AddTickable(m_replayPruneWindow);
+			m_replayPruneWindow->OnTick.Add(this, &SettingsPage_System::m_pruneReplaysImpl);
+		}
+	}
+private:
+	MapDatabase* m_mapDatabase = nullptr;
+	bool m_readyToPrune = false;
+	uint32 m_replaysProcessed = 0;
+	uint32 m_chartsProcessed = 0;
+	uint32 m_replaysRemoved = 0;
+	bool m_removeMissingScores;
+
+	BasicTextWindow* m_replayPruneWindow = nullptr;
+	size_t m_numReplaysToKeep = 1;
+	Map<int32, ChartIndex*>::const_iterator m_replayPruneIter;
+
+
+	void m_pruneReplaysCheck(bool valid, char* data)
+	{
+		if (!valid || strlen(data) == 0)
+			return;
+
+		long num = strtol(data, NULL, 10);
+		if (num <= 0)
+			return g_gameWindow->ShowMessageBox("Prune Extra Replays","Invalid number entered", 0);
+		m_removeMissingScores = g_gameWindow->ShowYesNoMessage("Prune Extra Replays",
+			"Do you want to also remove replays for scores that are missing from the database?");
+		if (!g_gameWindow->ShowYesNoMessage("Prune Extra Replays",
+			Utility::Sprintf("Are you sure you want to delete all but %u replay%s per chart?\n%sThis cannot be undone",
+				num, num == 1? "":"s",
+				m_removeMissingScores?"This will include replays of scores no longer in the database.\n":""
+			)))
+		{
+			return;
+		}
+		m_numReplaysToKeep = std::min(num, 100l);
+
+		m_replaysProcessed = 0;
+		m_chartsProcessed = 0;
+		m_replaysRemoved= 0;
+		m_mapDatabase = new MapDatabase(true);
+		m_mapDatabase->SetChartUpdateBehavior(g_gameConfig.GetBool(GameConfigKeys::TransferScoresOnChartUpdate));
+		m_mapDatabase->FinishInit();
+		m_mapDatabase->LoadDatabaseWithoutSearching();
+
+		m_replayPruneIter = m_mapDatabase->GetChartMap().begin();
+
+		m_readyToPrune = true;
+	}
+	void m_pruneReplaysImpl(float delta)
+	{
+		if (!m_mapDatabase)
+			return;
+
+		int count = 0;
+		const auto& end = m_mapDatabase->GetChartMap().end();
+		for (; m_replayPruneIter != end && count < 100; m_replayPruneIter++)
+		{
+			uint32 numSaved = 0;
+			m_chartsProcessed++;
+			const auto* chart = m_replayPruneIter->second;
+			Vector<String> saved(m_numReplaysToKeep, "");
+			for (auto* score : chart->scores)
+			{
+				count++;
+				m_replaysProcessed++;
+				const String& path = score->replayPath;
+				if (path.empty())
+					continue;
+				if (!Path::FileExists(path))
+					continue;
+
+				// Scores are already sorted so first n is the n best
+				if (numSaved < m_numReplaysToKeep)
+				{
+					if (m_removeMissingScores)
+						Path::RemoveLast(path, &saved[numSaved]);
+					numSaved++;
+					continue;
+				}
+
+				if (!Path::Delete(path))
+					continue;
+
+				m_replaysRemoved++;
+			}
+			if (!m_removeMissingScores)
+				continue;
+
+			String replayPath = Path::Normalize(Path::Absolute("replays/" + chart->hash + "/"));
+			Vector<FileInfo> files = Files::ScanFiles(replayPath, "urf");
+			for (auto& s : files)
+			{
+				String name;
+				Path::RemoveLast(s.fullPath, &name);
+				if (saved.Contains(name))
+					continue;
+
+				m_replaysProcessed++;
+				count++;
+
+				if (!Path::Delete(s.fullPath))
+					continue;
+
+				m_replaysRemoved++;
+			}
+		}
+		m_replayPruneWindow->SetText(Utility::Sprintf("Pruned %u replays so far...", m_replaysProcessed));
+		if (m_replayPruneIter == end)
+		{
+			m_replayPruneWindow->Close();
+			m_replayPruneWindow = nullptr;
+			delete m_mapDatabase;
+			m_readyToPrune = false;
+
+			g_gameWindow->ShowMessageBox("Done Pruning Replays",
+				Utility::Sprintf("Successfully removed %u/%u replay file%s from %u charts!",
+					m_replaysRemoved,
+					m_replaysProcessed,
+					m_replaysProcessed==1?"":"s",
+					m_chartsProcessed
+				), 2);
+		}
+	}
+};
+
+class SettingsPage_Practice : public SettingsPage
+{
+public:
+	SettingsPage_Practice(nk_context* nctx) : SettingsPage(nctx, "Practice") {}
+
+protected:
+	void Load() override {}
+	void Save() override {}
+
+protected:
+	void RenderContents() override
+	{
+		SectionHeader("Settings");
+		IntSetting(GameConfigKeys::PracticeLeadInTime, "Lead-in time (ms)", 250, 10000, 250);
+		ToggleSetting(GameConfigKeys::PracticeSetupNavEnabled, "Enable navigation inputs for the setup");
+		ToggleSetting(GameConfigKeys::RevertToSetupAfterScoreScreen, "Revert to the setup after the result is shown");
+		ToggleSetting(GameConfigKeys::DisplayPracticeInfoInGame, "Show practice-mode info during gameplay");
+
+		SectionHeader("Defaults for Playback and Loop Control");
+		IntSetting(GameConfigKeys::DefaultPlaybackSpeed, "Playback speed (%)", 25, 100);
+
+		Separator();
+
+		ToggleSetting(GameConfigKeys::DefaultLoopOnSuccess, "Loop on success");
+		ToggleSetting(GameConfigKeys::DefaultIncSpeedOnSuccess, "Increase speed on success");
+		IntSetting(GameConfigKeys::DefaultIncSpeedAmount, "Increment (%p)", 1, 10);
+		IntSetting(GameConfigKeys::DefaultIncStreak, "Required streaks", 1, 10);
+
+		Separator();
+
+		ToggleSetting(GameConfigKeys::DefaultLoopOnSuccess, "Loop on fail");
+		ToggleSetting(GameConfigKeys::DefaultDecSpeedOnFail, "Decrease speed on fail");
+		IntSetting(GameConfigKeys::DefaultDecSpeedAmount, "Decrement (%p)", 1, 10);
+		IntSetting(GameConfigKeys::DefaultMinPlaybackSpeed, "Minimum speed (%)", 25, 100);
+
+		Separator();
+
+		ToggleSetting(GameConfigKeys::DefaultEnableMaxRewind, "Set maximum amount of rewinding on fail");
+		IntSetting(GameConfigKeys::DefaultMaxRewindMeasure, "Amount in # of measures", 0, 20);
+
+		SectionHeader("Defaults for Mission");
+		SelectionSetting(GameConfigKeys::DefaultFailConditionType, GameFailCondition::TYPE_STR, "Fail Condition");
+
+		Separator();
+
+		IntSetting(GameConfigKeys::DefaultFailConditionScore, "Score less than", 800 * 10000, 1000 * 10000, 10000);
+		SelectionSetting(GameConfigKeys::DefaultFailConditionGrade, GRADE_MARK_STR, "Grade less than");
+		IntSetting(GameConfigKeys::DefaultFailConditionMiss, "Miss more than", 0, 100);
+		IntSetting(GameConfigKeys::DefaultFailConditionMissNear, "Miss+Near more than", 0, 100);
+		IntSetting(GameConfigKeys::DefaultFailConditionGauge, "Gauge less than", 0, 100);
 	}
 };
 
@@ -1100,6 +1295,7 @@ protected:
 		pages.emplace_back(std::make_unique<SettingsPage_Game>(m_nctx));
 		pages.emplace_back(std::make_unique<SettingsPage_Visual>(m_nctx));
 		pages.emplace_back(std::make_unique<SettingsPage_System>(m_nctx));
+		pages.emplace_back(std::make_unique<SettingsPage_Practice>(m_nctx));
 		pages.emplace_back(std::make_unique<SettingsPage_Online>(m_nctx));
 		pages.emplace_back(std::make_unique<SettingsPage_Skin>(m_nctx));
 	}
@@ -1266,7 +1462,7 @@ public:
 		}
 	}
 
-	virtual void OnKeyPressed(SDL_Scancode code)
+	void OnKeyPressed(SDL_Scancode code, int32 delta) override
 	{
 		if (!m_isGamepad && !m_knobs)
 		{
@@ -1431,7 +1627,7 @@ public:
 		}
 	}
 
-	virtual void OnKeyPressed(SDL_Scancode code)
+	void OnKeyPressed(SDL_Scancode code, int32 delta) override
 	{
 		if (code == SDL_SCANCODE_ESCAPE)
 			g_application->RemoveTickable(this);

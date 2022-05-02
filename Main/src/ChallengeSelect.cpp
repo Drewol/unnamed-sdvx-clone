@@ -1011,7 +1011,7 @@ public:
 		}
 	}
 
-	virtual void OnKeyPressed(SDL_Scancode code, int32 delta)
+	void OnKeyPressed(SDL_Scancode code, int32 delta) override
 	{
 		//if (m_multiplayer && m_multiplayer->GetChatOverlay()->OnKeyPressedConsume(code))
 
@@ -1110,11 +1110,11 @@ public:
 		}
 	}
 
-	virtual void OnKeyReleased(SDL_Scancode code, int32 delta)
+	void OnKeyReleased(SDL_Scancode code, int32 delta) override
 	{
 	}
 
-	virtual void Tick(float deltaTime) override
+	void Tick(float deltaTime) override
 	{
 		if (m_dbUpdateTimer.Milliseconds() > 500)
 		{
@@ -1134,7 +1134,7 @@ public:
 		//	m_multiplayer->GetChatOverlay()->Tick(deltaTime);
 	}
 
-	virtual void Render(float deltaTime)
+	void Render(float deltaTime) override
 	{
 		if (m_suspended && m_hasRestored) return;
 
@@ -1232,7 +1232,7 @@ public:
 		m_advanceChal -= advanceChalActual;
 	}
 
-	virtual void OnSuspend()
+	void OnSuspend() override
 	{
 		m_lastChalIndex = m_selectionWheel->GetCurrentItemIndex();
 
@@ -1243,7 +1243,7 @@ public:
 			m_lockMouse.reset();
 	}
 
-	virtual void OnRestore()
+	void OnRestore() override
 	{
 		// NOTE: we can't trigger the next chart here bc you can't add tickables on restore
 		g_application->DiscordPresenceMenu("Challenge Select");

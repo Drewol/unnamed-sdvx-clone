@@ -74,9 +74,6 @@ DefineEnum(GameConfigKeys,
 
 		   LeadInTime,
 		   PracticeLeadInTime,
-		   PracticeSetupNavEnabled,
-		   RevertToSetupAfterScoreScreen,
-		   DisplayPracticeInfoInGame,
 
 		   // Input device setting per element
 		   LaserInputDevice,
@@ -158,6 +155,10 @@ DefineEnum(GameConfigKeys,
 		   EditorParamsFormat,
 
 		   AutoScoreScreenshot,
+		   AutoSaveReplay,
+		   UseLegacyReplay,
+		   UseCompressedReplay,
+
 
 		   WASAPI_Exclusive,
 		   MuteUnfocused,
@@ -166,6 +167,30 @@ DefineEnum(GameConfigKeys,
 		   CheckForUpdates,
 		   OnlyRelease,
 		   LimitSettingsFont,
+
+		   // Practice Mode
+		   PracticeSetupNavEnabled,
+		   RevertToSetupAfterScoreScreen,
+		   DisplayPracticeInfoInGame,
+
+		   DefaultPlaybackSpeed,
+		   DefaultLoopOnSuccess,
+		   DefaultLoopOnFail,
+		   DefaultIncSpeedOnSuccess,
+		   DefaultIncSpeedAmount,
+		   DefaultIncStreak,
+		   DefaultDecSpeedOnFail,
+		   DefaultDecSpeedAmount,
+		   DefaultMinPlaybackSpeed,
+		   DefaultEnableMaxRewind,
+		   DefaultMaxRewindMeasure,
+
+		   DefaultFailConditionType,
+		   DefaultFailConditionScore,
+		   DefaultFailConditionGrade,
+		   DefaultFailConditionMiss,
+		   DefaultFailConditionMissNear,
+		   DefaultFailConditionGauge,
 
 		   // Multiplayer
 		   MultiplayerHost,
@@ -233,6 +258,11 @@ DefineEnum(AutoScoreScreenshotSettings,
 		   Highscore,
 		   Always)
 
+DefineEnum(AutoSaveReplaySettings,
+		   Off,
+		   Highscore,
+		   Always)
+
 DefineEnum(SongOffsetUpdateMethod,
 		   None,
 		   Play,
@@ -243,6 +273,15 @@ DefineEnum(ButtonComboModeSettings,
 		   Disabled,
 		   Hold,
 		   Instant)
+
+DefineEnum(QualityLevel,
+           Off,
+	       Low,
+	       Medium,
+	       High,
+	       Ultra,
+	       Max)
+	       
 
 	// Config for game settings
 	class GameConfig : public Config<Enum_GameConfigKeys>

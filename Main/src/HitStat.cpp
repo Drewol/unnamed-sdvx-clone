@@ -3,7 +3,9 @@
 #include "GameConfig.hpp"
 
 const HitWindow HitWindow::NORMAL = HitWindow(46, 150);
-const HitWindow HitWindow::HARD = HitWindow(23, 75);
+
+// The intention is that hard UC should be equivalent to normal PUC
+const HitWindow HitWindow::HARD = HitWindow(23, HitWindow::NORMAL.perfect);
 
 HitStat::HitStat(ObjectState* object) : object(object)
 {

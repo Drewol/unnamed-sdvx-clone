@@ -2,6 +2,9 @@
 #include "GuiUtils.hpp"
 #include "Application.hpp"
 
+Vector<BasicNuklearGui*> BasicNuklearGui::s_basicGuiStack;
+struct nk_context* BasicNuklearGui::m_nctx = nullptr;
+
 BasicNuklearGui::~BasicNuklearGui()
 {
 	ShutdownNuklear();
@@ -16,11 +19,18 @@ void BasicNuklearGui::UpdateNuklearInput(SDL_Event evt)
 
 void BasicNuklearGui::ShutdownNuklear()
 {
-    if (!m_nuklearRunning)
-        return;
+	if (!m_nuklearRunning)
+		return;
+
+	s_basicGuiStack.Remove(this);
 
     g_gameWindow->OnAnyEvent.RemoveAll(this);
-    nk_sdl_shutdown_keep_font();
+	if (m_nctx && s_basicGuiStack.size() == 0)
+	{
+		nk_sdl_shutdown_keep_font();
+		m_nctx = nullptr;
+	}
+
 
 	if (!g_gameConfig.GetBool(GameConfigKeys::KeepFontTexture)) {
 		glDeleteTextures(1, &s_fontTexture);
@@ -46,23 +56,31 @@ bool BasicNuklearGui::Init()
 
 void BasicNuklearGui::InitNuklearIfNeeded()
 {
-    if (m_nuklearRunning) {
-        return;
+	if (m_nuklearRunning)
+		return;
+
+	if (!m_nctx && s_basicGuiStack.size() == 0)
+	{
+		m_nctx = nk_sdl_init((SDL_Window*)g_gameWindow->Handle());
+		InitNuklearFontAtlas();
+
+		m_nctx->style.text.color = nk_rgb(255, 255, 255);
+		m_nctx->style.button.border_color = nk_rgb(0, 128, 255);
+		m_nctx->style.button.padding = nk_vec2(5,5);
+		m_nctx->style.button.rounding = 0;
+		m_nctx->style.window.fixed_background = nk_style_item_color(nk_rgb(40, 40, 40));
+		m_nctx->style.slider.bar_normal = nk_rgb(20, 20, 20);
+		m_nctx->style.slider.bar_hover = nk_rgb(20, 20, 20);
+		m_nctx->style.slider.bar_active = nk_rgb(20, 20, 20);
 	}
-	m_nctx = nk_sdl_init((SDL_Window*)g_gameWindow->Handle());
+	else
+	{
+		assert(s_basicGuiStack.back()->CanSuspend());
+	}
+
+	s_basicGuiStack.push_back(this);
 
 	g_gameWindow->OnAnyEvent.Add(this, &BasicNuklearGui::UpdateNuklearInput);
-
-	InitNuklearFontAtlas();
-
-	m_nctx->style.text.color = nk_rgb(255, 255, 255);
-	m_nctx->style.button.border_color = nk_rgb(0, 128, 255);
-	m_nctx->style.button.padding = nk_vec2(5,5);
-	m_nctx->style.button.rounding = 0;
-	m_nctx->style.window.fixed_background = nk_style_item_color(nk_rgb(40, 40, 40));
-	m_nctx->style.slider.bar_normal = nk_rgb(20, 20, 20);
-	m_nctx->style.slider.bar_hover = nk_rgb(20, 20, 20);
-	m_nctx->style.slider.bar_active = nk_rgb(20, 20, 20);
 
     m_nuklearRunning = true;
 }
@@ -208,6 +226,9 @@ void BasicNuklearGui::InitNuklearFontAtlasFallback(struct nk_font_atlas* atlas, 
 
 void BasicNuklearGui::Tick(float deltatime)
 {
+	if (m_canSuspend && IsSuspended())
+		return;
+
 	nk_input_begin(m_nctx);
 	while (!m_eventQueue.empty())
 	{
@@ -224,6 +245,9 @@ void BasicNuklearGui::NKRender()
 
 void BasicNuklearGui::Render(float deltatime)
 {
+	if (m_canSuspend && IsSuspended())
+		return;
+
 	if (m_backgroundFrame)
 	{
 		auto rq = g_application->GetRenderQueueBase();
@@ -246,6 +270,9 @@ void BasicWindow::Tick(float deltatime)
 	if (!m_isOpen) {
 		Close();
 	}
+
+	if (OnTick.IsHandled())
+		OnTick.Call(deltatime);
 }
 
 bool nk_edit_isfocused(struct nk_context *ctx)
@@ -318,7 +345,7 @@ void BasicWindow::Render(float deltatime)
 void BasicWindow::Close()
 {
 	m_isOpen = false;
-	OnClose();
+	m_onClose();
 
 	if (m_inEdit)
 	{
@@ -362,9 +389,10 @@ bool BasicPrompt::OnKeyPressedConsume(SDL_Scancode code)
 	return BasicWindow::OnKeyPressedConsume(code);
 }
 
-void BasicPrompt::OnClose()
+void BasicPrompt::m_onClose()
 {
 	OnResult.Call(m_submitted, m_submitted ? m_data : nullptr);
+	BasicWindow::m_onClose();
 }
 
 void nk_multiline_label(struct nk_context* ctx, const char* allText, nk_text_alignment ali, float width)
@@ -414,6 +442,7 @@ void nk_multiline_label(struct nk_context* ctx, const char* allText, nk_text_ali
 
 void BasicPrompt::DrawWindow()
 {
+
 	struct nk_vec2 start_pos = nk_widget_position(m_nctx);
 
 	nk_layout_set_min_row_height(m_nctx, 20);
@@ -437,14 +466,58 @@ void BasicPrompt::DrawWindow()
 
 	if (nk_button_label(m_nctx, "Cancel"))
 	{
-		m_isOpen = false;
+		m_closing = true;
 	}
 
 	if (nk_button_label(m_nctx, *m_submitText))
 	{
 		m_submitted = true;
-		m_isOpen = false;
+		m_closing = true;
 	}
+
+	if (m_closing)
+	{
+		if (!nk_input_is_mouse_down(&m_nctx->input, NK_BUTTON_LEFT))
+		{
+			m_isOpen = false;
+			m_closing = false;
+		}
+	}
+
+	struct nk_vec2 end_pos = nk_widget_position(m_nctx);
+
+	if (m_shrinkWindow) {
+		nk_window_set_size(m_nctx, *m_name, nk_vec2(
+			static_cast<float>(m_width),
+			end_pos.y - start_pos.y + 60.0f
+		));
+		m_shrinkWindow = false;
+	}
+}
+
+bool BasicTextWindow::Init()
+{
+	m_windowFlag = NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE;
+	if (!BasicWindow::Init())
+		return false;
+	return true;
+}
+
+void BasicTextWindow::DrawWindow()
+{
+
+	struct nk_vec2 start_pos = nk_widget_position(m_nctx);
+
+	nk_layout_set_min_row_height(m_nctx, 20);
+	nk_layout_row_dynamic(m_nctx, 20, 1);
+
+	if (!m_nextText.empty())
+	{
+		m_text = m_nextText;
+		m_nextText = "";
+	}
+
+	nk_multiline_label(m_nctx, *m_text, NK_TEXT_LEFT, static_cast<float>(m_width - 30));
 
 	struct nk_vec2 end_pos = nk_widget_position(m_nctx);
 
