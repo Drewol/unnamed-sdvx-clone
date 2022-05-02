@@ -106,11 +106,11 @@ public:
 	void DrawOverlays(RenderQueue& rq);
 	void DrawHitEffects(RenderQueue& rq);
 	// Draw a centered sprite at pos, relative from the track
-	void DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, Color color = Color::White, float tilt = 0.0f);
+	void DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, Color color = Color::White, float tilt = 0.0f) const;
 	void DrawTrackCover(RenderQueue& rq);
 	void DrawCalibrationCritLine(RenderQueue& rq);
 
-	Vector3 TransformPoint(const Vector3& p);
+	Vector3 TransformPoint(const Vector3& p) const;
 
 	// Adds a sprite effect to the track
 	void AddEffect(struct TimedEffect* effect);

@@ -6,6 +6,7 @@
 #include "LaserTrackBuilder.hpp"
 #include "AsyncAssetLoader.hpp"
 #include <unordered_set>
+#include <utility>
 
 const float Track::trackWidth = 1.0f;
 const float Track::buttonWidth = 1.0f / 6;
@@ -195,7 +196,7 @@ bool Track::AsyncFinalize()
 
 		//track cover
 		pos = Vector2(-trackWidth * 0.5f * i, -trackLength);
-		size = Vector2(trackWidth / 2.0f, trackLength * 2.0);
+		size = Vector2(trackWidth / 2.0f, trackLength * 2.f);
 		rect = Rect(pos, size);
 		splitTrackCoverMesh[i] = MeshRes::Create(g_gl);
 		splitTrackCoverMesh[i]->SetPrimitiveType(PrimitiveType::TriangleList);
@@ -302,7 +303,7 @@ void Track::Tick(class BeatmapPlayback& playback, float deltaTime)
 	objectGlowState = currentTime % 100 < 50 ? 0 : 1;
 	m_lastMapTime = currentTime;
 
-	objectGlow = fabs((currentTime % 100) / 50.0 - 1) * 0.5 + 0.5;
+	objectGlow = fabsf((currentTime % 100) / 50.f - 1) * 0.5f + 0.5f;
 
 	// Perform laser track cache cleanup, etc.
 	for (auto & i : m_laserTrackBuilder)
@@ -320,8 +321,18 @@ auto Track::m_GetObjectPosition(BeatmapPlayback& playback, ObjectState *obj)
 			obj->type == ObjectType::Hold ? ((MultiObjectState*)obj)->hold.GetRoot()->time <= playback.GetLastTime()
 			                              : obj->type == ObjectType::Laser && obj->time <= playback.GetLastTime();
 
-	float position = dontUseScrollSpeedForPos ? playback.TimeToViewDistanceIgnoringScrollSpeed(obj->time) : playback.TimeToViewDistance(obj->time);
-	position = position / m_viewRange + visualOffset;
+	float position;
+	if (obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
+	{
+		position = (dontUseScrollSpeedForPos ? playback.TimeToViewDistanceIgnoringScrollSpeed(obj->time) : playback.TimeToViewDistance(obj->time));
+		position = position / m_viewRange + visualOffset;
+	}
+	else // laser
+	{
+		// Calculate height based on time on current track
+		float posMult = trackLength / (m_viewRange * laserSpeedOffset);
+		position = playback.TimeToViewDistance(obj->time) * posMult + visualOffset;
+	}
 
 	return result {position, dontUseScrollSpeedForPos};
 }
@@ -424,17 +435,17 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 			int fxIdx = 0;
 			if (mobj->button.index < 2)
 			{
-				xposition -= 0.5 * centerSplit * buttonWidth;
+				xposition -= 0.5f * centerSplit * buttonWidth;
 			}
 			else 
 			{
-				xposition += 0.5 * centerSplit * buttonWidth;
+				xposition += 0.5f * centerSplit * buttonWidth;
 				fxIdx = 1;
 			}
 			if (!isHold && chipFXTimes[fxIdx].count(mobj->time))
 			{
 				xscale = m_btOverFxScale;
-				xposition += width * ((1.0 - xscale) / 2.0);
+				xposition += width * ((1.f - xscale) / 2.f);
 			}
 			length = buttonLength;
 			params.SetParameter("hasSample", mobj->button.hasSample);
@@ -521,7 +532,7 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 		auto* laser = (LaserObjectState*)obj;
 
 		// Draw segment function
-		auto DrawSegment = [&](Mesh mesh, Texture texture, int part)
+		auto DrawSegment = [&](const Mesh& mesh, Texture texture, int part)
 		{
 			MaterialParameterSet laserParams;
 			laserParams.SetParameter("trackPos", position / trackLength);
@@ -542,7 +553,7 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 				laserParams.SetParameter("objectGlow", active ? objectGlow : 0.4f);
 				laserParams.SetParameter("hitState", active ? 2 + objectGlowState : 0);
 			}
-			laserParams.SetParameter("mainTex", texture);
+			laserParams.SetParameter("mainTex", std::move(texture));
 			laserParams.SetParameter("laserPart", part);
 
 			// Get the length of this laser segment
@@ -594,7 +605,7 @@ void Track::DrawHitEffects(RenderQueue& rq)
 		bfx.Draw(rq);
 }
 
-void Track::DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, Color color /*= Color::White*/, float tilt /*= 0.0f*/)
+void Track::DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, Color color /*= Color::White*/, float tilt /*= 0.0f*/) const
 {
 	Transform spriteTransform = trackOrigin;
 	spriteTransform *= Transform::Translation(pos);
@@ -603,7 +614,7 @@ void Track::DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, 
 		spriteTransform *= Transform::Rotation({ tilt, 0.0f, 0.0f });
 
 	MaterialParameterSet params;
-	params.SetParameter("mainTex", tex);
+	params.SetParameter("mainTex", std::move(tex));
 	params.SetParameter("color", color);
 	rq.Draw(spriteTransform, centeredTrackMesh, spriteMaterial, params);
 }
@@ -651,7 +662,7 @@ void Track::DrawCalibrationCritLine(RenderQueue& rq)
 	}
 }
 
-Vector3 Track::TransformPoint(const Vector3 & p)
+Vector3 Track::TransformPoint(const Vector3 & p) const
 {
 	return trackOrigin.TransformPoint(p);
 }
@@ -719,11 +730,11 @@ float Track::GetButtonPlacement(uint32 buttonIdx)
 		float x = buttonIdx * buttonWidth - (buttonWidth * 1.5f);
 		if (buttonIdx < 2)
 		{
-			x -= 0.5 * centerSplit * buttonWidth;
+			x -= 0.5f * centerSplit * buttonWidth;
 		}
 		else
 		{
-			x += 0.5 * centerSplit * buttonWidth;
+			x += 0.5f * centerSplit * buttonWidth;
 		}
 		return x;
 	}
@@ -732,11 +743,11 @@ float Track::GetButtonPlacement(uint32 buttonIdx)
 		float x = (buttonIdx - 4) * fxButtonWidth - (fxButtonWidth * 0.5f);
 		if (buttonIdx < 5)
 		{
-			x -= 0.5 * centerSplit * buttonWidth;
+			x -= 0.5f * centerSplit * buttonWidth;
 		}
 		else
 		{
-			x += 0.5 * centerSplit * buttonWidth;
+			x += 0.5f * centerSplit * buttonWidth;
 		}
 		return x;
 	}
@@ -774,7 +785,7 @@ float Track::m_GetBaseVisualOffsetForObject(ObjectState* obj) const
 		return 0;
 
 	if (obj == nullptr || obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
-		return m_offsetMult / trackLength;
+		return 0;
 	else // laser
 		return m_offsetMult;
 }
