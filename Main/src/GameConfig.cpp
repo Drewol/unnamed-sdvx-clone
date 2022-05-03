@@ -31,7 +31,7 @@ inline static void ConvertKeyCodeToScanCode(GameConfig& config, std::vector<Game
 
 			const String& fieldName = Enum_GameConfigKeys::ToString(key);
 
-			Logf("Unable to convert key \"%s\" (%d) into scancode, for config field \"%s\".", Logger::Severity::Error, keyName, keycode, fieldName.c_str());
+			Logf(R"(Unable to convert key "%s" (%d) into scancode, for config field "%s".)", Logger::Severity::Error, keyName, keycode, fieldName.c_str());
 			config.Set(key, -1);
 		}
 	}
@@ -40,12 +40,7 @@ inline static void ConvertKeyCodeToScanCode(GameConfig& config, std::vector<Game
 GameConfig::GameConfig()
 {
     //XXX We can't do clear here as it leads to UB with the initialization of hitstat static values
-    // This sould be ok as Clear will be called in the Load function
-}
-
-void GameConfig::SetKeyBinding(GameConfigKeys key, Graphics::Key value)
-{
-	SetEnum<Enum_Key>(key, value);
+    // This should be ok as Clear will be called in the Load function
 }
 
 void GameConfig::InitDefaults()
@@ -261,7 +256,9 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::CurrentProfileName, "Main");
 	Set(GameConfigKeys::UpdateChannel, "master");
 
-	Set(GameConfigKeys::EnableVisualOffset, false);
+	Set(GameConfigKeys::NoteVisualOffset, 0.f);
+	Set(GameConfigKeys::LaserVisualOffset, 5.f);
+	Set(GameConfigKeys::DistantLaserOffset, false);
 
 #ifndef EMBEDDED
 	Set(GameConfigKeys::KeepFontTexture, true);

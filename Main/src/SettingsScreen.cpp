@@ -613,8 +613,10 @@ protected:
 
 		ToggleSetting(GameConfigKeys::DisableBackgrounds, "Disable song backgrounds");
 		ToggleSetting(GameConfigKeys::DelayedHitEffects, "Delayed fade button hit effects");
-		ToggleSetting(GameConfigKeys::EnableVisualOffset, "Enable visual offset");
+		FloatSetting(GameConfigKeys::NoteVisualOffset, "Note visual offset", -100, 100, 0.1);
+		FloatSetting(GameConfigKeys::LaserVisualOffset, "Laser visual offset", -100, 100, 0.1);
 		FloatSetting(GameConfigKeys::DistantButtonScale, "Distant button scale", 1.0f, 5.0f);
+		ToggleSetting(GameConfigKeys::DistantLaserOffset, "Gradually offset distant lasers");
 
 		SectionHeader("Game UI");
 
@@ -753,7 +755,7 @@ protected:
 #endif
 		if (nk_button_label(m_nctx, "Prune extra replays"))
 		{
-            BasicPrompt* w = new BasicPrompt(
+            auto* w = new BasicPrompt(
                 "Prune Extra Replays",
                 "How many replays per song would you like\nto keep? (>=1)",
                 "Prune Replays","3");

@@ -35,18 +35,18 @@
 Ref<Beatmap> TryLoadMap(const String& path)
 {
 	// Load map file
-	Beatmap* newMap = new Beatmap();
+	auto* newMap = new Beatmap();
 	File mapFile;
 	if(!mapFile.OpenRead(path))
 	{
 		delete newMap;
-		return Ref<Beatmap>();
+		return {};
 	}
 	FileReader reader(mapFile);
 	if(!newMap->Load(reader))
 	{
 		delete newMap;
-		return Ref<Beatmap>();
+		return {};
 	}
 	return Ref<Beatmap>(newMap);
 }
@@ -275,7 +275,7 @@ public:
 	}
 
 	AsyncAssetLoader loader;
-	virtual bool AsyncLoad() override
+	bool AsyncLoad() override
 	{
 		ProfilerScope $("AsyncLoad Game");
 
@@ -405,7 +405,7 @@ public:
 					break;
 			}
 
-			if (m_isPlayingReplay && m_scoreReplays.size() == 0 && m_replayForPlayback == nullptr)
+			if (m_isPlayingReplay && m_scoreReplays.empty() && m_replayForPlayback == nullptr)
 			{
 				Log("Could not find replay to playback!", Logger::Severity::Error);
 				return false;
@@ -502,7 +502,7 @@ public:
 		return true;
 	}
 
-	virtual bool AsyncFinalize() override
+	bool AsyncFinalize() override
 	{
 		if (!loader.Finalize())
 			return false;
@@ -535,7 +535,7 @@ public:
 				m_track->hiddenCutoff = hiddenMin;
 
 			// Sudden is reversed since it starts at 1.0
-			float suddenMin = 1.0 - m_challengeManager->GetCurrentOptions().sudden_min.Get(0.0);
+			float suddenMin = 1.f - m_challengeManager->GetCurrentOptions().sudden_min.Get(0.0);
 			if (m_track->suddenCutoff > suddenMin)
 				m_track->suddenCutoff = suddenMin;
 		}
@@ -545,7 +545,8 @@ public:
 		m_track->distantButtonScale = g_gameConfig.GetFloat(GameConfigKeys::DistantButtonScale);
 		m_showCover = g_gameConfig.GetBool(GameConfigKeys::ShowCover);
 
-		m_track->EnableVisualOffset(g_gameConfig.GetBool(GameConfigKeys::EnableVisualOffset));
+		m_track->SetVisualOffsets(g_gameConfig.GetFloat(GameConfigKeys::NoteVisualOffset), g_gameConfig.GetFloat(GameConfigKeys::LaserVisualOffset));
+		m_track->SetLaserSpeedOffset(g_gameConfig.GetBool(GameConfigKeys::DistantLaserOffset));
 
 		if (m_delayedHitEffects)
 		{
@@ -983,15 +984,12 @@ public:
 			if(m_scoring.IsLaserHeld(i))
 			{
 				m_track->laserPositions[i] = m_scoring.laserTargetPositions[i];
-				m_track->lasersAreExtend[i] = m_scoring.lasersAreExtend[i];
 			}
 			else
 			{
 				m_track->laserPositions[i] = m_scoring.laserPositions[i];
-				m_track->lasersAreExtend[i] = m_scoring.lasersAreExtend[i];
 			}
 			m_track->laserPositions[i] = m_scoring.laserPositions[i];
-			m_track->laserPointerOpacity[i] = (1.0f - Math::Clamp<float>(m_scoring.timeSinceLaserUsed[i] / 0.5f - 1.0f, 0, 1));
 		}
 		m_track->DrawHitEffects(hitEffectsRq);
 		m_track->DrawOverlays(scoringRq);
@@ -2314,15 +2312,15 @@ public:
 
 	void OnEventChanged(EventKey key, EventData data)
 	{
-		if(key == EventKey::LaserEffectType)
+		if (key == EventKey::LaserEffectType)
 		{
 			m_audioPlayback.SetLaserEffect(data.effectVal);
 		}
-		else if(key == EventKey::LaserEffectMix)
+		else if (key == EventKey::LaserEffectMix)
 		{
 			m_audioPlayback.SetLaserEffectMix(data.floatVal);
 		}
-		else if(key == EventKey::TrackRollBehaviour)
+		else if (key == EventKey::TrackRollBehaviour)
 		{
 			m_camera.SetRollKeep((data.rollVal & TrackRollBehaviour::Keep) == TrackRollBehaviour::Keep);
 			int32 i = (uint8)data.rollVal & 0x7;
@@ -2334,14 +2332,16 @@ public:
 				m_manualTiltEnabled = true;
 			}
 			else if (i == 0)
+			{
 				m_rollIntensity = 0;
+			}
 			else
 			{
 				m_rollIntensity = MAX_ROLL_ANGLE * (1.0 + 0.75 * (i - 1));
 			}
 			m_camera.SetRollIntensity(m_rollIntensity);
 		}
-		else if(key == EventKey::SlamVolume)
+		else if (key == EventKey::SlamVolume)
 		{
 			m_slamSample->SetVolume(data.floatVal * m_slamVolume * m_fxVolume);
 		}
@@ -2724,7 +2724,7 @@ public:
 	}
 
 	// Needs to be called before AsyncLoad
-	void InitPlayReplay(Replay* replay)
+	void InitPlayReplay(Replay* replay) override
 	{
 		m_isPlayingReplay = true;
 		m_setFinalReplayScore = false;
@@ -2950,7 +2950,7 @@ public:
 		return m_hitWindow;
 	}
 
-	virtual LuaBindable* MakeTrackLuaBindable(struct lua_State* L)
+	LuaBindable* MakeTrackLuaBindable(struct lua_State* L) override
 	{
 		auto* bind = new LuaBindable(L, "track");
 		bind->AddFunction("GetCurrentLaneXPos", this, &Game_Impl::lTrackGetCurrentLaneXPos);
@@ -3016,12 +3016,12 @@ public:
 		return 0;
 	}
 
-	virtual bool IsPlaying() const override
+	bool IsPlaying() const override
 	{
 		return m_playing;
 	}
 
-	virtual bool GetTickRate(int32& rate) override
+	bool GetTickRate(int32& rate) override
 	{
 		if(!m_audioPlayback.IsPaused())
 		{
@@ -3031,43 +3031,43 @@ public:
 		return false; // Default otherwise
 	}
 
-	virtual Texture GetJacketImage() override
+	Texture GetJacketImage() override
 	{
 		return m_jacketTexture;
 	}
-	virtual Ref<Beatmap> GetBeatmap() override
+	Ref<Beatmap> GetBeatmap() override
 	{
 		return m_beatmap;
 	}
-	virtual class Track& GetTrack() override
+	class Track& GetTrack() override
 	{
 		return *m_track;
 	}
-	virtual class Camera& GetCamera() override
+	class Camera& GetCamera() override
 	{
 		return m_camera;
 	}
-	virtual class BeatmapPlayback& GetPlayback() override
+	class BeatmapPlayback& GetPlayback() override
 	{
 		return m_playback;
 	}
-	virtual class Scoring& GetScoring() override
+	class Scoring& GetScoring() override
 	{
 		return m_scoring;
 	}
-	virtual const std::array<float, 256>& GetGaugeSamples() override
+	const std::array<float, 256>& GetGaugeSamples() override
 	{
 		return m_scoring.GetTopGauge()->GetSamples();
 	}
-	virtual PlaybackOptions GetPlaybackOptions() override
+	PlaybackOptions GetPlaybackOptions() override
 	{
 		return m_playOptions.playbackOptions;
 	}
-	virtual lua_State* GetLuaState() override 
+	lua_State* GetLuaState() override
 	{
 		return m_lua;
 	}
-	virtual void SetGauge(float g) override
+	void SetGauge(float g) override
 	{
 		auto gauge = m_scoring.GetTopGauge();
 		if (gauge)
@@ -3075,11 +3075,11 @@ public:
 			gauge->SetValue(g);
 		}
 	}
-	virtual void SetAllGaugeValues(const Vector<float> values)
+	void SetAllGaugeValues(const Vector<float> values) override
 	{
 		m_scoring.SetAllGaugeValues(values);
 	}
-	virtual bool IsStorableScore() override
+	bool IsStorableScore() override
 	{
 		if (m_scoring.autoplayInfo.IsAutoplayButtons()) return false;
 		if (m_isPracticeSetup) return false;
@@ -3127,7 +3127,7 @@ public:
 	{
 		return m_challengeManager != nullptr;
 	}
-	virtual Replay* GetCurrentReplay() const override
+	Replay* GetCurrentReplay() const override
 	{
 		return m_replayForPlayback;
 	}
@@ -3279,8 +3279,8 @@ public:
 			lua_getfield(L, -1, "critLine");
 
 			Vector2 critPos = m_camera.Project(m_camera.critOrigin.TransformPoint(Vector3(0, 0, 0)));
-			Vector2 leftPos = m_camera.Project(m_camera.critOrigin.TransformPoint(Vector3(-m_track->trackWidth / 2.0, 0, 0)));
-			Vector2 rightPos = m_camera.Project(m_camera.critOrigin.TransformPoint(Vector3(m_track->trackWidth / 2.0, 0, 0)));
+			Vector2 leftPos = m_camera.Project(m_camera.critOrigin.TransformPoint(Vector3(-Track::trackWidth / 2.0, 0, 0)));
+			Vector2 rightPos = m_camera.Project(m_camera.critOrigin.TransformPoint(Vector3(Track::trackWidth / 2.0, 0, 0)));
 			Vector2 line = rightPos - leftPos;
 
 			lua_pushstring(L, "x"); // x screen position
@@ -3360,7 +3360,7 @@ public:
 	}
 	void SetInitialGameplayLua(lua_State* L) override
 	{
-		auto pushStringToTable = [&](const char* name, String data)
+		auto pushStringToTable = [&](const char* name, const String& data)
 		{
 			lua_pushstring(L, name);
 			lua_pushstring(L, data.c_str());
@@ -3543,33 +3543,33 @@ public:
 
 Game* Game::Create(ChartIndex* chart, PlayOptions&& options)
 {
-	Game_Impl* impl = new Game_Impl(chart, std::move(options));
+	auto* impl = new Game_Impl(chart, std::move(options));
 	return impl;
 }
 
 Game* Game::Create(MultiplayerScreen* multiplayer, ChartIndex* chart, PlayOptions&& options)
 {
-	Game_Impl* impl = new Game_Impl(chart, std::move(options));
+	auto* impl = new Game_Impl(chart, std::move(options));
 	impl->MakeMultiplayer(multiplayer);
 	return impl;
 }
 
 Game* Game::Create(ChallengeManager* challenge, ChartIndex* chart, PlayOptions&& options)
 {
-	Game_Impl* impl = new Game_Impl(chart, std::move(options));
+	auto* impl = new Game_Impl(chart, std::move(options));
 	impl->MakeChallenge(challenge);
 	return impl;
 }
 
 Game* Game::Create(const String& mapPath, PlayOptions&& options)
 {
-	Game_Impl* impl = new Game_Impl(mapPath, std::move(options));
+	auto* impl = new Game_Impl(mapPath, std::move(options));
 	return impl;
 }
 
 Game* Game::CreatePractice(ChartIndex* chart, PlayOptions&& options)
 {
-	Game_Impl* impl = new Game_Impl(chart, std::move(options));
+	auto* impl = new Game_Impl(chart, std::move(options));
 	impl->MakePracticeSetup();
 	return impl;
 }

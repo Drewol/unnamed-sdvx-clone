@@ -315,7 +315,7 @@ void Track::Tick(class BeatmapPlayback& playback, float deltaTime)
 auto Track::m_GetObjectPosition(BeatmapPlayback& playback, ObjectState *obj)
 {
 	struct result {float position; bool dontUseScrollSpeedForPos;};
-	float visualOffset = m_GetBaseVisualOffsetForObject(obj);
+	float visualOffset = m_GetVisualOffsetForObject(obj);
 
 	const bool dontUseScrollSpeedForPos =
 			obj->type == ObjectType::Hold ? ((MultiObjectState*)obj)->hold.GetRoot()->time <= playback.GetLastTime()
@@ -324,17 +324,25 @@ auto Track::m_GetObjectPosition(BeatmapPlayback& playback, ObjectState *obj)
 	float position;
 	if (obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
 	{
-		position = (dontUseScrollSpeedForPos ? playback.TimeToViewDistanceIgnoringScrollSpeed(obj->time) : playback.TimeToViewDistance(obj->time));
-		position = position / m_viewRange + visualOffset;
+		position = dontUseScrollSpeedForPos ? playback.TimeToViewDistanceIgnoringScrollSpeed(obj->time) : playback.TimeToViewDistance(obj->time);
+		position = position / m_viewRange;
 	}
 	else // laser
 	{
 		// Calculate height based on time on current track
 		float posMult = trackLength / (m_viewRange * laserSpeedOffset);
-		position = playback.TimeToViewDistance(obj->time) * posMult + visualOffset;
+		position = playback.TimeToViewDistance(obj->time) * posMult;
 	}
 
-	return result {position, dontUseScrollSpeedForPos};
+	return result {position + visualOffset, dontUseScrollSpeedForPos};
+}
+
+float Track::m_GetVisualOffsetForObject(ObjectState* obj) const
+{
+	if (obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
+		return m_noteOffset;
+	else // laser
+		return m_laserOffset;
 }
 
 void Track::DrawLaserBase(RenderQueue& rq, class BeatmapPlayback& playback, const Vector<ObjectState*>& objects)
@@ -389,10 +397,9 @@ void Track::DrawBase(class RenderQueue& rq)
 	// Draw the main beat ticks on the track
 	params.SetParameter("mainTex", trackTickTexture);
 	params.SetParameter("hasSample", false);
-	float visualOffset = m_GetBaseVisualOffsetForObject(nullptr);
 	for (float f : m_barTicks)
 	{
-		float fLocal = f / m_viewRange + visualOffset;
+		float fLocal = f / m_viewRange + m_noteOffset;
 		Vector3 tickPosition = Vector3(0.0f, trackLength * fLocal - trackTickLength * 0.5f, 0.01f);
 		Transform tickTransform = trackOrigin;
 		tickTransform *= Transform::Translation(tickPosition);
@@ -413,7 +420,7 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 {
 	// Calculate height based on time on current track
 	auto result = m_GetObjectPosition(playback, obj);
-	auto position = result.position; auto dontUseScrollSpeedForPos = result.dontUseScrollSpeedForPos; // Should just be able to use binding decl., but C++ says no
+	auto position = result.position; auto dontUseScrollSpeedForPos = result.dontUseScrollSpeedForPos; // Should be able to use binding decl., but C++ says no
 
 	if (obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
 	{
@@ -645,7 +652,7 @@ void Track::DrawTrackCover(RenderQueue& rq)
 	#endif
 }
 
-void Track::DrawCalibrationCritLine(RenderQueue& rq)
+void Track::DrawCalibrationCritLine(RenderQueue& rq) const
 {
 	Transform t = trackOrigin;
 	{
@@ -676,18 +683,6 @@ void Track::AddEffect(TimedEffect* effect)
 void Track::AddHitEffect(uint32 buttonCode, Color color, bool hold)
 {
 	m_buttonHitEffects[buttonCode].Reset(buttonCode, color, hold);
-}
-
-void Track::ClearEffects()
-{
-	m_trackHide = 0.0f;
-	m_trackHideSpeed = 0.0f;
-
-	for (auto & m_hitEffect : m_hitEffects)
-	{
-		delete m_hitEffect;
-	}
-	m_hitEffects.clear();
 }
 
 void Track::SetViewRange(float newRange)
@@ -723,7 +718,7 @@ float Track::GetViewRange() const
 	return m_viewRange;
 }
 
-float Track::GetButtonPlacement(uint32 buttonIdx)
+float Track::GetButtonPlacement(uint32 buttonIdx) const
 {
 	if (buttonIdx < 4)
 	{
@@ -769,23 +764,18 @@ void Track::OnButtonReleased(Input::Button buttonCode)
 	m_buttonHitEffects[buttonIndex].held = false;
 }
 
-void Track::OnButtonReleasedDelta(Input::Button buttonCode, int32 delta)
+void Track::OnButtonReleasedDelta(Input::Button buttonCode, int32 _)
 {
 	OnButtonReleased(buttonCode);
 }
 
-void Track::EnableVisualOffset(bool setting)
+void Track::SetVisualOffsets(float noteOffset, float laserOffset)
 {
-	m_enableVisualOffset = setting;
+	m_noteOffset = noteOffset / 100;
+	m_laserOffset = trackLength * laserOffset / 100;
 }
 
-float Track::m_GetBaseVisualOffsetForObject(ObjectState* obj) const
+void Track::SetLaserSpeedOffset(bool offset)
 {
-	if (!m_enableVisualOffset)
-		return 0;
-
-	if (obj == nullptr || obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
-		return 0;
-	else // laser
-		return m_offsetMult;
+	laserSpeedOffset = offset ? 0.9 : 1;
 }
