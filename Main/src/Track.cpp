@@ -399,7 +399,7 @@ void Track::DrawBase(class RenderQueue& rq)
 	params.SetParameter("hasSample", false);
 	for (float f : m_barTicks)
 	{
-		float fLocal = f / m_viewRange + m_noteOffset;
+		float fLocal = f / m_viewRange;
 		Vector3 tickPosition = Vector3(0.0f, trackLength * fLocal - trackTickLength * 0.5f, 0.01f);
 		Transform tickTransform = trackOrigin;
 		tickTransform *= Transform::Translation(tickPosition);

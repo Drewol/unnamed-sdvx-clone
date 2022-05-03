@@ -257,7 +257,7 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::UpdateChannel, "master");
 
 	Set(GameConfigKeys::NoteVisualOffset, 0.f);
-	Set(GameConfigKeys::LaserVisualOffset, 5.f);
+	Set(GameConfigKeys::LaserVisualOffset, 2.5f);
 	Set(GameConfigKeys::DistantLaserOffset, false);
 
 #ifndef EMBEDDED
