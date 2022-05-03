@@ -231,6 +231,6 @@ private:
 	float m_trackHideSpeed = 0.0f;
 	float m_btOverFxScale = 0.8f;
 
-	float m_laserOffset = 0.025f;
+	float m_laserOffset = 0.008f;
 	float m_noteOffset = 0;
 };
