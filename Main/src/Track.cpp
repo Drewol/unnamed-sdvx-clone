@@ -174,7 +174,7 @@ bool Track::AsyncFinalize()
 	{
 		m_laserTrackBuilder[i] = new LaserTrackBuilder(g_gl, this, i);
 		m_laserTrackBuilder[i]->laserBorderPixels = 12;
-		m_laserTrackBuilder[i]->laserLengthScale = trackLength / (GetViewRange() * laserSpeedOffset);
+		m_laserTrackBuilder[i]->laserLengthScale = trackLength / (GetViewRange() * m_laserSpeedOffset);
 		m_laserTrackBuilder[i]->Reset(); // Also initializes the track builder
 	}
 
@@ -237,14 +237,14 @@ bool Track::AsyncFinalize()
 		{
 			if (i < 4)
 			{
-				bfx.delayFadeDuration = BT_DELAY_FADE_DURATION;
-				bfx.hitEffectDuration = BT_HIT_EFFECT_DURATION;
+				bfx.delayFadeDuration = 4 / 60.f;
+				bfx.hitEffectDuration = 4 / 60.f;
 				bfx.alphaScale = 0.6f; // Ranges from 0.6 to 0.85 depending on hispeed
 			}
 			else
 			{
-				bfx.delayFadeDuration = FX_DELAY_FADE_DURATION;
-				bfx.hitEffectDuration = FX_HIT_EFFECT_DURATION;
+				bfx.delayFadeDuration = 3 / 60.f;
+				bfx.hitEffectDuration = 3 / 60.f;
 				bfx.alphaScale = 0.45f;
 			}
 		}
@@ -330,7 +330,7 @@ auto Track::m_GetObjectPosition(BeatmapPlayback& playback, ObjectState *obj)
 	else // laser
 	{
 		// Calculate height based on time on current track
-		float posMult = trackLength / (m_viewRange * laserSpeedOffset);
+		float posMult = trackLength / (m_viewRange * m_laserSpeedOffset);
 		position = playback.TimeToViewDistance(obj->time) * posMult;
 	}
 
@@ -692,7 +692,7 @@ void Track::SetViewRange(float newRange)
 		m_viewRange = newRange;
 
 		// Update view range
-		float newLaserLengthScale = trackLength / (m_viewRange * laserSpeedOffset);
+		float newLaserLengthScale = trackLength / (m_viewRange * m_laserSpeedOffset);
 		m_laserTrackBuilder[0]->laserLengthScale = newLaserLengthScale;
 		m_laserTrackBuilder[1]->laserLengthScale = newLaserLengthScale;
 
@@ -777,5 +777,5 @@ void Track::SetVisualOffsets(float noteOffset, float laserOffset)
 
 void Track::SetLaserSpeedOffset(bool offset)
 {
-	laserSpeedOffset = offset ? 0.9 : 1;
+	m_laserSpeedOffset = offset ? 0.9 : 1;
 }

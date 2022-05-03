@@ -3,11 +3,6 @@
 #include "AsyncLoadable.hpp"
 #include <unordered_set>
 
-#define BT_DELAY_FADE_DURATION (4 / 60.f)
-#define BT_HIT_EFFECT_DURATION (4 / 60.f)
-#define FX_DELAY_FADE_DURATION (3 / 60.f)
-#define FX_HIT_EFFECT_DURATION (3 / 60.f)
-
 // Base class for sprite effects on the track
 struct TimedEffect
 {
@@ -73,9 +68,9 @@ public:
 	static const float buttonTrackWidth;
 
 	float trackLength;
-	float trackTickLength{};
-	float buttonLength{};
-	float fxButtonLength{};
+	float trackTickLength = 0;
+	float buttonLength = 0;
+	float fxButtonLength = 0;
 	float distantButtonScale = 2.0f;
 
 	// Laser color setting
@@ -131,16 +126,12 @@ public:
     void SetVisualOffsets(float noteOffset, float laserOffset);
 	void SetLaserSpeedOffset(bool offset);
 
-	// Laser positions, as shown on the overlay
-	float laserPositions[2]{};
-
 	float hiddenCutoff = 0.0f;
 	float hiddenFadewindow = 0.2f;
 
 	float suddenCutoff = 0.5f;
 	float suddenFadewindow = 0.2f;
 
-	float laserSpeedOffset = 0;
 	float centerSplit = 0.0f;
 
 	// Visible time elements on the playfield track
@@ -189,9 +180,9 @@ public:
 	Material spriteMaterial;
 
 	// For flickering objects, like hold objects that are active
-	float objectGlow{};
+	float objectGlow = 0;
 	// 20Hz flickering. 0 = Miss, 1 = Inactive, 2 & 3 = Active alternating.
-	int objectGlowState{};
+	int objectGlowState = 0;
 
 	// Early/Late indicator
 	struct TimedHitEffect* timedHitEffect = nullptr;
@@ -233,4 +224,6 @@ private:
 
 	float m_laserOffset = 0; // Based off of percentage of trackLength
 	float m_noteOffset = 0; // [-1, 1]
+
+	float m_laserSpeedOffset = 0;
 };

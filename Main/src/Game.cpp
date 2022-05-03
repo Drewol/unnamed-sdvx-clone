@@ -978,19 +978,6 @@ public:
 		RenderQueue hitEffectsRq(g_gl, rs);
 		RenderQueue scoringRq(g_gl, rs);
 
-		// Copy over laser position and extend info
-		for(uint32 i = 0; i < 2; i++)
-		{
-			if(m_scoring.IsLaserHeld(i))
-			{
-				m_track->laserPositions[i] = m_scoring.laserTargetPositions[i];
-			}
-			else
-			{
-				m_track->laserPositions[i] = m_scoring.laserPositions[i];
-			}
-			m_track->laserPositions[i] = m_scoring.laserPositions[i];
-		}
 		m_track->DrawHitEffects(hitEffectsRq);
 		m_track->DrawOverlays(scoringRq);
 		
