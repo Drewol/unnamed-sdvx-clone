@@ -44,7 +44,7 @@ protected:
 
 
 	}
-	
+
 	void Save() override
 	{
 		if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice) == InputDevice::Mouse)
@@ -218,12 +218,12 @@ private:
 		const float DESIRED_BT_HEIGHT = m_lineHeight * 3.0f;
 		const float DESIRED_BT_SPACING = m_lineHeight * 0.25f;
 
-		const float DESIRED_CONTROLLER_WIDTH = DESIRED_BT_HEIGHT*4 + DESIRED_BT_SPACING*3;
+		const float DESIRED_CONTROLLER_WIDTH = DESIRED_BT_HEIGHT * 4 + DESIRED_BT_SPACING * 3;
 
 		const float CONTROLLER_WIDTH = Math::Min(DESIRED_CONTROLLER_WIDTH, m_pageInnerWidth * 0.8f);
 		const float BT_SPACING = CONTROLLER_WIDTH / (DESIRED_CONTROLLER_WIDTH / DESIRED_BT_SPACING);
 
-		const float BT_HEIGHT = (CONTROLLER_WIDTH - BT_SPACING * 3)/ 4;
+		const float BT_HEIGHT = (CONTROLLER_WIDTH - BT_SPACING * 3) / 4;
 		const float FX_HEIGHT = BT_HEIGHT / 2;
 		const float LASER_HEIGHT = BT_HEIGHT / 2;
 
@@ -245,7 +245,7 @@ private:
 			nk_style_push_style_item(m_nctx, &m_nctx->style.button.normal, nk_style_item_color(nk_rgb(0, 0, 0)));
 			nk_style_push_style_item(m_nctx, &m_nctx->style.button.hover, nk_style_item_color(nk_rgb(0, 0, 0)));
 			nk_style_push_color(m_nctx, &m_nctx->style.button.border_color, nk_rgb(0, 0, 0));
-			nk_style_push_color(m_nctx, &m_nctx->style.button.text_normal , nk_rgb(0, 0, 0));
+			nk_style_push_color(m_nctx, &m_nctx->style.button.text_normal, nk_rgb(0, 0, 0));
 			nk_style_push_color(m_nctx, &m_nctx->style.button.text_hover, nk_rgb(0, 0, 0));
 
 			nk_style_push_float(m_nctx, &m_nctx->style.button.rounding, LASER_HEIGHT / 4);
@@ -577,7 +577,7 @@ protected:
 			g_gameConfig.SetEnum<Enum_InputDevice>(GameConfigKeys::ButtonInputDevice, InputDevice::Keyboard);
 		}
 	}
-	
+
 	std::array<float, 2> m_laserColors = { 200.0f, 330.0f };
 
 	void RenderContents() override
@@ -777,13 +777,13 @@ protected:
 #endif
 		if (nk_button_label(m_nctx, "Prune extra replays"))
 		{
-            BasicPrompt* w = new BasicPrompt(
-                "Prune Extra Replays",
-                "How many replays per song would you like\nto keep? (>=1)",
-                "Prune Replays","3");
+			BasicPrompt* w = new BasicPrompt(
+				"Prune Extra Replays",
+				"How many replays per song would you like\nto keep? (>=1)",
+				"Prune Replays", "3");
 			w->OnResult.Add(this, &SettingsPage_System::m_pruneReplaysCheck);
-            w->Focus();
-            g_application->AddTickable(w);
+			w->Focus();
+			g_application->AddTickable(w);
 		}
 
 		SectionHeader("Update");
@@ -820,7 +820,7 @@ protected:
 			IntSetting(GameConfigKeys::DemoIdleTime, "Enter demo after %d seconds idle. (0 = Disable)", 0, 600);
 			FloatSetting(GameConfigKeys::AutoResetToSpeed, "Reset speed to after each play", 50, 1500, 0.5f);
 		}
-		
+
 	}
 private:
 	MapDatabase* m_mapDatabase = nullptr;
@@ -829,7 +829,7 @@ private:
 	uint32 m_chartsProcessed = 0;
 	uint32 m_replaysRemoved = 0;
 	bool m_removeMissingScores;
-	
+
 	BasicTextWindow* m_replayPruneWindow = nullptr;
 	size_t m_numReplaysToKeep = 1;
 	Map<int32, ChartIndex*>::const_iterator m_replayPruneIter;
@@ -842,13 +842,13 @@ private:
 
 		long num = strtol(data, NULL, 10);
 		if (num <= 0)
-			return g_gameWindow->ShowMessageBox("Prune Extra Replays","Invalid number entered", 0);
+			return g_gameWindow->ShowMessageBox("Prune Extra Replays", "Invalid number entered", 0);
 		m_removeMissingScores = g_gameWindow->ShowYesNoMessage("Prune Extra Replays",
 			"Do you want to also remove replays for scores that are missing from the database?");
 		if (!g_gameWindow->ShowYesNoMessage("Prune Extra Replays",
 			Utility::Sprintf("Are you sure you want to delete all but %u replay%s per chart?\n%sThis cannot be undone",
-				num, num == 1? "":"s",
-				m_removeMissingScores?"This will include replays of scores no longer in the database.\n":""
+				num, num == 1 ? "" : "s",
+				m_removeMissingScores ? "This will include replays of scores no longer in the database.\n" : ""
 			)))
 		{
 			return;
@@ -857,7 +857,7 @@ private:
 
 		m_replaysProcessed = 0;
 		m_chartsProcessed = 0;
-		m_replaysRemoved= 0;
+		m_replaysRemoved = 0;
 		m_mapDatabase = new MapDatabase(true);
 		m_mapDatabase->SetChartUpdateBehavior(g_gameConfig.GetBool(GameConfigKeys::TransferScoresOnChartUpdate));
 		m_mapDatabase->FinishInit();
@@ -901,7 +901,7 @@ private:
 
 				if (!Path::Delete(path))
 					continue;
-				
+
 				m_replaysRemoved++;
 			}
 			if (!m_removeMissingScores)
@@ -921,7 +921,7 @@ private:
 
 				if (!Path::Delete(s.fullPath))
 					continue;
-				
+
 				m_replaysRemoved++;
 			}
 		}
@@ -937,7 +937,7 @@ private:
 				Utility::Sprintf("Successfully removed %u/%u replay file%s from %u charts!",
 					m_replaysRemoved,
 					m_replaysProcessed,
-					m_replaysProcessed==1?"":"s",
+					m_replaysProcessed == 1 ? "" : "s",
 					m_chartsProcessed
 				), 2);
 		}
@@ -975,7 +975,7 @@ protected:
 		ToggleSetting(GameConfigKeys::DefaultIncSpeedOnSuccess, "Increase speed on success");
 		IntSetting(GameConfigKeys::DefaultIncSpeedAmount, "Increment (%p)", 1, 10);
 		IntSetting(GameConfigKeys::DefaultIncStreak, "Required streaks", 1, 10);
-		
+
 		Separator();
 
 		ToggleSetting(GameConfigKeys::DefaultLoopOnSuccess, "Loop on fail");
@@ -1005,7 +1005,7 @@ class SettingsPage_Online : public SettingsPage
 {
 public:
 	SettingsPage_Online(nk_context* nctx) : SettingsPage(nctx, "Online") {}
-	
+
 protected:
 	void Load() override
 	{
@@ -1135,7 +1135,7 @@ private:
 
 	protected:
 		String LoadConfig() override { return m_skinConfig ? m_skinConfig->GetString(m_key) : ""; }
-		void SaveConfig(const String& value) override { if(m_skinConfig) m_skinConfig->Set(m_key, value); }
+		void SaveConfig(const String& value) override { if (m_skinConfig) m_skinConfig->Set(m_key, value); }
 
 		SkinConfig* m_skinConfig = nullptr;
 		String m_key;
@@ -1192,7 +1192,7 @@ private:
 		}
 
 		Vector<const char*> displayData;
-		for (int i=0; i<setting.selectionSetting.numOptions; ++i)
+		for (int i = 0; i < setting.selectionSetting.numOptions; ++i)
 		{
 			displayData.Add(setting.selectionSetting.options[i].data());
 		}
@@ -1229,7 +1229,7 @@ private:
 
 		nk_labelf(m_nctx, nk_text_alignment::NK_TEXT_LEFT, setting.label.data(), value);
 		nk_slider_float(m_nctx, setting.floatSetting.min, &value, setting.floatSetting.max, step);
-		
+
 		if (prevValue != value) {
 			m_skinConfig->Set(setting.key, value);
 			return true;
@@ -1243,7 +1243,7 @@ private:
 		auto it = m_skinConfigTextData.find(setting.key);
 		if (it == m_skinConfigTextData.end())
 		{
-			it = m_skinConfigTextData.emplace_hint(it, setting.key, SkinConfigTextData { m_skinConfig, setting.key });
+			it = m_skinConfigTextData.emplace_hint(it, setting.key, SkinConfigTextData{ m_skinConfig, setting.key });
 			it->second.Load();
 		}
 
@@ -1351,7 +1351,7 @@ private:
 
 	GameConfigKeys m_key;
 	String m_keyName;
-	
+
 	bool m_isGamepad;
 	int m_gamepadIndex;
 	bool m_completed = false;
@@ -1535,7 +1535,7 @@ public:
 				g_application->RemoveTickable(this);
 			}
 		}
-		
+
 		if (m_isGamepad && code == SDL_Scancode::SDL_SCANCODE_ESCAPE)
 		{
 			if (m_gamepad)
@@ -1627,7 +1627,7 @@ public:
 			if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::LaserInputDevice) == InputDevice::Mouse)
 				g_application->FastText(Utility::Sprintf("Current Sens: %.2f, ppr: (%.0f)", sens, fabs(m_delta)), center.x, center.y + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 			else
-				g_application->FastText(Utility::Sprintf("Current Sens: %.2f", sens), center.x, center.y + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);	
+				g_application->FastText(Utility::Sprintf("Current Sens: %.2f", sens), center.x, center.y + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 
 		}
 		else

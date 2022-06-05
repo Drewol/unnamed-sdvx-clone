@@ -21,7 +21,7 @@ static float DampedSin(float t, float amplitude, float frequency, float decay)
 
 static float Swing(float time) { return DampedSin(time, 120.0f / 360, 1, 3.5f); }
 
-static void Spin(float time, float &roll, float &bgAngle, float dir)
+static void Spin(float time, float& roll, float& bgAngle, float dir)
 {
 	const float TSPIN = 0.75f / 2.0f;
 	const float TRECOV = 0.75f / 2.0f;
@@ -109,7 +109,7 @@ static Transform GetOriginTransform(float pitch, float offs, float roll)
 
 void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 {
-	auto LerpTo = [&](float &value, float target, float speed = 0.5f)
+	auto LerpTo = [&](float& value, float target, float speed = 0.5f)
 	{
 		float change = deltaTime * speed;
 
@@ -173,7 +173,7 @@ void Camera::Tick(float deltaTime, class BeatmapPlayback& playback)
 	if (m_manualTiltRecentlyToggled)
 		// Check if roll has met target
 		m_manualTiltRecentlyToggled = m_actualRoll != actualRollTarget;
-	
+
 	for (int index = 0; index < 2; ++index)
 	{
 		m_rollIgnoreTimer[index] -= deltaTime;
@@ -375,7 +375,7 @@ RenderState Camera::CreateRenderState(bool clipped)
 	// Calculate clipping distances
 	Vector3 toTrackEnd = (track->trackOrigin).TransformPoint(Vector3(0.0f, track->trackLength, 0));
 	Vector3 toTrackBegin = (track->trackOrigin).TransformPoint(Vector3(0.0f, -1.f, 0.f));
-	
+
 	float radPitch = Math::degToRad * m_actualCameraPitch;
 	float endDist = -VectorMath::Dot(toTrackEnd, { 0, sinf(radPitch) ,cosf(radPitch) });
 	float beginDist = -VectorMath::Dot(toTrackBegin, { 0, sinf(radPitch) ,cosf(radPitch) });
@@ -416,7 +416,7 @@ void Camera::SetSpin(float direction, uint32 duration, uint8 type, class Beatmap
 	m_spinType = type;
 }
 
-void Camera::SetXOffsetBounce(float direction, uint32 duration, uint32 amplitude, uint32 frequency, float decay, class BeatmapPlayback &playback)
+void Camera::SetXOffsetBounce(float direction, uint32 duration, uint32 amplitude, uint32 frequency, float decay, class BeatmapPlayback& playback)
 {
 	const TimingPoint& currentTimingPoint = playback.GetCurrentTimingPoint();
 
@@ -478,14 +478,14 @@ float Camera::GetShakeOffset()
 float Camera::m_ClampRoll(float in) const
 {
 	float ain = fabs(in);
-	if(ain < 1.0f)
+	if (ain < 1.0f)
 		return in;
 	bool odd = ((uint32)fabs(in) % 2) == 1;
 	float sign = Math::Sign(in);
-	if(odd)
+	if (odd)
 	{
 		// Swap sign and modulo
-		return -sign * (1.0f-fmodf(ain, 1.0f));
+		return -sign * (1.0f - fmodf(ain, 1.0f));
 	}
 	else
 	{

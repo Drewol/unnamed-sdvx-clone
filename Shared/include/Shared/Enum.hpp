@@ -20,20 +20,20 @@ public:
 		size_t idLast = 0;
 		size_t badVal = -1;
 		EnumType e;
-		for(uint32_t i = 0; split != badVal && !src.empty(); i++)
+		for (uint32_t i = 0; split != badVal && !src.empty(); i++)
 		{
 			split = src.find(',');
 			String seg = (split == badVal) ? src : src.substr(0, split);
 			size_t assignment = seg.find("=");
-			if(assignment != badVal)
+			if (assignment != badVal)
 			{
-					String valueStr = seg.substr(assignment + 1);
-					seg = seg.substr(0, assignment);
-					size_t charValue = valueStr.find('\'');
-					if(charValue != badVal) // Probably a char value
-						idLast = (size_t)valueStr[charValue + 1];
-					else // Hex or decimal value
-						idLast = strtol(*valueStr, NULL, 0);
+				String valueStr = seg.substr(assignment + 1);
+				seg = seg.substr(0, assignment);
+				size_t charValue = valueStr.find('\'');
+				if (charValue != badVal) // Probably a char value
+					idLast = (size_t)valueStr[charValue + 1];
+				else // Hex or decimal value
+					idLast = strtol(*valueStr, NULL, 0);
 			}
 			e = (EnumType)idLast++;
 			seg.Trim();
@@ -73,11 +73,11 @@ public:
 	{
 		String result;
 		uint32 mask = 1;
-		for(uint32 i = 0; i < 32; i++)
+		for (uint32 i = 0; i < 32; i++)
 		{
-			if((uint32)e & mask)
+			if ((uint32)e & mask)
 			{
-				if(!result.empty())
+				if (!result.empty())
 					result += " | ";
 				result += stringMap.ToString((EnumType)mask);
 			}
@@ -90,11 +90,11 @@ public:
 		uint32 result = 0;
 		size_t next = 0;
 		size_t badVal = -1;
-		while(next != badVal)
+		while (next != badVal)
 		{
 			next = str.find('|');
 			String current = str;
-			if(next != badVal)
+			if (next != badVal)
 			{
 				current = str.substr(0, next);
 				str = str.substr(next + 1);

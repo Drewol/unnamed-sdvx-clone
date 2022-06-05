@@ -6,7 +6,7 @@ DefineEnum(InputDevice,
 	Mouse,
 	Controller)
 
-typedef Ref<int32> MouseLockHandle;
+	typedef Ref<int32> MouseLockHandle;
 
 /*
 	Class that handles game keyboard (and soon controller input)
@@ -21,7 +21,7 @@ public:
 		BT_3,
 		FX_0,
 		FX_1,
-        BT_S, //Start Button
+		BT_S, //Start Button
 		LS_0Neg, // Left laser- 
 		LS_0Pos, // Left laser+		(|---->)
 		LS_1Neg, // Right laser-	(<----|)
@@ -29,7 +29,7 @@ public:
 		Back,
 		Length)
 
-	~Input();
+		~Input();
 	void Init(Graphics::Window& wnd);
 	void Cleanup();
 

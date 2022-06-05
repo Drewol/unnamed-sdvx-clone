@@ -90,7 +90,7 @@ public:
 
 // NOTE: macros are used here to reduce the amount of copy paste required to update
 //       or add new options
-struct ChallengeOptions{
+struct ChallengeOptions {
 #define CHALLENGE_OPTIONS_ALL(v) \
 	v(bool, mirror) \
 	v(bool, excessive) \
@@ -301,10 +301,10 @@ public:
 
 private:
 	ChallengeOption<uint32> m_getOptionAsPositiveInteger(
-		nlohmann::json reqs, String name, int64 min=0, int64 max=INT_MAX);
+		nlohmann::json reqs, String name, int64 min = 0, int64 max = INT_MAX);
 
 	ChallengeOption<float> m_getOptionAsFloat(
-		nlohmann::json reqs, String name, float min=-INFINITY, float max=INFINITY);
+		nlohmann::json reqs, String name, float min = -INFINITY, float max = INFINITY);
 
 	ChallengeOption<bool> m_getOptionAsBool(
 		nlohmann::json reqs, String name);

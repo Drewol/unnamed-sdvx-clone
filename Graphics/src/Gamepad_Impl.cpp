@@ -16,15 +16,15 @@ namespace Graphics
 		m_window = window;
 		m_deviceIndex = deviceIndex;
 		m_joystick = SDL_JoystickOpen(deviceIndex);
-		if(!m_joystick)
+		if (!m_joystick)
 		{
 			Logf("Failed to open joystick %d", Logger::Severity::Error, deviceIndex);
 			return false;
 		}
 
-		for(int32 i = 0; i < SDL_JoystickNumButtons(m_joystick); i++)
+		for (int32 i = 0; i < SDL_JoystickNumButtons(m_joystick); i++)
 			m_buttonStates.Add(0);
-		for(int32 i = 0; i < SDL_JoystickNumAxes(m_joystick); i++)
+		for (int32 i = 0; i < SDL_JoystickNumAxes(m_joystick); i++)
 			m_axisState.Add(0.0f);
 
 		String deviceName = SDL_JoystickName(m_joystick);
@@ -37,7 +37,7 @@ namespace Graphics
 	void Gamepad_Impl::HandleInputEvent(uint32 buttonIndex, uint8 newState, int32 delta)
 	{
 		m_buttonStates[buttonIndex] = newState;
-		if(newState != 0)
+		if (newState != 0)
 			OnButtonPressed.Call(buttonIndex, delta);
 		else
 			OnButtonReleased.Call(buttonIndex, delta);
@@ -53,13 +53,13 @@ namespace Graphics
 
 	bool Gamepad_Impl::GetButton(uint8 button) const
 	{
-		if(button >= m_buttonStates.size())
+		if (button >= m_buttonStates.size())
 			return false;
 		return m_buttonStates[button] != 0;
 	}
 	float Gamepad_Impl::GetAxis(uint8 idx) const
 	{
-		if(idx >= m_axisState.size())
+		if (idx >= m_axisState.size())
 			return 0.0f;
 		return m_axisState[idx];
 	}

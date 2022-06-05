@@ -37,7 +37,7 @@ public:
 
 	// Either cancel this job or wait till it finished if it is already being processed
 	void Terminate();
-	
+
 	// Flags for jobs
 	// make sure to add the IO flag if this job performs file operations
 	JobFlags jobFlags = JobFlags::None;

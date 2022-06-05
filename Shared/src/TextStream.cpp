@@ -6,31 +6,31 @@ bool TextStream::ReadLine(BinaryStream& stream, String& out, const String& lineE
 	out.clear();
 	size_t max = stream.GetSize();
 	size_t pos = stream.Tell();
-	while(pos < max)
+	while (pos < max)
 	{
 		char c;
 		stream << c;
 		out.push_back(c);
-		if(out.size() >= lineEnding.size())
+		if (out.size() >= lineEnding.size())
 		{
 			// Compare end of output with line ending
 			auto liStart = out.end() - lineEnding.size();
-			for(size_t i = 0; i < lineEnding.size(); i++)
+			for (size_t i = 0; i < lineEnding.size(); i++)
 			{
-				if(lineEnding[i] != *(liStart + i))
+				if (lineEnding[i] != *(liStart + i))
 					goto _continue;
 			}
 			out.erase(liStart, out.end());
 			return true;
 		}
-		_continue:
+	_continue:
 		pos++;
 	}
 	return out.size() > 0;
 }
 void TextStream::Write(BinaryStream& stream, const String& out)
 {
-	for(char c : out)
+	for (char c : out)
 	{
 		stream << c;
 	}

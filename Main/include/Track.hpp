@@ -127,7 +127,7 @@ public:
 	// Normal/FX button X-axis placement
 	float GetButtonPlacement(uint32 buttonIdx);
 
-    void OnHoldEnter(Input::Button buttonCode);
+	void OnHoldEnter(Input::Button buttonCode);
 	void OnButtonReleased(Input::Button buttonCode);
 	void OnButtonReleasedDelta(Input::Button buttonCode, int32 delta);
 
@@ -204,8 +204,8 @@ public:
 	// Track Origin position
 	Transform trackOrigin;
 
-    bool hitEffectAutoplay = false;
-    float scrollSpeed = 0;
+	bool hitEffectAutoplay = false;
+	float scrollSpeed = 0;
 
 private:
 	// Laser track generators

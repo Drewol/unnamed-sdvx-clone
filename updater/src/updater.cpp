@@ -63,7 +63,7 @@ void StartUSC()
 	std::string cd(currDir);
 	std::string usc_path = cd + "\\usc-game.exe";
 
-	STARTUPINFOA info = {sizeof(info)};
+	STARTUPINFOA info = { sizeof(info) };
 	PROCESS_INFORMATION processInfo;
 	CreateProcessA(NULL, &usc_path.front(),
 		NULL,

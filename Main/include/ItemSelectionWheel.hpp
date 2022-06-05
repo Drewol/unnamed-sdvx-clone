@@ -16,7 +16,7 @@ protected:
 	Vector<uint32> m_randomVec;
 
 	bool m_filterSet = false;
-	IApplicationTickable *m_owner;
+	IApplicationTickable* m_owner;
 
 	// Currently selected sort index
 	uint32 m_selectedSortIndex = 0;
@@ -31,18 +31,18 @@ protected:
 	int32 m_lastItemIndex = -1;
 
 	// Style to use for everything song select related
-	lua_State *m_lua = nullptr;
+	lua_State* m_lua = nullptr;
 	String m_lastStatus = "";
 	std::mutex m_lock;
 
-	ItemSort<ItemSelectIndex> *m_currentSort = nullptr;
+	ItemSort<ItemSelectIndex>* m_currentSort = nullptr;
 
 	String luaScript = "";
 
 public:
 	Delegate<> OnItemsChanged;
 
-	ItemSelectionWheel(IApplicationTickable *owner) : m_owner(owner)
+	ItemSelectionWheel(IApplicationTickable* owner) : m_owner(owner)
 	{
 	}
 
@@ -124,7 +124,7 @@ public:
 		OnItemsChanged.Call();
 	}
 
-	virtual void OnItemsUpdated(Vector<DBIndex *> items)
+	virtual void OnItemsUpdated(Vector<DBIndex*> items)
 	{
 		// TODO what does this actually do?
 		for (auto i : items)
@@ -141,7 +141,7 @@ public:
 		OnItemsChanged.Call();
 	}
 
-	virtual void OnItemsCleared(Map<int32, DBIndex *> newList)
+	virtual void OnItemsCleared(Map<int32, DBIndex*> newList)
 	{
 
 		m_itemFilter.clear();
@@ -188,7 +188,8 @@ public:
 		uint32 itemIndex;
 		if (m_randomVec.size() == 1) {
 			itemIndex = m_randomVec.back();
-		} else {
+		}
+		else {
 			uint32 selection = Random::IntRange(0, (int32)m_randomVec.size() - 1);
 			itemIndex = m_randomVec.at(selection);
 			m_randomVec[selection] = m_randomVec.back();
@@ -200,7 +201,7 @@ public:
 
 	void SelectItemByItemId(uint32 id)
 	{
-		for (const auto &it : m_SourceCollection())
+		for (const auto& it : m_SourceCollection())
 		{
 			if (m_getDBEntryFromItemIndex((const ItemSelectIndex)it.second)->id == (int32)id)
 			{
@@ -221,7 +222,7 @@ public:
 
 		uint32 itemIndex = m_sortVec[sortIndex];
 
-		auto &srcCollection = m_SourceCollection();
+		auto& srcCollection = m_SourceCollection();
 		auto it = srcCollection.find(itemIndex);
 		if (it != srcCollection.end())
 		{
@@ -313,7 +314,7 @@ public:
 		return SortType::TITLE_ASC;
 	}
 
-	void SetSort(ItemSort<ItemSelectIndex> *sort)
+	void SetSort(ItemSort<ItemSelectIndex>* sort)
 	{
 		if (sort == m_currentSort)
 			return;
@@ -341,7 +342,7 @@ public:
 
 		// Add the filtered maps into the sort vec then sort
 		m_sortVec.clear();
-		for (auto &it : m_itemFilter)
+		for (auto& it : m_itemFilter)
 		{
 			m_sortVec.push_back(it.first);
 		}
@@ -356,7 +357,7 @@ public:
 		m_SetCurrentItems();
 	}
 
-	void SetFilter(Filter<ItemSelectIndex> *filter[2])
+	void SetFilter(Filter<ItemSelectIndex>* filter[2])
 	{
 		bool isFiltered = false;
 		m_itemFilter = m_items;
@@ -372,7 +373,7 @@ public:
 
 		// Add the filtered maps into the sort vec then sort
 		m_sortVec.clear();
-		for (auto &it : m_itemFilter)
+		for (auto& it : m_itemFilter)
 		{
 			m_sortVec.push_back(it.first);
 		}
@@ -380,7 +381,7 @@ public:
 
 		// Clear the current queue of random charts
 		m_randomVec.clear();
-		
+
 		// Try to go back to selected song in new sort
 		SelectLastItemIndex(isFiltered);
 
@@ -396,7 +397,7 @@ public:
 
 		// Reset sort vec to all maps and then sort
 		m_sortVec.clear();
-		for (auto &it : m_items)
+		for (auto& it : m_items)
 		{
 			m_sortVec.push_back(it.first);
 		}
@@ -404,16 +405,16 @@ public:
 
 		// Clear the current queue of random charts
 		m_randomVec.clear();
-		
+
 		// Try to go back to selected song in new sort
 		SelectLastItemIndex(true);
 
 		m_SetCurrentItems();
 	}
 
-	DBIndex *GetSelection() const
+	DBIndex* GetSelection() const
 	{
-		ItemSelectIndex const *item = m_SourceCollection().Find(
+		ItemSelectIndex const* item = m_SourceCollection().Find(
 			m_getCurrentlySelectedItemIndex());
 		if (item)
 			return m_getDBEntryFromItemIndex(item);
@@ -445,7 +446,7 @@ protected:
 		if (m_sortVec.size() == 0)
 			return -1;
 
-		const auto &it = std::find(m_sortVec.begin(), m_sortVec.end(), itemId);
+		const auto& it = std::find(m_sortVec.begin(), m_sortVec.end(), itemId);
 		if (it == m_sortVec.end())
 			return -1;
 		return std::distance(m_sortVec.begin(), it);
@@ -461,24 +462,24 @@ protected:
 		return m_sortVec[m_selectedSortIndex];
 	}
 
-	const Map<int32, ItemSelectIndex> &m_SourceCollection() const
+	const Map<int32, ItemSelectIndex>& m_SourceCollection() const
 	{
 		return m_filterSet ? m_itemFilter : m_items;
 	}
 
-	void m_PushStringToTable(const char *name, const char *data)
+	void m_PushStringToTable(const char* name, const char* data)
 	{
 		lua_pushstring(m_lua, name);
 		lua_pushstring(m_lua, data);
 		lua_settable(m_lua, -3);
 	}
-	void m_PushFloatToTable(const char *name, float data)
+	void m_PushFloatToTable(const char* name, float data)
 	{
 		lua_pushstring(m_lua, name);
 		lua_pushnumber(m_lua, data);
 		lua_settable(m_lua, -3);
 	}
-	void m_PushIntToTable(const char *name, int data)
+	void m_PushIntToTable(const char* name, int data)
 	{
 		lua_pushstring(m_lua, name);
 		lua_pushinteger(m_lua, data);

@@ -7,12 +7,12 @@
 
 Scoring::Scoring()
 {
-    g_application->autoplayInfo = &autoplayInfo;
+	g_application->autoplayInfo = &autoplayInfo;
 }
 
 Scoring::~Scoring()
 {
-    g_application->autoplayInfo = nullptr;
+	g_application->autoplayInfo = nullptr;
 	m_CleanupInput();
 	m_CleanupHitStats();
 	m_CleanupTicks();
@@ -194,7 +194,7 @@ void Scoring::Reset(const MapTimeRange& range)
 		gauge->Init(mapTotals, total, m_endTime);
 		m_gaugeStack.push_back(gauge);
 	}
-	else 
+	else
 	{
 		GaugeNormal* gauge = new GaugeNormal();
 		gauge->Init(mapTotals, total, m_endTime);
@@ -202,7 +202,7 @@ void Scoring::Reset(const MapTimeRange& range)
 	}
 
 	m_heldObjects.clear();
-	
+
 	memset(m_holdObjects, 0, sizeof(m_holdObjects));
 	memset(m_prevHoldHit, 0, sizeof(m_prevHoldHit));
 	memset(m_currentLaserSegments, 0, sizeof(m_currentLaserSegments));
@@ -291,11 +291,11 @@ void Scoring::Tick(float deltaTime)
 	m_UpdateTicks();
 	m_UpdateGaugeSamples();
 
-    for (size_t i = 0; i < 6; i++)
-    {
-        if (!m_ticks[i].empty())
-        {
-            auto tick = m_ticks[i].front();
+	for (size_t i = 0; i < 6; i++)
+	{
+		if (!m_ticks[i].empty())
+		{
+			auto tick = m_ticks[i].front();
 			if (tick->HasFlag(TickFlags::Hold))
 			{
 				if (m_replay || autoplayInfo.IsAutoplayButtons())
@@ -323,12 +323,12 @@ void Scoring::Tick(float deltaTime)
 				}
 				else if (HoldObjectAvailable(i, true) && m_input->GetButton((Input::Button)i))
 				{
-						OnHoldEnter.Call(static_cast<Input::Button>(i));
+					OnHoldEnter.Call(static_cast<Input::Button>(i));
 				}
 			}
-        }
-        autoplayInfo.buttonAnimationTimer[i] -= deltaTime;
-    }
+		}
+		autoplayInfo.buttonAnimationTimer[i] -= deltaTime;
+	}
 }
 
 float Scoring::GetLaserPosition(uint32 index, float pos)
@@ -342,7 +342,7 @@ float Scoring::GetLaserRollOutput(uint32 index)
 	assert(index <= 1);
 	// Ignore slams that are the last segment since Camera handles slam behaviour
 	if (m_currentLaserSegments[index] && !(m_currentLaserSegments[index]->flags & LaserObjectState::flag_Instant &&
-			!m_currentLaserSegments[index]->next))
+		!m_currentLaserSegments[index]->next))
 	{
 		return GetLaserPosition(index, laserTargetPositions[index]);
 	}
@@ -590,7 +590,7 @@ Gauge* Scoring::GetTopGauge() const
 void Scoring::SetAllGaugeValues(const Vector<float> values, bool zeroRest)
 {
 	unsigned int i = 0;
-	for (; i<m_gaugeStack.size() && i<values.size(); i++)
+	for (; i < m_gaugeStack.size() && i < values.size(); i++)
 	{
 		m_gaugeStack[i]->SetValue(values[i]);
 	}
@@ -742,7 +742,7 @@ void Scoring::m_OnObjectEntered(ObjectState* obj)
 	}
 	else if (obj->type == ObjectType::Hold)
 	{
-        HoldObjectState* hold = (HoldObjectState*)obj;
+		HoldObjectState* hold = (HoldObjectState*)obj;
 
 		// Add all hold ticks
 		Vector<MapTime> holdTicks;
@@ -814,7 +814,7 @@ void Scoring::m_OnObjectLeaved(ObjectState* obj)
 
 void Scoring::RenderDebugHUD(float deltaTime, Vector2& textPos)
 {
-	auto RenderText = [&](const String& text, const Vector2& pos, const Color& color = {1.0f, 1.0f, 0.5f, 1.0f})
+	auto RenderText = [&](const String& text, const Vector2& pos, const Color& color = { 1.0f, 1.0f, 0.5f, 1.0f })
 	{
 		g_application->FastText(text, pos.x + 1, pos.y + 1, 12, 0, Color::Black);
 		g_application->FastText(text, pos.x, pos.y, 12, 0, color);
@@ -845,7 +845,7 @@ void Scoring::m_UpdateTicks()
 	// This loop checks for ticks that are missed
 	for (uint32 buttonCode = 0; buttonCode < 8; buttonCode++)
 	{
-		Input::Button button = (Input::Button) buttonCode;
+		Input::Button button = (Input::Button)buttonCode;
 
 		// List of ticks for the current button code
 		auto& ticks = m_ticks[buttonCode];
@@ -876,7 +876,7 @@ void Scoring::m_UpdateTicks()
 			{
 				delta = currentTime - ticks[i]->time + m_laserOffset;
 			}
-			else 
+			else
 			{
 				delta = currentTime - ticks[i]->time + m_inputOffset;
 			}
@@ -983,7 +983,7 @@ void Scoring::m_UpdateTicks()
 			else if (replayJudgement)
 			{
 				// Some other hitstat which we don't understand
-				assert(false); 
+				assert(false);
 				processed = true;
 				m_replayDebugInfo.unkownJudgementType++;
 			}
@@ -1034,7 +1034,7 @@ void Scoring::m_UpdateTicks()
 						}
 					}
 					else if (tick->HasFlag(TickFlags::End))
-					    OnHoldLeave.Call(button);
+						OnHoldLeave.Call(button);
 
 					processed = true;
 				}
@@ -1229,7 +1229,7 @@ void Scoring::m_TickHit(ScoreTick* tick, uint32 index, MapTime delta /*= 0*/)
 
 		}
 		m_AddScore((uint32)stat->rating);
-        autoplayInfo.buttonAnimationTimer[index] = AUTOPLAY_BUTTON_HIT_DURATION;
+		autoplayInfo.buttonAnimationTimer[index] = AUTOPLAY_BUTTON_HIT_DURATION;
 	}
 	else if (tick->HasFlag(TickFlags::Hold))
 	{
@@ -1302,8 +1302,8 @@ void Scoring::m_UpdateGauges(ScoreHitRating rating, TickFlags flags)
 	}
 
 	bool isLong = (flags & TickFlags::Hold) != TickFlags::None
-	|| ((flags & TickFlags::Laser) != TickFlags::None
-	&& (flags & TickFlags::Slam) == TickFlags::None);
+		|| ((flags & TickFlags::Laser) != TickFlags::None
+			&& (flags & TickFlags::Slam) == TickFlags::None);
 
 	if (isLong)
 	{
@@ -1322,7 +1322,7 @@ void Scoring::m_UpdateGauges(ScoreHitRating rating, TickFlags flags)
 			}
 		}
 	}
-	else 
+	else
 	{
 		if (rating == ScoreHitRating::Miss)
 		{
@@ -1367,7 +1367,7 @@ void Scoring::m_UpdateGaugeSamples()
 
 void Scoring::m_CleanupTicks()
 {
-	for (auto & m_tick : m_ticks)
+	for (auto& m_tick : m_ticks)
 	{
 		for (ScoreTick* tick : m_tick)
 			delete tick;
@@ -1412,7 +1412,7 @@ void Scoring::m_SetHoldObject(ObjectState* obj, uint32 index)
 		m_holdObjects[index] = obj;
 		OnObjectHold.Call((Input::Button)index, obj);
 		if (index < 6)
-            autoplayInfo.buttonAnimationTimer[index] = ((HoldObjectState*)obj)->duration / 1000.f;
+			autoplayInfo.buttonAnimationTimer[index] = ((HoldObjectState*)obj)->duration / 1000.f;
 	}
 }
 
@@ -1446,13 +1446,13 @@ bool Scoring::m_IsBeingHeld(const ScoreTick* tick) const
 	// NOTE: all these are just heuristics. If there's a better heuristic, change this.
 	// See issue #355 for more detail.
 
-	const HoldObjectState* obj = (HoldObjectState*) tick->object;
+	const HoldObjectState* obj = (HoldObjectState*)tick->object;
 	const uint32 index = obj->index;
 	assert(index < 6);
-	
+
 	// Button needs to be hold at this moment.
 	// (Unless `tick` is the end of a long note; see below)
-	if (m_input && m_input->GetButton((Input::Button) index))
+	if (m_input && m_input->GetButton((Input::Button)index))
 	{
 		// The object currently being held must be the given hold object.
 		const ObjectState* heldObject = m_holdObjects[index];
@@ -1589,7 +1589,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 
 				positionDelta = laserTargetPositions[i] - laserPositions[i];
 				if ((inputDir == laserDir || laserDir == 0) && fabsf(positionDelta) <= m_laserDistanceLeniency)
-                    m_autoLaserTime[i] = m_autoLaserDuration;
+					m_autoLaserTime[i] = m_autoLaserDuration;
 				else
 					m_autoLaserTime[i] -= deltaTime;
 			}
@@ -1610,8 +1610,8 @@ void Scoring::m_UpdateLasers(float deltaTime)
 			{
 				laserPositions[i] = incomingLaser->points[0];
 				m_autoLaserTime[i] = inputDir == incomingLaser->GetDirection() || inputDir == 0
-									 ? m_autoLaserDuration
-									 : 0;
+					? m_autoLaserDuration
+					: 0;
 			}
 		}
 
@@ -1621,7 +1621,7 @@ void Scoring::m_UpdateLasers(float deltaTime)
 		bool replay_laser = false;
 		if (m_replay && currentSegment)
 		{
-			const ReplayJudgement* judge = m_replay->FindNextJudgement(6+i, 1000);
+			const ReplayJudgement* judge = m_replay->FindNextJudgement(6 + i, 1000);
 			replay_laser = judge && judge->rating > 0;
 		}
 		if (autoplayInfo.autoplay || m_autoLaserTime[i] > 0 || replay_laser)
@@ -1734,7 +1734,7 @@ MapTotals Scoring::CalculateMapTotals() const
 constexpr static uint32 CalculateScore(const uint32 currHitScore, const uint32 maxHitScore, const uint32 maxScore)
 {
 	if (maxHitScore == 0) return 0;
-	else return (uint32) (((double) currHitScore / (double) maxHitScore) * (double) maxScore);
+	else return (uint32)(((double)currHitScore / (double)maxHitScore) * (double)maxScore);
 }
 
 uint32 Scoring::CalculateCurrentScore() const
@@ -1790,22 +1790,22 @@ uint32 Scoring::CalculateCurrentAverageScore(uint32 currHit, uint32 currMaxHit) 
 
 bool Scoring::HoldObjectAvailable(uint32 index, bool checkIfPassedCritLine)
 {
-    if (m_ticks[index].empty())
-        return false;
-
-    auto currentTime = m_playback->GetLastTime() + m_inputOffset;
-    auto tick = m_ticks[index].front();
-    auto obj = (HoldObjectState*)tick->object;
-    if (obj->type != ObjectType::Hold)
+	if (m_ticks[index].empty())
 		return false;
-    // When a hold passes the crit line and we're eligible to hit the starting tick,
-    // change the idle hit effect to the crit hit effect
-    bool withinHoldStartWindow = tick->HasFlag(TickFlags::Start) && m_IsBeingHeld(tick) && (!checkIfPassedCritLine || obj->time <= currentTime);
-    // This allows us to have a crit hit effect anytime a hold hasn't fully scrolled past,
-    // including when the final scorable tick has been processed
-    bool holdObjectHittable = obj->time + obj->duration > currentTime && m_buttonHitTime[index] + m_inputOffset > obj->time;
 
-    return withinHoldStartWindow || holdObjectHittable;
+	auto currentTime = m_playback->GetLastTime() + m_inputOffset;
+	auto tick = m_ticks[index].front();
+	auto obj = (HoldObjectState*)tick->object;
+	if (obj->type != ObjectType::Hold)
+		return false;
+	// When a hold passes the crit line and we're eligible to hit the starting tick,
+	// change the idle hit effect to the crit hit effect
+	bool withinHoldStartWindow = tick->HasFlag(TickFlags::Start) && m_IsBeingHeld(tick) && (!checkIfPassedCritLine || obj->time <= currentTime);
+	// This allows us to have a crit hit effect anytime a hold hasn't fully scrolled past,
+	// including when the final scorable tick has been processed
+	bool holdObjectHittable = obj->time + obj->duration > currentTime && m_buttonHitTime[index] + m_inputOffset > obj->time;
+
+	return withinHoldStartWindow || holdObjectHittable;
 }
 
 ScoreHitRating ScoreTick::GetHitRatingFromDelta(const HitWindow& hitWindow, MapTime delta) const

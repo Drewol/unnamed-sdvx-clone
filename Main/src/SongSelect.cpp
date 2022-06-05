@@ -130,7 +130,7 @@ const float PreviewPlayer::m_fadeDelayDuration = 0.5f;
 
 /*
 	Song selection wheel
-*/ 
+*/
 using SongItemSelectionWheel = ItemSelectionWheel<SongSelectIndex, FolderIndex>;
 class SelectionWheel : public SongItemSelectionWheel
 {
@@ -231,8 +231,8 @@ public:
 		m_currentlySelectedDiff = newDiff;
 		m_SetLuaDiffIndex();
 
-		const Map<int32, SongSelectIndex> &maps = m_SourceCollection();
-		const SongSelectIndex *map = maps.Find(m_getCurrentlySelectedItemIndex());
+		const Map<int32, SongSelectIndex>& maps = m_SourceCollection();
+		const SongSelectIndex* map = maps.Find(m_getCurrentlySelectedItemIndex());
 		if (map == NULL)
 			return;
 		OnChartSelected.Call(map[0].GetCharts()[m_currentlySelectedDiff]);
@@ -240,9 +240,9 @@ public:
 
 	void AdvanceDifficultySelection(int32 offset)
 	{
-		const Map<int32, SongSelectIndex> &maps = m_SourceCollection();
+		const Map<int32, SongSelectIndex>& maps = m_SourceCollection();
 
-		const SongSelectIndex *map = maps.Find(m_getCurrentlySelectedItemIndex());
+		const SongSelectIndex* map = maps.Find(m_getCurrentlySelectedItemIndex());
 		if (map == NULL)
 			return;
 
@@ -254,13 +254,13 @@ public:
 	}
 
 	// Called when a new map is selected
-	Delegate<FolderIndex *> OnFolderSelected;
-	Delegate<ChartIndex *> OnChartSelected;
+	Delegate<FolderIndex*> OnFolderSelected;
+	Delegate<ChartIndex*> OnChartSelected;
 
 	// Extra method to get the chart for the current diff
-	ChartIndex *GetSelectedChart() const
+	ChartIndex* GetSelectedChart() const
 	{
-		SongSelectIndex const *map = m_SourceCollection().Find(
+		SongSelectIndex const* map = m_SourceCollection().Find(
 			m_getCurrentlySelectedItemIndex());
 		if (map)
 			return map->GetCharts()[m_currentlySelectedDiff];
@@ -382,7 +382,7 @@ private:
 		}
 	}
 
-	void m_SetLuaMaps(const char *key, const Map<int32, SongSelectIndex> &collection, bool sorted)
+	void m_SetLuaMaps(const char* key, const Map<int32, SongSelectIndex>& collection, bool sorted)
 	{
 		lua_getglobal(m_lua, "songwheel");
 		lua_pushstring(m_lua, key);
@@ -495,8 +495,8 @@ public:
 
 	bool Init()
 	{
-		SongFilter *lvFilter = new SongFilter();
-		SongFilter *flFilter = new SongFilter();
+		SongFilter* lvFilter = new SongFilter();
+		SongFilter* flFilter = new SongFilter();
 
 		AddFilter(lvFilter, FilterType::Level);
 		AddFilter(flFilter, FilterType::Folder);
@@ -534,7 +534,7 @@ public:
 		{
 			if (filter->GetType() == FilterType::Folder)
 			{
-				FolderFilter *f = (FolderFilter *)filter;
+				FolderFilter* f = (FolderFilter*)filter;
 				delete f;
 			}
 			else
@@ -562,7 +562,7 @@ public:
 		return false;
 	}
 
-	void AddFilter(SongFilter *filter, FilterType type)
+	void AddFilter(SongFilter* filter, FilterType type)
 	{
 		if (type == FilterType::Level)
 			m_levelFilters.Add(filter);
@@ -570,7 +570,7 @@ public:
 			m_folderFilters.Add(filter);
 	}
 
-	void SelectFilter(SongFilter *filter, FilterType type)
+	void SelectFilter(SongFilter* filter, FilterType type)
 	{
 		uint8 t = type == FilterType::Folder ? 0 : 1;
 		int index = 0;
@@ -635,7 +635,7 @@ public:
 		}
 	}
 
-	void SetMapDB(MapDatabase *db)
+	void SetMapDB(MapDatabase* db)
 	{
 		m_mapDB = db;
 		UpdateFilters();
@@ -664,7 +664,7 @@ public:
 		{
 			if (m_collections.find(c) == m_collections.end())
 			{
-				CollectionFilter *filter = new CollectionFilter(c, m_mapDB);
+				CollectionFilter* filter = new CollectionFilter(c, m_mapDB);
 				AddFilter(filter, FilterType::Collection);
 				m_collections.insert(c);
 			}
@@ -674,7 +674,7 @@ public:
 		{
 			if (m_folders.find(p) == m_folders.end())
 			{
-				FolderFilter *filter = new FolderFilter(p, m_mapDB);
+				FolderFilter* filter = new FolderFilter(p, m_mapDB);
 				if (filter->GetFiltered(Map<int32, SongSelectIndex>()).size() > 0)
 				{
 					AddFilter(filter, FilterType::Folder);
@@ -688,13 +688,13 @@ public:
 		}
 
 		//sort the new folderfilter vector
-		m_folderFilters.Sort([](const SongFilter *a, const SongFilter *b) {
+		m_folderFilters.Sort([](const SongFilter* a, const SongFilter* b) {
 			String aupper = a->GetName();
 			aupper.ToUpper();
 			String bupper = b->GetName();
 			bupper.ToUpper();
 			return aupper.compare(bupper) < 0;
-		});
+			});
 
 		//set the selection index to match the selected filter
 		m_currentFolderSelection = std::find(m_folderFilters.begin(), m_folderFilters.end(), m_currentFilters[0]) - m_folderFilters.begin();
@@ -708,13 +708,13 @@ public:
 	}
 
 private:
-	void m_PushStringToTable(const char *name, const char *data)
+	void m_PushStringToTable(const char* name, const char* data)
 	{
 		lua_pushstring(m_lua, name);
 		lua_pushstring(m_lua, data);
 		lua_settable(m_lua, -3);
 	}
-	void m_PushStringToArray(int index, const char *data)
+	void m_PushStringToArray(int index, const char* data)
 	{
 		lua_pushinteger(m_lua, index);
 		lua_pushstring(m_lua, data);
@@ -758,14 +758,14 @@ private:
 	}
 
 	Ref<SelectionWheel> m_selectionWheel;
-	Vector<SongFilter *> m_folderFilters;
-	Vector<SongFilter *> m_levelFilters;
+	Vector<SongFilter*> m_folderFilters;
+	Vector<SongFilter*> m_levelFilters;
 	int32 m_currentFolderSelection = 0;
 	int32 m_currentLevelSelection = 0;
 	bool m_selectingFolders = true;
-	SongFilter *m_currentFilters[2] = {nullptr};
-	MapDatabase *m_mapDB;
-	lua_State *m_lua = nullptr;
+	SongFilter* m_currentFilters[2] = { nullptr };
+	MapDatabase* m_mapDB;
+	lua_State* m_lua = nullptr;
 	std::unordered_set<std::string> m_folders;
 	std::unordered_set<std::string> m_collections;
 };
@@ -783,7 +783,7 @@ public:
 	~SortSolection()
 	{
 		g_gameConfig.Set(GameConfigKeys::LastSort, m_selection);
-		for (SongSort *s : m_sorts)
+		for (SongSort* s : m_sorts)
 		{
 			delete s;
 			// TitleSort *t = (TitleSort *)s;
@@ -853,7 +853,7 @@ public:
 		return true;
 	}
 
-	void SetSelection(SongSort *s)
+	void SetSelection(SongSort* s)
 	{
 		m_selection = std::find(m_sorts.begin(), m_sorts.end(), s) - m_sorts.begin();
 		m_selectionWheel->SetSort(s);
@@ -889,7 +889,7 @@ public:
 	}
 
 private:
-	void m_PushStringToArray(int index, const char *data)
+	void m_PushStringToArray(int index, const char* data)
 	{
 		lua_pushinteger(m_lua, index);
 		lua_pushstring(m_lua, data);
@@ -918,9 +918,9 @@ private:
 	}
 
 	Ref<SelectionWheel> m_selectionWheel;
-	Vector<SongSort *> m_sorts;
+	Vector<SongSort*> m_sorts;
 	int m_selection = 0;
-	lua_State *m_lua = nullptr;
+	lua_State* m_lua = nullptr;
 };
 
 /*
@@ -958,10 +958,10 @@ private:
 	bool m_hasRestored = false;
 	Map<Input::Button, float> m_timeSinceButtonPressed;
 	Map<Input::Button, float> m_timeSinceButtonReleased;
-	lua_State *m_lua = nullptr;
+	lua_State* m_lua = nullptr;
 	float m_lightTimer = 0.0f;
 
-	MultiplayerScreen *m_multiplayer = nullptr;
+	MultiplayerScreen* m_multiplayer = nullptr;
 	CollectionDialog m_collDiag;
 	GameplaySettingsDialog m_settDiag;
 
@@ -1073,7 +1073,7 @@ public:
 		g_audio->SetGlobalVolume(g_gameConfig.GetFloat(GameConfigKeys::MasterVolume));
 
 		m_sensMult = g_gameConfig.GetFloat(GameConfigKeys::SongSelSensMult);
-		m_previewParams = {"", 0, 0};
+		m_previewParams = { "", 0, 0 };
 		if (!g_gameConfig.GetBool(GameConfigKeys::EventMode)) { //don't let people edit collections at events
 			m_hasCollDiag = m_collDiag.Init(m_mapDatabase);
 		}
@@ -1097,12 +1097,12 @@ public:
 
 			game->GetScoring().autoplayInfo.autoplay = true;
 
-			if(m_settDiag.IsActive()) m_settDiag.Close();
+			if (m_settDiag.IsActive()) m_settDiag.Close();
 			m_suspended = true;
 
 			// Transition to game
 			g_transition->TransitionTo(game);
-		});
+			});
 
 		m_settDiag.onPressReplay.AddLambda([this]() {
 			if (m_multiplayer != nullptr) return;
@@ -1132,12 +1132,12 @@ public:
 			}
 			game->InitPlayReplay();
 
-			if(m_settDiag.IsActive()) m_settDiag.Close();
+			if (m_settDiag.IsActive()) m_settDiag.Close();
 			m_suspended = true;
 
 			// Transition to game
 			g_transition->TransitionTo(game);
-		});
+			});
 
 		m_settDiag.onPressPractice.AddLambda([this]() {
 			if (m_multiplayer != nullptr) return;
@@ -1160,7 +1160,7 @@ public:
 
 			// Transition to practice mode
 			g_transition->TransitionTo(practiceGame);
-		});
+			});
 
 		m_settDiag.onPressComputeSongOffset.AddLambda([this]() {
 			ChartIndex* chart = GetCurrentSelectedChart();
@@ -1174,7 +1174,7 @@ public:
 			}
 
 			m_previewPlayer.Restore();
-		});
+			});
 
 		if (m_hasCollDiag)
 		{
@@ -1211,14 +1211,14 @@ public:
 		OnSearchTermChanged(m_searchInput->input);
 	}
 
-	void m_updatePreview(ChartIndex *diff, bool mapChanged)
+	void m_updatePreview(ChartIndex* diff, bool mapChanged)
 	{
 		String mapRootPath = diff->path.substr(0, diff->path.find_last_of(Path::sep));
 
 		// Set current preview audio
 		String audioPath = mapRootPath + Path::sep + diff->preview_file;
 
-		PreviewParams params = {audioPath, static_cast<uint32>(diff->preview_offset), static_cast<uint32>(diff->preview_length)};
+		PreviewParams params = { audioPath, static_cast<uint32>(diff->preview_offset), static_cast<uint32>(diff->preview_length) };
 
 		/* A lot of pre-effected charts use different audio files for each difficulty; these
 		 * files differ only in their effects, so the preview offset and duration remain the
@@ -1243,7 +1243,7 @@ public:
 			}
 			else
 			{
-				params = {"", 0, 0};
+				params = { "", 0, 0 };
 
 				Logf("Failed to load preview audio from [%s]", Logger::Severity::Warning, audioPath);
 				if (m_previewParams != params)
@@ -1255,19 +1255,19 @@ public:
 	}
 
 	// When a map is selected in the song wheel
-	void OnFolderSelected(FolderIndex *folder)
+	void OnFolderSelected(FolderIndex* folder)
 	{
 		if (!folder->charts.empty() && (int)folder->charts.size() > m_selectionWheel->GetSelectedDifficultyIndex())
 			m_updatePreview(folder->charts[m_selectionWheel->GetSelectedDifficultyIndex()], true);
 	}
 	// When a difficulty is selected in the song wheel
-	void OnChartSelected(ChartIndex *chart)
+	void OnChartSelected(ChartIndex* chart)
 	{
 		m_updatePreview(chart, false);
 	}
 
 	/// TODO: Fix some conflicts between search field and filter selection
-	void OnSearchTermChanged(const String &search)
+	void OnSearchTermChanged(const String& search)
 	{
 		if (search.empty())
 			m_filterSelection->AdvanceSelection(0);
@@ -1280,12 +1280,12 @@ public:
 				{ "effector", &effector },
 				{ "author", &author },
 				{ "bpm", &bpm },
-			});
+				});
 			Map<int32, FolderIndex*> filter = m_mapDatabase->FindFoldersWithFilter(query, {
 				{ "effector", effector },
 				{ "author", author },
 				{ "bpm", bpm }
-			});
+				});
 			m_selectionWheel->SetFilter(filter);
 		}
 	}
@@ -1306,7 +1306,7 @@ public:
 		if (buttonCode == Input::Button::BT_S && !m_filterSelection->Active && !m_sortSelection->Active && !IsSuspended() && !m_transitionedToGame)
 		{
 			bool autoplay = (g_gameWindow->GetModifierKeys() & ModifierKeys::Ctrl) == ModifierKeys::Ctrl;
-			FolderIndex *folder = m_selectionWheel->GetSelection();
+			FolderIndex* folder = m_selectionWheel->GetSelection();
 			if (folder)
 			{
 				if (m_multiplayer != nullptr)
@@ -1321,7 +1321,7 @@ public:
 
 				ChartIndex* chart = GetCurrentSelectedChart();
 				m_mapDatabase->UpdateChartOffset(chart);
-				Game *game = Game::Create(chart, Game::PlaybackOptionsFromSettings());
+				Game* game = Game::Create(chart, Game::PlaybackOptionsFromSettings());
 				if (!game)
 				{
 					Log("Failed to start game", Logger::Severity::Error);
@@ -1432,7 +1432,7 @@ public:
 				m_sortSelection->Active = !m_sortSelection->Active;
 			}
 			break;
-			default:
+		default:
 			break;
 		}
 	}
@@ -1470,7 +1470,7 @@ public:
 	void OnKeyPressed(SDL_Scancode code, int32 delta) override
 	{
 		if (m_multiplayer &&
-				m_multiplayer->GetChatOverlay()->OnKeyPressedConsume(code))
+			m_multiplayer->GetChatOverlay()->OnKeyPressedConsume(code))
 			return;
 
 		if (m_collDiag.IsActive() || m_settDiag.IsActive())
@@ -1552,7 +1552,7 @@ public:
 				String paramFormat = g_gameConfig.GetString(GameConfigKeys::EditorParamsFormat);
 				String path = Path::Normalize(g_gameConfig.GetString(GameConfigKeys::EditorPath));
 				String param = Utility::Sprintf(paramFormat.c_str(),
-												Utility::Sprintf("\"%s\"", Path::Absolute(GetCurrentSelectedChart()->path)));
+					Utility::Sprintf("\"%s\"", Path::Absolute(GetCurrentSelectedChart()->path)));
 				Path::Run(path, param.GetData());
 			}
 			else if (code == SDL_SCANCODE_F12 && m_shiftDown)
@@ -1577,13 +1577,13 @@ public:
 			{
 				m_settDiag.onPressPractice.Call();
 			}
-			else if (code == SDL_SCANCODE_LSHIFT || code == SDL_SCANCODE_RSHIFT )
+			else if (code == SDL_SCANCODE_LSHIFT || code == SDL_SCANCODE_RSHIFT)
 			{
-				m_shiftDown |= (code == SDL_SCANCODE_LSHIFT? 1 : 2);
+				m_shiftDown |= (code == SDL_SCANCODE_LSHIFT ? 1 : 2);
 			}
 			else if (code == SDL_SCANCODE_DELETE)
 			{
-				m_previewParams = {"", 0, 0};
+				m_previewParams = { "", 0, 0 };
 
 				m_previewPlayer.FadeTo(Ref<AudioStream>());
 				m_previewPlayer.StopCurrent();
@@ -1591,7 +1591,7 @@ public:
 				ChartIndex* chart = m_selectionWheel->GetSelectedChart();
 				FolderIndex* folder = m_mapDatabase->GetFolder(chart->folderId);
 
-				bool deleteFolder = m_shiftDown !=0 || folder->charts.size() == 1;
+				bool deleteFolder = m_shiftDown != 0 || folder->charts.size() == 1;
 
 				if (deleteFolder)
 				{
@@ -1641,7 +1641,7 @@ public:
 
 		if (code == SDL_SCANCODE_LSHIFT)
 		{
-			m_shiftDown &= ~(code == SDL_SCANCODE_LSHIFT? 1 : 2);
+			m_shiftDown &= ~(code == SDL_SCANCODE_LSHIFT ? 1 : 2);
 		}
 	}
 	void Tick(float deltaTime) override
@@ -1689,7 +1689,7 @@ public:
 			if (g_gameConfig.GetBool(GameConfigKeys::EventMode) && idleTimeout > 0 && g_gameWindow->GetIdleTimsMs() > idleTimeout * 1000) {
 				StartDemoMode();
 			}
-		
+
 
 
 
@@ -1825,7 +1825,7 @@ public:
 		}
 	}
 
-	void MakeMultiplayer(MultiplayerScreen *multiplayer)
+	void MakeMultiplayer(MultiplayerScreen* multiplayer)
 	{
 		m_multiplayer = multiplayer;
 	}
@@ -1836,15 +1836,15 @@ public:
 	}
 };
 
-SongSelect *SongSelect::Create(MultiplayerScreen *multiplayer)
+SongSelect* SongSelect::Create(MultiplayerScreen* multiplayer)
 {
-	SongSelect_Impl *impl = new SongSelect_Impl();
+	SongSelect_Impl* impl = new SongSelect_Impl();
 	impl->MakeMultiplayer(multiplayer);
 	return impl;
 }
 
-SongSelect *SongSelect::Create()
+SongSelect* SongSelect::Create()
 {
-	SongSelect_Impl *impl = new SongSelect_Impl();
+	SongSelect_Impl* impl = new SongSelect_Impl();
 	return impl;
 }

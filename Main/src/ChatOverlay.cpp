@@ -6,7 +6,7 @@
 
 ChatOverlay::~ChatOverlay()
 {
-    ShutdownNuklear();
+	ShutdownNuklear();
 }
 
 
@@ -27,7 +27,7 @@ bool ChatOverlay::Init()
 	// Init the socket callbacks
 	m_multi->GetTCP().SetTopicHandler("server.chat.received", this, &ChatOverlay::m_handleChatReceived);
 
-	AddMessage("Note: This chat is currently not encrypted", 179, 73, 73); 
+	AddMessage("Note: This chat is currently not encrypted", 179, 73, 73);
 	return true;
 }
 
@@ -35,8 +35,8 @@ void ChatOverlay::Tick(float deltatime)
 {
 	BasicNuklearGui::Tick(deltatime);
 
-	if (m_isOpen && nk_window_find(m_nctx, "Multiplayer Chat") && 
-			nk_window_is_closed(m_nctx, "Multiplayer Chat"))
+	if (m_isOpen && nk_window_find(m_nctx, "Multiplayer Chat") &&
+		nk_window_is_closed(m_nctx, "Multiplayer Chat"))
 	{
 		CloseChat();
 	}
@@ -70,7 +70,7 @@ void ChatOverlay::m_drawChatAlert()
 	else
 	{
 		const char* cs = "Press F8 to chat";
-		nk_text_colored(m_nctx, cs, strlen(cs), NK_TEXT_CENTERED, nk_rgb(255,255,255));
+		nk_text_colored(m_nctx, cs, strlen(cs), NK_TEXT_CENTERED, nk_rgb(255, 255, 255));
 	}
 
 	nk_end(m_nctx);
@@ -79,7 +79,7 @@ void ChatOverlay::m_drawChatAlert()
 void ChatOverlay::m_drawWindow()
 {
 	//const int windowFlag = NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_CLOSABLE;
-	const int windowFlag = NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE | NK_WINDOW_SCALABLE ;
+	const int windowFlag = NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE | NK_WINDOW_SCALABLE;
 
 	float w = Math::Min(g_resolution.y / 1.4, g_resolution.x - 5.0);
 	float x = g_resolution.x / 2 - w / 2;
@@ -104,9 +104,9 @@ void ChatOverlay::m_drawWindow()
 
 		nk_layout_row_dynamic(m_nctx, 30, 1);
 
-		const struct nk_user_font *font = m_nctx->style.font;
+		const struct nk_user_font* font = m_nctx->style.font;
 
-		for(auto v : m_messages) {
+		for (auto v : m_messages) {
 			const char* s = v.first.c_str();
 
 			// Try to wrap text if needed
@@ -118,7 +118,7 @@ void ChatOverlay::m_drawWindow()
 				textEnd = maxlen;
 
 				// We are going to try to find the max length that fits
-				while(
+				while (
 					font->width(font->userdata, font->height, s, textEnd) > chat_box_width
 					&& textEnd > 1)
 				{
@@ -131,9 +131,9 @@ void ChatOverlay::m_drawWindow()
 
 				// Render the rest if there is more
 				s += textEnd;
-			} while( textEnd < maxlen);
+			} while (textEnd < maxlen);
 		}
-		
+
 		struct nk_vec2 scroll_end_pos = nk_widget_position(m_nctx);
 		if (m_newMessages > 0 || m_forceToBottom)
 		{
@@ -184,7 +184,7 @@ void ChatOverlay::m_drawWindow()
 
 	m_inEdit = isFocused;
 
-	nk_flags event = nk_edit_string_zero_terminated(m_nctx, NK_EDIT_FIELD, m_chatDraft, sizeof(m_chatDraft)-1, nk_filter_default);
+	nk_flags event = nk_edit_string_zero_terminated(m_nctx, NK_EDIT_FIELD, m_chatDraft, sizeof(m_chatDraft) - 1, nk_filter_default);
 
 	nk_end(m_nctx);
 }
@@ -267,14 +267,14 @@ void ChatOverlay::SendChatMessage(const String& message)
 	nlohmann::json packet;
 	if (m_multi->InRoom())
 		packet["topic"] = "room.chat.send";
-	else 
+	else
 		packet["topic"] = "server.chat.send";
 
 	packet["message"] = message;
 	m_multi->GetTCP().SendJSON(packet);
 
 	time_t t = time(NULL);
-	struct tm ttm = * localtime(&t);
+	struct tm ttm = *localtime(&t);
 	String out = Utility::Sprintf("%02u:%02u [%s] %s", ttm.tm_hour, ttm.tm_min, m_multi->GetUserName(), message);
 
 
@@ -288,7 +288,7 @@ bool ChatOverlay::m_handleChatReceived(nlohmann::json& packet)
 	packet["message"].get_to(message);
 
 	time_t t = time(NULL);
-	struct tm ttm = * localtime(&t);
+	struct tm ttm = *localtime(&t);
 
 	String out = Utility::Sprintf("%02u:%02u %s", ttm.tm_hour, ttm.tm_min, message);
 	m_newMessages++;
@@ -298,7 +298,7 @@ bool ChatOverlay::m_handleChatReceived(nlohmann::json& packet)
 
 void ChatOverlay::AddMessage(const String& message, int r, int g, int b)
 {
-	m_messages.push_back(std::make_pair(message, nk_rgb(r,g,b)));
+	m_messages.push_back(std::make_pair(message, nk_rgb(r, g, b)));
 }
 
 void ChatOverlay::AddMessage(const String& message)

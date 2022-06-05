@@ -40,7 +40,7 @@ public:
 	}
 	void OnKeyPressed(SDL_Scancode code, int32 delta) override
 	{
-		if(code == SDL_SCANCODE_TAB)
+		if (code == SDL_SCANCODE_TAB)
 		{
 			//m_settings->SetShow(!m_settings->IsShown());
 		}

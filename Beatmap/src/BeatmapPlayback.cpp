@@ -434,7 +434,7 @@ void BeatmapPlayback::GetBarPositionsInViewRange(float numBeats, Vector<float>& 
 	while (barPositions.size() < MAX_DISP_BAR_COUNT)
 	{
 		barPositions.Add(TimeToViewDistance(currTime));
-		
+
 		Beatmap::TimingPointsIterator ntp = next(tp);
 		currTime = tp->time + static_cast<MapTime>(++measureNo * tp->GetBarDuration());
 
@@ -599,7 +599,7 @@ Beatmap::LaneTogglePointsIterator BeatmapPlayback::m_SelectLaneTogglePoint(MapTi
 		if (!IsEndLaneToggle(objStart + 1) && (objStart + 1)->time <= time)
 		{
 			objStart = objStart + 1;
-		} 
+		}
 		else
 			break;
 	}
@@ -623,7 +623,7 @@ Beatmap::ObjectsIterator BeatmapPlayback::m_SelectHitObject(MapTime time, bool a
 		if (!IsEndObject(objStart) && objStart[0]->time < time)
 		{
 			objStart = std::next(objStart);
-		} 
+		}
 		else
 			break;
 	}
@@ -652,10 +652,10 @@ Vector<String> BeatmapPlayback::GetStateString() const
 	{
 		if (state == nullptr)
 		{
-			return String{"null"};
+			return String{ "null" };
 		}
 
-		const auto* obj = (const MultiObjectState*) state;
+		const auto* obj = (const MultiObjectState*)state;
 
 		switch (obj->type)
 		{
@@ -694,7 +694,7 @@ Vector<String> BeatmapPlayback::GetStateString() const
 	{
 		if (IsEndObject(it))
 		{
-			return String{"end"};
+			return String{ "end" };
 		}
 
 		return ObjectStateToStr(it->get());

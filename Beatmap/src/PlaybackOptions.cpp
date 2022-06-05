@@ -22,7 +22,7 @@ enum class LegacyGameFlags : uint32
 
 PlaybackOptions PlaybackOptions::FromFlags(uint32 flags)
 {
-    PlaybackOptions res;
+	PlaybackOptions res;
 	if ((flags & (uint32)LegacyGameFlags::Hard) != 0) {
 		res.gaugeType = GaugeType::Hard;
 	}
@@ -31,7 +31,7 @@ PlaybackOptions PlaybackOptions::FromFlags(uint32 flags)
 	res.mirror = (flags & (uint32)LegacyGameFlags::Mirror);
 	res.autoFlags = (AutoFlags)((flags >> 3) & 0b111);
 
-    return res;
+	return res;
 }
 
 uint32 PlaybackOptions::ToLegacyFlags(const PlaybackOptions& options)

@@ -43,7 +43,7 @@ Transform& Transform::operator=(const Transform& right)
 Transform::Transform(std::initializer_list<float> values)
 {
 	auto it = values.begin();
-	for(size_t i = 0; i < Math::Max<size_t>(values.size(), 16); i++)
+	for (size_t i = 0; i < Math::Max<size_t>(values.size(), 16); i++)
 	{
 		mat[i] = *it++;
 	}
@@ -69,14 +69,14 @@ Transform& Transform::operator*=(const Transform& other)
 	Transform result;
 
 	size_t index = 0;
-	for(size_t x = 0; x < 4; x++)
+	for (size_t x = 0; x < 4; x++)
 	{
-		for(size_t y = 0; y < 4; y++)
+		for (size_t y = 0; y < 4; y++)
 		{
 			result[index] = 0;
 			size_t left = y;
 			size_t top = x * 4;
-			for(size_t i = 0; i < 4; i++)
+			for (size_t i = 0; i < 4; i++)
 			{
 				result[index] += mat[left] * other.mat[top];
 				left += 4, top++;
@@ -92,14 +92,14 @@ Transform Transform::operator*(const Transform& other) const
 	Transform result;
 
 	size_t index = 0;
-	for(size_t x = 0; x < 4; x++)
+	for (size_t x = 0; x < 4; x++)
 	{
-		for(size_t y = 0; y < 4; y++)
+		for (size_t y = 0; y < 4; y++)
 		{
 			result[index] = 0;
 			size_t left = y;
 			size_t top = x * 4;
-			for(size_t i = 0; i < 4; i++)
+			for (size_t i = 0; i < 4; i++)
 			{
 				result[index] += mat[left] * other.mat[top];
 				left += 4, top++;
@@ -185,7 +185,7 @@ Vector3 Transform::GetScale() const
 		sqrt(this->mat[0] * this->mat[0] + this->mat[1] * this->mat[1] + this->mat[2] * this->mat[2]),
 		sqrt(this->mat[4] * this->mat[4] + this->mat[5] * this->mat[5] + this->mat[6] * this->mat[6]),
 		sqrt(this->mat[8] * this->mat[8] + this->mat[9] * this->mat[9] + this->mat[10] * this->mat[10])
-		);
+	);
 }
 Vector3 Transform::GetEuler() const
 {
@@ -199,7 +199,7 @@ Vector3 Transform::GetEuler() const
 	const float cosine = cos(euler.y);
 
 	float n1, n2;
-	if(fabs(cosine) > float(0.0005))
+	if (fabs(cosine) > float(0.0005))
 	{
 		n1 = copy[10] / cosine;
 		n2 = -copy[6] / cosine;
@@ -241,7 +241,7 @@ Vector3 Transform::TransformPoint(const Vector3& position) const
 		this->mat[0] * position.x + this->mat[4] * position.y + this->mat[8] * position.z + this->mat[12],
 		this->mat[1] * position.x + this->mat[5] * position.y + this->mat[9] * position.z + this->mat[13],
 		this->mat[2] * position.x + this->mat[6] * position.y + this->mat[10] * position.z + this->mat[14]
-		) / w;
+	) / w;
 }
 Vector3 Transform::TransformDirection(const Vector3& direction) const
 {
@@ -249,7 +249,7 @@ Vector3 Transform::TransformDirection(const Vector3& direction) const
 		this->mat[0] * direction.x + this->mat[4] * direction.y + this->mat[8] * direction.z,
 		this->mat[1] * direction.x + this->mat[5] * direction.y + this->mat[9] * direction.z,
 		this->mat[2] * direction.x + this->mat[6] * direction.y + this->mat[10] * direction.z
-		);
+	);
 }
 
 Transform Transform::FromAxes(Vector3 bitangent, Vector3 tangent, Vector3 normal)

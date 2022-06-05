@@ -125,10 +125,10 @@ String ChallengeIndex::ChallengeDescriptionVal(
 {
 	// This function requires a %d or %u formater, so just sanity check in debug
 	assert(ChallengeDescriptionStrings.Find(stringName));
-	assert(ChallengeDescriptionStrings.Find(stringName)->first.find("%d")!=String::npos
-		|| ChallengeDescriptionStrings.Find(stringName)->first.find("%u")!=String::npos);
-	assert(!isOverride || ChallengeDescriptionStrings.Find(stringName)->first.find("%d")!=String::npos
-		|| ChallengeDescriptionStrings.Find(stringName)->first.find("%u")!=String::npos);
+	assert(ChallengeDescriptionStrings.Find(stringName)->first.find("%d") != String::npos
+		|| ChallengeDescriptionStrings.Find(stringName)->first.find("%u") != String::npos);
+	assert(!isOverride || ChallengeDescriptionStrings.Find(stringName)->first.find("%d") != String::npos
+		|| ChallengeDescriptionStrings.Find(stringName)->first.find("%u") != String::npos);
 
 	if (!j.contains(keyName))
 		return "";
@@ -160,7 +160,7 @@ String ChallengeIndex::ChallengeDescriptionVal(
 		// Unknown type, skip
 		return "";
 	}
-	return (isOverride? "  - ":"- ") + Utility::Sprintf(*(isOverride ? str->second : str->first), value) + "\n";
+	return (isOverride ? "  - " : "- ") + Utility::Sprintf(*(isOverride ? str->second : str->first), value) + "\n";
 }
 
 // Use this if the keyName is the same as the stringName
@@ -204,23 +204,23 @@ void ChallengeIndex::GenerateDescription()
 		desc += "\n";
 	}
 
-	desc += ChallengeDescriptionVal(j, String("min_percentage"),         false);
+	desc += ChallengeDescriptionVal(j, String("min_percentage"), false);
 	desc += ChallengeDescriptionVal(j, String("min_average_percentage"), false);
-	desc += ChallengeDescriptionVal(j, String("min_gauge"),              false, /*mult=*/100);
-	desc += ChallengeDescriptionVal(j, String("min_average_gauge"),      false, /*mult=*/100);
-	desc += ChallengeDescriptionVal(j, String("max_errors"),             false, /*mult=*/1,              /*add=*/1);
-	desc += ChallengeDescriptionVal(j, String("max_overall_errors"),     false, /*mult=*/1,              /*add=*/1);
+	desc += ChallengeDescriptionVal(j, String("min_gauge"), false, /*mult=*/100);
+	desc += ChallengeDescriptionVal(j, String("min_average_gauge"), false, /*mult=*/100);
+	desc += ChallengeDescriptionVal(j, String("max_errors"), false, /*mult=*/1,              /*add=*/1);
+	desc += ChallengeDescriptionVal(j, String("max_overall_errors"), false, /*mult=*/1,              /*add=*/1);
 	desc += ChallengeDescriptionVal(j, String("max_average_errors"),     // Reuse overall string ^
-									       String("max_overall_errors"), false, /*mult=*/totalNumCharts, /*add=*/1);
-	desc += ChallengeDescriptionVal(j, String("max_nears"),              false, /*mult=*/1,              /*add=*/1);
-	desc += ChallengeDescriptionVal(j, String("max_overall_nears"),      false, /*mult=*/1,              /*add=*/1);
+		String("max_overall_errors"), false, /*mult=*/totalNumCharts, /*add=*/1);
+	desc += ChallengeDescriptionVal(j, String("max_nears"), false, /*mult=*/1,              /*add=*/1);
+	desc += ChallengeDescriptionVal(j, String("max_overall_nears"), false, /*mult=*/1,              /*add=*/1);
 	desc += ChallengeDescriptionVal(j, String("max_average_nears"),      // Reuse overall string ^
-	                                       String("max_overall_nears"),  false, /*mult=*/totalNumCharts, /*add=*/1);
-	desc += ChallengeDescriptionVal(j, String("min_crits"),              false);
-	desc += ChallengeDescriptionVal(j, String("min_overall_crits"),      false);
+		String("max_overall_nears"), false, /*mult=*/totalNumCharts, /*add=*/1);
+	desc += ChallengeDescriptionVal(j, String("min_crits"), false);
+	desc += ChallengeDescriptionVal(j, String("min_overall_crits"), false);
 	desc += ChallengeDescriptionVal(j, String("min_average_crits"),      // Reuse overall string ^
-	                                       String("min_overall_crits"),  false, /*mult=*/totalNumCharts, /*add=*/0);
-	desc += ChallengeDescriptionVal(j, String("min_chain"),              false);
+		String("min_overall_crits"), false, /*mult=*/totalNumCharts, /*add=*/0);
+	desc += ChallengeDescriptionVal(j, String("min_chain"), false);
 
 	// If no overrides don't do anything
 	if (!settings.contains("overrides"))
@@ -273,11 +273,11 @@ void ChallengeIndex::GenerateDescription()
 		}
 
 		overdesc += ChallengeDescriptionVal(j, String("min_percentage"), true);
-		overdesc += ChallengeDescriptionVal(j, String("min_gauge"),      true, /*mult=*/100);
-		overdesc += ChallengeDescriptionVal(j, String("max_errors"),     true, /*mult=*/1, /*add=*/1);
-		overdesc += ChallengeDescriptionVal(j, String("max_nears"),      true, /*mult=*/1, /*add=*/1);
-		overdesc += ChallengeDescriptionVal(j, String("min_crits"),      true);
-		overdesc += ChallengeDescriptionVal(j, String("min_chain"),      true);
+		overdesc += ChallengeDescriptionVal(j, String("min_gauge"), true, /*mult=*/100);
+		overdesc += ChallengeDescriptionVal(j, String("max_errors"), true, /*mult=*/1, /*add=*/1);
+		overdesc += ChallengeDescriptionVal(j, String("max_nears"), true, /*mult=*/1, /*add=*/1);
+		overdesc += ChallengeDescriptionVal(j, String("min_crits"), true);
+		overdesc += ChallengeDescriptionVal(j, String("min_chain"), true);
 
 		if (!overdesc.empty())
 			desc += charts[i]->title + ":\n" + overdesc;

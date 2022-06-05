@@ -25,7 +25,8 @@ enum class GameFlags : uint32
 	AutoFX = 0b10000,
 
 	AutoLaser = 0b100000,
-End};
+	End
+};
 
 GameFlags operator|(const GameFlags& a, const GameFlags& b);
 GameFlags operator&(const GameFlags& a, const GameFlags& b);
@@ -56,7 +57,7 @@ public:
 		// Implicitly used for normal gameplay
 		PlayOptions(PlaybackOptions playbackOptions) : playbackOptions(playbackOptions) {}
 		PlayOptions(PlayOptions&&) = default;
-		
+
 		bool loopOnSuccess = false;
 		bool loopOnFail = false;
 
@@ -97,7 +98,7 @@ public:
 	virtual ChartIndex* GetChartIndex() = 0;
 	// The beatmap
 	virtual Ref<class Beatmap> GetBeatmap() = 0;
-	
+
 	// Whether the score can be scored
 	// (Full playthrough, playback speed at least x1)
 	virtual bool IsStorableScore() = 0;
@@ -113,9 +114,9 @@ public:
 	// Get lua state
 	virtual struct lua_State* GetLuaState() = 0;
 	// Set demo mode
-	virtual void SetDemoMode(bool value) = 0; 
+	virtual void SetDemoMode(bool value) = 0;
 	// Init replay mode (call before AsyncLoad) if replay is null, plays best score
-	virtual void InitPlayReplay(Replay* replay=nullptr) = 0;
+	virtual void InitPlayReplay(Replay* replay = nullptr) = 0;
 
 	// Set song db for random song selection and practice mode setups
 	virtual void SetSongDB(class MapDatabase* db) = 0;

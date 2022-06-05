@@ -34,7 +34,7 @@ namespace Graphics
 	public:
 		BuiltInShaderVariableMap()
 		{
-			for(int32 i = 0; i < SV__BuiltInEnd; i++)
+			for (int32 i = 0; i < SV__BuiltInEnd; i++)
 			{
 				Add(builtInShaderVariableNames[i], (BuiltInShaderVariable)i);
 			}
@@ -87,12 +87,12 @@ namespace Graphics
 		}
 		~Material_Impl()
 		{
-			#ifdef EMBEDDED
+#ifdef EMBEDDED
 			if (glIsProgram(m_program))
 				glDeleteProgram(m_program);
-			#else
+#else
 			glDeleteProgramPipelines(1, &m_pipeline);
-			#endif
+#endif
 		}
 		void AssignShader(ShaderType t, Shader shader) override
 		{
@@ -111,64 +111,64 @@ namespace Graphics
 #ifdef EMBEDDED
 			glAttachShader(m_program, handle);
 			glLinkProgram(m_program);
-			
+
 			glGetProgramiv(m_program, GL_ACTIVE_UNIFORMS, &numUniforms);
 #else
 			glGetProgramiv(handle, GL_ACTIVE_UNIFORMS, &numUniforms);
 #endif
-			
-			for(int32 i = 0; i < numUniforms; i++)
+
+			for (int32 i = 0; i < numUniforms; i++)
 			{
 				char name[64];
 				int32 nameLen, size;
 				uint32 type;
-				#ifdef EMBEDDED
+#ifdef EMBEDDED
 				glGetActiveUniform(m_program, i, sizeof(name), &nameLen, &size, &type, name);
 				uint32 loc = glGetUniformLocation(m_program, name);
-				#else
+#else
 				glGetActiveUniform(handle, i, sizeof(name), &nameLen, &size, &type, name);
 				uint32 loc = glGetUniformLocation(handle, name);
-				#endif
+#endif
 				m_uniforms.Add(name);
 				// Select type
 				uint32 textureID = 0;
 				String typeName = "Unknown";
-				if(type == GL_SAMPLER_2D)
+				if (type == GL_SAMPLER_2D)
 				{
 					typeName = "Sampler2D";
-					if(!m_textureIDs.Contains(name))
+					if (!m_textureIDs.Contains(name))
 						m_textureIDs.Add(name, m_textureID++);
 				}
-				else if(type == GL_FLOAT_MAT4)
+				else if (type == GL_FLOAT_MAT4)
 				{
 					typeName = "Transform";
 				}
-				else if(type == GL_FLOAT_VEC4)
+				else if (type == GL_FLOAT_VEC4)
 				{
 					typeName = "Vector4";
 				}
-				else if(type == GL_FLOAT_VEC3)
+				else if (type == GL_FLOAT_VEC3)
 				{
 					typeName = "Vector3";
 				}
-				else if(type == GL_FLOAT_VEC2)
+				else if (type == GL_FLOAT_VEC2)
 				{
 					typeName = "Vector2";
 				}
-				else if(type == GL_FLOAT)
+				else if (type == GL_FLOAT)
 				{
 					typeName = "Float";
 				}
 
 				// Built in variable?
 				uint32 targetID = 0;
-				if(builtInShaderVariableMap.Contains(name))
+				if (builtInShaderVariableMap.Contains(name))
 				{
 					targetID = builtInShaderVariableMap[name];
 				}
 				else
 				{
-					if(m_mappedParameters.Contains(name))
+					if (m_mappedParameters.Contains(name))
 						targetID = m_mappedParameters[name];
 					else
 						targetID = m_mappedParameters.Add(name, m_userID++);
@@ -191,16 +191,16 @@ namespace Graphics
 		{
 #if _DEBUG
 			bool reloadedShaders = false;
-			for(uint32 i = 0; i < 3; i++)
+			for (uint32 i = 0; i < 3; i++)
 			{
-				if(m_shaders[i] && m_shaders[i]->UpdateHotReload())
+				if (m_shaders[i] && m_shaders[i]->UpdateHotReload())
 				{
 					reloadedShaders = true;
 				}
 			}
 
 			// Regenerate parameter map
-			if(reloadedShaders)
+			if (reloadedShaders)
 			{
 				Log("Reloading material", Logger::Severity::Info);
 				m_boundParameters.clear();
@@ -208,19 +208,19 @@ namespace Graphics
 				m_mappedParameters.clear();
 				m_userID = SV_User;
 				m_textureID = 0;
-				for(uint32 i = 0; i < 3; i++)
+				for (uint32 i = 0; i < 3; i++)
 				{
-					if(m_shaders[i])
+					if (m_shaders[i])
 						AssignShader(ShaderType(i), m_shaders[i]);
-					#ifdef EMBEDDED
+#ifdef EMBEDDED
 					glLinkProgram(m_program);
-					#endif
+#endif
 				}
 			}
 #endif
-			#ifdef EMBEDDED
+#ifdef EMBEDDED
 			BindToContext();
-			#endif
+#endif
 			// Bind renderstate variables
 			BindAll(SV_Proj, rs.projectionTransform);
 			BindAll(SV_Camera, rs.cameraTransform);
@@ -229,21 +229,21 @@ namespace Graphics
 			Transform billboard = CameraMatrix::BillboardMatrix(rs.cameraTransform);
 			BindAll(SV_BillboardMatrix, billboard);
 			BindAll(SV_Time, rs.time);
-			
+
 			// Bind parameters
 			BindParameters(params, rs.worldTransform);
-			#ifndef EMBEDDED
+#ifndef EMBEDDED
 			BindToContext();
-			#endif
+#endif
 		}
 
 		// Bind only parameters
 		void BindParameters(const MaterialParameterSet& params, const Transform& worldTransform) override
 		{
 			BindAll(SV_World, worldTransform);
-			for(auto p : params)
+			for (auto p : params)
 			{
-				switch(p.second.parameterType)
+				switch (p.second.parameterType)
 				{
 				case GL_INT:
 					BindAll(p.first, p.second.Get<int>());
@@ -275,7 +275,7 @@ namespace Graphics
 				case GL_SAMPLER_2D:
 				{
 					uint32* textureUnit = m_textureIDs.Find(p.first);
-					if(!textureUnit)
+					if (!textureUnit)
 					{
 						/// TODO: Add print once mechanism for these kind of errors
 						//Logf("Texture not found \"%s\"", Logger::Warning, p.first);
@@ -300,11 +300,11 @@ namespace Graphics
 		void BindToContext() override
 		{
 			// Bind pipeline to context
-			#ifdef EMBEDDED
+#ifdef EMBEDDED
 			glUseProgram(m_program);
-			#else
+#else
 			glBindProgramPipeline(m_pipeline);
-			#endif
+#endif
 		}
 
 		virtual bool HasUniform(String name) override
@@ -315,14 +315,14 @@ namespace Graphics
 		BoundParameterInfo* GetBoundParameters(const String& name, uint32& count)
 		{
 			uint32* mappedID = m_mappedParameters.Find(name);
-			if(!mappedID)
+			if (!mappedID)
 				return nullptr;
 			return GetBoundParameters((BuiltInShaderVariable)*mappedID, count);
 		}
 		BoundParameterInfo* GetBoundParameters(BuiltInShaderVariable bsv, uint32& count)
 		{
 			BoundParameterList* l = m_boundParameters.Find(bsv);
-			if(!l)
+			if (!l)
 				return nullptr;
 			else
 			{
@@ -333,11 +333,11 @@ namespace Graphics
 		template<typename T> void BindAll(const String& name, const T& obj)
 		{
 			uint32 num = 0;
-			#ifdef EMBEDDED
+#ifdef EMBEDDED
 			glUseProgram(m_program);
-			#endif
+#endif
 			BoundParameterInfo* bp = GetBoundParameters(name, num);
-			for(uint32 i = 0; bp && i < num; i++)
+			for (uint32 i = 0; bp && i < num; i++)
 			{
 				BindShaderVar<T>(m_shaders[(size_t)bp[i].shaderType]->Handle(), bp[i].location, obj);
 			}
@@ -345,11 +345,11 @@ namespace Graphics
 		template<typename T> void BindAll(BuiltInShaderVariable bsv, const T& obj)
 		{
 			uint32 num = 0;
-			#ifdef EMBEDDED
+#ifdef EMBEDDED
 			glUseProgram(m_program);
-			#endif
+#endif
 			BoundParameterInfo* bp = GetBoundParameters(bsv, num);
-			for(uint32 i = 0; bp && i < num; i++)
+			for (uint32 i = 0; bp && i < num; i++)
 			{
 				BindShaderVar<T>(m_shaders[(size_t)bp[i].shaderType]->Handle(), bp[i].location, obj);
 			}
@@ -360,7 +360,7 @@ namespace Graphics
 			static_assert(sizeof(T) != 0, "Incompatible shader uniform type");
 		}
 	};
-	
+
 #ifdef EMBEDDED
 	template<> void Material_Impl::BindShaderVar<Vector4>(uint32 shader, uint32 loc, const Vector4& obj)
 	{
@@ -463,13 +463,13 @@ namespace Graphics
 		impl->m_debugNames[(size_t)ShaderType::Fragment] = fsPath;
 #endif
 
-		if(!impl->m_shaders[(size_t)ShaderType::Vertex])
+		if (!impl->m_shaders[(size_t)ShaderType::Vertex])
 		{
 			Logf("Failed to load vertex shader for material from %s", Logger::Severity::Error, vsPath);
 			delete impl;
 			return Material();
 		}
-		if(!impl->m_shaders[(size_t)ShaderType::Fragment])
+		if (!impl->m_shaders[(size_t)ShaderType::Fragment])
 		{
 			Logf("Failed to load fragment shader for material from %s", Logger::Severity::Error, fsPath);
 			delete impl;

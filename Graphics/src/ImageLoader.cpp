@@ -42,7 +42,7 @@ namespace Graphics
 		static void jpegOutputMessage(jpeg_common_struct* cinfo)
 		{
 		}
-		static void jpegFormatMessage(jpeg_common_struct* cinfo, char * buffer)
+		static void jpegFormatMessage(jpeg_common_struct* cinfo, char* buffer)
 		{
 		}
 
@@ -62,7 +62,7 @@ namespace Graphics
 			cinfo.err = &jerr;
 
 			// Return point for long jump
-			if(setjmp(jerr.jmpBuf) == 0)
+			if (setjmp(jerr.jmpBuf) == 0)
 			{
 				jpeg_create_decompress(&cinfo);
 				jpeg_mem_src(&cinfo, in.data(), (uint32)in.size());
@@ -80,10 +80,10 @@ namespace Graphics
 				size_t pixelSize = cinfo.out_color_components;
 				cinfo.out_color_space = JCS_RGB;
 
-				while(cinfo.output_scanline < cinfo.output_height)
+				while (cinfo.output_scanline < cinfo.output_height)
 				{
 					jpeg_read_scanlines(&cinfo, sample, 1);
-					for(size_t i = 0; i < cinfo.output_width; i++)
+					for (size_t i = 0; i < cinfo.output_width; i++)
 					{
 						memcpy(pBits + i, sample[0] + i * pixelSize, pixelSize);
 						pBits[i].w = 0xFF;
@@ -96,7 +96,7 @@ namespace Graphics
 				jpeg_destroy_decompress(&cinfo);
 				return true;
 			}
-			
+
 			// If we get here, the loading of the jpeg failed
 			return false;
 		}
@@ -106,20 +106,20 @@ namespace Graphics
 			memset(&image, 0, (sizeof image));
 			image.version = PNG_IMAGE_VERSION;
 
-			if(png_image_begin_read_from_memory(&image, in.data(), in.size()) == 0)
+			if (png_image_begin_read_from_memory(&image, in.data(), in.size()) == 0)
 				return false;
 
 			image.format = PNG_FORMAT_RGBA;
 
 			pImage->SetSize(Vector2i(image.width, image.height));
 			Colori* pBuffer = pImage->GetBits();
-			if(!pBuffer)
+			if (!pBuffer)
 				return false;
 
-			if((image.width * image.height * 4) != PNG_IMAGE_SIZE(image))
+			if ((image.width * image.height * 4) != PNG_IMAGE_SIZE(image))
 				return false;
 
-			if(png_image_finish_read(&image, nullptr, pBuffer, 0, nullptr) == 0)
+			if (png_image_finish_read(&image, nullptr, pBuffer, 0, nullptr) == 0)
 				return false;
 
 			png_image_free(&image);
@@ -128,12 +128,12 @@ namespace Graphics
 		bool Load(ImageRes* pImage, const String& fullPath)
 		{
 			File f;
-			if(!f.OpenRead(fullPath))
+			if (!f.OpenRead(fullPath))
 				return false;
 
 			Buffer b(f.GetSize());
 			f.Read(b.data(), b.size());
-			if(b.size() < 4)
+			if (b.size() < 4)
 				return false;
 
 			return Load(pImage, b);

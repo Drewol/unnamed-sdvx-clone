@@ -5,11 +5,11 @@
 // Fixed point format for resampling
 const uint64 AudioStreamBase::fp_sampleStep = 1ull << 48;
 
-BinaryStream &AudioStreamBase::m_reader()
+BinaryStream& AudioStreamBase::m_reader()
 {
-	return m_preloaded ? (BinaryStream &)m_memoryReader : (BinaryStream &)m_fileReader;
+	return m_preloaded ? (BinaryStream&)m_memoryReader : (BinaryStream&)m_fileReader;
 }
-bool AudioStreamBase::Init(Audio *audio, const String &path, bool preload)
+bool AudioStreamBase::Init(Audio* audio, const String& path, bool preload)
 {
 	m_audio = audio;
 
@@ -38,7 +38,7 @@ void AudioStreamBase::m_initSampling(uint32 sampleRate)
 	m_sampleStepIncrement = (uint64)(sampleStep * (double)fp_sampleStep);
 
 	m_numChannels = 2;
-	m_readBuffer = new float *[m_numChannels];
+	m_readBuffer = new float* [m_numChannels];
 	for (uint32 c = 0; c < m_numChannels; c++)
 	{
 		m_readBuffer[c] = new float[m_bufferSize];
@@ -77,11 +77,11 @@ bool AudioStreamBase::HasEnded() const
 }
 uint64 AudioStreamBase::m_secondsToSamples(double s) const
 {
-	return (uint64)(s * (double)const_cast<AudioStreamBase *>(this)->GetStreamRate_Internal());
+	return (uint64)(s * (double)const_cast<AudioStreamBase*>(this)->GetStreamRate_Internal());
 }
 double AudioStreamBase::SamplesToSeconds(int64 s) const
 {
-	return (double)s / (double)const_cast<AudioStreamBase *>(this)->GetStreamRate_Internal();
+	return (double)s / (double)const_cast<AudioStreamBase*>(this)->GetStreamRate_Internal();
 }
 double AudioStreamBase::m_getPositionSeconds(bool allowFreezeSkip /*= true*/) const
 {
@@ -114,7 +114,7 @@ void AudioStreamBase::SetPosition(int32 pos)
 	m_ended = false;
 	m_lock.unlock();
 }
-float *AudioStreamBase::GetPCM()
+float* AudioStreamBase::GetPCM()
 {
 	return GetPCM_Internal();
 }
@@ -135,11 +135,11 @@ void AudioStreamBase::m_restartTiming()
 	m_deltaSum = 0;
 	m_deltaSamples = 0;
 }
-void AudioStreamBase::PreRenderDSPs(Vector<DSP *> &DSPs)
+void AudioStreamBase::PreRenderDSPs(Vector<DSP*>& DSPs)
 {
 	PreRenderDSPs_Internal(DSPs);
 }
-void AudioStreamBase::Process(float *out, uint32 numSamples)
+void AudioStreamBase::Process(float* out, uint32 numSamples)
 {
 	if (!m_playing || m_paused)
 		return;

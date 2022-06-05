@@ -18,7 +18,7 @@ std::vector<std::pair<const char*, const wchar_t*>> testCases({
 
 	// Some emojis
 	{"\xF0\x9F\x91\x8C\xF0\x9F\x94\xA5", L"\xD83D\xDC4C\xD83D\xDD25"},
-});
+	});
 
 Test("String.ConvertToWString")
 {

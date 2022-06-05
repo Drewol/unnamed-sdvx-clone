@@ -36,7 +36,7 @@ public:
 		m_binding = new StaticBinding<R, A...>(staticFunction);
 	}
 	template<typename T>
-	void Bind(T* obj, R(T::*memberFunc)(A...))
+	void Bind(T* obj, R(T::* memberFunc)(A...))
 	{
 		Clear();
 		m_binding = new ObjectBinding<T, R, A...>(obj, memberFunc);
@@ -62,7 +62,7 @@ public:
 	}
 	void Clear()
 	{
-		if(m_binding)
+		if (m_binding)
 			delete m_binding;
 		m_binding = nullptr;
 	}
@@ -71,8 +71,8 @@ private:
 	IFunctionBinding<R, A...>* m_binding = nullptr;
 };
 
-/* 
-	Bindable property 
+/*
+	Bindable property
 	This field either acts just as a normal variable or acts a a property using Get/Set methods to interface with the underlying value
 */
 template<typename T>
@@ -106,14 +106,14 @@ public:
 protected:
 	inline T m_Get() const
 	{
-		if(Get.IsBound())
+		if (Get.IsBound())
 			return const_cast<Property*>(this)->Get.Call();
 		else
 			return m_value;
 	}
 	inline void m_Set(const T& val)
 	{
-		if(Set.IsBound())
+		if (Set.IsBound())
 			Set.Call(val);
 		else
 			m_value = val;

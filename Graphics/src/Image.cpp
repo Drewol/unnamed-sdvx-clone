@@ -28,14 +28,14 @@ namespace Graphics
 		}
 		void Clear()
 		{
-			if(m_pData)
+			if (m_pData)
 				delete[] m_pData;
 			m_pData = nullptr;
 		}
 		void Allocate()
 		{
 			m_nDataLength = m_size.x * m_size.y;
-			if(m_nDataLength == 0)
+			if (m_nDataLength == 0)
 				return;
 			m_pData = new Colori[m_nDataLength];
 		}
@@ -49,13 +49,13 @@ namespace Graphics
 		void ReSize(Vector2i size)
 		{
 			size_t new_DataLength = size.x * size.y;
-			if (new_DataLength == 0){
+			if (new_DataLength == 0) {
 				return;
 			}
 			Colori* new_pData = new Colori[new_DataLength];
 
-			for (int32 ix = 0; ix < size.x; ++ix){
-				for (int32 iy = 0; iy < size.y; ++iy){
+			for (int32 ix = 0; ix < size.x; ++ix) {
+				for (int32 iy = 0; iy < size.y; ++iy) {
 					int32 sampledX = ix * ((double)m_size.x / (double)size.x);
 					int32 sampledY = iy * ((double)m_size.y / (double)size.y);
 					new_pData[size.x * iy + ix] = m_pData[m_size.x * sampledY + sampledX];
@@ -67,7 +67,7 @@ namespace Graphics
 			m_size = size;
 			m_nDataLength = m_size.x * m_size.y;
 		}
-		bool Screenshot(OpenGL* gl,Vector2i pos)
+		bool Screenshot(OpenGL* gl, Vector2i pos)
 		{
 			GLuint texture;
 			GLenum err;
@@ -104,11 +104,11 @@ namespace Graphics
 
 
 			//Copy texture contents to image pData
-			#ifdef EMBEDDED
+#ifdef EMBEDDED
 			glReadPixels(0, 0, m_size.x, m_size.y, GL_RGBA, GL_UNSIGNED_BYTE, m_pData);
-			#else
+#else
 			glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_pData);
-			#endif
+#endif
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glFinish();
 
@@ -183,7 +183,7 @@ namespace Graphics
 		pImpl->SetSize(size);
 		return GetResourceManager<ResourceType::Image>().Register(pImpl);
 	}
-	Ref<ImageRes> ImageRes::Create(Buffer & b)
+	Ref<ImageRes> ImageRes::Create(Buffer& b)
 	{
 		Image_Impl* pImpl = new Image_Impl();
 		if (ImageLoader::Load(pImpl, b))
@@ -200,7 +200,7 @@ namespace Graphics
 	Image ImageRes::Create(const String& assetPath)
 	{
 		Image_Impl* pImpl = new Image_Impl();
-		if(ImageLoader::Load(pImpl, assetPath))
+		if (ImageLoader::Load(pImpl, assetPath))
 		{
 			return GetResourceManager<ResourceType::Image>().Register(pImpl);
 		}

@@ -1,22 +1,22 @@
 #include "stdafx.h"
 #include "AudioStreamWav.hpp"
 
-uint32 AudioStreamWav::m_decode_ms_adpcm(const Buffer &encoded, Buffer *decoded, uint64 pos)
+uint32 AudioStreamWav::m_decode_ms_adpcm(const Buffer& encoded, Buffer* decoded, uint64 pos)
 {
-	int16 *pcm = (int16 *)decoded->data();
+	int16* pcm = (int16*)decoded->data();
 
-	int8 *src = ((int8 *)encoded.data()) + pos;
-	int8 blockPredictors[] = {0, 0};
-	int32 ideltas[] = {0, 0};
-	int32 sample1[] = {0, 0};
-	int32 sample2[] = {0, 0};
+	int8* src = ((int8*)encoded.data()) + pos;
+	int8 blockPredictors[] = { 0, 0 };
+	int32 ideltas[] = { 0, 0 };
+	int32 sample1[] = { 0, 0 };
+	int32 sample2[] = { 0, 0 };
 
 	blockPredictors[0] = *src++;
 	blockPredictors[1] = *src++;
 	assert(blockPredictors[0] >= 0 && blockPredictors[0] < 7);
 	assert(blockPredictors[1] >= 0 && blockPredictors[0] < 7);
 
-	int16 *src_16 = (int16 *)src;
+	int16* src_16 = (int16*)src;
 	ideltas[0] = *src_16++;
 	ideltas[1] = *src_16++;
 
@@ -31,14 +31,14 @@ uint32 AudioStreamWav::m_decode_ms_adpcm(const Buffer &encoded, Buffer *decoded,
 	*pcm++ = sample1[0];
 	*pcm++ = sample1[1];
 
-	src = (int8 *)src_16;
+	src = (int8*)src_16;
 	uint32 decodedCount = 2;
 
 	int AdaptationTable[] = {
 		230, 230, 230, 230, 307, 409, 512, 614,
-		768, 614, 512, 409, 307, 230, 230, 230};
-	int AdaptCoeff1[] = {256, 512, 0, 192, 240, 460, 392};
-	int AdaptCoeff2[] = {0, -256, 0, 64, 0, -208, -232};
+		768, 614, 512, 409, 307, 230, 230, 230 };
+	int AdaptCoeff1[] = { 256, 512, 0, 192, 240, 460, 392 };
+	int AdaptCoeff2[] = { 0, -256, 0, 64, 0, -208, -232 };
 
 	// Decode the rest of the data in the block
 	int remainingInBlock = m_format.nBlockAlign - 14;
@@ -46,12 +46,12 @@ uint32 AudioStreamWav::m_decode_ms_adpcm(const Buffer &encoded, Buffer *decoded,
 	{
 		int8 nibbleData = *src++;
 
-		int8 nibbles[] = {0, 0};
+		int8 nibbles[] = { 0, 0 };
 		nibbles[0] = nibbleData >> 4;
 		nibbles[0] &= 0x0F;
 		nibbles[1] = nibbleData & 0x0F;
 
-		int16 predictors[] = {0, 0};
+		int16 predictors[] = { 0, 0 };
 		for (size_t i = 0; i < 2; i++)
 		{
 
@@ -83,7 +83,7 @@ AudioStreamWav::~AudioStreamWav()
 	delete[] m_readBuffer;
 }
 
-bool AudioStreamWav::Init(Audio *audio, const String &path, bool preload)
+bool AudioStreamWav::Init(Audio* audio, const String& path, bool preload)
 {
 	if (!AudioStreamBase::Init(audio, path, preload)) // Always preload for now
 		return false;
@@ -159,7 +159,7 @@ bool AudioStreamWav::Init(Audio *audio, const String &path, bool preload)
 				m_pcm.resize(2 * m_samplesTotal * sizeof(float));
 				if (m_format.nFormat == 1)
 				{
-					int16 *src = ((int16 *)m_Internaldata.data());
+					int16* src = ((int16*)m_Internaldata.data());
 					if (m_format.nChannels == 2)
 					{
 						while (pos < m_samplesTotal)
@@ -189,7 +189,7 @@ bool AudioStreamWav::Init(Audio *audio, const String &path, bool preload)
 					{
 						uint32 newDecoded = m_decode_ms_adpcm(m_Internaldata, &decodedBuffer, pos);
 						pos += m_format.nBlockAlign;
-						int16 *src = ((int16 *)decodedBuffer.data());
+						int16* src = ((int16*)decodedBuffer.data());
 						for (uint32 i = 0; i < newDecoded; i++)
 						{
 							m_pcm[(2 * decoded) + (i * 2)] = (float)src[i * 2] / (float)0x7FFF;
@@ -325,7 +325,7 @@ int32 AudioStreamWav::DecodeData_Internal()
 			Buffer readData;
 			readData.resize(samplesPerRead * m_format.nChannels * sizeof(short));
 			m_fileReader.Serialize(readData.data(), samplesPerRead * m_format.nChannels * sizeof(short));
-			int16 *src = ((int16 *)readData.data());
+			int16* src = ((int16*)readData.data());
 			if (m_format.nChannels == 2)
 			{
 				for (uint32 i = 0; i < samplesPerRead; i++)
@@ -379,7 +379,7 @@ int32 AudioStreamWav::DecodeData_Internal()
 			uint64 bufferOffset = 0;
 			for (uint32 i = 0; i < decodedCount; i++)
 			{
-				int16 *src = ((int16 *)decoded.data()) + (i * 2);
+				int16* src = ((int16*)decoded.data()) + (i * 2);
 				m_readBuffer[0][i] = (float)src[0] / (float)0x7FFF;
 				m_readBuffer[1][i] = (float)src[1] / (float)0x7FFF;
 			}
@@ -420,7 +420,7 @@ int32 AudioStreamWav::DecodeData_Internal()
 	}
 	return 0;
 }
-float *AudioStreamWav::GetPCM_Internal()
+float* AudioStreamWav::GetPCM_Internal()
 {
 	if (m_preloaded)
 		return &m_pcm.front();
@@ -440,9 +440,9 @@ uint32 AudioStreamWav::GetSampleRate_Internal() const
 	return m_format.nSampleRate;
 }
 
-Ref<AudioStream> AudioStreamWav::Create(class Audio *audio, const String &path, bool preload)
+Ref<AudioStream> AudioStreamWav::Create(class Audio* audio, const String& path, bool preload)
 {
-	AudioStreamWav *impl = new AudioStreamWav();
+	AudioStreamWav* impl = new AudioStreamWav();
 	if (!impl->Init(audio, path, preload))
 	{
 		delete impl;

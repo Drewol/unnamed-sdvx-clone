@@ -1,0 +1,14 @@
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+charset = utf-8
+trim_trailing_whitespace = true
+end_of_line = lf
+insert_final_newline = true
+indent_style = tab
+
+[*.{c,h,cpp,hpp}]
+indent_size = 4
+cpp_space_pointer_reference_alignment = left
+cpp_space_after_keywords_in_control_flow_statements = true

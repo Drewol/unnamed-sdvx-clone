@@ -37,7 +37,7 @@ public:
 	virtual HRESULT STDMETHODCALLTYPE OnDefaultDeviceChanged(_In_ EDataFlow flow, _In_ ERole role, _In_ LPCWSTR pwstrDefaultDeviceId);
 	virtual HRESULT STDMETHODCALLTYPE OnPropertyValueChanged(_In_ LPCWSTR pwstrDeviceId, _In_ const PROPERTYKEY key);
 
-	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject)
+	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObject)
 	{
 		return E_NOINTERFACE;
 	}
@@ -97,7 +97,7 @@ public:
 		CloseDevice();
 
 		SAFE_RELEASE(m_pendingDevice);
-		if(m_deviceEnumerator)
+		if (m_deviceEnumerator)
 		{
 			m_deviceEnumerator->UnregisterEndpointNotificationCallback(&m_notificationClient);
 			SAFE_RELEASE(m_deviceEnumerator);
@@ -106,7 +106,7 @@ public:
 
 	void Start()
 	{
-		if(m_runAudioThread)
+		if (m_runAudioThread)
 			return;
 
 		m_runAudioThread = true;
@@ -114,12 +114,12 @@ public:
 	}
 	void Stop()
 	{
-		if(!m_runAudioThread)
+		if (!m_runAudioThread)
 			return;
 
 		// Join audio thread
 		m_runAudioThread = false;
-		if(m_audioThread.joinable())
+		if (m_audioThread.joinable())
 			m_audioThread.join();
 	}
 
@@ -132,10 +132,10 @@ public:
 		const CLSID CLSID_MMDeviceEnumerator = __uuidof(MMDeviceEnumerator);
 		const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
 		CoInitialize(nullptr);
-		if(!m_deviceEnumerator)
+		if (!m_deviceEnumerator)
 		{
 			res = CoCreateInstance(CLSID_MMDeviceEnumerator, nullptr, CLSCTX_ALL, IID_IMMDeviceEnumerator, (void**)&m_deviceEnumerator);
-			if(res != S_OK)
+			if (res != S_OK)
 				throw _com_error(res);
 
 			// Register change handler
@@ -144,12 +144,12 @@ public:
 
 		// Select default device
 		IMMDevice* defaultDevice = nullptr;
-		m_deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &defaultDevice);		
+		m_deviceEnumerator->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &defaultDevice);
 		return OpenDevice(defaultDevice);
-	}	
+	}
 	void CloseDevice()
 	{
-		if(m_audioClient)
+		if (m_audioClient)
 			m_audioClient->Stop();
 		SAFE_RELEASE(m_device);
 		SAFE_RELEASE(m_audioClient);
@@ -159,7 +159,7 @@ public:
 	{
 		assert(m_deviceEnumerator);
 		IMMDevice* newDevice = nullptr;
-		if(m_deviceEnumerator->GetDevice(devId, &newDevice) != S_OK)
+		if (m_deviceEnumerator->GetDevice(devId, &newDevice) != S_OK)
 		{
 			SAFE_RELEASE(newDevice);
 			return nullptr;
@@ -176,7 +176,7 @@ public:
 		CloseDevice();
 
 		// Open dummy device when no device specified
-		if(!device)
+		if (!device)
 			return OpenNullDevice();
 
 		HRESULT res = 0;
@@ -184,7 +184,7 @@ public:
 		// Obtain audio client
 		m_device = device;
 		res = m_device->Activate(__uuidof(IAudioClient), CLSCTX_ALL, nullptr, (void**)&m_audioClient);
-		if(res != S_OK)
+		if (res != S_OK)
 			throw _com_error(res);
 
 		WAVEFORMATEX* mixFormat = nullptr;
@@ -204,8 +204,8 @@ public:
 				WORD formats[2] = { WAVE_FORMAT_PCM, WAVE_FORMAT_IEEE_FLOAT };
 
 				int numRates = 5;
-				long sampleRates[5] = {192000L, 96000L, 88200L, 48000L, 44100L};
-				
+				long sampleRates[5] = { 192000L, 96000L, 88200L, 48000L, 44100L };
+
 				Vector<WAVEFORMATEX> allFormats;
 				for (size_t f = 0; f < numFormats; f++)
 				{
@@ -238,7 +238,7 @@ public:
 						mixFormat->nSamplesPerSec,
 						mixFormat->wBitsPerSample,
 						mixFormat->wFormatTag == WAVE_FORMAT_PCM ? "PCM" : "IEEE FLOAT"
-						);
+					);
 
 					res = m_audioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, mixFormat, NULL);
 					attemptingFormat++;
@@ -273,7 +273,7 @@ public:
 		CoTaskMemFree(mixFormat);
 
 		// Check if initialization was succesfull
-		if(res != S_OK)
+		if (res != S_OK)
 		{
 			Logf("Failed to initialize audio client with the selected settings. (%d: %s)", Logger::Severity::Error, res, GetDisplayString(res));
 			SAFE_RELEASE(device);
@@ -283,7 +283,7 @@ public:
 
 		// Get the audio render client
 		res = m_audioClient->GetService(__uuidof(IAudioRenderClient), (void**)&m_audioRenderClient);
-		if(res != S_OK)
+		if (res != S_OK)
 		{
 			Logf("Failed to get audio render client service. (%d: %s)", Logger::Severity::Error, res, GetDisplayString(res));
 			SAFE_RELEASE(device);
@@ -309,13 +309,13 @@ public:
 	}
 	bool NullBegin(float*& buffer, uint32_t& numSamples)
 	{
-		if(m_dummyTimer.Milliseconds() > 2)
+		if (m_dummyTimer.Milliseconds() > 2)
 		{
 			m_dummyTimerPos += m_dummyTimer.SecondsAsDouble();
 			m_dummyTimer.Restart();
 
 			uint32 availableSamples = (uint32)(m_dummyTimerPos * (double)m_format.nSamplesPerSec);
-			if(availableSamples > 0)
+			if (availableSamples > 0)
 			{
 				numSamples = Math::Min(m_dummyBufferLength, availableSamples);
 
@@ -330,12 +330,12 @@ public:
 
 	bool Begin(float*& buffer, uint32_t& numSamples)
 	{
-		if(m_pendingDeviceChange)
+		if (m_pendingDeviceChange)
 		{
 			OpenDevice(m_pendingDevice);
 			m_pendingDeviceChange = false;
 		}
-		if(!m_device)
+		if (!m_device)
 			return NullBegin(buffer, numSamples);
 
 		// See how much buffer space is available.
@@ -343,13 +343,13 @@ public:
 		m_audioClient->GetCurrentPadding(&numFramesPadding);
 		numSamples = m_numBufferFrames - numFramesPadding;
 
-		if(numSamples > 0)
+		if (numSamples > 0)
 		{
 			// Grab all the available space in the shared buffer.
 			HRESULT hr = m_audioRenderClient->GetBuffer(numSamples, (BYTE**)&buffer);
-			if(hr != S_OK)
+			if (hr != S_OK)
 			{
-				if(hr == AUDCLNT_E_DEVICE_INVALIDATED)
+				if (hr == AUDCLNT_E_DEVICE_INVALIDATED)
 				{
 					Logf("Audio device unplugged", Logger::Severity::Warning);
 					return false;
@@ -365,10 +365,10 @@ public:
 	}
 	void End(uint32_t numSamples)
 	{
-		if(!m_device)
+		if (!m_device)
 			return;
 
-		if(numSamples > 0)
+		if (numSamples > 0)
 		{
 			m_audioRenderClient->ReleaseBuffer(numSamples, 0);
 		}
@@ -377,14 +377,14 @@ public:
 	// Main mixer thread
 	void AudioThread()
 	{
-		while(m_runAudioThread)
+		while (m_runAudioThread)
 		{
 			int32 sleepDuration = 1;
 			float* data;
 			uint32 numSamples;
-			if(Begin(data, numSamples))
+			if (Begin(data, numSamples))
 			{
-				if(m_mixer)
+				if (m_mixer)
 					m_mixer->Mix(data, numSamples);
 				End(numSamples);
 			}
@@ -408,7 +408,7 @@ HRESULT STDMETHODCALLTYPE NotificationClient::OnDeviceRemoved(_In_ LPCWSTR pwstr
 }
 HRESULT STDMETHODCALLTYPE NotificationClient::OnDefaultDeviceChanged(_In_ EDataFlow flow, _In_ ERole role, _In_ LPCWSTR pwstrDefaultDeviceId)
 {
-	if(flow == EDataFlow::eRender && role == ERole::eMultimedia)
+	if (flow == EDataFlow::eRender && role == ERole::eMultimedia)
 	{
 		output->m_pendingDeviceChange = true;
 		output->m_pendingDevice = output->FindDevice(pwstrDefaultDeviceId);

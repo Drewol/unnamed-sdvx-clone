@@ -18,13 +18,13 @@ void Downloader::Download(const std::string& url)
 	session.SetProgressCallback(cpr::ProgressCallback([&](cpr::cpr_off_t total, cpr::cpr_off_t current, cpr::cpr_off_t, cpr::cpr_off_t, intptr_t) {
 		m_progressBar.Update(m_content.size() + total, m_content.size() + current);
 		return true;
-	}));
+		}));
 
 	m_progressBar.Start();
 
 	cpr::Response response = {};
 
-	while(true)
+	while (true)
 	{
 		response = session.Get();
 		if (response.text.empty()) break;
@@ -37,7 +37,7 @@ void Downloader::Download(const std::string& url)
 		// It might be a fluke so continue trying...
 		std::stringstream sb;
 		sb << "bytes=" << m_content.size() << "-";
-		session.SetHeader({{"Range", sb.str()}});
+		session.SetHeader({ {"Range", sb.str()} });
 	}
 
 	m_progressBar.Finish();
@@ -56,7 +56,7 @@ void Downloader::Download(const std::string& url)
 		throw std::runtime_error(sb.str());
 	}
 
-	if (response.status_code/100 != 2)
+	if (response.status_code / 100 != 2)
 	{
 		std::stringstream sb;
 		sb << "The server has returned HTTP status code " << response.status_code << ".";

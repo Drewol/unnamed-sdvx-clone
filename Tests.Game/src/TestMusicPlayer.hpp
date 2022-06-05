@@ -1,6 +1,6 @@
 #pragma once
 
-class TestMusicPlayer: public Unique
+class TestMusicPlayer : public Unique
 {
 public:
 	Audio* audio;

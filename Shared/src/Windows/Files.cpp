@@ -10,7 +10,7 @@ static Map<String, Vector<FileInfo>>  _ScanFiles(const String& rootFolder, const
 	Map<String, Vector<FileInfo>> ret;
 
 	Vector<String> fixedExts;
-	for (int i=0; i<extFilters.size(); i++)
+	for (int i = 0; i < extFilters.size(); i++)
 	{
 		// Not a reference or const bc we need a copy so we can trim it
 		String ext = extFilters[i];
@@ -22,7 +22,7 @@ static Map<String, Vector<FileInfo>>  _ScanFiles(const String& rootFolder, const
 		fixedExts.push_back(ext); // Remove possible leading dot
 	}
 
-	if(!Path::IsDirectory(rootFolder))
+	if (!Path::IsDirectory(rootFolder))
 	{
 		Logf("Can't run ScanFiles, \"%s\" is not a folder", Logger::Severity::Warning, rootFolder);
 		return ret;
@@ -39,7 +39,7 @@ static Map<String, Vector<FileInfo>>  _ScanFiles(const String& rootFolder, const
 		ret[""] = Vector<FileInfo>();
 
 	// Recursive folder search
-	while(!folderQueue.empty() && (!interrupt || !*interrupt))
+	while (!folderQueue.empty() && (!interrupt || !*interrupt))
 	{
 		String searchPath = folderQueue.front();
 		folderQueue.pop_front();
@@ -47,7 +47,7 @@ static Map<String, Vector<FileInfo>>  _ScanFiles(const String& rootFolder, const
 		WString searchPathW = Utility::ConvertToWString(searchPath + "\\*");
 		WIN32_FIND_DATA findDataW;
 		HANDLE searchHandle = FindFirstFile(*searchPathW, &findDataW);
-		if(searchHandle == INVALID_HANDLE_VALUE)
+		if (searchHandle == INVALID_HANDLE_VALUE)
 			continue;
 
 		String currentfolder;
@@ -55,9 +55,9 @@ static Map<String, Vector<FileInfo>>  _ScanFiles(const String& rootFolder, const
 		{
 			String filename = Utility::ConvertToUTF8(findDataW.cFileName);
 			/// TODO: Ask windows why
-			if(filename == ".")
+			if (filename == ".")
 				continue;
-			if(filename == "..")
+			if (filename == "..")
 				continue;
 
 			FileInfo info;
@@ -65,14 +65,14 @@ static Map<String, Vector<FileInfo>>  _ScanFiles(const String& rootFolder, const
 			info.lastWriteTime = ((uint64)findDataW.ftLastWriteTime.dwHighDateTime << 32) | (uint64)findDataW.ftLastWriteTime.dwLowDateTime;
 			info.type = FileType::Regular;
 
-			if(findDataW.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			if (findDataW.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
-				if(recurse)
+				if (recurse)
 				{
 					// Visit sub-folder
 					folderQueue.AddBack(info.fullPath);
 				}
-				else if(!filterByExtension)
+				else if (!filterByExtension)
 				{
 					info.type = FileType::Folder;
 					ret[""].push_back(info);
@@ -81,7 +81,7 @@ static Map<String, Vector<FileInfo>>  _ScanFiles(const String& rootFolder, const
 			else
 			{
 				// Check file
-				if(filterByExtension)
+				if (filterByExtension)
 				{
 					String ext = Path::GetExtension(filename);
 					for (int i = 0; i < extFilters.size(); i++)
@@ -100,7 +100,7 @@ static Map<String, Vector<FileInfo>>  _ScanFiles(const String& rootFolder, const
 					ret[""].push_back(info);
 				}
 			}
-		} while(FindNextFile(searchHandle, &findDataW) && (!interrupt || !*interrupt));
+		} while (FindNextFile(searchHandle, &findDataW) && (!interrupt || !*interrupt));
 
 		FindClose(searchHandle);
 	}

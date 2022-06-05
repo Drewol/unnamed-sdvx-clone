@@ -110,7 +110,7 @@ void Extractor::CopyArchiveData(archive* src, archive* dst)
 
 	for (;;) {
 		r = archive_read_data_block(src, &buff, &size, &offset);
-		
+
 		if (r == ARCHIVE_EOF) break;
 		WarnOrThrow(r, src, ARCHIVE_OK);
 

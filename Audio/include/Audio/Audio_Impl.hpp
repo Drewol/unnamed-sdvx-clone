@@ -43,18 +43,18 @@ public:
 protected:
 	// Used to limit rendering to a fixed number of samples
 	constexpr static uint32 m_sampleBufferLength = 384;
-	std::array<float, 2*m_sampleBufferLength> m_sampleBuffer;
-	
+	std::array<float, 2 * m_sampleBufferLength> m_sampleBuffer;
+
 private:
 	alignas(sizeof(float))
-	std::array<float, 2 * m_sampleBufferLength> m_itemBuffer;
+		std::array<float, 2 * m_sampleBufferLength> m_itemBuffer;
 
 	// Check memory corruption during filling m_itemBuffer
 #if _DEBUG
 	constexpr static uint32 m_guardBandSize = 256;
 
 	alignas(1)
-	std::array<uint8, m_guardBandSize> m_guard;
+		std::array<uint8, m_guardBandSize> m_guard;
 
 	void InitMemoryGuard();
 	void CheckMemoryGuard();

@@ -20,9 +20,9 @@ namespace Graphics
 	}
 	ResourceManagers::~ResourceManagers()
 	{
-		for(size_t i = 0; i < (size_t)ResourceType::_Length; i++)
+		for (size_t i = 0; i < (size_t)ResourceType::_Length; i++)
 		{
-			if(managers[i])
+			if (managers[i])
 			{
 				delete managers[i];
 				managers[i] = nullptr;
@@ -33,7 +33,7 @@ namespace Graphics
 	void ResourceManagers::DestroyResourceManager(ResourceType type)
 	{
 		size_t idx = (size_t)type;
-		if(managers[idx])
+		if (managers[idx])
 		{
 			managers[idx]->ReleaseAll();
 
@@ -62,7 +62,7 @@ namespace Graphics
 	void ResourceManagers::ContinueGC()
 	{
 		disabled--;
-		if(disabled < 0)
+		if (disabled < 0)
 			disabled = 0;
 	}
 	void ResourceManagers::TickAll()
@@ -71,11 +71,11 @@ namespace Graphics
 	}
 	void ResourceManagers::m_TickAll()
 	{
-		if(gcTimer.Milliseconds() > 250 && disabled == 0)
+		if (gcTimer.Milliseconds() > 250 && disabled == 0)
 		{
-			for(auto rm : managers)
+			for (auto rm : managers)
 			{
-				if(rm)
+				if (rm)
 					rm->GarbageCollect();
 			}
 			gcTimer.Restart();

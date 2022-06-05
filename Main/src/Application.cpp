@@ -34,16 +34,16 @@
 #include "LightPlugin/LightPlugin.h"
 
 GameConfig g_gameConfig;
-SkinConfig *g_skinConfig;
-OpenGL *g_gl = nullptr;
-Graphics::Window *g_gameWindow = nullptr;
-Application *g_application = nullptr;
-JobSheduler *g_jobSheduler = nullptr;
-TransitionScreen *g_transition = nullptr;
+SkinConfig* g_skinConfig;
+OpenGL* g_gl = nullptr;
+Graphics::Window* g_gameWindow = nullptr;
+Application* g_application = nullptr;
+JobSheduler* g_jobSheduler = nullptr;
+TransitionScreen* g_transition = nullptr;
 Input g_input;
 
 // Tickable queue
-static Vector<IApplicationTickable *> g_tickables;
+static Vector<IApplicationTickable*> g_tickables;
 
 struct TickableChange
 {
@@ -54,8 +54,8 @@ struct TickableChange
 		RemovedNoDelete,
 	};
 	Mode mode;
-	IApplicationTickable *tickable;
-	IApplicationTickable *insertBefore;
+	IApplicationTickable* tickable;
+	IApplicationTickable* insertBefore;
 };
 // List of changes applied to the collection of tickables
 // Applied at the end of each main loop
@@ -82,7 +82,7 @@ Application::~Application()
 	assert(g_application == this);
 	g_application = nullptr;
 }
-void Application::SetCommandLine(int32 argc, char **argv)
+void Application::SetCommandLine(int32 argc, char** argv)
 {
 	m_commandLine.clear();
 
@@ -92,7 +92,7 @@ void Application::SetCommandLine(int32 argc, char **argv)
 		m_commandLine.Add(argv[i]);
 	}
 }
-void Application::SetCommandLine(const char *cmdLine)
+void Application::SetCommandLine(const char* cmdLine)
 {
 	m_commandLine.clear();
 
@@ -173,7 +173,7 @@ int32 Application::Run()
 			}
 			else
 			{
-				auto &cmdLine = g_application->GetAppCommandLine();
+				auto& cmdLine = g_application->GetAppCommandLine();
 				if (!isReplay && (cmdLine.Contains("-autoplay") || cmdLine.Contains("-auto")))
 				{
 					game->GetScoring().autoplayInfo.autoplay = true;
@@ -186,7 +186,7 @@ int32 Application::Run()
 		{
 			if (m_commandLine.Contains("-notitle"))
 			{
-				SongSelect *ss = SongSelect::Create();
+				SongSelect* ss = SongSelect::Create();
 				ss->AsyncLoad();
 				ss->AsyncFinalize();
 				AddTickable(ss);
@@ -201,7 +201,7 @@ int32 Application::Run()
 	return 0;
 }
 
-void Application::SetUpdateAvailable(const String &version, const String &url, const String &download)
+void Application::SetUpdateAvailable(const String& version, const String& url, const String& download)
 {
 	m_updateVersion = version;
 	m_updateUrl = url;
@@ -226,7 +226,7 @@ void Application::RunUpdater()
 	//	0);
 
 	/// TODO: use process handle instead of pid to wait
-	
+
 	String arguments = Utility::Sprintf("%lld %s", GetCurrentProcessId(), *m_updateDownload);
 	Path::Run(Path::Absolute("updater.exe"), *arguments);
 	Shutdown();
@@ -240,7 +240,7 @@ void Application::ForceRender()
 	nvgBeginFrame(g_guiState.vg, g_resolution.x, g_resolution.y, 1);
 }
 
-NVGcontext *Application::GetVGContext()
+NVGcontext* Application::GetVGContext()
 {
 	return g_guiState.vg;
 }
@@ -271,10 +271,10 @@ Vector<String> Application::GetUpdateAvailable()
 	return Vector<String>();
 }
 
-int copyArchiveData(archive *ar, archive *aw)
+int copyArchiveData(archive* ar, archive* aw)
 {
 	int r;
-	const void *buff;
+	const void* buff;
 	size_t size;
 	la_int64_t offset;
 
@@ -302,14 +302,14 @@ void Application::m_unpackSkins()
 	if (interrupt)
 		return;
 
-	for (FileInfo &fi : files)
+	for (FileInfo& fi : files)
 	{
 		Logf("[Archive] Extracting skin '%s'", Logger::Severity::Info, fi.fullPath);
 
 		// Init archive structs
-		archive *a = archive_read_new();
-		archive *ext = archive_write_disk_new();
-		archive_entry *entry;
+		archive* a = archive_read_new();
+		archive* ext = archive_write_disk_new();
+		archive_entry* entry;
 
 		archive_read_support_filter_all(a);
 		archive_read_support_format_all(a);
@@ -325,7 +325,7 @@ void Application::m_unpackSkins()
 		if (res != ARCHIVE_OK)
 		{
 			Logf("[Archive] Error reading skin archive '%s'", Logger::Severity::Error,
-				 archive_error_string(a));
+				archive_error_string(a));
 			archive_read_close(a);
 			archive_read_free(a);
 			archive_write_free(ext);
@@ -378,7 +378,7 @@ void Application::m_unpackSkins()
 		if (res != ARCHIVE_OK)
 		{
 			Logf("[Archive] Error reading skin archive '%s'", Logger::Severity::Error,
-				 archive_error_string(a));
+				archive_error_string(a));
 			archive_read_close(a);
 			archive_read_free(a);
 			archive_write_free(ext);
@@ -400,7 +400,7 @@ void Application::m_unpackSkins()
 				break;
 			if (res < ARCHIVE_OK)
 				Logf("[Archive] Error reading skin archive '%s'", Logger::Severity::Error,
-					 archive_error_string(a));
+					archive_error_string(a));
 			if (res < ARCHIVE_WARN)
 			{
 				extractOk = false;
@@ -408,7 +408,7 @@ void Application::m_unpackSkins()
 			}
 
 			// Update the path to our dest
-			const char *currentFile = archive_entry_pathname(entry);
+			const char* currentFile = archive_entry_pathname(entry);
 			const std::string fullOutputPath = dest + currentFile;
 
 			const String dot_dot_win = "..\\";
@@ -434,14 +434,14 @@ void Application::m_unpackSkins()
 			res = archive_write_header(ext, entry);
 			if (res < ARCHIVE_OK)
 				Logf("[Archive] Error writing skin archive '%s'", Logger::Severity::Error,
-					 archive_error_string(ext));
+					archive_error_string(ext));
 			else if (archive_entry_size(entry) > 0)
 			{
 				// Copy the data so it will be extracted
 				res = copyArchiveData(a, ext);
 				if (res < ARCHIVE_OK)
 					Logf("[Archive] Error writing skin archive '%s'", Logger::Severity::Error,
-						 archive_error_string(ext));
+						archive_error_string(ext));
 				if (res < ARCHIVE_WARN)
 				{
 					extractOk = false;
@@ -451,7 +451,7 @@ void Application::m_unpackSkins()
 			res = archive_write_finish_entry(ext);
 			if (res < ARCHIVE_OK)
 				Logf("[Archive] Error writing skin archive '%s'", Logger::Severity::Error,
-					 archive_error_string(ext));
+					archive_error_string(ext));
 			if (res < ARCHIVE_WARN)
 			{
 				extractOk = false;
@@ -528,8 +528,8 @@ bool Application::m_LoadConfig(String profileName /* must be by value */)
 	}
 	else
 	{
-        // Clear here to apply defaults
-        g_gameConfig.Clear();
+		// Clear here to apply defaults
+		g_gameConfig.Clear();
 		g_gameConfig.Set(GameConfigKeys::ConfigVersion, GameConfig::VERSION);
 	}
 
@@ -554,11 +554,11 @@ bool Application::m_LoadConfig(String profileName /* must be by value */)
 
 		profileConfigFile.Close();
 	}
-    else
-    {
+	else
+	{
 		// We couldn't load this, but we are not going to do anything about it
 		successful = false;
-    }
+	}
 
 	g_gameConfig.Set(GameConfigKeys::CurrentProfileName, profileName);
 	return successful;
@@ -657,30 +657,30 @@ void Application::m_SaveConfig()
 	}
 }
 
-void __discordError(int errorCode, const char *message)
+void __discordError(int errorCode, const char* message)
 {
 	g_application->DiscordError(errorCode, message);
 }
 
-void __discordReady(const DiscordUser *user)
+void __discordReady(const DiscordUser* user)
 {
 	Logf("[Discord] Logged in as \"%s\"", Logger::Severity::Info, user->username);
 }
 
-void __discordJoinGame(const char *joins)
+void __discordJoinGame(const char* joins)
 {
 	g_application->JoinMultiFromInvite(joins);
 }
 
-void __discordSpecGame(const char *specs)
+void __discordSpecGame(const char* specs)
 {
 }
 
-void __discordJoinReq(const DiscordUser *duser)
+void __discordJoinReq(const DiscordUser* duser)
 {
 }
 
-void __discordDisconnected(int errcode, const char *msg)
+void __discordDisconnected(int errcode, const char* msg)
 {
 	g_application->DiscordError(errcode, msg);
 }
@@ -696,16 +696,16 @@ void __updateChecker()
 
 	String channel = g_gameConfig.GetString(GameConfigKeys::UpdateChannel);
 
-    // For some reason the github actions have the branch as HEAD?
-    if (channel == "HEAD")
-    {
+	// For some reason the github actions have the branch as HEAD?
+	if (channel == "HEAD")
+	{
 		g_gameConfig.Set(GameConfigKeys::UpdateChannel, "master");
-    }
+	}
 
 	ProfilerScope $1("Check for updates");
 	if (channel == "release")
 	{
-		auto r = cpr::Get(cpr::Url{"https://api.github.com/repos/drewol/unnamed-sdvx-clone/releases/latest"});
+		auto r = cpr::Get(cpr::Url{ "https://api.github.com/repos/drewol/unnamed-sdvx-clone/releases/latest" });
 
 		Logf("Update check status code: %d", Logger::Severity::Normal, r.status_code);
 		if (r.status_code != 200)
@@ -720,7 +720,7 @@ void __updateChecker()
 			{
 				latestInfo = nlohmann::json::parse(r.text);
 			}
-			catch (const std::exception &e)
+			catch (const std::exception& e)
 			{
 				Logf("Failed to parse version json: \"%s\"", Logger::Severity::Error, e.what());
 				return;
@@ -754,7 +754,7 @@ void __updateChecker()
 	else
 	{
 #ifdef GIT_COMMIT
-		auto response = cpr::Get(cpr::Url{"https://api.github.com/repos/drewol/unnamed-sdvx-clone/actions/runs"});
+		auto response = cpr::Get(cpr::Url{ "https://api.github.com/repos/drewol/unnamed-sdvx-clone/actions/runs" });
 		if (response.status_code != 200)
 		{
 			Logf("Failed to get update information: %s", Logger::Severity::Error, response.error.message.c_str());
@@ -775,7 +775,7 @@ void __updateChecker()
 		}
 
 		commits = commits.at("workflow_runs");
-		for (auto &commit_kvp : commits.items())
+		for (auto& commit_kvp : commits.items())
 		{
 			auto commit = commit_kvp.value();
 
@@ -801,7 +801,7 @@ void __updateChecker()
 				}
 				else //update available
 				{
-					auto response = cpr::Get(cpr::Url{"https://api.github.com/repos/drewol/unnamed-sdvx-clone/commits/" + new_hash});
+					auto response = cpr::Get(cpr::Url{ "https://api.github.com/repos/drewol/unnamed-sdvx-clone/commits/" + new_hash });
 					String updateUrl = "https://github.com/drewol/unnamed-sdvx-clone";
 					if (response.status_code != 200)
 					{
@@ -883,7 +883,7 @@ void Application::m_InitLightPlugins()
 			lp.Init = (int(*)(void(*)(char*)))SDL_LoadFunction(handle, "Init");
 			lp.Close = (int(*)())SDL_LoadFunction(handle, "Close");
 			lp.SetButtons = (void(*)(uint32))SDL_LoadFunction(handle, "SetButtons");
-			lp.GetName = (char*(*)())SDL_LoadFunction(handle, "GetName");
+			lp.GetName = (char* (*)())SDL_LoadFunction(handle, "GetName");
 			lp.SetLights = (void(*)(uint8, uint32, uint8, uint8, uint8))SDL_LoadFunction(handle, "SetLights");
 			lp.Tick = (void(*)(float))SDL_LoadFunction(handle, "Tick");
 			if (verifyPlugin(lp))
@@ -959,7 +959,7 @@ bool Application::m_Init()
 		CustomInfoEntry("git", ""),
 #endif
 	};
-	google_breakpad::CustomClientInfo custom_info = {kCustomInfoEntries, 2};
+	google_breakpad::CustomClientInfo custom_info = { kCustomInfoEntries, 2 };
 	//CustomClientInfo custom_info
 	auto handler = new google_breakpad::ExceptionHandler(
 		L".\\crash_dumps",
@@ -968,7 +968,7 @@ bool Application::m_Init()
 		NULL,
 		google_breakpad::ExceptionHandler::HANDLER_ALL,
 		MiniDumpNormal,
-		(const wchar_t *)nullptr,
+		(const wchar_t*)nullptr,
 		&custom_info);
 #endif
 #endif
@@ -977,7 +977,7 @@ bool Application::m_Init()
 	assert(m_commandLine.size() >= 1);
 
 	// Flags read _before_ config load
-	for (auto &cl : m_commandLine)
+	for (auto& cl : m_commandLine)
 	{
 		String k, v;
 		if (cl.Split("=", &k, &v))
@@ -1016,7 +1016,7 @@ bool Application::m_Init()
 	fullscreenMonitor = g_gameConfig.GetInt(GameConfigKeys::FullscreenMonitorIndex);
 
 	// Flags read _after_ config load
-	for (auto &cl : m_commandLine)
+	for (auto& cl : m_commandLine)
 	{
 		String k, v;
 		if (cl.Split("=", &k, &v))
@@ -1228,7 +1228,7 @@ void Application::m_MainLoop()
 		Vector<TickableChange> currentChanges(g_tickableChanges);
 		g_tickableChanges.clear();
 
-		for (auto &ch : currentChanges)
+		for (auto& ch : currentChanges)
 		{
 			if (ch.mode == TickableChange::Added)
 			{
@@ -1333,7 +1333,7 @@ void Application::m_Tick()
 	m_skinIR.ProcessCallbacks();
 
 	// Tick all items
-	for (auto &tickable : g_tickables)
+	for (auto& tickable : g_tickables)
 	{
 		tickable->Tick(m_deltaTime);
 	}
@@ -1474,7 +1474,7 @@ void Application::RenderTickables()
 	{
 		// Have no idea why `SDL_GL_SwapWindow` causes these errors...
 		if (glErr == GL_INVALID_ENUM || glErr == GL_INVALID_OPERATION) continue;
-		
+
 		Logf("OpenGL error after buffer swapping: %p", Logger::Severity::Debug, glErr);
 	}
 }
@@ -1552,7 +1552,7 @@ void Application::m_Cleanup()
 
 	sharedTextures.clear();
 	// Clear fonts before freeing library
-	for (auto &f : g_guiState.fontCahce)
+	for (auto& f : g_guiState.fontCahce)
 	{
 		f.second.reset();
 	}
@@ -1579,10 +1579,10 @@ void Application::m_Cleanup()
 	m_SaveConfig();
 }
 
-class Game *Application::LaunchMap(const String &mapPath)
+class Game* Application::LaunchMap(const String& mapPath)
 {
 	PlaybackOptions opt;
-	Game *game = Game::Create(mapPath, opt);
+	Game* game = Game::Create(mapPath, opt);
 	g_transition->TransitionTo(game);
 	return game;
 }
@@ -1611,20 +1611,20 @@ void Application::Shutdown()
 	g_gameWindow->Close();
 }
 
-void Application::AddTickable(class IApplicationTickable *tickable, class IApplicationTickable *insertBefore)
+void Application::AddTickable(class IApplicationTickable* tickable, class IApplicationTickable* insertBefore)
 {
 	Log("Adding tickable", Logger::Severity::Debug);
 
-	TickableChange &change = g_tickableChanges.Add();
+	TickableChange& change = g_tickableChanges.Add();
 	change.mode = TickableChange::Added;
 	change.tickable = tickable;
 	change.insertBefore = insertBefore;
 }
-void Application::RemoveTickable(IApplicationTickable *tickable, bool noDelete)
+void Application::RemoveTickable(IApplicationTickable* tickable, bool noDelete)
 {
 	Logf("Removing tickable: %s", Logger::Severity::Debug, noDelete ? "NoDelete" : "Delete");
 
-	TickableChange &change = g_tickableChanges.Add();
+	TickableChange& change = g_tickableChanges.Add();
 	if (noDelete)
 	{
 		change.mode = TickableChange::RemovedNoDelete;
@@ -1646,7 +1646,7 @@ String Application::GetCurrentSkin()
 	return m_skin;
 }
 
-const Vector<String> &Application::GetAppCommandLine() const
+const Vector<String>& Application::GetAppCommandLine() const
 {
 	return m_commandLine;
 }
@@ -1655,28 +1655,28 @@ RenderState Application::GetRenderStateBase() const
 	return m_renderStateBase;
 }
 
-RenderQueue *Application::GetRenderQueueBase()
+RenderQueue* Application::GetRenderQueueBase()
 {
 	return &m_renderQueueBase;
 }
 
-Graphics::Image Application::LoadImage(const String &name)
+Graphics::Image Application::LoadImage(const String& name)
 {
 	String path = String("skins/") + m_skin + String("/textures/") + name;
 	return ImageRes::Create(Path::Absolute(path));
 }
 
-Graphics::Image Application::LoadImageExternal(const String &name)
+Graphics::Image Application::LoadImageExternal(const String& name)
 {
 	return ImageRes::Create(name);
 }
-Texture Application::LoadTexture(const String &name)
+Texture Application::LoadTexture(const String& name)
 {
 	Texture ret = TextureRes::Create(g_gl, LoadImage(name));
 	return ret;
 }
 
-Texture Application::LoadTexture(const String &name, const bool &external)
+Texture Application::LoadTexture(const String& name, const bool& external)
 {
 	if (external)
 	{
@@ -1689,7 +1689,7 @@ Texture Application::LoadTexture(const String &name, const bool &external)
 		return ret;
 	}
 }
-Material Application::LoadMaterial(const String &name, const String &path)
+Material Application::LoadMaterial(const String& name, const String& path)
 {
 	String pathV = path + name + ".vs";
 	String pathF = path + name + ".fs";
@@ -1706,15 +1706,15 @@ Material Application::LoadMaterial(const String &name, const String &path)
 		ret->AssignShader(ShaderType::Geometry, gshader);
 	}
 	if (!ret)
-		g_gameWindow->ShowMessageBox("Shader Error", "Could not load shaders "+path+name+".vs and "+path+name+".fs", 0);
+		g_gameWindow->ShowMessageBox("Shader Error", "Could not load shaders " + path + name + ".vs and " + path + name + ".fs", 0);
 	assert(ret);
 	return ret;
 }
-Material Application::LoadMaterial(const String &name)
+Material Application::LoadMaterial(const String& name)
 {
 	return LoadMaterial(name, String("skins/") + m_skin + String("/shaders/"));
 }
-Sample Application::LoadSample(const String &name, const bool &external)
+Sample Application::LoadSample(const String& name, const bool& external)
 {
 	String path;
 	if (external)
@@ -1732,9 +1732,9 @@ Sample Application::LoadSample(const String &name, const bool &external)
 	return ret;
 }
 
-Graphics::Font Application::LoadFont(const String &name, const bool &external)
+Graphics::Font Application::LoadFont(const String& name, const bool& external)
 {
-	Graphics::Font *cached = m_fonts.Find(name);
+	Graphics::Font* cached = m_fonts.Find(name);
 	if (cached)
 		return *cached;
 
@@ -1749,14 +1749,14 @@ Graphics::Font Application::LoadFont(const String &name, const bool &external)
 	return newFont;
 }
 
-int Application::LoadImageJob(const String &path, Vector2i size, int placeholder, const bool &web)
+int Application::LoadImageJob(const String& path, Vector2i size, int placeholder, const bool& web)
 {
 	int ret = placeholder;
 	auto it = m_jacketImages.find(path);
 	if (it == m_jacketImages.end() || !it->second)
 	{
-		CachedJacketImage *newImage = new CachedJacketImage();
-		JacketLoadingJob *job = new JacketLoadingJob();
+		CachedJacketImage* newImage = new CachedJacketImage();
+		JacketLoadingJob* job = new JacketLoadingJob();
 		job->imagePath = path;
 		job->target = newImage;
 		job->w = size.x;
@@ -1780,7 +1780,7 @@ int Application::LoadImageJob(const String &path, Vector2i size, int placeholder
 	return ret;
 }
 
-void Application::SetScriptPath(lua_State *s)
+void Application::SetScriptPath(lua_State* s)
 {
 	//Set path for 'require' (https://stackoverflow.com/questions/4125971/setting-the-global-lua-path-variable-from-c-c?lq=1)
 	String lua_path = Path::Normalize(
@@ -1812,9 +1812,9 @@ bool Application::ScriptError(const String& name, lua_State* L)
 }
 
 
-lua_State *Application::LoadScript(const String &name, bool noError)
+lua_State* Application::LoadScript(const String& name, bool noError)
 {
-	lua_State *s = luaL_newstate();
+	lua_State* s = luaL_newstate();
 	luaL_openlibs(s);
 	SetScriptPath(s);
 
@@ -1830,8 +1830,8 @@ lua_State *Application::LoadScript(const String &name, bool noError)
 		if (Path::FileExists(defaultPath))
 		{
 			bool copyDefault = g_gameWindow->ShowYesNoMessage("Missing " + name + ".lua", "No " + name + ".lua file could be found, suggested solution:\n"
-																										 "Would you like to copy \"scripts/" +
-																							  name + ".lua\" from the default skin to your current skin?");
+				"Would you like to copy \"scripts/" +
+				name + ".lua\" from the default skin to your current skin?");
 			if (copyDefault)
 				Path::Copy(defaultPath, path);
 		}
@@ -1850,7 +1850,7 @@ lua_State *Application::LoadScript(const String &name, bool noError)
 	return s;
 }
 
-bool Application::ReloadScript(const String &name, lua_State *L)
+bool Application::ReloadScript(const String& name, lua_State* L)
 {
 	SetScriptPath(L);
 	String path = "skins/" + m_skin + "/scripts/" + name + ".lua";
@@ -1873,7 +1873,7 @@ bool Application::ReloadScript(const String &name, lua_State *L)
 void Application::ReloadSkin()
 {
 	//remove all tickables
-	for (auto *t : g_tickables)
+	for (auto* t : g_tickables)
 	{
 		t->m_Suspend();
 		delete t;
@@ -1895,7 +1895,7 @@ void Application::ReloadSkin()
 	m_jacketImages.clear();
 	sharedTextures.clear();
 
-	for (auto &sample : m_samples)
+	for (auto& sample : m_samples)
 	{
 		sample.second->Stop();
 	}
@@ -1931,10 +1931,10 @@ void Application::ReloadSkin()
 
 	//push new titlescreen
 	m_gaugeRemovedWarn = true;
-	TitleScreen *t = TitleScreen::Create();
+	TitleScreen* t = TitleScreen::Create();
 	AddTickable(t);
 }
-void Application::DisposeLua(lua_State *state)
+void Application::DisposeLua(lua_State* state)
 {
 	DisposeGUI(state);
 	m_skinHttp.ClearState(state);
@@ -1942,7 +1942,7 @@ void Application::DisposeLua(lua_State *state)
 	lua_close(state);
 }
 
-void Application::DiscordError(int errorCode, const char *message)
+void Application::DiscordError(int errorCode, const char* message)
 {
 	Logf("[Discord] %s", Logger::Severity::Warning, message);
 }
@@ -1983,15 +1983,15 @@ void Application::DiscordPresenceMulti(String secret, int partySize, int partyMa
 	Discord_UpdatePresence(&discordPresence);
 }
 
-void Application::DiscordPresenceSong(const BeatmapSettings &song, int64 startTime, int64 endTime)
+void Application::DiscordPresenceSong(const BeatmapSettings& song, int64 startTime, int64 endTime)
 {
-	Vector<String> diffNames = {"NOV", "ADV", "EXH", "INF"};
+	Vector<String> diffNames = { "NOV", "ADV", "EXH", "INF" };
 	DiscordRichPresence discordPresence;
 	memset(&discordPresence, 0, sizeof(discordPresence));
-	char bufferState[128] = {0};
+	char bufferState[128] = { 0 };
 	sprintf(bufferState, "Playing [%s %d]", diffNames[song.difficulty].c_str(), song.level);
 	discordPresence.state = bufferState;
-	char bufferDetails[128] = {0};
+	char bufferDetails[128] = { 0 };
 	int titleLength = snprintf(bufferDetails, 128, "%s - %s", *song.title, *song.artist);
 	if (titleLength >= 128 || titleLength < 0)
 	{
@@ -2017,11 +2017,11 @@ void Application::DiscordPresenceSong(const BeatmapSettings &song, int64 startTi
 
 void Application::JoinMultiFromInvite(String secret)
 {
-	MultiplayerScreen *mpScreen = new MultiplayerScreen();
-	IApplicationTickable *title = (IApplicationTickable *)TitleScreen::Create();
-	String *token = new String(*secret);
-	auto tokenInput = [=](void *screen) {
-		MultiplayerScreen *mpScreen = (MultiplayerScreen *)screen;
+	MultiplayerScreen* mpScreen = new MultiplayerScreen();
+	IApplicationTickable* title = (IApplicationTickable*)TitleScreen::Create();
+	String* token = new String(*secret);
+	auto tokenInput = [=](void* screen) {
+		MultiplayerScreen* mpScreen = (MultiplayerScreen*)screen;
 		mpScreen->JoinRoomWithToken(*token);
 		delete token;
 	};
@@ -2032,7 +2032,7 @@ void Application::JoinMultiFromInvite(String secret)
 	//Remove all tickables and add back a titlescreen as a base
 	AddTickable(title);
 	g_transition->TransitionTo(mpScreen);
-	for (IApplicationTickable *tickable : g_tickables)
+	for (IApplicationTickable* tickable : g_tickables)
 	{
 		RemoveTickable(tickable);
 	}
@@ -2175,7 +2175,7 @@ void Application::m_OnKeyReleased(SDL_Scancode code, int32 delta)
 		break;
 	}
 }
-void Application::m_OnWindowResized(const Vector2i &newSize)
+void Application::m_OnWindowResized(const Vector2i& newSize)
 {
 	if (g_gameConfig.GetBool(GameConfigKeys::ForcePortrait))
 	{
@@ -2252,11 +2252,11 @@ void Application::m_UpdateWindowPosAndShape(int32 monitorId, bool fullscreen, bo
 	const Vector2i windowSize(g_gameConfig.GetInt(GameConfigKeys::ScreenWidth), g_gameConfig.GetInt(GameConfigKeys::ScreenHeight));
 	const Vector2i fullscreenSize(g_gameConfig.GetInt(GameConfigKeys::FullScreenWidth), g_gameConfig.GetInt(GameConfigKeys::FullScreenHeight));
 
-	g_gameWindow->SetPosAndShape(Graphics::Window::PosAndShape {
+	g_gameWindow->SetPosAndShape(Graphics::Window::PosAndShape{
 		fullscreen, g_gameConfig.GetBool(GameConfigKeys::WindowedFullscreen),
 		windowPos, windowSize, monitorId, fullscreenSize
-	}, ensureInBound);
-	
+		}, ensureInBound);
+
 	if (ensureInBound && !fullscreen)
 	{
 		Vector2i windowPos = g_gameWindow->GetWindowPos();
@@ -2278,7 +2278,7 @@ void Application::m_OnFocusChanged(bool focused)
 	}
 }
 
-int Application::FastText(String inputText, float x, float y, int size, int align, const Color &color /* = Color::White */)
+int Application::FastText(String inputText, float x, float y, int size, int align, const Color& color /* = Color::White */)
 {
 	WString text = Utility::ConvertToWString(inputText);
 	String fontpath = Path::Normalize(Path::Absolute("fonts/settings/NotoSans-Regular.ttf"));
@@ -2312,7 +2312,7 @@ int Application::FastText(String inputText, float x, float y, int size, int alig
 	return 0;
 }
 
-static int lGetMousePos(lua_State *L)
+static int lGetMousePos(lua_State* L)
 {
 	Vector2i pos = g_gameWindow->GetMousePos();
 	float left = g_gameWindow->GetWindowSize().x / 2 - g_resolution.x / 2;
@@ -2321,17 +2321,17 @@ static int lGetMousePos(lua_State *L)
 	return 2;
 }
 
-static int lGetResolution(lua_State *L)
+static int lGetResolution(lua_State* L)
 {
 	lua_pushnumber(L, g_resolution.x);
 	lua_pushnumber(L, g_resolution.y);
 	return 2;
 }
 
-static int lGetLaserColor(lua_State *L /*int laser*/)
+static int lGetLaserColor(lua_State* L /*int laser*/)
 {
 	int laser = luaL_checkinteger(L, 1);
-	float laserHues[2] = {0.f};
+	float laserHues[2] = { 0.f };
 	laserHues[0] = g_gameConfig.GetFloat(GameConfigKeys::Laser0Color);
 	laserHues[1] = g_gameConfig.GetFloat(GameConfigKeys::Laser1Color);
 	Colori c = Color::FromHSV(laserHues[laser], 1.0, 1.0).ToRGBA8();
@@ -2341,7 +2341,7 @@ static int lGetLaserColor(lua_State *L /*int laser*/)
 	return 3;
 }
 
-static int lLog(lua_State *L)
+static int lLog(lua_State* L)
 {
 	String msg = luaL_checkstring(L, 1);
 	int severity = luaL_checkinteger(L, 2);
@@ -2349,26 +2349,26 @@ static int lLog(lua_State *L)
 	return 0;
 }
 
-static int lGetButton(lua_State *L /* int button */)
+static int lGetButton(lua_State* L /* int button */)
 {
-    int button = luaL_checkinteger(L, 1);
-    if (g_application->autoplayInfo
-        && (g_application->autoplayInfo->IsAutoplayButtons() || g_application->autoplayInfo->IsReplayingButtons())
+	int button = luaL_checkinteger(L, 1);
+	if (g_application->autoplayInfo
+		&& (g_application->autoplayInfo->IsAutoplayButtons() || g_application->autoplayInfo->IsReplayingButtons())
 		&& button < 6)
-        lua_pushboolean(L, g_application->autoplayInfo->buttonAnimationTimer[button] > 0);
-    else
-        lua_pushboolean(L, g_input.GetButton((Input::Button)button));
-    return 1;
+		lua_pushboolean(L, g_application->autoplayInfo->buttonAnimationTimer[button] > 0);
+	else
+		lua_pushboolean(L, g_input.GetButton((Input::Button)button));
+	return 1;
 }
 
-static int lGetKnob(lua_State *L /* int knob */)
+static int lGetKnob(lua_State* L /* int knob */)
 {
 	int knob = luaL_checkinteger(L, 1);
 	lua_pushnumber(L, g_input.GetAbsoluteLaser(knob));
 	return 1;
 }
 
-static int lGetUpdateAvailable(lua_State *L)
+static int lGetUpdateAvailable(lua_State* L)
 {
 	Vector<String> info = g_application->GetUpdateAvailable();
 	if (info.empty())
@@ -2381,9 +2381,9 @@ static int lGetUpdateAvailable(lua_State *L)
 	return 2;
 }
 
-static int lCreateSkinImage(lua_State *L /*const char* filename, int imageflags */)
+static int lCreateSkinImage(lua_State* L /*const char* filename, int imageflags */)
 {
-	const char *filename = luaL_checkstring(L, 1);
+	const char* filename = luaL_checkstring(L, 1);
 	int imageflags = luaL_checkinteger(L, 2);
 	String path = "skins/" + g_application->GetCurrentSkin() + "/textures/" + filename;
 	path = Path::Absolute(path);
@@ -2397,9 +2397,9 @@ static int lCreateSkinImage(lua_State *L /*const char* filename, int imageflags 
 	return 0;
 }
 
-static int lLoadSkinAnimation(lua_State *L)
+static int lLoadSkinAnimation(lua_State* L)
 {
-	const char *p;
+	const char* p;
 	float frametime;
 	int loopcount = 0;
 	bool compressed = false;
@@ -2426,17 +2426,17 @@ static int lLoadSkinAnimation(lua_State *L)
 	return 1;
 }
 
-static int lLoadSkinFont(lua_State *L /*const char* name */)
+static int lLoadSkinFont(lua_State* L /*const char* name */)
 {
-	const char *name = luaL_checkstring(L, 1);
+	const char* name = luaL_checkstring(L, 1);
 	String path = "skins/" + g_application->GetCurrentSkin() + "/fonts/" + name;
 	path = Path::Absolute(path);
 	return LoadFont(name, path.c_str(), L);
 }
 
-static int lLoadSkinSample(lua_State *L /*char* name */)
+static int lLoadSkinSample(lua_State* L /*char* name */)
 {
-	const char *name = luaL_checkstring(L, 1);
+	const char* name = luaL_checkstring(L, 1);
 	Sample newSample = g_application->LoadSample(name);
 	if (!newSample)
 	{
@@ -2452,9 +2452,9 @@ static int lLoadSkinSample(lua_State *L /*char* name */)
 	return 0;
 }
 
-static int lPlaySample(lua_State *L /*char* name, bool loop */)
+static int lPlaySample(lua_State* L /*char* name, bool loop */)
 {
-	const char *name = luaL_checkstring(L, 1);
+	const char* name = luaL_checkstring(L, 1);
 	bool loop = false;
 	if (lua_gettop(L) == 2)
 	{
@@ -2465,9 +2465,9 @@ static int lPlaySample(lua_State *L /*char* name, bool loop */)
 	return 0;
 }
 
-static int lIsSamplePlaying(lua_State *L /* char* name */)
+static int lIsSamplePlaying(lua_State* L /* char* name */)
 {
-	const char *name = luaL_checkstring(L, 1);
+	const char* name = luaL_checkstring(L, 1);
 	int res = g_application->IsNamedSamplePlaying(name);
 	if (res == -1)
 		return 0;
@@ -2476,29 +2476,29 @@ static int lIsSamplePlaying(lua_State *L /* char* name */)
 	return 1;
 }
 
-static int lStopSample(lua_State *L /* char* name */)
+static int lStopSample(lua_State* L /* char* name */)
 {
-	const char *name = luaL_checkstring(L, 1);
+	const char* name = luaL_checkstring(L, 1);
 	g_application->StopNamedSample(name);
 	return 0;
 }
 
-static int lPathAbsolute(lua_State *L /* string path */)
+static int lPathAbsolute(lua_State* L /* string path */)
 {
-	const char *path = luaL_checkstring(L, 1);
+	const char* path = luaL_checkstring(L, 1);
 	lua_pushstring(L, *Path::Absolute(path));
 	return 1;
 }
 
-static int lForceRender(lua_State *L)
+static int lForceRender(lua_State* L)
 {
 	g_application->ForceRender();
 	return 0;
 }
 
-static int lLoadImageJob(lua_State *L /* char* path, int placeholder, int w = 0, int h = 0 */)
+static int lLoadImageJob(lua_State* L /* char* path, int placeholder, int w = 0, int h = 0 */)
 {
-	const char *path = luaL_checkstring(L, 1);
+	const char* path = luaL_checkstring(L, 1);
 	int fallback = luaL_checkinteger(L, 2);
 	int w = 0, h = 0;
 	if (lua_gettop(L) == 4)
@@ -2506,13 +2506,13 @@ static int lLoadImageJob(lua_State *L /* char* path, int placeholder, int w = 0,
 		w = luaL_checkinteger(L, 3);
 		h = luaL_checkinteger(L, 4);
 	}
-	lua_pushinteger(L, g_application->LoadImageJob(path, {w, h}, fallback));
+	lua_pushinteger(L, g_application->LoadImageJob(path, { w, h }, fallback));
 	return 1;
 }
 
-static int lLoadWebImageJob(lua_State *L /* char* url, int placeholder, int w = 0, int h = 0 */)
+static int lLoadWebImageJob(lua_State* L /* char* url, int placeholder, int w = 0, int h = 0 */)
 {
-	const char *url = luaL_checkstring(L, 1);
+	const char* url = luaL_checkstring(L, 1);
 	int fallback = luaL_checkinteger(L, 2);
 	int w = 0, h = 0;
 	if (lua_gettop(L) == 4)
@@ -2520,26 +2520,26 @@ static int lLoadWebImageJob(lua_State *L /* char* url, int placeholder, int w = 
 		w = luaL_checkinteger(L, 3);
 		h = luaL_checkinteger(L, 4);
 	}
-	lua_pushinteger(L, g_application->LoadImageJob(url, {w, h}, fallback, true));
+	lua_pushinteger(L, g_application->LoadImageJob(url, { w, h }, fallback, true));
 	return 1;
 }
 
-static int lWarnGauge(lua_State *L)
+static int lWarnGauge(lua_State* L)
 {
 	g_application->WarnGauge();
 	return 0;
 }
 
-static int lGetSkin(lua_State *L)
+static int lGetSkin(lua_State* L)
 {
 	lua_pushstring(L, *g_application->GetCurrentSkin());
 	return 1;
 }
 
-static int lSetSkinSetting(lua_State *L /*String key, Any value*/)
+static int lSetSkinSetting(lua_State* L /*String key, Any value*/)
 {
 	String key = luaL_checkstring(L, 1);
-	IConfigEntry *entry = g_skinConfig->GetEntry(key);
+	IConfigEntry* entry = g_skinConfig->GetEntry(key);
 	if (!entry) //just set depending on value type
 	{
 		if (lua_isboolean(L, 2))
@@ -2584,10 +2584,10 @@ static int lSetSkinSetting(lua_State *L /*String key, Any value*/)
 	return 0;
 }
 
-static int lGetSkinSetting(lua_State *L /*String key*/)
+static int lGetSkinSetting(lua_State* L /*String key*/)
 {
 	String key = luaL_checkstring(L, 1);
-	IConfigEntry *entry = g_skinConfig->GetEntry(key);
+	IConfigEntry* entry = g_skinConfig->GetEntry(key);
 	if (!entry)
 	{
 		return 0;
@@ -2650,7 +2650,7 @@ int lLoadSharedTexture(lua_State* L) {
 		lua_pushstring(L, *Utility::Sprintf("Failed to load shared texture with path: '%s', key: '%s'", path, key));
 		return lua_error(L);
 	}
-	
+
 	return 0;
 }
 
@@ -2691,19 +2691,19 @@ int lGetSharedTexture(lua_State* L) {
 		return 1;
 	}
 
-	
+
 	return 0;
 }
 
-void Application::SetLuaBindings(lua_State *state)
+void Application::SetLuaBindings(lua_State* state)
 {
-	auto pushFuncToTable = [&](const char *name, int (*func)(lua_State *)) {
+	auto pushFuncToTable = [&](const char* name, int (*func)(lua_State*)) {
 		lua_pushstring(state, name);
 		lua_pushcfunction(state, func);
 		lua_settable(state, -3);
 	};
 
-	auto pushIntToTable = [&](const char *name, int data) {
+	auto pushIntToTable = [&](const char* name, int data) {
 		lua_pushstring(state, name);
 		lua_pushinteger(state, data);
 		lua_settable(state, -3);
@@ -2891,7 +2891,7 @@ void Application::SetLuaBindings(lua_State *state)
 		lua_pushstring(state, "States");
 		lua_newtable(state);
 
-		for(const auto& el : IR::ResponseState::Values)
+		for (const auto& el : IR::ResponseState::Values)
 			pushIntToTable(el.first, el.second);
 
 		lua_settable(state, -3);
@@ -2939,7 +2939,7 @@ bool JacketLoadingJob::Run()
 		{
 			if (loadedImage->GetSize().x > w || loadedImage->GetSize().y > h)
 			{
-				loadedImage->ReSize({w, h});
+				loadedImage->ReSize({ w, h });
 			}
 		}
 		return loadedImage.get() != nullptr;
@@ -2951,7 +2951,7 @@ bool JacketLoadingJob::Run()
 		{
 			if (loadedImage->GetSize().x > w || loadedImage->GetSize().y > h)
 			{
-				loadedImage->ReSize({w, h});
+				loadedImage->ReSize({ w, h });
 			}
 		}
 		return loadedImage.get() != nullptr;
@@ -2962,7 +2962,7 @@ void JacketLoadingJob::Finalize()
 	if (IsSuccessfull())
 	{
 		///TODO: Maybe do the nvgCreateImage in Run() instead
-		target->texture = nvgCreateImageRGBA(g_guiState.vg, loadedImage->GetSize().x, loadedImage->GetSize().y, 0, (unsigned char *)loadedImage->GetBits());
+		target->texture = nvgCreateImageRGBA(g_guiState.vg, loadedImage->GetSize().x, loadedImage->GetSize().y, 0, (unsigned char*)loadedImage->GetBits());
 		target->loaded = true;
 	}
 }

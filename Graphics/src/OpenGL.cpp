@@ -29,7 +29,7 @@ namespace Graphics
 	}
 	OpenGL::~OpenGL()
 	{
-		if(m_impl->context)
+		if (m_impl->context)
 		{
 			// Cleanup resource managers
 			ResourceManagers::DestroyResourceManager<ResourceType::Mesh>();
@@ -40,7 +40,7 @@ namespace Graphics
 			ResourceManagers::DestroyResourceManager<ResourceType::ParticleSystem>();
 
 #ifndef EMBEDDED
-			if(glBindProgramPipeline)
+			if (glBindProgramPipeline)
 			{
 				glDeleteProgramPipelines(1, &m_mainProgramPipeline);
 			}
@@ -62,7 +62,7 @@ namespace Graphics
 	}
 	bool OpenGL::Init(Window& window, uint32 antialiasing)
 	{
-		if(m_impl->context)
+		if (m_impl->context)
 			return true; // Already initialized
 
 		// Store the thread ID that the OpenGL context runs on
@@ -82,10 +82,10 @@ namespace Graphics
 #endif
 		// Create a context
 		m_impl->context = SDL_GL_CreateContext(sdlWnd);
-		if(!m_impl->context)
+		if (!m_impl->context)
 		{
-            Logf("Failed to create OpenGL context: %s", Logger::Severity::Error, SDL_GetError());
-            return false;
+			Logf("Failed to create OpenGL context: %s", Logger::Severity::Error, SDL_GetError());
+			return false;
 		}
 
 		if (SDL_GL_MakeCurrent(sdlWnd, m_impl->context) < 0)
@@ -101,13 +101,13 @@ namespace Graphics
 #else
 
 		// macOS and embedded doesnt need glew
-		#ifndef EMBEDDED
-		#ifndef __APPLE__
-		// To allow usage of experimental features
+#ifndef EMBEDDED
+#ifndef __APPLE__
+// To allow usage of experimental features
 		glewExperimental = true;
 		glewInit();
-		#endif
-		#endif
+#endif
+#endif
 #endif
 
 		//#define LIST_OGL_EXTENSIONS
@@ -115,14 +115,14 @@ namespace Graphics
 		Logf("Listing OpenGL Extensions:", Logger::Info);
 		GLint n, i;
 		glGetIntegerv(GL_NUM_EXTENSIONS, &n);
-		for(i = 0; i < n; i++) {
+		for (i = 0; i < n; i++) {
 			Logf("%s", Logger::Info, glGetStringi(GL_EXTENSIONS, i));
 		}
 #endif
 
 #ifdef _DEBUG
 		// Setup GL debug messages to go to the console
-		if(glDebugMessageCallback && glDebugMessageControl)
+		if (glDebugMessageCallback && glDebugMessageControl)
 		{
 			Log("OpenGL Logging on.", Logger::Severity::Info);
 			glDebugMessageCallback(GLDebugProc, 0);
@@ -200,11 +200,11 @@ namespace Graphics
 		SDL_GL_SwapWindow(sdlWnd);
 	}
 
-	#ifdef _WIN32
+#ifdef _WIN32
 	void APIENTRY GLDebugProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
-	#else
+#else
 	void GLDebugProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
-	#endif
+#endif
 	{
 #define DEBUG_SEVERITY_HIGH                              0x9146
 #define DEBUG_SEVERITY_MEDIUM                            0x9147
@@ -212,7 +212,7 @@ namespace Graphics
 #define DEBUG_SEVERITY_NOTIFICATION                      0x826B
 
 		Logger::Severity mySeverity;
-		switch(severity)
+		switch (severity)
 		{
 		case DEBUG_SEVERITY_MEDIUM:
 		case DEBUG_SEVERITY_HIGH:

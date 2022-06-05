@@ -49,8 +49,8 @@ protected:
 	Material m_material;
 	MaterialParameterSet m_params;
 	Map<String, Texture> m_textures;
-	Vector3 m_pos = Vector3(0.0,0.0,0.0);
-	Vector3 m_scale = Vector3(1.0,1.0,1.0);
+	Vector3 m_pos = Vector3(0.0, 0.0, 0.0);
+	Vector3 m_scale = Vector3(1.0, 1.0, 1.0);
 	Vector3 m_rotation = Vector3(0.0, 0.0, 0.0);
 	bool m_isWireframe = false;
 };

@@ -67,10 +67,10 @@ protected:
 	bool foreground = false;
 	bool errored = false;
 	Vector<String> defaultBGs;
-	LuaBindable *bindable = nullptr;
-	LuaBindable *trackBindable = nullptr;
+	LuaBindable* bindable = nullptr;
+	LuaBindable* trackBindable = nullptr;
 	String folderPath;
-	lua_State *lua = nullptr;
+	lua_State* lua = nullptr;
 	Vector3 timing;
 	Vector2 tilt;
 };
@@ -114,12 +114,12 @@ public:
 		String skin = g_gameConfig.GetString(GameConfigKeys::Skin);
 		lua = luaL_newstate();
 
-		auto openLib = [this](const char *name, lua_CFunction lib) {
+		auto openLib = [this](const char* name, lua_CFunction lib) {
 			luaL_requiref(lua, name, lib, 1);
 			lua_pop(lua, 1);
 		};
 
-		auto errorOnLib = [this](const char *name) {
+		auto errorOnLib = [this](const char* name) {
 			luaL_dostring(lua, (String(name) + " = {}; setmetatable(" + String(name) + ", {__index = function() error(\"Song background cannot access the '" + name + "' library\") end})").c_str());
 		};
 
@@ -197,18 +197,18 @@ public:
 		{
 			//default bg: load from skin path
 			folderPath = "skins/" +
-						 g_application->GetCurrentSkin() + Path::sep +
-						 "backgrounds" + Path::sep +
-						 layer +
-						 Path::sep;
+				g_application->GetCurrentSkin() + Path::sep +
+				"backgrounds" + Path::sep +
+				layer +
+				Path::sep;
 			folderPath = Path::Absolute(folderPath);
 		}
 		else
 		{
 			//if skin doesn't have it, try loading from chart folder
 			folderPath = game->GetChartRootPath() + Path::sep +
-						 layer +
-						 Path::sep;
+				layer +
+				Path::sep;
 			folderPath = Path::Absolute(folderPath);
 		}
 
@@ -228,7 +228,7 @@ public:
 			return;
 		UpdateRenderState(deltaTime);
 		game->SetGameplayLua(lua);
-		const TimingPoint &tp = game->GetPlayback().GetCurrentTimingPoint();
+		const TimingPoint& tp = game->GetPlayback().GetCurrentTimingPoint();
 		timing.x = game->GetPlayback().GetBeatTime();
 		timing.z = game->GetPlayback().GetLastTime() / 1000.0f;
 		offsyncTimer += (speedMult * deltaTime / tp.beatDuration) * 1000.0 * game->GetPlaybackSpeed();
@@ -252,7 +252,7 @@ public:
 
 		Vector2i screenCenter = game->GetCamera().GetScreenCenter();
 
-		tilt = {game->GetCamera().GetActualRoll(), game->GetCamera().GetBackgroundSpin()};
+		tilt = { game->GetCamera().GetActualRoll(), game->GetCamera().GetBackgroundSpin() };
 		fullscreenMaterialParams.SetParameter("clearTransition", clearTransition);
 		fullscreenMaterialParams.SetParameter("tilt", tilt);
 		fullscreenMaterialParams.SetParameter("screenCenter", screenCenter);
@@ -282,7 +282,7 @@ public:
 		g_application->ForceRender();
 	}
 
-	int LoadTexture(lua_State *L /*String uniformName, String filename*/)
+	int LoadTexture(lua_State* L /*String uniformName, String filename*/)
 	{
 		String uniformName(luaL_checkstring(L, 2));
 		String filename(luaL_checkstring(L, 3));
@@ -299,7 +299,7 @@ public:
 		return 0;
 	}
 
-	int GetTiming(lua_State *L)
+	int GetTiming(lua_State* L)
 	{
 		lua_pushnumber(L, timing.x);
 		lua_pushnumber(L, timing.y);
@@ -307,14 +307,14 @@ public:
 		return 3;
 	}
 
-	int GetTilt(lua_State *L)
+	int GetTilt(lua_State* L)
 	{
 		lua_pushnumber(L, tilt.x);
 		lua_pushnumber(L, tilt.y);
 		return 2;
 	}
 
-	int GetScreenCenter(lua_State *L)
+	int GetScreenCenter(lua_State* L)
 	{
 		auto c = game->GetCamera().GetScreenCenter();
 		lua_pushnumber(L, c.x);
@@ -322,13 +322,13 @@ public:
 		return 2;
 	}
 
-	int GetClearTransition(lua_State *L)
+	int GetClearTransition(lua_State* L)
 	{
 		lua_pushnumber(L, clearTransition);
 		return 1;
 	}
 
-	int SetParami(lua_State *L /*String param, int v*/)
+	int SetParami(lua_State* L /*String param, int v*/)
 	{
 		String param(luaL_checkstring(L, 2));
 		int v(luaL_checkinteger(L, 3));
@@ -336,16 +336,16 @@ public:
 		return 0;
 	}
 
-	int SetParamf(lua_State *L /*String param, float v*/)
+	int SetParamf(lua_State* L /*String param, float v*/)
 	{
 		String param(luaL_checkstring(L, 2));
 		float v(luaL_checknumber(L, 3));
 		fullscreenMaterialParams.SetParameter(param, v);
 		return 0;
 	}
-	int DrawShader(lua_State *L)
+	int DrawShader(lua_State* L)
 	{
-		for (auto &texParam : textures)
+		for (auto& texParam : textures)
 		{
 			fullscreenMaterialParams.SetParameter(texParam.first, texParam.second);
 		}
@@ -354,19 +354,19 @@ public:
 		FullscreenBackground::Render(0);
 		return 0;
 	}
-	int SetSpeedMult(lua_State *L)
+	int SetSpeedMult(lua_State* L)
 	{
 		speedMult = luaL_checknumber(L, 2);
 		return 0;
 	}
 
-	int GetPath(lua_State *L)
+	int GetPath(lua_State* L)
 	{
 		lua_pushstring(L, *folderPath);
 		return 1;
 	}
 
-	Material LoadBackgroundMaterial(const String &path)
+	Material LoadBackgroundMaterial(const String& path)
 	{
 		String skin = g_gameConfig.GetString(GameConfigKeys::Skin);
 		String pathV = Path::Absolute(String("skins/" + skin + "/shaders/") + "background" + ".vs");
@@ -383,16 +383,16 @@ public:
 		return ret;
 	}
 
-	Texture LoadBackgroundTexture(const String &path)
+	Texture LoadBackgroundTexture(const String& path)
 	{
 		Texture ret = TextureRes::Create(g_gl, ImageRes::Create(path));
 		return ret;
 	}
 };
 
-Background *CreateBackground(class Game *game, bool foreground /* = false*/)
+Background* CreateBackground(class Game* game, bool foreground /* = false*/)
 {
-	Background *bg = new TestBackground();
+	Background* bg = new TestBackground();
 	bg->game = game;
 	if (!bg->Init(foreground))
 	{

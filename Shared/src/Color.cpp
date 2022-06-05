@@ -5,14 +5,14 @@
 Color::Color(const VectorMath::VectorBase<uint8, 4>& icolor)
 {
 	*this = Color(
-    icolor.x / 255.0f,
-    icolor.y / 255.0f,
-    icolor.z / 255.0f,
-    icolor.w / 255.0f
-    );
+		icolor.x / 255.0f,
+		icolor.y / 255.0f,
+		icolor.z / 255.0f,
+		icolor.w / 255.0f
+	);
 }
 
-Color::Color(float r, float g, float b) : Color(r,g,b,1.0f)
+Color::Color(float r, float g, float b) : Color(r, g, b, 1.0f)
 {
 }
 
@@ -45,7 +45,7 @@ Color Color::FromHSV(float hue, float saturation, float value)
 	float m = value - chroma;
 	float x = chroma * (1 - fabsf(hueMod));
 	Color c;
-	switch((int)floorf(hue2)) {
+	switch ((int)floorf(hue2)) {
 	case 0:
 		c = Color(chroma, x, 0.0f);
 		break;
@@ -79,7 +79,7 @@ const Color Color::Yellow = Color(1, 1, 0, 1);
 const Color Color::Magenta = Color(1, 0, 1, 1);
 const Color Color::Cyan = Color(0, 1, 1, 1);
 
-Colori::Colori(uint8 r, uint8 g, uint8 b) : Colori(r,g,b,255)
+Colori::Colori(uint8 r, uint8 g, uint8 b) : Colori(r, g, b, 255)
 {
 
 }

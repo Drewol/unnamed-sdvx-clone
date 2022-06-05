@@ -23,7 +23,7 @@ public:
 		// Store the name of the executable
 		moduleName = Path::GetModuleName();
 		m_logLevel = Logger::Severity::Debug;
-		
+
 #ifdef _WIN32
 		// Store console output handle
 		consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -61,7 +61,7 @@ public:
 
 	void WriteHeader(Logger::Severity severity)
 	{
-		
+
 		// Format a timestamp string
 		char timeStr[64];
 		time_t currentTime = time(0);
@@ -77,7 +77,7 @@ public:
 		OutputDebugStringW(*Utility::ConvertToWString(msg));
 #endif
 		printf("%s", msg.c_str());
-		if(!m_failedToOpen)
+		if (!m_failedToOpen)
 			TextStream::Write(m_writer, msg);
 	}
 
@@ -107,7 +107,7 @@ Logger& Logger::Get()
 void Logger::SetColor(Color color)
 {
 #ifdef _WIN32
-	if(m_impl->consoleHandle)
+	if (m_impl->consoleHandle)
 	{
 		static uint8 params[] =
 		{
@@ -132,7 +132,7 @@ void Logger::SetColor(Color color)
 		{Color::Magenta, "200;0;200"},
 		{Color::Gray,    "140;140;140"}
 	};
-	if(color == Color::White)
+	if (color == Color::White)
 		printf("\x1b[39m");
 	else
 		printf("\x1b[38;2;%sm", params[color]);
@@ -142,7 +142,7 @@ void Logger::Log(const String& msg, Logger::Severity severity)
 {
 	if (severity < m_impl->GetLogLevel())
 		return;
-	switch(severity)
+	switch (severity)
 	{
 	case Severity::Normal:
 		SetColor(White);
@@ -187,12 +187,12 @@ void Log(const String& msg, Logger::Severity severity)
 #ifdef _WIN32
 String Utility::WindowsFormatMessage(uint32 code)
 {
-	if(code == 0)
+	if (code == 0)
 	{
 		return "No additional info available";
 	}
 
-	wchar_t buffer[1024] = {0};
+	wchar_t buffer[1024] = { 0 };
 	FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, 0, code, LANG_SYSTEM_DEFAULT, buffer, sizeof(buffer), 0);
 
 	return Utility::ConvertToUTF8(buffer);

@@ -149,7 +149,7 @@ class StringEncodingHeuristicCollection<Heuristic>
 public:
 	StringEncodingHeuristicCollection() = default;
 	inline const StringEncodingHeuristic& GetBestHeuristic() const { return m_head; }
-	inline void Consume(const char c) { if(m_head.IsValid()) m_head.Consume(c); }
+	inline void Consume(const char c) { if (m_head.IsValid()) m_head.Consume(c); }
 	inline void Finalize() { m_head.Finalize(); }
 
 	inline void DebugPrint() const { m_head.DebugPrint(); }
@@ -170,7 +170,7 @@ public:
 
 		return restBest.Beats(head) ? restBest : head;
 	}
-	inline void Consume(const char c) { if(m_head.IsValid()) m_head.Consume(c); m_rest.Consume(c); }
+	inline void Consume(const char c) { if (m_head.IsValid()) m_head.Consume(c); m_rest.Consume(c); }
 	inline void Finalize() { m_head.Finalize(); m_rest.Finalize(); }
 
 	inline void DebugPrint() const { m_head.DebugPrint(); m_rest.DebugPrint(); }
@@ -217,7 +217,7 @@ public:
 
 	inline void Consume(const char ch) { m_collection.Consume(ch); m_rest.Consume(ch); }
 	inline void Finalize() { m_collection.Finalize(); m_rest.Finalize(); }
-	
+
 	inline void DebugPrint() const { m_collection.DebugPrint(); m_rest.DebugPrint(); }
 
 protected:
@@ -235,7 +235,7 @@ public:
 	StringEncoding GetEncoding() const override { return StringEncoding::UTF8; }
 
 	bool Consume(const uint8_t ch) override;
-	bool Finalize() override { if (m_remaining) MarkInvalid(); return IsValid();}
+	bool Finalize() override { if (m_remaining) MarkInvalid(); return IsValid(); }
 
 protected:
 	CharClass GetCharClass(const uint16_t ch) const override;

@@ -2,7 +2,7 @@
 
 /*
 	An enum for common string encodings.
-	
+
 	When a new encoding must be supported, be sure to update these functions:
 	- GetDisplayString
 	- StringEncodingConverter::GetIConvArg

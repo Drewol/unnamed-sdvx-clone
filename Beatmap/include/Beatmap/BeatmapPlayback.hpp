@@ -45,7 +45,7 @@ public:
 	const TimingPoint& GetCurrentTimingPoint() const;
 	// Get the timing point at a given time
 	const TimingPoint* GetTimingPointAt(MapTime time) const;
-	
+
 	// The beatmap this player is using
 	const Beatmap& GetBeatmap() { return *m_beatmap; }
 
@@ -162,7 +162,7 @@ private:
 
 	// Ordered by leaving time
 	Multimap<MapTime, ObjectState*> m_objectsByLeaveTime;
-	
+
 	// Hold buttons with effects that are active
 	Set<ObjectState*> m_effectObjects;
 

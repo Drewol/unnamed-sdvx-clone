@@ -22,7 +22,7 @@ public:
 
 	// Adds an object function handler
 	template<typename Class>
-	void Add(Class* object, void (Class::*func)(A...))
+	void Add(Class* object, void (Class::* func)(A...))
 	{
 		void* id = Utility::UnionCast<void*>(func);
 		auto& fmap = objectMap.FindOrAdd(object);
@@ -48,14 +48,14 @@ public:
 
 	// Removes an object handler
 	template<typename Class>
-	void Remove(Class* object, void(Class::*func)(A...))
+	void Remove(Class* object, void(Class::* func)(A...))
 	{
 		void* id = Utility::UnionCast<void*>(func);
 		assert(objectMap.Contains(object));
 		auto& fmap = objectMap[object];
 		assert(fmap.Contains(id));
 		fmap.erase(id);
-		if(fmap.empty())
+		if (fmap.empty())
 			objectMap.erase(object);
 	}
 	// Removes a static handler
@@ -78,9 +78,9 @@ public:
 	void RemoveAll(void* object)
 	{
 		auto it = objectMap.find(object);
-		if(it != objectMap.end())
+		if (it != objectMap.end())
 		{
-			for(auto& f : it->second)
+			for (auto& f : it->second)
 			{
 				delete f.second;
 			}
@@ -92,18 +92,18 @@ public:
 	void Clear()
 	{
 		// Cleanup the pointers
-		for(auto& h : staticMap)
+		for (auto& h : staticMap)
 		{
 			delete h.second;
 		}
-		for(auto& h : objectMap)
+		for (auto& h : objectMap)
 		{
-			for(auto& f : h.second)
+			for (auto& f : h.second)
 			{
 				delete f.second;
 			}
 		}
-		for(auto& h : lambdaMap)
+		for (auto& h : lambdaMap)
 		{
 			delete h.second;
 		}
@@ -115,18 +115,18 @@ public:
 	// Calls the delegate
 	void Call(A... args)
 	{
-		for(auto& h : staticMap)
+		for (auto& h : staticMap)
 		{
 			h.second->Call(args...);
 		}
-		for(auto& h : objectMap)
+		for (auto& h : objectMap)
 		{
-			for(auto& f : h.second)
+			for (auto& f : h.second)
 			{
 				f.second->Call(args...);
 			}
 		}
-		for(auto& h : lambdaMap)
+		for (auto& h : lambdaMap)
 		{
 			h.second->Call(args...);
 		}

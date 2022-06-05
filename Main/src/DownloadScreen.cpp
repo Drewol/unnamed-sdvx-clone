@@ -25,9 +25,9 @@ DownloadScreen::~DownloadScreen()
 	g_input.OnButtonReleased.RemoveAll(this);
 	g_gameWindow->OnMouseScroll.RemoveAll(this);
 	m_running = false;
-	if(m_archiveThread.joinable())
+	if (m_archiveThread.joinable())
 		m_archiveThread.join();
-	if(m_lua)
+	if (m_lua)
 		g_application->DisposeLua(m_lua);
 }
 
@@ -56,7 +56,7 @@ bool DownloadScreen::Init()
 	return true;
 }
 
-void DownloadScreen::OnSearchTermChanged(const String &search)
+void DownloadScreen::OnSearchTermChanged(const String& search)
 {
 	lua_getglobal(m_lua, "update_search_text");
 	if (lua_isfunction(m_lua, -1))
@@ -125,7 +125,7 @@ void DownloadScreen::Tick(float deltaTime)
 					{ "effector", &effector },
 					{ "uploader", &uploader },
 					{ "level",    &level    },
-				});
+					});
 
 				lua_pushstring(m_lua, "query");
 				if (query.empty())
@@ -155,7 +155,7 @@ void DownloadScreen::Tick(float deltaTime)
 				{
 					lua_newtable(m_lua);
 
-					for (int num = 1 ; !level.empty(); num++)
+					for (int num = 1; !level.empty(); num++)
 					{
 						String unit;
 						String rest;
@@ -406,7 +406,7 @@ void DownloadScreen::m_ProcessArchiveResponses()
 
 		// Process response
 		lua_rawgeti(m_lua, LUA_REGISTRYINDEX, ar.callback);
-		struct archive_entry *entry;
+		struct archive_entry* entry;
 		int numEntries = 1;
 		bool readError = false;
 		lua_newtable(m_lua);
@@ -423,13 +423,13 @@ void DownloadScreen::m_ProcessArchiveResponses()
 			lua_settable(m_lua, -3);
 			archive_read_data_skip(ar.a);
 		}
-		
+
 		if (archive_read_free(ar.a) != ARCHIVE_OK)
 		{
 			Log("Error closing handle for downloaded chart archive", Logger::Severity::Error);
 		}
 		lua_pushstring(m_lua, ar.id.c_str());
-		
+
 		if (readError)
 		{
 			Log("Error reading downloaded chart archive", Logger::Severity::Error);
@@ -459,7 +459,7 @@ void DownloadScreen::m_ProcessArchiveResponses()
 			ar.a = archive_read_new();
 			archive_read_support_filter_all(ar.a);
 			archive_read_support_format_all(ar.a);
-			
+
 			if (archive_read_open_memory(ar.a, ar.data.data(), ar.data.size()) != ARCHIVE_OK)
 			{
 				Log("Error opening downloaded chart archive for extraction", Logger::Severity::Error);
@@ -481,7 +481,7 @@ void DownloadScreen::m_ProcessArchiveResponses()
 				Log("Error closing archive handle after extracting", Logger::Severity::Error);
 			}
 		}
-		
+
 		lua_settop(m_lua, 0);
 		luaL_unref(m_lua, LUA_REGISTRYINDEX, ar.callback);
 
@@ -509,16 +509,16 @@ int DownloadScreen::m_DownloadArchive(lua_State* L)
 	return 0;
 }
 
-int DownloadScreen::m_GetSongsPath(lua_State * L)
+int DownloadScreen::m_GetSongsPath(lua_State* L)
 {
 	lua_pushstring(L, *Path::Normalize(Path::Absolute(g_gameConfig.GetString(GameConfigKeys::SongFolder))));
 	return 1;
 }
 
-bool DownloadScreen::m_extractFile(archive * a, String path)
+bool DownloadScreen::m_extractFile(archive* a, String path)
 {
 	int r;
-	const void *buff;
+	const void* buff;
 	size_t size;
 	la_int64_t offset;
 	File f;
@@ -540,13 +540,13 @@ bool DownloadScreen::m_extractFile(archive * a, String path)
 		Path::CreateDir(path);
 		return true;
 	}
-	
+
 	if (!f.OpenWrite(Path::Normalize(path)))
 	{
 		return false;
 	}
 
-	while(true) {
+	while (true) {
 		r = archive_read_data_block(a, &buff, &size, &offset);
 		if (r == ARCHIVE_EOF)
 			return true;
@@ -571,8 +571,8 @@ Map<String, String> DownloadScreen::m_mapFromLuaTable(int index)
 	while (lua_next(m_lua, -2))
 	{
 		lua_pushvalue(m_lua, -2);
-		const char *key = lua_tostring(m_lua, -1);
-		const char *value = lua_tostring(m_lua, -2);
+		const char* key = lua_tostring(m_lua, -1);
+		const char* value = lua_tostring(m_lua, -2);
 		ret[key] = value;
 		lua_pop(m_lua, 2);
 	}
@@ -580,7 +580,7 @@ Map<String, String> DownloadScreen::m_mapFromLuaTable(int index)
 	return ret;
 }
 
-int DownloadScreen::m_Exit(lua_State * L)
+int DownloadScreen::m_Exit(lua_State* L)
 {
 	g_application->RemoveTickable(this);
 	return 0;
@@ -596,7 +596,7 @@ int DownloadScreen::m_PlayPreview(lua_State* L)
 
 	String ext = Path::GetExtension(url);
 
-	String preview_path = Path::Normalize(Path::Absolute("preview/" + song_id + "." + ext ));
+	String preview_path = Path::Normalize(Path::Absolute("preview/" + song_id + "." + ext));
 	// Create dir if it doesn't exist
 	Path::CreateDir(Path::Absolute("preview"));
 

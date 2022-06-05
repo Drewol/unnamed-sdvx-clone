@@ -28,7 +28,7 @@ private:
 	Graphics::Font m_specialFont;
 	Sample m_applause;
 	Texture m_categorizedHitTextures[4];
-	lua_State *m_lua = nullptr;
+	lua_State* m_lua = nullptr;
 	bool m_autoplay;
 	bool m_autoButtons;
 	bool m_startPressed;
@@ -56,15 +56,15 @@ private:
 	HitWindow m_hitWindow = HitWindow::NORMAL;
 
 	//0 = normal, 1 = absolute
-	float m_meanHitDelta[2] = {0.f, 0.f};
-	MapTime m_medianHitDelta[2] = {0, 0};
+	float m_meanHitDelta[2] = { 0.f, 0.f };
+	MapTime m_medianHitDelta[2] = { 0, 0 };
 
 	ScoreIndex m_scoredata;
 	bool m_restored = false;
 	bool m_removed = false;
 	bool m_hasScreenshot = false;
 	bool m_hasRendered = false;
-    MultiplayerScreen* m_multiplayer = NULL;
+	MultiplayerScreen* m_multiplayer = NULL;
 	String m_playerName;
 	String m_playerId;
 	String m_displayId;
@@ -101,13 +101,13 @@ private:
 		lua_pushstring(m_lua, data.c_str());
 		lua_settable(m_lua, -3);
 	}
-	void m_PushFloatToTable(const char *name, float data)
+	void m_PushFloatToTable(const char* name, float data)
 	{
 		lua_pushstring(m_lua, name);
 		lua_pushnumber(m_lua, data);
 		lua_settable(m_lua, -3);
 	}
-	void m_PushIntToTable(const char *name, int data)
+	void m_PushIntToTable(const char* name, int data)
 	{
 		lua_pushstring(m_lua, name);
 		lua_pushinteger(m_lua, data);
@@ -164,7 +164,7 @@ private:
 
 		//we don't need to display the server record separately if we just set it
 		//we also don't need to display the server record separately if our PB is the server record
-		if(!m_irResponseJson["body"]["isServerRecord"] && m_irResponseJson["body"]["serverRecord"]["score"] != m_irResponseJson["body"]["score"]["score"])
+		if (!m_irResponseJson["body"]["isServerRecord"] && m_irResponseJson["body"]["serverRecord"]["score"] != m_irResponseJson["body"]["score"]["score"])
 		{
 			auto& record = m_irResponseJson["body"]["serverRecord"];
 
@@ -201,7 +201,7 @@ private:
 		m_PushIntToTable("timestamp", score["timestamp"]);
 		m_PushStringToTable("username", score["username"]);
 
-		if(yours)
+		if (yours)
 		{
 			lua_pushstring(m_lua, "yours");
 			lua_pushboolean(m_lua, true);
@@ -214,7 +214,7 @@ private:
 		lua_settable(m_lua, -3);
 	}
 
-	void m_SaveReplay(bool alert=false)
+	void m_SaveReplay(bool alert = false)
 	{
 		if (m_badge == ClearMark::NotPlayed)
 			return;
@@ -436,7 +436,7 @@ private:
 	}
 
 public:
-	void loadScoresFromGame(class Game *game)
+	void loadScoresFromGame(class Game* game)
 	{
 		Scoring& scoring = game->GetScoring();
 		Gauge* gauge = scoring.GetTopGauge();
@@ -449,7 +449,7 @@ public:
 		if (score)
 		{
 			m_score = score->score;
-	 	}
+		}
 		else
 		{
 			m_score = scoring.CalculateCurrentScore();
@@ -504,7 +504,7 @@ public:
 		if (m_displayIndex >= (int)m_stats->size())
 			return;
 
-		const nlohmann::json &data = (*m_stats)[m_displayIndex];
+		const nlohmann::json& data = (*m_stats)[m_displayIndex];
 
 		//TODO(gauge refactor): options are from flags, multi server needs update for the new options
 
@@ -586,7 +586,7 @@ public:
 			m_playerId = uid;
 
 			// Show the player's score first
-			for (size_t i=0; i<m_stats->size(); i++)
+			for (size_t i = 0; i < m_stats->size(); i++)
 			{
 				if (m_playerId == (*m_stats)[i].value("uid", ""))
 				{
@@ -718,7 +718,7 @@ public:
 			res.scorescreenInfo.suddenCutoff = g_gameConfig.GetFloat(GameConfigKeys::SuddenCutoff);
 			res.scorescreenInfo.hiddenCutoff = g_gameConfig.GetFloat(GameConfigKeys::HiddenCutoff);
 			res.scorescreenInfo.suddenFade = g_gameConfig.GetFloat(GameConfigKeys::SuddenFade);
-			res.scorescreenInfo.hiddenFade =  g_gameConfig.GetFloat(GameConfigKeys::HiddenFade);
+			res.scorescreenInfo.hiddenFade = g_gameConfig.GetFloat(GameConfigKeys::HiddenFade);
 			res.scorescreenInfo.simpleNoteHitStats = m_simpleNoteHitStats;
 			SpeedMods speedMod = g_gameConfig.GetEnum<Enum_SpeedMods>(GameConfigKeys::SpeedMod);
 			res.scorescreenInfo.speedMod = static_cast<int>(speedMod);
@@ -794,7 +794,7 @@ public:
 		if (m_multiplayer)
 		{
 			m_PushStringToTable("playerName", m_playerName);
-			m_PushStringToTable("title", "<"+m_playerName+"> " + m_beatmapSettings.title);
+			m_PushStringToTable("title", "<" + m_playerName + "> " + m_beatmapSettings.title);
 		}
 		else
 		{
@@ -835,9 +835,9 @@ public:
 		m_PushStringToTable("chartHash", m_chartHash);
 
 		//description (for displaying any errors, etc)
-		if(m_irState >= 20)
+		if (m_irState >= 20)
 		{
-			if(m_irState == IR::ResponseState::RequestFailure)
+			if (m_irState == IR::ResponseState::RequestFailure)
 				m_PushStringToTable("irDescription", "The request to the IR failed.");
 			else
 				m_PushStringToTable("irDescription", m_irResponseJson["description"]);
@@ -869,7 +869,7 @@ public:
 			lua_pushstring(m_lua, "highScores");
 			lua_newtable(m_lua);
 			int scoreIndex = 1;
-			for (auto &score : *m_stats)
+			for (auto& score : *m_stats)
 			{
 				lua_pushinteger(m_lua, scoreIndex++);
 				lua_newtable(m_lua);
@@ -893,12 +893,12 @@ public:
 			lua_pushstring(m_lua, "highScores");
 			lua_newtable(m_lua);
 			int scoreIndex = 1;
-			for (auto &score : m_highScores)
+			for (auto& score : m_highScores)
 			{
 				lua_pushinteger(m_lua, scoreIndex++);
 				lua_newtable(m_lua);
 				m_PushFloatToTable("gauge", score->gauge);
-				
+
 				m_PushIntToTable("gauge_type", (uint32)score->gaugeType);
 				m_PushIntToTable("gauge_option", score->gaugeOption);
 				m_PushIntToTable("random", score->random);
@@ -923,7 +923,7 @@ public:
 		}
 
 		//ir scores moved to be in multiplayer too, not yet tested
-		if(m_irState == IR::ResponseState::Success)
+		if (m_irState == IR::ResponseState::Success)
 			m_PushIRScores();
 
 		if (isSelf)
@@ -1050,13 +1050,13 @@ public:
 	void OnKeyPressed(SDL_Scancode code, int32 delta) override
 	{
 		if (m_multiplayer &&
-				m_multiplayer->GetChatOverlay()->OnKeyPressedConsume(code))
+			m_multiplayer->GetChatOverlay()->OnKeyPressedConsume(code))
 			return;
 
 		if (m_collDiag.IsActive())
 			return;
 
-		if(code == SDL_SCANCODE_RETURN && !m_removed)
+		if (code == SDL_SCANCODE_RETURN && !m_removed)
 		{
 			g_application->RemoveTickable(this);
 			m_removed = true;
@@ -1174,11 +1174,11 @@ public:
 			try {
 
 
-				if(m_irResponse.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+				if (m_irResponse.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
 				{
 					cpr::Response response = m_irResponse.get();
 
-		        	if(response.status_code != 200)
+					if (response.status_code != 200)
 					{
 						Logf("Submitting score to IR failed with code: %d", Logger::Severity::Error, response.status_code);
 						m_irState = IR::ResponseState::RequestFailure;
@@ -1188,25 +1188,26 @@ public:
 						try {
 							m_irResponseJson = nlohmann::json::parse(response.text);
 
-							if(!IR::ValidatePostScoreReturn(m_irResponseJson)) m_irState = IR::ResponseState::RequestFailure;
+							if (!IR::ValidatePostScoreReturn(m_irResponseJson)) m_irState = IR::ResponseState::RequestFailure;
 							else
 							{
 								m_irState = m_irResponseJson["statusCode"];
 
 								//if we are allowed to send replays
-								if(!g_gameConfig.GetBool(GameConfigKeys::IRLowBandwidth))
+								if (!g_gameConfig.GetBool(GameConfigKeys::IRLowBandwidth))
 								{
 									//and server wants us to send replay
-									if(m_irResponseJson.find("body") != m_irResponseJson.end() && m_irResponseJson["body"].find("sendReplay") != m_irResponseJson["body"].end() && m_irResponseJson["body"]["sendReplay"].is_string())
+									if (m_irResponseJson.find("body") != m_irResponseJson.end() && m_irResponseJson["body"].find("sendReplay") != m_irResponseJson["body"].end() && m_irResponseJson["body"]["sendReplay"].is_string())
 									{
 										//don't really care about the return of this, if it fails it's not the end of the world
 										IR::PostReplay(m_irResponseJson["body"]["sendReplay"].get<String>(), m_replayPath);
 									}
-								}			
+								}
 							}
 
 
-						} catch(nlohmann::json::parse_error& e) {
+						}
+						catch (nlohmann::json::parse_error& e) {
 							Log("Parsing JSON returned from IR failed.", Logger::Severity::Error);
 							m_irState = IR::ResponseState::RequestFailure;
 						}
@@ -1215,7 +1216,8 @@ public:
 					updateLuaData();
 				}
 
-			} catch(std::future_error& e) {
+			}
+			catch (std::future_error& e) {
 				Logf("future_error when submitting score to IR: %s", Logger::Severity::Error, e.what());
 			}
 		}
@@ -1299,7 +1301,7 @@ public:
 	}
 };
 
-ScoreScreen *ScoreScreen::Create(class Game *game)
+ScoreScreen* ScoreScreen::Create(class Game* game)
 {
 	ScoreScreen_Impl* impl = new ScoreScreen_Impl(game, nullptr, "", nullptr, nullptr);
 	return impl;

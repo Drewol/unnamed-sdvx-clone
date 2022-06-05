@@ -17,7 +17,7 @@ namespace Math
 	template<typename T>
 	static T Min(T a, T b)
 	{
-		if(a < b)
+		if (a < b)
 			return a;
 		else
 			return b;
@@ -27,7 +27,7 @@ namespace Math
 	template<typename T>
 	static T Max(T a, T b)
 	{
-		if(a > b)
+		if (a > b)
 			return a;
 		else
 			return b;
@@ -36,9 +36,9 @@ namespace Math
 	template<typename T>
 	static T Clamp(T v, T min, T max)
 	{
-		if(v < min)
+		if (v < min)
 			return min;
-		if(v > max)
+		if (v > max)
 			return max;
 		return v;
 	}
@@ -58,7 +58,7 @@ namespace Math
 	}
 
 	// Gets the sign of a value
-	template <typename T> T Sign(T val) 
+	template <typename T> T Sign(T val)
 	{
 		return (T)((T(0) < val) - (val < T(0)));
 	}

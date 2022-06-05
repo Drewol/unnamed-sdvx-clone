@@ -55,5 +55,5 @@ private:
 
 	LineGraph m_rotationZ; /// former manual tilt
 
-	LineGraph m_scrollSpeed = LineGraph{1.0};
+	LineGraph m_scrollSpeed = LineGraph{ 1.0 };
 };

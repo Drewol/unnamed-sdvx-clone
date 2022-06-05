@@ -24,7 +24,7 @@ public:
 	}
 
 	template<typename Class>
-	void AddFunction(String name, Class* object, int (Class::*func)(lua_State*))
+	void AddFunction(String name, Class* object, int (Class::* func)(lua_State*))
 	{
 		auto binding = new ObjectBinding<Class, int, lua_State*>(object, func);
 		Bindings.Add(name, binding);
@@ -56,7 +56,7 @@ private:
 static int lMemberCallFunction(lua_State* L)
 {
 	IFunctionBinding<int, lua_State*>** t = (IFunctionBinding<int, lua_State*>**)(luaL_checkudata(L, 1, "Scriptable_Callback"));
-	if(*t)
+	if (*t)
 		return (*t)->Call(L);
 	else
 	{

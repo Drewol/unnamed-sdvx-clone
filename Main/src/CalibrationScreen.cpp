@@ -184,7 +184,7 @@ void CalibrationScreen::Render(float deltaTime)
 			for (auto it = m_hitDeltas.rbegin(); it != m_hitDeltas.rend(); ++it)
 			{
 				double hue = 120.0 - ((double)abs(*it) / 50.0) * 60.0;
-				auto c = Color::FromHSV(fmax(hue, 0.0) , 1.0, 1.0).ToRGBA8();
+				auto c = Color::FromHSV(fmax(hue, 0.0), 1.0, 1.0).ToRGBA8();
 				nk_label_colored(m_ctx, *Utility::Sprintf("%d", *it), NK_TEXT_RIGHT, nk_color{ c.x, c.y, c.z, 255 });
 			}
 		}

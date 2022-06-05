@@ -75,7 +75,7 @@ public:
 
 	// Reads or writes a struct or native type's data based on the stream's mode of operation
 	template<typename T>
-	typename std::enable_if<!std::is_pointer<T>::value && std::is_trivially_copyable<T>::value, bool>::type SerializeObject(T& obj)
+	typename std::enable_if<!std::is_pointer<T>::value&& std::is_trivially_copyable<T>::value, bool>::type SerializeObject(T& obj)
 	{
 		return Serialize(&obj, sizeof(obj)) == sizeof(obj);
 	}
@@ -115,7 +115,7 @@ public:
 		return m_isOk;
 	}
 
-	bool IsReading() const 
+	bool IsReading() const
 	{
 		return m_isReading;
 	}
@@ -131,14 +131,14 @@ protected:
 template<typename T>
 bool BinaryStream::SerializeObject(Vector<T>& obj)
 {
-	if(IsReading())
+	if (IsReading())
 	{
 		obj.clear();
 		uint32 len;
-		*this << len; 
+		*this << len;
 		if (!m_isOk)
 			return false;
-		for(uint32 i = 0; i < len; i++)
+		for (uint32 i = 0; i < len; i++)
 		{
 			T v;
 			bool ok = SerializeObject(v);
@@ -154,7 +154,7 @@ bool BinaryStream::SerializeObject(Vector<T>& obj)
 		*this << len;
 		if (!m_isOk)
 			return false;
-		for(uint32 i = 0; i < len; i++)
+		for (uint32 i = 0; i < len; i++)
 		{
 			bool ok = SerializeObject(obj[i]);
 			assert(ok);
@@ -167,14 +167,14 @@ bool BinaryStream::SerializeObject(Vector<T>& obj)
 template<typename K, typename V>
 bool BinaryStream::SerializeObject(Map<K, V>& obj)
 {
-	if(IsReading())
+	if (IsReading())
 	{
 		obj.clear();
 		uint32 len;
 		*this << len;
 		if (!m_isOk)
 			return false;
-		for(uint32 i = 0; i < len; i++)
+		for (uint32 i = 0; i < len; i++)
 		{
 			K k;
 			V v;
@@ -193,7 +193,7 @@ bool BinaryStream::SerializeObject(Map<K, V>& obj)
 		*this << len;
 		if (!m_isOk)
 			return false;
-		for(auto& p : obj)
+		for (auto& p : obj)
 		{
 			bool ok = true;
 			ok = ok && SerializeObject(const_cast<K&>(p.first));

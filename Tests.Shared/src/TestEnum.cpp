@@ -10,9 +10,9 @@ DefineEnum(TestEnum,
 	OO);
 
 DefineBitflagEnum(TestFlags,
-    Color = 0x1,
-    Float = 0x2,
-    Transparent = 0x4);
+	Color = 0x1,
+	Float = 0x2,
+	Transparent = 0x4);
 ImplementBitflagEnum(TestFlags);
 
 Test("Enum.String.Regular")

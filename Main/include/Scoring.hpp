@@ -50,14 +50,14 @@ public:
 
 struct AutoplayInfo
 {
-    // Autoplay mode
-    bool autoplay = false;
-    // Autoplay but for buttons
-    bool autoplayButtons = false;
-    float buttonAnimationTimer[6] = { 0 };
+	// Autoplay mode
+	bool autoplay = false;
+	// Autoplay but for buttons
+	bool autoplayButtons = false;
+	float buttonAnimationTimer[6] = { 0 };
 	bool replay = false;
 
-    bool IsAutoplayButtons() const { return autoplay || autoplayButtons; };
+	bool IsAutoplayButtons() const { return autoplay || autoplayButtons; };
 	bool IsReplayingButtons() const { return replay; };
 };
 
@@ -105,7 +105,7 @@ public:
 	void FinishGame();
 	void SetScoreForReplay();
 
-	void SetReplayForPlayback(Replay * replay);
+	void SetReplayForPlayback(Replay* replay);
 
 	// Updates the list of objects that are possible to hit
 	void Tick(float deltaTime);
@@ -134,7 +134,7 @@ public:
 
 	bool IsFailOut() const;
 	class Gauge* GetTopGauge() const;
-	void SetAllGaugeValues(const Vector<float>, bool zeroRest=true);
+	void SetAllGaugeValues(const Vector<float>, bool zeroRest = true);
 	void GetAllGaugeValues(Vector<float>& out) const;
 
 	// Calculates the maximum score of the current map
@@ -322,7 +322,7 @@ private:
 
 	//Ehhhh maybe
 	const MapTime m_offsetLaserConstant = 5;
-	
+
 	// Saves the time when a button was hit, used to decide if a button was held before a hold object was active
 	MapTime m_buttonHitTime[6] = { 0, 0, 0, 0, 0, 0 };
 	MapTime m_buttonReleaseTime[6] = { 0, 0, 0, 0, 0, 0 };

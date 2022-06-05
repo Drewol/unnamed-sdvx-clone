@@ -27,9 +27,9 @@ namespace Graphics
 		}
 		~Mesh_Impl()
 		{
-			if(m_buffer)
+			if (m_buffer)
 				glDeleteBuffers(1, &m_buffer);
-			if(m_vao)
+			if (m_vao)
 				glDeleteVertexArrays(1, &m_vao);
 		}
 		bool Init()
@@ -46,32 +46,32 @@ namespace Graphics
 
 			m_vertexCount = vertexCount;
 			size_t totalVertexSize = 0;
-			for(auto e : desc)
+			for (auto e : desc)
 				totalVertexSize += e.componentSize * e.components;
 			size_t index = 0;
 			size_t offset = 0;
-			for(auto e : desc)
+			for (auto e : desc)
 			{
 				uint32 type = -1;
-				if(!e.isFloat)
+				if (!e.isFloat)
 				{
-					if(e.componentSize == 4)
+					if (e.componentSize == 4)
 						type = e.isSigned ? GL_INT : GL_UNSIGNED_INT;
-					else if(e.componentSize == 2)
+					else if (e.componentSize == 2)
 						type = e.isSigned ? GL_SHORT : GL_UNSIGNED_SHORT;
-					else if(e.componentSize == 1)
+					else if (e.componentSize == 1)
 						type = e.isSigned ? GL_BYTE : GL_UNSIGNED_BYTE;
 				}
 				else
 				{
-					#ifdef EMBEDDED
+#ifdef EMBEDDED
 					type = GL_FLOAT;
-					#else
-					if(e.componentSize == 4)
+#else
+					if (e.componentSize == 4)
 						type = GL_FLOAT;
-					else if(e.componentSize == 8)
+					else if (e.componentSize == 8)
 						type = GL_DOUBLE;
-					#endif
+#endif
 				}
 				assert(type != (uint32)-1);
 				glVertexAttribPointer((int)index, (int)e.components, type, GL_TRUE, (int)totalVertexSize, (void*)offset);
@@ -84,8 +84,8 @@ namespace Graphics
 			glBindVertexArray(0);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
-		
-		#ifdef EMBEDDED
+
+#ifdef EMBEDDED
 		void Draw() override
 		{
 			glBindVertexArray(m_vao);
@@ -98,7 +98,7 @@ namespace Graphics
 			glDrawArrays(m_glType, 0, (int)m_vertexCount);
 			glBindVertexArray(0);
 		}
-		#else
+#else
 		void Draw() override
 		{
 			glBindVertexArray(m_vao);
@@ -108,7 +108,7 @@ namespace Graphics
 		{
 			glDrawArrays(m_glType, 0, (int)m_vertexCount);
 		}
-		#endif
+#endif
 
 		void SetPrimitiveType(PrimitiveType pt) override
 		{
@@ -124,7 +124,7 @@ namespace Graphics
 	Mesh MeshRes::Create(class OpenGL* gl)
 	{
 		Mesh_Impl* pImpl = new Mesh_Impl();
-		if(!pImpl->Init())
+		if (!pImpl->Init())
 		{
 			delete pImpl;
 			return Mesh();

@@ -27,13 +27,13 @@ Test("Audio.Playback")
 
 	Timer t;
 	float time = FLT_MAX;
-	while(true)
+	while (true)
 	{
 		float deltaTime = t.SecondsAsFloat();
 		t.Restart();
 		time += deltaTime;
 		t.Restart();
-		if(time > 3.0f)
+		if (time > 3.0f)
 		{
 			Log("Playing sample", Logger::Severity::Info);
 			testSample->Play();
@@ -125,9 +125,9 @@ Test("Audio.Music.LPF")
 			// Increment filter
 			filterSetting += dt * 0.25f * sweepDir;
 			filterSetting = Math::Clamp(filterSetting, 0.0f, 1.0f);
-			if(filterSetting >= 1.0f)
+			if (filterSetting >= 1.0f)
 				sweepDir = -1.0f;
-			else if(filterSetting <= 0.0f)
+			else if (filterSetting <= 0.0f)
 				sweepDir = 1.0f;
 
 			float sweepInput = pow(filterSetting, 2.0f);
@@ -175,9 +175,9 @@ Test("Audio.Music.LPFMix")
 			// Increment filter
 			filterSetting += dt * 0.2f * sweepDir;
 			filterSetting = Math::Clamp(filterSetting, 0.0f, 1.0f);
-			if(filterSetting >= 1.0f)
+			if (filterSetting >= 1.0f)
 				sweepDir = -1.0f;
-			else if(filterSetting <= 0.0f)
+			else if (filterSetting <= 0.0f)
 				sweepDir = 1.0f;
 
 			int32 playbackTime = song->GetPosition();
@@ -227,9 +227,9 @@ Test("Audio.Music.Peaking")
 			// Increment filter
 			filterSetting += dt * 0.5f * sweepDir;
 			filterSetting = Math::Clamp(filterSetting, 0.0f, 1.0f);
-			if(filterSetting >= 1.0f)
+			if (filterSetting >= 1.0f)
 				sweepDir = -1.0f;
-			else if(filterSetting <= 0.0f)
+			else if (filterSetting <= 0.0f)
 				sweepDir = 1.0f;
 
 			float sweepInput = pow(filterSetting, 2.0f);

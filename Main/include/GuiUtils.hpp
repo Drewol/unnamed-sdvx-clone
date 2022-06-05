@@ -14,15 +14,15 @@ public:
 	void Render(float deltaTime) override;
 	void NKRender();
 	void UpdateNuklearInput(SDL_Event evt);
-    void ShutdownNuklear();
-    void InitNuklearIfNeeded();
+	void ShutdownNuklear();
+	void InitNuklearIfNeeded();
 	virtual bool OnKeyPressedConsume(SDL_Scancode code) { return m_isOpen; };
 
 	static void StartFontInit();
 	static void BakeFontWithLock();
 	static void DestroyFont();
 
-	bool CanSuspend() { return m_canSuspend;  }
+	bool CanSuspend() { return m_canSuspend; }
 
 protected:
 	bool m_canSuspend = true;

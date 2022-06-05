@@ -8,7 +8,7 @@ TimedEffect::TimedEffect(float duration)
 }
 void TimedEffect::Reset(float duration)
 {
-	this->duration = duration; 
+	this->duration = duration;
 	time = duration;
 }
 void TimedEffect::Tick(float deltaTime)
@@ -46,7 +46,7 @@ void ButtonHitEffect::Draw(class RenderQueue& rq)
 	{
 		// Scale hit effect alpha between hispeed range of 100 to 600
 		if (delayFadeDuration > 0)
-            hiSpeedAlphaOffset = 0.25f * (Math::Clamp(track->scrollSpeed - 100, 0.f, 500.f) / 500);
+			hiSpeedAlphaOffset = 0.25f * (Math::Clamp(track->scrollSpeed - 100, 0.f, 500.f) / 500);
 
 		w = Track::buttonWidth;
 		x = (-Track::buttonWidth * 1.5f) + w * buttonCode;
@@ -76,7 +76,7 @@ void ButtonHitEffect::Draw(class RenderQueue& rq)
 ButtonHitRatingEffect::ButtonHitRatingEffect(uint32 buttonCode, ScoreHitRating rating) : TimedEffect(0.3f), buttonCode(buttonCode), rating(rating)
 {
 	assert(buttonCode < 6);
-	if(rating == ScoreHitRating::Miss)
+	if (rating == ScoreHitRating::Miss)
 		Reset(0.4f);
 }
 
@@ -85,7 +85,7 @@ void ButtonHitRatingEffect::Draw(class RenderQueue& rq)
 	float x;
 	float w;
 	float y;
-	if(buttonCode < 4)
+	if (buttonCode < 4)
 	{
 		w = Track::buttonWidth;
 		x = (-Track::buttonWidth * 1.5f) + w * buttonCode;
@@ -116,12 +116,12 @@ void ButtonHitRatingEffect::Draw(class RenderQueue& rq)
 
 	float iScale = 1.0f;
 	uint32 on = 1;
-	if(rating == ScoreHitRating::Miss) // flicker
+	if (rating == ScoreHitRating::Miss) // flicker
 		on = (uint32)floorf(GetRate() * 6.0f) % 2;
-	else if(rating == ScoreHitRating::Perfect)
+	else if (rating == ScoreHitRating::Perfect)
 		iScale = cos(GetRate() * 12.0f) * 0.5f + 1.0f;
 
-	if(on == 1)
+	if (on == 1)
 	{
 		Texture hitTexture = track->scoreHitTextures[(size_t)rating];
 
@@ -150,7 +150,7 @@ TimedHitEffect::TimedHitEffect(bool late) : TimedEffect(0.75f), late(late)
 void TimedHitEffect::Draw(class RenderQueue& rq)
 {
 	float x = 0.0f;
-    float y = 0.5f;
+	float y = 0.5f;
 
 	float iScale = 1.0f;
 	uint32 on = (uint32)floorf(time * 20) % 2;

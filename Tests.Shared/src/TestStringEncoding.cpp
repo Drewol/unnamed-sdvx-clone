@@ -177,7 +177,7 @@ Test("StringEncodingDetector.CP932")
 {
 	for (auto& testCase : TEST_CASES)
 	{
-		if(testCase.cp932)
+		if (testCase.cp932)
 			TestEnsure(StringEncodingDetector::Detect(testCase.cp932) == StringEncoding::CP932);
 	}
 }

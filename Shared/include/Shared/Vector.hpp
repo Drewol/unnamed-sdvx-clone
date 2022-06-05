@@ -8,7 +8,7 @@ class Vector : public std::vector<I>
 {
 public:
 	using std::vector<I>::vector;
-	
+
 	// These are for allowing function to be called on the base class when compiling on GCC
 	using std::vector<I>::back;
 	using std::vector<I>::front;
@@ -16,25 +16,25 @@ public:
 	using std::vector<I>::end;
 	using std::vector<I>::erase;
 	using std::vector<I>::push_back;
-	
+
 	// Adds a new element and returns it
 	I& Add(const I& obj = I()) { push_back(std::move(obj)); return back(); };
 	I& AddZeroed() { push_back(I()); memset(&back(), 0, sizeof(I)); return back(); };
 	void AddUnique(const I& obj)
 	{
-		if(!Contains(obj))
+		if (!Contains(obj))
 			Add(obj);
 	}
-	
+
 	// Removes the first or all entries of <obj>
 	void Remove(const I& obj, bool all = true)
 	{
-		for(auto it = begin(); it != end();)
+		for (auto it = begin(); it != end();)
 		{
-			if(*it == obj)
+			if (*it == obj)
 			{
 				it = erase(it);
-				if(!all)
+				if (!all)
 					break;
 			}
 			else
@@ -43,11 +43,11 @@ public:
 	}
 
 	// O(N) lookup to check if object is in array
-	bool Contains(const I& obj) const 
+	bool Contains(const I& obj) const
 	{
-		for(auto& i : *this)
+		for (auto& i : *this)
 		{
-			if(obj == i)
+			if (obj == i)
 				return true;
 		}
 		return false;
@@ -57,9 +57,9 @@ public:
 	template<typename Predicate>
 	I* Find(Predicate&& pred)
 	{
-		for(auto& i : *this)
+		for (auto& i : *this)
 		{
-			if(pred(i))
+			if (pred(i))
 			{
 				return &i;
 			}
@@ -70,9 +70,9 @@ public:
 	template<typename Predicate>
 	const I* Find(Predicate&& pred) const
 	{
-		for(auto& i : *this)
+		for (auto& i : *this)
 		{
-			if(pred(i))
+			if (pred(i))
 			{
 				return &i;
 			}
@@ -85,9 +85,9 @@ public:
 	Vector<I*> FindAll(Predicate&& pred)
 	{
 		Vector<I*> r;
-		for(auto& i : *this)
+		for (auto& i : *this)
 		{
-			if(pred(i))
+			if (pred(i))
 			{
 				r.push_back(i);
 			}
@@ -98,9 +98,9 @@ public:
 	Vector<const I*> FindAll(Predicate&& pred) const
 	{
 		Vector<I*> r;
-		for(auto& i : *this)
+		for (auto& i : *this)
 		{
-			if(pred(i))
+			if (pred(i))
 			{
 				r.push_back(i);
 			}

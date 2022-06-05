@@ -37,7 +37,7 @@ namespace Graphics
 				: PosAndShape(FlagsToMode(fullscreen, windowedFullscreen), pos, size, monitorId, fullscreenSize) {}
 
 			PosAndShape(Mode mode, const Vector2i& pos, const Vector2i& size, int32 monitorId, const Vector2i& fullscreenSize)
-				: mode(mode), windowPos(pos), windowSize(size), monitorId(monitorId), fullscreenSize(fullscreenSize){}
+				: mode(mode), windowPos(pos), windowSize(size), monitorId(monitorId), fullscreenSize(fullscreenSize) {}
 
 			inline static Mode FlagsToMode(bool fullscreen, bool windowedFullscreen)
 			{
@@ -53,7 +53,7 @@ namespace Graphics
 			Vector2i windowPos;
 			/// Size of the window; ignored when in fullscreen mode
 			Vector2i windowSize;
-			
+
 			/// Monitor to use when in fullscreen; ignored when in windowed mode
 			int32 monitorId;
 			/// Only used for windowed fullscreen mode
@@ -82,7 +82,7 @@ namespace Graphics
 		bool GetRelativeMouseMode();
 
 		// Sets cursor to use
-		void SetCursor(const Ref<class ImageRes>& image, Vector2i hotspot = Vector2i(0,0));
+		void SetCursor(const Ref<class ImageRes>& image, Vector2i hotspot = Vector2i(0, 0));
 		void SetCursorVisible(bool visible);
 
 		// Switches between borderless and windowed
@@ -99,13 +99,13 @@ namespace Graphics
 
 		// Window is active
 		bool IsActive() const;
-		
+
 		// Set window client area size
 		void SetPosAndShape(const PosAndShape& posAndShape, bool ensureInBound);
 		bool IsFullscreen() const;
 
 		int GetDisplayIndex() const;
-		
+
 		// Checks if a key is pressed
 		bool IsKeyPressed(SDL_Scancode key) const;
 

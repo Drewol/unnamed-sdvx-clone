@@ -34,7 +34,7 @@ bool File::OpenRead(const String& path)
 		nullptr,
 		OPEN_EXISTING,
 		0, 0);
-	if(h == INVALID_HANDLE_VALUE)
+	if (h == INVALID_HANDLE_VALUE)
 	{
 		Logf("Failed to open file for reading %s: %s", Logger::Severity::Warning, *path, Utility::WindowsFormatMessage(GetLastError()));
 		return false;
@@ -45,7 +45,7 @@ bool File::OpenRead(const String& path)
 }
 bool File::OpenWrite(const String& path, bool append /*= false*/, bool noLog /*= false*/)
 {
-	Close(); 
+	Close();
 	WString wstringPath = Utility::ConvertToWString(path);
 	HANDLE h = CreateFileW(*wstringPath,
 		GENERIC_WRITE, // Desired Access
@@ -53,23 +53,23 @@ bool File::OpenWrite(const String& path, bool append /*= false*/, bool noLog /*=
 		nullptr,
 		append ? OPEN_EXISTING : CREATE_ALWAYS,
 		0, 0);
-	if(h == INVALID_HANDLE_VALUE)
+	if (h == INVALID_HANDLE_VALUE)
 	{
-		if(!noLog) //if logger isn't ready this will lock up the program
+		if (!noLog) //if logger isn't ready this will lock up the program
 			Logf("Failed to open file for writing %s: %s", Logger::Severity::Warning, *path, Utility::WindowsFormatMessage(GetLastError()));
 		return false;
 	}
 	m_impl = new File_Impl(h);
 
 	// Seek to end if append is enabled
-	if(append)
+	if (append)
 		SeekReverse(0);
 
 	return true;
 }
 void File::Close()
 {
-	if(m_impl)
+	if (m_impl)
 	{
 		delete m_impl;
 		m_impl = nullptr;
@@ -136,7 +136,7 @@ uint64 File::GetLastWriteTime() const
 {
 	assert(m_impl);
 	FILETIME ftCreate, ftAccess, ftWrite;
-	if(!GetFileTime(m_impl->handle, &ftCreate, &ftAccess, &ftWrite))
+	if (!GetFileTime(m_impl->handle, &ftCreate, &ftAccess, &ftWrite))
 		return -1;
 	return (uint64&)ftWrite;
 }
@@ -146,7 +146,7 @@ uint64 File::GetLastWriteTime(const String& path)
 	WString wstringPath = Utility::ConvertToWString(path);
 	HANDLE h = CreateFileW(*wstringPath,
 		GENERIC_READ, FILE_SHARE_WRITE, 0, OPEN_ALWAYS, 0, 0);
-	if(h == INVALID_HANDLE_VALUE)
+	if (h == INVALID_HANDLE_VALUE)
 		return -1;
 
 	FILETIME ftCreate, ftAccess, ftWrite;
@@ -164,10 +164,10 @@ static bool LoadResourceInternal(const char* name, const char* type, Buffer& out
 {
 	HMODULE module = GetModuleHandle(nullptr);
 	HRSRC res = FindResourceA(module, name, type);
-	if(res == INVALID_HANDLE_VALUE)
+	if (res == INVALID_HANDLE_VALUE)
 		return false;
 	HGLOBAL data = ::LoadResource(module, res);
-	if(!data)
+	if (!data)
 		return false;
 
 	size_t size = SizeofResource(module, res);

@@ -19,7 +19,7 @@ DSP::~DSP()
 	assert(!m_audioBase);
 }
 
-bool DSP::Sorter(DSP *&a, DSP *&b)
+bool DSP::Sorter(DSP*& a, DSP*& b)
 {
 	if (a->priority == b->priority)
 	{
@@ -28,7 +28,7 @@ bool DSP::Sorter(DSP *&a, DSP *&b)
 	return a->priority < b->priority;
 }
 
-void DSP::SetAudioBase(class AudioBase *audioBase)
+void DSP::SetAudioBase(class AudioBase* audioBase)
 {
 	if (!audioBase)
 	{
@@ -50,27 +50,27 @@ uint32 AudioBase::GetAudioSampleRate() const
 {
 	return audio->GetSampleRate();
 }
-void AudioBase::ProcessDSPs(float *out, uint32 numSamples)
+void AudioBase::ProcessDSPs(float* out, uint32 numSamples)
 {
-	for (DSP *dsp : DSPs)
+	for (DSP* dsp : DSPs)
 	{
 		dsp->Process(out, numSamples);
 	}
 }
-void AudioBase::AddDSP(DSP *dsp)
+void AudioBase::AddDSP(DSP* dsp)
 {
 	audio->lock.lock();
 	DSPs.AddUnique(dsp);
 	// Sort by priority
-	DSPs.Sort([](DSP *l, DSP *r) {
+	DSPs.Sort([](DSP* l, DSP* r) {
 		if (l->priority == r->priority)
 			return l < r;
 		return l->priority < r->priority;
-	});
+		});
 	dsp->SetAudioBase(this);
 	audio->lock.unlock();
 }
-void AudioBase::RemoveDSP(DSP *dsp)
+void AudioBase::RemoveDSP(DSP* dsp)
 {
 	assert(DSPs.Contains(dsp));
 
@@ -90,7 +90,7 @@ void AudioBase::Deregister()
 
 	// Unbind DSP's
 	// It is safe to do here since the audio won't be rendered again after a call to deregister
-	for (DSP *dsp : DSPs)
+	for (DSP* dsp : DSPs)
 	{
 		dsp->RemoveAudioBase();
 	}

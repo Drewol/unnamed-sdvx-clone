@@ -13,14 +13,14 @@ struct IFunctionBinding
 template<typename Class, typename R, typename... A>
 struct ObjectBinding : public IFunctionBinding<R, A...>
 {
-	ObjectBinding(Class* object, R (Class::*func)(A...)) : object(object), func(func) {};
+	ObjectBinding(Class* object, R(Class::* func)(A...)) : object(object), func(func) {};
 	virtual R Call(A... args) override
 	{
 		return ((object)->*func)(args...);
 	}
 
 	Class* object;
-	R (Class::*func)(A...);
+	R(Class::* func)(A...);
 };
 
 /* Static function binding */

@@ -43,6 +43,6 @@ inline StringEncoding StringEncodingDetector::Detect(const char* data, const siz
 {
 	StringEncodingDetector detector;
 	detector.Feed(data, len);
-	
+
 	return detector.GetEncoding();
 }

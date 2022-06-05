@@ -40,7 +40,7 @@ private:
 
 	LuaBindable* m_bindable = nullptr;
 
-    ChallengeManager* m_manager = NULL;
+	ChallengeManager* m_manager = NULL;
 
 	void m_PushBoolToTable(const char* name, bool data)
 	{
@@ -115,7 +115,7 @@ public:
 		lua_newtable(m_lua);
 		for (unsigned int i = 0; i < res.size(); i++)
 		{
-			lua_pushnumber(m_lua, (uint64)i+1u);
+			lua_pushnumber(m_lua, (uint64)i + 1u);
 			lua_newtable(m_lua);
 			const ChartIndex* chart = charts[i];
 			const ChallengeResult& cres = res[i];
@@ -271,7 +271,7 @@ public:
 	}
 	virtual bool AsyncFinalize() override
 	{
-		if(!loader.Finalize())
+		if (!loader.Finalize())
 			return false;
 		m_lua = g_application->LoadScript("challengeresult");
 		if (!m_lua)
@@ -312,7 +312,7 @@ public:
 
 	void OnKeyPressed(SDL_Scancode code, int32 delta) override
 	{
-		if(code == SDL_SCANCODE_RETURN && !m_removed)
+		if (code == SDL_SCANCODE_RETURN && !m_removed)
 		{
 			g_application->RemoveTickable(this);
 			m_removed = true;
@@ -441,7 +441,7 @@ public:
 			screenshot->SavePNG(screenshotPath);
 			screenshot.reset();
 		}
-		else 
+		else
 		{
 			screenshotPath = "Failed to capture screenshot";
 		}

@@ -13,7 +13,7 @@ public:
 	bool InitCompression();
 	// Initailize zlib and start using it for the rest of the stream
 	bool StartCompression();
-	bool IsUsingCompression() { return m_useCompression;  }
+	bool IsUsingCompression() { return m_useCompression; }
 
 	virtual void Seek(size_t pos) override
 	{

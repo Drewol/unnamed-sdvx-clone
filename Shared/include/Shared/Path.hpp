@@ -2,8 +2,8 @@
 #include "Shared/String.hpp"
 #include "Shared/Vector.hpp"
 
-/* 
-	File path API 
+/*
+	File path API
 	Operates on string objects that contain path strings
 	Valid formats are windows strings using \'s as directory seperators and X: as drive letters
 
@@ -80,7 +80,7 @@ public:
 	// Same as ExtractPathFromCmdLine but returns the result in an array and keeps the input intact
 	static Vector<String> SplitCommandLine(const String& input);
 	static Vector<String> SplitCommandLine(int argc, char** argv);
-	
+
 	// The character seperating directories/files 
 	// '/' on linux
 	// '\' on windows

@@ -252,7 +252,7 @@ bool MultiplayerScreen::m_handleJoinRoom(nlohmann::json& packet)
 
 	String roomname;
 	packet["room"]["name"].get_to(roomname);
-	m_chatOverlay->AddMessage("You joined "+roomname, 207, 178, 41);
+	m_chatOverlay->AddMessage("You joined " + roomname, 207, 178, 41);
 
 	return true;
 }
@@ -260,7 +260,7 @@ bool MultiplayerScreen::m_handleJoinRoom(nlohmann::json& packet)
 bool MultiplayerScreen::m_handleError(nlohmann::json& packet)
 {
 	g_gameWindow->ShowMessageBox("Multiplayer server closed", packet.value("error", ""), 0);
-	
+
 	// Fatal error, so leave this view
 	m_suspended = true;
 	g_application->RemoveTickable(this);
@@ -270,7 +270,7 @@ bool MultiplayerScreen::m_handleError(nlohmann::json& packet)
 // Save the unique user id the server assigns us
 bool MultiplayerScreen::m_handleAuthResponse(nlohmann::json& packet)
 {
-	double server_version = atof(static_cast<String>(packet.value("version", "0.0")).c_str()+1);
+	double server_version = atof(static_cast<String>(packet.value("version", "0.0")).c_str() + 1);
 	if (server_version < 0.16)
 	{
 		g_gameWindow->ShowMessageBox("Multiplayer server closed", "This version of multiplayer (" MULTIPLAYER_VERSION ") does not support this server", 0);
@@ -282,7 +282,7 @@ bool MultiplayerScreen::m_handleAuthResponse(nlohmann::json& packet)
 
 	g_application->DiscordPresenceMenu("Browsing multiplayer rooms");
 	packet["userid"].get_to(m_userId);
-	m_scoreInterval = packet.value("refresh_rate",1000);
+	m_scoreInterval = packet.value("refresh_rate", 1000);
 
 	// If we are waiting to join a room, join now
 	if (m_joinToken != "")
@@ -414,7 +414,7 @@ ChartIndex* MultiplayerScreen::m_getChartByHash(const String& hash, const String
 	// Fallback on an empty hash
 	if (hash.length() == 0)
 		return m_getChartByShortPath(path, diffIndex, level, true);
-	
+
 	Logf("[Multiplayer] looking up song hash '%s' level %u", Logger::Severity::Info, *hash, level);
 	for (auto folder : m_mapDatabase->FindFoldersByHash(hash))
 	{
@@ -525,7 +525,7 @@ void MultiplayerScreen::SetSelectedMap(FolderIndex* folder, ChartIndex* chart)
 		m_hasSelectedMap = false;
 		return;
 	}
-	
+
 
 	m_selfPicked = true;
 	m_updateSelectedMap(newChart->folderId, diff_index, true);
@@ -548,7 +548,7 @@ void MultiplayerScreen::m_changeSelectedRoom(int offset)
 		}
 	}
 	lua_settop(m_lua, 0);
-	
+
 }
 
 void MultiplayerScreen::m_changeDifficulty(int offset)
@@ -576,7 +576,7 @@ void MultiplayerScreen::m_changeDifficulty(int offset)
 		}
 	}
 	lua_settop(m_lua, 0);
-	
+
 
 }
 
@@ -682,7 +682,7 @@ void MultiplayerScreen::m_updateSelectedMap(int32 mapid, int32 diff_ind, bool is
 		lua_newtable(m_lua);
 		m_PushIntToTable("level", chart->level);
 		m_PushIntToTable("id", chart->id);
-		m_PushIntToTable("diff_index", diffIndex-1);
+		m_PushIntToTable("diff_index", diffIndex - 1);
 		m_PushIntToTable("difficulty", chart->diff_index);
 		lua_settable(m_lua, -3);
 	}
@@ -716,7 +716,7 @@ void MultiplayerScreen::m_updateSelectedMap(int32 mapid, int32 diff_ind, bool is
 	// If we selected this song ourselves, we have to tell the server about it
 	if (isNew)
 	{
-		
+
 		nlohmann::json packet;
 		packet["topic"] = "room.setsong";
 		packet["song"] = shortPath;
@@ -844,10 +844,10 @@ void MultiplayerScreen::Tick(float deltaTime)
 	m_previewPlayer.Update(deltaTime);
 
 	// Lock mouse to screen when active
-	if (m_screenState == MultiplayerScreenState::ROOM_LIST && 
+	if (m_screenState == MultiplayerScreenState::ROOM_LIST &&
 		g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::LaserInputDevice) == InputDevice::Mouse &&
-        g_gameWindow->IsActive() &&
-        !m_chatOverlay->IsOpen())
+		g_gameWindow->IsActive() &&
+		!m_chatOverlay->IsOpen())
 	{
 		if (!m_lockMouse)
 			m_lockMouse = g_input.LockMouse();
@@ -934,7 +934,7 @@ void MultiplayerScreen::m_addFinalStat(nlohmann::json& data)
 		[](const nlohmann::json& a, const nlohmann::json& b) -> bool
 		{
 			return (a["score"].get<int>() + (a["clear"].get<int>() > 1 ? 10000000 : 0)) >
-				(b["score"].get<int>() +( b["clear"].get<int>() > 1 ? 10000000 : 0));
+				(b["score"].get<int>() + (b["clear"].get<int>() > 1 ? 10000000 : 0));
 		});
 }
 
@@ -1067,7 +1067,7 @@ void MultiplayerScreen::OnKeyPressed(SDL_Scancode code, int32 delta)
 	}
 	else if (code == SDL_SCANCODE_RETURN)
 	{
-		if (m_screenState == MultiplayerScreenState::JOIN_PASSWORD) 
+		if (m_screenState == MultiplayerScreenState::JOIN_PASSWORD)
 		{
 			lJoinWithPassword(NULL);
 		}
@@ -1153,7 +1153,7 @@ void MultiplayerScreen::m_OnButtonPressed(Input::Button buttonCode, int32 delta)
 					break;
 			}
 			// Otherwise fall though
-            [[fallthrough]];
+			[[fallthrough]];
 		default:
 			if (m_returnToMainList())
 				return;
@@ -1227,7 +1227,7 @@ void MultiplayerScreen::m_OnMouseScroll(int32 steps)
 	lua_settop(m_lua, 0);
 }
 
-int MultiplayerScreen::lExit(lua_State * L)
+int MultiplayerScreen::lExit(lua_State* L)
 {
 	m_suspended = true;
 	g_application->RemoveTickable(this);
@@ -1254,8 +1254,8 @@ void MultiplayerScreen::OnRestore()
 	m_suspended = false;
 	m_previewPlayer.Restore();
 
-    // Restart nuklear if we turned it off during suspend
-    m_chatOverlay->InitNuklearIfNeeded();
+	// Restart nuklear if we turned it off during suspend
+	m_chatOverlay->InitNuklearIfNeeded();
 
 	// If we disconnected while playing or selecting wait until we get back before exiting
 	/*if (!m_tcp.IsOpen())
@@ -1339,7 +1339,7 @@ bool MultiplayerScreen::AsyncFinalize()
 	if (m_lua == nullptr)
 		return false;
 
-	m_previewParams = {"", 0, 0};
+	m_previewParams = { "", 0, 0 };
 
 	// Install the socket functions and call the lua init
 	m_tcp.PushFunctions(m_lua);
@@ -1462,7 +1462,7 @@ int MultiplayerScreen::lJoinWithPassword(lua_State* L)
 		m_roomToJoin = luaL_checkstring(L, 2);
 		m_textInput->Reset();
 		m_textInput->SetActive(true);
-		
+
 
 		m_screenState = MultiplayerScreenState::JOIN_PASSWORD;
 		m_chatOverlay->DisableOpeningChat();
@@ -1531,7 +1531,7 @@ void MultiplayerScreen::m_updatePreview(ChartIndex* diff, bool mapChanged)
 	// Set current preview audio
 	String audioPath = mapRootPath + Path::sep + diff->preview_file;
 
-	PreviewParams params = {audioPath, static_cast<uint32>(diff->preview_offset), static_cast<uint32>(diff->preview_length)};
+	PreviewParams params = { audioPath, static_cast<uint32>(diff->preview_offset), static_cast<uint32>(diff->preview_length) };
 
 	/* A lot of pre-effected charts use different audio files for each difficulty; these
 	 * files differ only in their effects, so the preview offset and duration remain the
@@ -1556,7 +1556,7 @@ void MultiplayerScreen::m_updatePreview(ChartIndex* diff, bool mapChanged)
 		}
 		else
 		{
-			params = {"", 0, 0};
+			params = { "", 0, 0 };
 
 			Logf("Failed to load preview audio from [%s]", Logger::Severity::Warning, audioPath);
 			if (m_previewParams != params)
@@ -1569,7 +1569,7 @@ void MultiplayerScreen::m_updatePreview(ChartIndex* diff, bool mapChanged)
 
 void MultiplayerScreen::m_stopPreview()
 {
-	PreviewParams params = {"", 0, 0};
+	PreviewParams params = { "", 0, 0 };
 	if (m_previewParams != params)
 		m_previewPlayer.FadeTo(Ref<AudioStream>());
 

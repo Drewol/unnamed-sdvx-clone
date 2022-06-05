@@ -10,11 +10,11 @@ extern struct GUIState g_guiState;
 extern class Graphics::Window* g_gameWindow;
 extern float g_aspectRatio;
 extern Vector2i g_resolution;
-extern class Application *g_application;
-extern class JobSheduler *g_jobSheduler;
+extern class Application* g_application;
+extern class JobSheduler* g_jobSheduler;
 extern class Input g_input;
-extern class SkinConfig *g_skinConfig;
-extern class TransitionScreen *g_transition;
+extern class SkinConfig* g_skinConfig;
+extern class TransitionScreen* g_transition;
 
 class SharedTexture;
 
@@ -44,8 +44,8 @@ public:
 	class Game* LaunchReplay(const String& replayPath, MapDatabase** database = nullptr);
 	void Shutdown();
 
-	void AddTickable(class IApplicationTickable *tickable, class IApplicationTickable *insertBefore = nullptr);
-	void RemoveTickable(class IApplicationTickable *tickable, bool noDelete = false);
+	void AddTickable(class IApplicationTickable* tickable, class IApplicationTickable* insertBefore = nullptr);
+	void RemoveTickable(class IApplicationTickable* tickable, bool noDelete = false);
 
 	// Current running map path (full file path)
 	String GetCurrentMapPath();
@@ -54,19 +54,19 @@ public:
 	String GetCurrentSkin();
 
 	// Retrieves application command line parameters
-	const Vector<String> &GetAppCommandLine() const;
+	const Vector<String>& GetAppCommandLine() const;
 
 	// Gets a basic template for a render state, with all the application variables initialized
 	RenderState GetRenderStateBase() const;
-	RenderQueue *GetRenderQueueBase();
+	RenderQueue* GetRenderQueueBase();
 
 #ifdef LoadImage
 #undef LoadImage
 #endif
 	Image LoadImage(const String& name);
-	Graphics::Image LoadImageExternal(const String & name);
+	Graphics::Image LoadImageExternal(const String& name);
 	Texture LoadTexture(const String& name);
-	Texture LoadTexture(const String & name, const bool& external);
+	Texture LoadTexture(const String& name, const bool& external);
 	Material LoadMaterial(const String& name);
 	Material LoadMaterial(const String& name, const String& path);
 	Sample LoadSample(const String& name, const bool& external = false);
@@ -102,9 +102,9 @@ public:
 	void DiscordError(int errorCode, const char* message);
 	void DiscordPresenceMenu(String name);
 	void DiscordPresenceMulti(String secret, int partySize, int partyMax, String id);
-	void DiscordPresenceSong(const struct BeatmapSettings &song, int64 startTime, int64 endTime);
+	void DiscordPresenceSong(const struct BeatmapSettings& song, int64 startTime, int64 endTime);
 	void JoinMultiFromInvite(String secret);
-	void SetUpdateAvailable(const String &version, const String &url, const String &download);
+	void SetUpdateAvailable(const String& version, const String& url, const String& download);
 	void RunUpdater();
 	void CheckForUpdate();
 	void ForceRender();
@@ -121,7 +121,7 @@ public:
 
 	AutoplayInfo* autoplayInfo = nullptr;
 	Map<String, Ref<SharedTexture>> sharedTextures;
-	
+
 
 private:
 	bool m_LoadConfig(String profileName = "");
@@ -200,7 +200,7 @@ public:
 	String imagePath;
 	int w = 0, h = 0;
 	bool web = false;
-	Application::CachedJacketImage *target;
+	Application::CachedJacketImage* target;
 };
 
 void __discordJoinGame(const char* joins);

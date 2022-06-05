@@ -7,7 +7,7 @@ namespace Interpolation
 
 	CubicBezier::CubicBezier(Predefined predefined)
 	{
-		switch(predefined)
+		switch (predefined)
 		{
 		case Linear:
 			m_Set(0.0, 0.0, 1.0, 1.0);
@@ -54,14 +54,14 @@ namespace Interpolation
 		assert(in >= 0);
 		assert(in <= 1.0f);
 		float inv = 1.0f - in;
-		float inv2 = inv*inv;
-		float inv3 = inv2*inv;
-		float in2 = in*in;
-		float in3 = in2*in;
-		Vector2 r =  Vector2(0,0) * inv3 +
-			Vector2(a,b) * 3 * inv2 * in +
+		float inv2 = inv * inv;
+		float inv3 = inv2 * inv;
+		float in2 = in * in;
+		float in3 = in2 * in;
+		Vector2 r = Vector2(0, 0) * inv3 +
+			Vector2(a, b) * 3 * inv2 * in +
 			Vector2(c, d) * 3 * inv * in2 +
-			Vector2(1,1) * in3;
+			Vector2(1, 1) * in3;
 		return r.y;
 	}
 	float CubicBezier::operator()(float in) const

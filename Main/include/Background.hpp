@@ -1,6 +1,6 @@
 #pragma once
 
-/* 
+/*
 	Game background base class
 */
 class Background

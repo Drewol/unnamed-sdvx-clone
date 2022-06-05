@@ -12,13 +12,13 @@ namespace Math
 	float AngularDifference(float a, float b)
 	{
 		float sign = 1.0f;
-		if(a > b)
+		if (a > b)
 		{
 			Utility::Swap(a, b);
 			sign = -1.0f;
 		}
 		b -= a;
-		if(b > pi)
+		if (b > pi)
 			b = b - pi * 2;
 		return b * sign;
 	}

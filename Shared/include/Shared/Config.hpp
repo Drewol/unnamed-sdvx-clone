@@ -34,7 +34,7 @@ public:
 	void Update(ConfigBase& other, KeyList* ignore = nullptr, KeyList* only = nullptr);
 
 	// Only really useful for profiles
-	const KeyList& GetKeysInFile() { return m_entriesInFile;  }
+	const KeyList& GetKeysInFile() { return m_entriesInFile; }
 
 protected:
 	ConfigBase();
@@ -44,7 +44,7 @@ protected:
 	Map<uint32, String> m_reverseKeys;
 	Map<uint32, IConfigEntry*> m_entries;
 	KeyList m_entriesInFile;
-	
+
 	bool m_dirty = false;
 };
 
@@ -58,7 +58,7 @@ public:
 	typedef typename EnumClass::EnumType KeyType;
 	Config()
 	{
-		for(auto it : EnumClass::GetMap())
+		for (auto it : EnumClass::GetMap())
 		{
 			m_keys.Add(it.second, (uint32)it.first);
 			m_reverseKeys.Add((uint32)it.first, it.second);
@@ -100,7 +100,7 @@ public:
 	void Set(KeyType key, const int32& value)
 	{
 		int32& dst = SetEnsure<IntConfigEntry>(key)->data;
-		if(dst != value)
+		if (dst != value)
 		{
 			dst = value;
 			m_dirty = true;
@@ -109,7 +109,7 @@ public:
 	void Set(KeyType key, const float& value)
 	{
 		float& dst = SetEnsure<FloatConfigEntry>(key)->data;
-		if(dst != value)
+		if (dst != value)
 		{
 			dst = value;
 			m_dirty = true;
@@ -118,7 +118,7 @@ public:
 	void Set(KeyType key, const bool& value)
 	{
 		bool& dst = SetEnsure<BoolConfigEntry>(key)->data;
-		if(dst != value)
+		if (dst != value)
 		{
 			dst = value;
 			m_dirty = true;
@@ -127,7 +127,7 @@ public:
 	void Set(KeyType key, const String& value)
 	{
 		String& dst = SetEnsure<StringConfigEntry>(key)->data;
-		if(dst != value)
+		if (dst != value)
 		{
 			dst = value;
 			m_dirty = true;
@@ -136,7 +136,7 @@ public:
 	void Set(KeyType key, const char* value)
 	{
 		String& dst = SetEnsure<StringConfigEntry>(key)->data;
-		if(dst != value)
+		if (dst != value)
 		{
 			dst = value;
 			m_dirty = true;
@@ -158,7 +158,7 @@ public:
 	void SetEnum(KeyType key, typename EnumClass1::EnumType value)
 	{
 		typename EnumClass1::EnumType& dst = SetEnsure<EnumConfigEntry<EnumClass1>>(key)->data;
-		if(dst != value)
+		if (dst != value)
 		{
 			dst = value;
 			m_dirty = true;
@@ -172,7 +172,7 @@ private:
 	template<typename T> T* SetEnsure(KeyType key)
 	{
 		IConfigEntry** found = m_entries.Find((uint32)key);
-		if(found)
+		if (found)
 		{
 			T* targetType = found[0]->As<T>();
 			assert(targetType); // Make sure type matches
@@ -189,7 +189,7 @@ private:
 	// Gets the wanted type with type checking and seeing if it exists
 	template<typename T> const T* GetEnsure(KeyType key) const
 	{
-		IConfigEntry*const* found = m_entries.Find((uint32)key);
+		IConfigEntry* const* found = m_entries.Find((uint32)key);
 		assert(found);
 		const T* targetType = found[0]->As<T>();
 		assert(targetType); // Make sure type matches

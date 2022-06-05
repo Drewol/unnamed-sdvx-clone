@@ -5,7 +5,7 @@
 #include "AudioOutput.hpp"
 #include "DSP.hpp"
 
-Audio *g_audio = nullptr;
+Audio* g_audio = nullptr;
 static Audio_Impl g_impl;
 
 Audio_Impl::Audio_Impl()
@@ -15,7 +15,7 @@ Audio_Impl::Audio_Impl()
 #endif
 }
 
-void Audio_Impl::Mix(void *data, uint32 &numSamples)
+void Audio_Impl::Mix(void* data, uint32& numSamples)
 {
 	double adv = GetSecondsPerSample();
 
@@ -40,7 +40,7 @@ void Audio_Impl::Mix(void *data, uint32 &numSamples)
 
 			// Render items
 			lock.lock();
-			for (auto &item : itemsToRender)
+			for (auto& item : itemsToRender)
 			{
 				// Clear per-channel data
 				m_itemBuffer.fill(0);
@@ -94,11 +94,11 @@ void Audio_Impl::Mix(void *data, uint32 &numSamples)
 				{
 					if (output->IsIntegerFormat())
 					{
-						((int16 *)data)[(currentNumberOfSamples + i) * outputChannels + c] = (int16)(0x7FFF * Math::Clamp(m_sampleBuffer[(sampleOffset + i) * 2 + c], -1.f, 1.f));
+						((int16*)data)[(currentNumberOfSamples + i) * outputChannels + c] = (int16)(0x7FFF * Math::Clamp(m_sampleBuffer[(sampleOffset + i) * 2 + c], -1.f, 1.f));
 					}
 					else
 					{
-						((float *)data)[(currentNumberOfSamples + i) * outputChannels + c] = m_sampleBuffer[(sampleOffset + i) * 2 + c];
+						((float*)data)[(currentNumberOfSamples + i) * outputChannels + c] = m_sampleBuffer[(sampleOffset + i) * 2 + c];
 					}
 				}
 			}
@@ -124,7 +124,7 @@ void Audio_Impl::Stop()
 	delete limiter;
 	limiter = nullptr;
 }
-void Audio_Impl::Register(AudioBase *audio)
+void Audio_Impl::Register(AudioBase* audio)
 {
 	if (audio)
 	{
@@ -134,7 +134,7 @@ void Audio_Impl::Register(AudioBase *audio)
 		lock.unlock();
 	}
 }
-void Audio_Impl::Deregister(AudioBase *audio)
+void Audio_Impl::Deregister(AudioBase* audio)
 {
 	lock.lock();
 	itemsToRender.Remove(audio);
@@ -192,16 +192,16 @@ uint32 Audio::GetSampleRate() const
 {
 	return g_impl.output->GetSampleRate();
 }
-class Audio_Impl *Audio::GetImpl()
+class Audio_Impl* Audio::GetImpl()
 {
 	return &g_impl;
 }
 
-Ref<AudioStream> Audio::CreateStream(const String &path, bool preload)
+Ref<AudioStream> Audio::CreateStream(const String& path, bool preload)
 {
 	return AudioStream::Create(this, path, preload);
 }
-Sample Audio::CreateSample(const String &path)
+Sample Audio::CreateSample(const String& path)
 {
 	return SampleRes::Create(this, path);
 }

@@ -48,9 +48,9 @@ public:
 	{
 		size_t numCleanedUp = 0;
 		m_lock.lock();
-		for(auto it = m_objects.begin(); it != m_objects.end();)
+		for (auto it = m_objects.begin(); it != m_objects.end();)
 		{
-			if(it->use_count() <= 1)
+			if (it->use_count() <= 1)
 			{
 				numCleanedUp++;
 				it = m_objects.erase(it);
@@ -59,7 +59,7 @@ public:
 			it++;
 		}
 		m_lock.unlock();
-		if(numCleanedUp > 0)
+		if (numCleanedUp > 0)
 		{
 			//Logf("Cleaned up %d resource(s) of %s", Logger::Info, numCleanedUp, Utility::TypeInfo<T>::name);
 		}
@@ -68,14 +68,14 @@ public:
 	{
 		m_lock.lock();
 		size_t numCleanedUp = m_objects.size();
-		for(auto it = m_objects.begin(); it != m_objects.end(); it++)
+		for (auto it = m_objects.begin(); it != m_objects.end(); it++)
 		{
-			if(*it)
+			if (*it)
 				it->reset();
 		}
 		m_objects.clear();
 		m_lock.unlock();
-		if(numCleanedUp > 0)
+		if (numCleanedUp > 0)
 		{
 			Logf("Cleaned up %d resource(s) of %s", Logger::Severity::Info, numCleanedUp, Utility::TypeInfo<T>::name);
 		}

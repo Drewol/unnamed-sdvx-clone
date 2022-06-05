@@ -28,13 +28,13 @@ namespace Graphics
 		}
 		~Texture_Impl()
 		{
-			if(m_texture)
+			if (m_texture)
 				glDeleteTextures(1, &m_texture);
 		}
 		bool Init()
 		{
 			glGenTextures(1, &m_texture);
-			if(m_texture == 0)
+			if (m_texture == 0)
 				return false;
 			return true;
 		}
@@ -46,17 +46,17 @@ namespace Graphics
 			uint32 ifmt = -1;
 			uint32 fmt = -1;
 			uint32 type = -1;
-			if(format == TextureFormat::D32)
+			if (format == TextureFormat::D32)
 			{
-				#ifdef EMBEDDED
+#ifdef EMBEDDED
 				ifmt = GL_DEPTH_COMPONENT16;
-				#else
+#else
 				ifmt = GL_DEPTH_COMPONENT32;
-				#endif
+#endif
 				fmt = GL_DEPTH_COMPONENT;
 				type = GL_FLOAT;
 			}
-			else if(format == TextureFormat::RGBA8)
+			else if (format == TextureFormat::RGBA8)
 			{
 				ifmt = GL_RGBA8;
 				fmt = GL_RGBA;
@@ -98,25 +98,25 @@ namespace Graphics
 		void UpdateFilterState()
 		{
 			glBindTexture(GL_TEXTURE_2D, m_texture);
-			if(!m_mipmaps)
+			if (!m_mipmaps)
 			{
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_filter ? GL_LINEAR : GL_NEAREST);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_filter ? GL_LINEAR : GL_NEAREST);
 			}
 			else
 			{
-				if(m_mipFilter)
+				if (m_mipFilter)
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_filter ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR);
 				else
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_filter ? GL_LINEAR : GL_NEAREST);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_filter ? GL_LINEAR : GL_NEAREST);
 			}
-			#ifndef EMBEDDED
-			if(GL_TEXTURE_MAX_ANISOTROPY_EXT)
+#ifndef EMBEDDED
+			if (GL_TEXTURE_MAX_ANISOTROPY_EXT)
 			{
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_anisotropic);
 			}
-			#endif
+#endif
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 		void SetFilter(bool enabled, bool mipFiltering, float anisotropic) override
@@ -129,7 +129,7 @@ namespace Graphics
 		}
 		void SetMipmaps(bool enabled) override
 		{
-			if(enabled)
+			if (enabled)
 			{
 				glBindTexture(GL_TEXTURE_2D, m_texture);
 				glGenerateMipmap(GL_TEXTURE_2D);
@@ -183,7 +183,7 @@ namespace Graphics
 	Texture TextureRes::Create(OpenGL* gl)
 	{
 		Texture_Impl* pImpl = new Texture_Impl(gl);
-		if(pImpl->Init())
+		if (pImpl->Init())
 		{
 			return GetResourceManager<ResourceType::Texture>().Register(pImpl);
 		}
@@ -195,10 +195,10 @@ namespace Graphics
 	}
 	Texture TextureRes::Create(OpenGL* gl, Image image)
 	{
-		if(!image)
+		if (!image)
 			return Texture();
 		Texture_Impl* pImpl = new Texture_Impl(gl);
-		if(pImpl->Init())
+		if (pImpl->Init())
 		{
 			pImpl->SetData(image->GetSize(), image->GetBits());
 			return GetResourceManager<ResourceType::Texture>().Register(pImpl);

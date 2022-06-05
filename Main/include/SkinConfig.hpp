@@ -44,7 +44,7 @@ struct SkinSetting
 			char* def;
 			bool secret;
 		} textSetting;
-		
+
 		struct {
 			Color* def;
 			bool hsv;
@@ -100,7 +100,7 @@ private:
 	template<typename T> const T* GetEnsure(const String& key) const
 	{
 		assert(m_keys.Contains(key));
-		IConfigEntry*const* found = m_entries.Find(m_keys.at(key));
+		IConfigEntry* const* found = m_entries.Find(m_keys.at(key));
 		assert(found);
 		const T* targetType = found[0]->As<T>();
 		assert(targetType); // Make sure type matches

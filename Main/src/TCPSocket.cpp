@@ -46,7 +46,7 @@ bool TCPSocket::Connect(String host)
 		return false;
 
 	size_t port_index = host.find_first_of(":");
-	String port = host.substr(port_index+1, host.length());
+	String port = host.substr(port_index + 1, host.length());
 
 	host = host.substr(0, port_index);
 
@@ -121,12 +121,12 @@ void TCPSocket::SendLine(String data)
 {
 	// For now send a 0 to say it is line deliniated
 	char zeroByte = (char)TCPPacketMode::JSON_LINE;
-	send(m_socket, (char*)& zeroByte, 1, 0);
+	send(m_socket, (char*)&zeroByte, 1, 0);
 
 	send(m_socket, data.c_str(), data.length(), 0);
 
 	char new_line = '\n';
-	send(m_socket, (char*)& new_line, 1, 0);
+	send(m_socket, (char*)&new_line, 1, 0);
 }
 
 // Send a JSON packet to the server
@@ -277,8 +277,8 @@ void TCPSocket::PushJsonValue(lua_State* L, const nlohmann::json& val)
 	}
 	else if (val.is_string())
 	{
-    String valueString;
-    val.get_to(valueString);
+		String valueString;
+		val.get_to(valueString);
 		lua_pushstring(L, *valueString);
 	}
 	else if (val.is_number_integer())
@@ -306,7 +306,7 @@ void TCPSocket::PushJsonObject(lua_State* L, const nlohmann::json& packet)
 	{
 		const String& key = el.key();
 		auto& val = el.value();
-		
+
 		lua_pushstring(L, key.c_str());
 		PushJsonValue(L, val);
 		lua_settable(L, -3);
@@ -332,7 +332,7 @@ void TCPSocket::ProcessSocket()
 
 		if (!m_readyToRead())
 			return;
-		
+
 		// Get a byte to indicate the packet type
 		unsigned char mode;
 		if (recv(m_socket, (char*)&mode, 1, 0) <= 0)
@@ -382,7 +382,7 @@ void TCPSocket::ProcessSocket()
 
 		// Update total amount read
 		m_amountRead += newRead;
-		
+
 		// Parse out any packets in the buffer currently
 		while (m_readingMode != TCPPacketMode::NOT_READING)
 		{
@@ -433,7 +433,7 @@ void TCPSocket::ProcessSocket()
 				Close();
 				return;
 			}
-			
+
 		}
 
 		// Check if we need to expand the buffer

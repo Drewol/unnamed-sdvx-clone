@@ -35,7 +35,7 @@ struct MapTimeRange
 	constexpr MapTime Length() const noexcept { return HasEnd() ? end - begin : 0; }
 	constexpr MapTime Length(const MapTime defaultEnd) const noexcept { return HasEnd() ? end - begin : defaultEnd - begin; }
 	constexpr bool Includes(const MapTime t, const bool includingEnd = false) const noexcept { return begin <= t && (!HasEnd() || (includingEnd ? t <= end : t < end)); }
-	constexpr bool Includes(const MapTimeRange& other) const noexcept { return Includes(other.begin) && (other.HasEnd() ? Includes(other.end, true) : !HasEnd());}
+	constexpr bool Includes(const MapTimeRange& other) const noexcept { return Includes(other.begin) && (other.HasEnd() ? Includes(other.end, true) : !HasEnd()); }
 	constexpr bool Overlaps(const MapTimeRange& other) const noexcept { if (begin <= other.begin) return Includes(other.begin); else return other.Includes(begin); }
 
 	MapTime begin, end;
@@ -72,8 +72,8 @@ enum class TrackRollBehaviour : uint8
 	// Flag for keep
 	Keep = 0x8,
 };
-TrackRollBehaviour operator|(const TrackRollBehaviour &l, const TrackRollBehaviour &r);
-TrackRollBehaviour operator&(const TrackRollBehaviour &l, const TrackRollBehaviour &r);
+TrackRollBehaviour operator|(const TrackRollBehaviour& l, const TrackRollBehaviour& r);
+TrackRollBehaviour operator&(const TrackRollBehaviour& l, const TrackRollBehaviour& r);
 
 // Sensitive data layout since union structure is used to access buttons/holds/... object states
 #pragma pack(push, 1)
@@ -81,7 +81,7 @@ TrackRollBehaviour operator&(const TrackRollBehaviour &l, const TrackRollBehavio
 // Common data for all object types
 struct ObjectTypeData_Base
 {
-	ObjectTypeData_Base(ObjectType type) : type(type){};
+	ObjectTypeData_Base(ObjectType type) : type(type) {};
 
 	// Position in ms when this object appears
 	MapTime time;
@@ -95,28 +95,28 @@ struct MultiObjectState;
 template <typename T>
 struct TObjectState : public ObjectTypeData_Base, T
 {
-	TObjectState() : ObjectTypeData_Base(T::staticType){};
+	TObjectState() : ObjectTypeData_Base(T::staticType) {};
 
 	// Implicit down-cast
-	operator TObjectState<void> *() { return (TObjectState<void> *)this; }
-	operator const TObjectState<void> *() const { return (TObjectState<void> *)this; }
+	operator TObjectState<void>* () { return (TObjectState<void> *)this; }
+	operator const TObjectState<void>* () const { return (TObjectState<void> *)this; }
 	// Implicit down-cast
-	operator MultiObjectState *() { return (MultiObjectState *)this; }
-	operator const MultiObjectState *() const { return (MultiObjectState *)this; }
+	operator MultiObjectState* () { return (MultiObjectState*)this; }
+	operator const MultiObjectState* () const { return (MultiObjectState*)this; }
 };
 
 // Generic object, does not have an object member
 template <>
 struct TObjectState<void> : public ObjectTypeData_Base
 {
-	TObjectState() : ObjectTypeData_Base(ObjectType::Invalid){};
+	TObjectState() : ObjectTypeData_Base(ObjectType::Invalid) {};
 
 	// Sort object states by their time and other properties
 	static void SortArray(std::vector<std::unique_ptr<TObjectState<void>>>& arr);
 
 	// Always allow casting from typeless object to Union State object
-	operator MultiObjectState *() { return (MultiObjectState *)this; }
-	operator const MultiObjectState *() const { return (MultiObjectState *)this; }
+	operator MultiObjectState* () { return (MultiObjectState*)this; }
+	operator const MultiObjectState* () const { return (MultiObjectState*)this; }
 };
 
 // A Single button
@@ -141,18 +141,18 @@ struct ObjectTypeData_Button
 // A Hold button, extends a normal button with duration and effect type
 struct ObjectTypeData_Hold : public ObjectTypeData_Button
 {
-	TObjectState<ObjectTypeData_Hold> *GetRoot();
+	TObjectState<ObjectTypeData_Hold>* GetRoot();
 	// Used for hold notes, 0 is a normal note
 	MapTime duration = 0;
 	// The sound effect on the note
 	EffectType effectType = EffectType::None;
 	// The parameter for effects that have it
 	// the maximum number of parameters is 2 (only echo uses this)
-	int16 effectParams[2] = {0};
+	int16 effectParams[2] = { 0 };
 
 	// Set for hold notes that are a continuation of the previous one, but with a different effect
-	TObjectState<ObjectTypeData_Hold> *next = nullptr;
-	TObjectState<ObjectTypeData_Hold> *prev = nullptr;
+	TObjectState<ObjectTypeData_Hold>* next = nullptr;
+	TObjectState<ObjectTypeData_Hold>* prev = nullptr;
 
 	static const ObjectType staticType = ObjectType::Hold;
 };
@@ -206,8 +206,8 @@ struct ObjectTypeData_Laser
 	// Position of the laser on the track
 	float points[2];
 	// Set the to the object state that connects to this laser, if any, otherwise null
-	TObjectState<ObjectTypeData_Laser> *next = nullptr;
-	TObjectState<ObjectTypeData_Laser> *prev = nullptr;
+	TObjectState<ObjectTypeData_Laser>* next = nullptr;
+	TObjectState<ObjectTypeData_Laser>* prev = nullptr;
 
 	SpinStruct spin;
 
@@ -229,7 +229,7 @@ struct EventData
 {
 	EventData() = default;
 	template <typename T>
-	EventData(const T &obj)
+	EventData(const T& obj)
 	{
 		static_assert(sizeof(T) <= 4, "Invalid object size");
 		memset(this, 0, 4);
@@ -245,9 +245,9 @@ struct EventData
 	};
 
 	// Address of operator that returns a pointer to 32-bit data
-	uint32 *operator&()
+	uint32* operator&()
 	{
-		return (uint32 *)this;
+		return (uint32*)this;
 	}
 };
 
@@ -269,7 +269,7 @@ struct ObjectTypeData_Event
 // Object state with union data member
 struct MultiObjectState
 {
-	static bool StaticSerialize(BinaryStream &stream, MultiObjectState *&out);
+	static bool StaticSerialize(BinaryStream& stream, MultiObjectState*& out);
 
 	// Position in ms when this object appears
 	MapTime time;
@@ -283,8 +283,8 @@ struct MultiObjectState
 	};
 
 	// Implicit down-cast
-	operator TObjectState<void> *() { return (TObjectState<void> *)this; }
-	operator const TObjectState<void> *() const { return (TObjectState<void> *)this; }
+	operator TObjectState<void>* () { return (TObjectState<void> *)this; }
+	operator const TObjectState<void>* () const { return (TObjectState<void> *)this; }
 };
 
 // Restore packing
@@ -299,7 +299,7 @@ typedef TObjectState<ObjectTypeData_Event> EventObjectState;
 // Map timing point
 struct TimingPoint
 {
-	static bool StaticSerialize(BinaryStream &stream, TimingPoint *&out);
+	static bool StaticSerialize(BinaryStream& stream, TimingPoint*& out);
 
 	double GetWholeNoteLength() const { return beatDuration * 4; }
 	double GetBarDuration() const { return GetWholeNoteLength() * ((double)numerator / (double)denominator); }

@@ -4,7 +4,7 @@
 Buffer::Buffer(const char* string)
 {
 	uint32 l = (uint32)strlen(string);
-	for(uint32 i = 0; i < l; i++)
+	for (uint32 i = 0; i < l; i++)
 	{
 		push_back((uint8)string[i]);
 	}
@@ -16,7 +16,7 @@ Buffer::Buffer(Buffer&& rhs)
 Buffer Buffer::Copy() const
 {
 	Buffer newBuffer;
-	if(!empty())
+	if (!empty())
 	{
 		newBuffer.resize(size());
 		memcpy(newBuffer.data(), data(), size());
@@ -31,10 +31,10 @@ Buffer& Buffer::operator=(Buffer&& rhs)
 
 CopyableBuffer& CopyableBuffer::operator=(const CopyableBuffer& rhs)
 {
-	(Vector<uint8>&)*this = rhs;
+	(Vector<uint8>&)* this = rhs;
 	return *this;
 }
 CopyableBuffer::CopyableBuffer(const CopyableBuffer& rhs)
 {
-	(Vector<uint8>&)*this = rhs;
+	(Vector<uint8>&)* this = rhs;
 }

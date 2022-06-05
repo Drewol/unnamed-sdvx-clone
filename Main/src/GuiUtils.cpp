@@ -24,7 +24,7 @@ void BasicNuklearGui::ShutdownNuklear()
 
 	s_basicGuiStack.Remove(this);
 
-    g_gameWindow->OnAnyEvent.RemoveAll(this);
+	g_gameWindow->OnAnyEvent.RemoveAll(this);
 	if (m_nctx && s_basicGuiStack.size() == 0)
 	{
 		nk_sdl_shutdown_keep_font();
@@ -38,7 +38,7 @@ void BasicNuklearGui::ShutdownNuklear()
 		s_hasFontTexture = false;
 	}
 
-    m_nuklearRunning = false;
+	m_nuklearRunning = false;
 }
 
 bool BasicNuklearGui::Init()
@@ -50,8 +50,8 @@ bool BasicNuklearGui::Init()
 			Vector2(0, static_cast<float>(g_resolution.y)),
 			Vector2(static_cast<float>(g_resolution.x), static_cast<float>(-g_resolution.y)));
 	}
-    InitNuklearIfNeeded();
-    return true;
+	InitNuklearIfNeeded();
+	return true;
 }
 
 void BasicNuklearGui::InitNuklearIfNeeded()
@@ -66,7 +66,7 @@ void BasicNuklearGui::InitNuklearIfNeeded()
 
 		m_nctx->style.text.color = nk_rgb(255, 255, 255);
 		m_nctx->style.button.border_color = nk_rgb(0, 128, 255);
-		m_nctx->style.button.padding = nk_vec2(5,5);
+		m_nctx->style.button.padding = nk_vec2(5, 5);
 		m_nctx->style.button.rounding = 0;
 		m_nctx->style.window.fixed_background = nk_style_item_color(nk_rgb(40, 40, 40));
 		m_nctx->style.slider.bar_normal = nk_rgb(20, 20, 20);
@@ -82,7 +82,7 @@ void BasicNuklearGui::InitNuklearIfNeeded()
 
 	g_gameWindow->OnAnyEvent.Add(this, &BasicNuklearGui::UpdateNuklearInput);
 
-    m_nuklearRunning = true;
+	m_nuklearRunning = true;
 }
 
 static void ExtendFontAtlas(struct nk_font_atlas* atlas, const std::string_view& fontPath, float pixelHeight, const nk_rune* ranges)
@@ -172,7 +172,7 @@ void BasicNuklearGui::InitNuklearFontAtlas()
 		// Also assigns the atlas to the current sdl
 		s_fontTexture = usc_nk_sdl_generate_texture(s_atlas, s_atlas->pixel, s_fontImageWidth, s_fontImageHeight);
 		s_hasFontTexture = true;
-	} 
+	}
 	else
 	{
 		usc_nk_sdl_use_atlas(s_atlas, s_fontTexture);
@@ -257,7 +257,7 @@ void BasicNuklearGui::Render(float deltatime)
 		params.SetParameter("color", Vector4(1.0f));
 		rq->Draw(t, m_bgMesh, g_application->GetGuiTexMaterial(), params);
 	}
-	
+
 	g_application->ForceRender();
 	NKRender();
 }
@@ -275,9 +275,9 @@ void BasicWindow::Tick(float deltatime)
 		OnTick.Call(deltatime);
 }
 
-bool nk_edit_isfocused(struct nk_context *ctx)
+bool nk_edit_isfocused(struct nk_context* ctx)
 {
-	struct nk_window *win;
+	struct nk_window* win;
 	if (!ctx || !ctx->current) return false;
 
 	win = ctx->current;
@@ -397,7 +397,7 @@ void BasicPrompt::m_onClose()
 
 void nk_multiline_label(struct nk_context* ctx, const char* allText, nk_text_alignment ali, float width)
 {
-	const struct nk_user_font *font = ctx->style.font;
+	const struct nk_user_font* font = ctx->style.font;
 
 	const char* text = allText;
 	const char* end = NULL;

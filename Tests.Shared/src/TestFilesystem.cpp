@@ -60,7 +60,7 @@ Test("File.ScanFilesRecursive")
 	expectedPaths.Add(folder1 + Path::sep + "fileD");
 
 	Vector<FileInfo> files = Files::ScanFilesRecursive(folder);
-	for(auto& file : files)
+	for (auto& file : files)
 	{
 		TestEnsure(expectedPaths.Contains(file.fullPath));
 		expectedPaths.erase(file.fullPath);
@@ -87,7 +87,7 @@ Test("File.ScanFiles")
 	expectedPaths.Add(folder + Path::sep + "Folder");
 
 	Vector<FileInfo> files = Files::ScanFiles(folder);
-	for(auto& file : files)
+	for (auto& file : files)
 	{
 		TestEnsure(expectedPaths.Contains(file.fullPath));
 		expectedPaths.erase(file.fullPath);

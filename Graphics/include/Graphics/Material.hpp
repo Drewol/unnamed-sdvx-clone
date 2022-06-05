@@ -34,9 +34,9 @@ namespace Graphics
 
 		bool operator==(const MaterialParameter& other) const
 		{
-			if(parameterType != other.parameterType)
+			if (parameterType != other.parameterType)
 				return false;
-			if(parameterData.size() != other.parameterData.size())
+			if (parameterData.size() != other.parameterData.size())
 				return false;
 			return memcmp(parameterData.data(), other.parameterData.data(), parameterData.size()) == 0;
 		}
@@ -55,7 +55,7 @@ namespace Graphics
 		void SetParameter(const String& name, const Vector4& vec);
 		void SetParameter(const String& name, const Colori& color);
 		void SetParameter(const String& name, const Vector2& vec2);
-		void SetParameter(const String & name, const Vector3 & vec3);
+		void SetParameter(const String& name, const Vector3& vec3);
 		void SetParameter(const String& name, const Vector2i& vec2);
 		void SetParameter(const String& name, const Transform& tf);
 		void SetParameter(const String& name, Ref<class TextureRes> tex);

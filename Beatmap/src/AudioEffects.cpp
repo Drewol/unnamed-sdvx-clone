@@ -12,7 +12,7 @@ EffectDuration::EffectDuration(float rate)
 	type = Rate;
 }
 
-EffectDuration EffectDuration::Lerp(const EffectDuration &lhs, const EffectDuration &rhs, float time)
+EffectDuration EffectDuration::Lerp(const EffectDuration& lhs, const EffectDuration& rhs, float time)
 {
 	assert(rhs.type == lhs.type);
 	if (lhs.type == Type::Rate)
@@ -147,7 +147,7 @@ public:
 	}
 };
 
-const AudioEffect &AudioEffect::GetDefault(EffectType type)
+const AudioEffect& AudioEffect::GetDefault(EffectType type)
 {
 	static DefaultEffectSettings defaults;
 	assert((size_t)type < defaults.effects.size());
@@ -171,7 +171,7 @@ int AudioEffect::GetDefaultEffectPriority(EffectType type)
 	return 99;
 }
 
-void AudioEffect::SetDefaultEffectParams(int16 *params)
+void AudioEffect::SetDefaultEffectParams(int16* params)
 {
 	// Set defaults based on effect type
 	switch (type)

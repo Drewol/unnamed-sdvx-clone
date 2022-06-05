@@ -29,10 +29,10 @@ namespace Graphics
 		void Update()
 		{
 			float currentTime = timer.SecondsAsFloat();
-			for(auto it = begin(); it != end();)
+			for (auto it = begin(); it != end();)
 			{
 				float durationSinceUsed = currentTime - it->second.lastUsage;
-				if(durationSinceUsed > 1.0f)
+				if (durationSinceUsed > 1.0f)
 				{
 					it = erase(it);
 					continue;
@@ -43,7 +43,7 @@ namespace Graphics
 		Text GetText(const WString& key)
 		{
 			auto it = find(key);
-			if(it != end())
+			if (it != end())
 			{
 				it->second.lastUsage = timer.SecondsAsFloat();
 				return it->second.text;
@@ -100,13 +100,13 @@ namespace Graphics
 		const CharInfo& GetCharInfo(wchar_t t)
 		{
 			auto it = infoByChar.find(t);
-			if(it == infoByChar.end())
+			if (it == infoByChar.end())
 				return AddCharInfo(t);
 			return infos[it->second];
 		}
 		Texture GetTextureMap()
 		{
-			if(bUpdated)
+			if (bUpdated)
 			{
 				textureMap = spriteMap->GenerateTexture(m_gl);
 				bUpdated = false;
@@ -124,14 +124,14 @@ namespace Graphics
 			FT_Face* pFace = &face;
 
 			ci.glyphID = FT_Get_Char_Index(*pFace, t);
-			if(ci.glyphID == 0)
+			if (ci.glyphID == 0)
 			{
 				pFace = &fallbackFont;
 				ci.glyphID = FT_Get_Char_Index(*pFace, t);
 			}
 			FT_Load_Glyph(*pFace, ci.glyphID, FT_LOAD_DEFAULT);
 
-			if((*pFace)->glyph->format != FT_GLYPH_FORMAT_BITMAP)
+			if ((*pFace)->glyph->format != FT_GLYPH_FORMAT_BITMAP)
 			{
 				FT_Render_Glyph((*pFace)->glyph, FT_RENDER_MODE_NORMAL);
 			}
@@ -144,7 +144,7 @@ namespace Graphics
 			Colori* pDst = img->GetBits();
 			uint8* pSrc = (*pFace)->glyph->bitmap.buffer;
 			uint32 nLen = (*pFace)->glyph->bitmap.width * (*pFace)->glyph->bitmap.rows;
-			for(uint32 i = 0; i < nLen; i++)
+			for (uint32 i = 0; i < nLen; i++)
 			{
 				pDst[0].w = pSrc[0];
 				Reinterpret<VectorBase<uint8, 3>>(pDst[0]) = VectorBase<uint8, 3>(255, 255, 255);
@@ -187,13 +187,13 @@ namespace Graphics
 
 		friend class TextRes;
 	public:
-		Font_Impl(class OpenGL* gl) : m_gl(gl) , m_face(nullptr)
+		Font_Impl(class OpenGL* gl) : m_gl(gl), m_face(nullptr)
 		{
 
 		}
 		~Font_Impl()
 		{
-			for(auto s : m_sizes)
+			for (auto s : m_sizes)
 			{
 				delete s.second;
 			}
@@ -207,19 +207,19 @@ namespace Graphics
 		bool Init(const String& assetPath)
 		{
 			File in;
-			if(!in.OpenRead(assetPath))
+			if (!in.OpenRead(assetPath))
 				return false;
 
 			m_data.resize(in.GetSize());
-			if(m_data.size() == 0)
+			if (m_data.size() == 0)
 				return false;
 
 			in.Read(&m_data.front(), m_data.size());
 
-			if(FT_New_Memory_Face(library, m_data.data(), (FT_Long)m_data.size(), 0, &m_face) != 0)
+			if (FT_New_Memory_Face(library, m_data.data(), (FT_Long)m_data.size(), 0, &m_face) != 0)
 				return false;
 
-			if(FT_Select_Charmap(m_face, FT_ENCODING_UNICODE) != 0)
+			if (FT_Select_Charmap(m_face, FT_ENCODING_UNICODE) != 0)
 				assert(false);
 
 			return true;
@@ -227,19 +227,19 @@ namespace Graphics
 
 		FontSize* GetSize(uint32 nSize)
 		{
-			if(m_currentSize != nSize)
+			if (m_currentSize != nSize)
 			{
 				FT_Set_Pixel_Sizes(m_face, 0, nSize);
 				m_currentSize = nSize;
 			}
-			if(fallbackFontSize != nSize)
+			if (fallbackFontSize != nSize)
 			{
 				FT_Set_Pixel_Sizes(fallbackFont, 0, nSize);
 				fallbackFontSize = nSize;
 			}
 
 			auto it = m_sizes.find(nSize);
-			if(it != m_sizes.end())
+			if (it != m_sizes.end())
 				return it->second;
 
 			FontSize* pMap = new FontSize(m_gl, m_face);
@@ -251,7 +251,7 @@ namespace Graphics
 			FontSize* size = GetSize(nFontSize);
 
 			Text cachedText = size->cache.GetText(str);
-			if(cachedText)
+			if (cachedText)
 				return cachedText;
 
 			struct TextVertex : public VertexFormat<Vector2, Vector2>
@@ -268,11 +268,11 @@ namespace Graphics
 
 			Vector<TextVertex> vertices;
 			Vector2 pen;
-			for(wchar_t c : str)
+			for (wchar_t c : str)
 			{
 				const CharInfo& info = size->GetCharInfo(c);
 
-				if(c != L'\n' && c != L'\t' && info.coords.size.x != 0 && info.coords.size.y != 0)
+				if (c != L'\n' && c != L'\t' && info.coords.size.x != 0 && info.coords.size.y != 0)
 				{
 					Vector2 corners[4];
 					corners[0] = Vector2(0, 0);
@@ -283,7 +283,7 @@ namespace Graphics
 					Vector2 offset = Vector2(pen.x, pen.y);
 					offset.x += info.leftOffset;
 					offset.y += nFontSize - info.topOffset;
-					if((options & TextOptions::Monospace) != 0)
+					if ((options & TextOptions::Monospace) != 0)
 					{
 						offset.x += (monospaceWidth - info.coords.size.x) * 0.5f;
 					}
@@ -305,20 +305,20 @@ namespace Graphics
 						corners[2] + info.coords.pos);
 				}
 
-				if(c == L'\n')
+				if (c == L'\n')
 				{
 					pen.x = 0.0f;
 					pen.y += size->lineHeight;
 					ret->size.y = pen.y;
 				}
-				else if(c == L'\t')
+				else if (c == L'\t')
 				{
 					const CharInfo& space = size->GetCharInfo(L' ');
 					pen.x += space.advance * 3.0f;
 				}
 				else
 				{
-					if((options & TextOptions::Monospace) != 0)
+					if ((options & TextOptions::Monospace) != 0)
 					{
 						pen.x += monospaceWidth;
 					}
@@ -346,7 +346,7 @@ namespace Graphics
 	Font FontRes::Create(OpenGL* gl, const String& assetPath)
 	{
 		Font_Impl* pImpl = new Font_Impl(gl);
-		if(pImpl->Init(assetPath))
+		if (pImpl->Init(assetPath))
 		{
 			return GetResourceManager<ResourceType::Font>().Register(pImpl);
 		}
@@ -360,10 +360,10 @@ namespace Graphics
 	bool FontRes::InitLibrary()
 	{
 		ProfilerScope $("Font library initialization");
-		if(FT_Init_FreeType(&library) != FT_Err_Ok)
+		if (FT_Init_FreeType(&library) != FT_Err_Ok)
 			return false;
 
-		if(!LoadFallbackFont())
+		if (!LoadFallbackFont())
 			Log("Failed to load embedded fallback font", Logger::Severity::Error);
 
 		return true;
@@ -378,7 +378,7 @@ namespace Graphics
 	bool FontRes::LoadFallbackFont()
 	{
 		File file;
-		if(!file.OpenRead(Path::Absolute("fonts/NotoSansCJKjp-Regular.otf")))
+		if (!file.OpenRead(Path::Absolute("fonts/NotoSansCJKjp-Regular.otf")))
 			return false;
 
 		loadedFallbackFont.resize(file.GetSize());
@@ -386,6 +386,6 @@ namespace Graphics
 		file.Close();
 
 		return FT_New_Memory_Face(library, loadedFallbackFont.data(), (uint32)loadedFallbackFont.size(), 0, &fallbackFont) == 0
-				&& FT_Select_Charmap(fallbackFont, FT_ENCODING_UNICODE) == 0;
+			&& FT_Select_Charmap(fallbackFont, FT_ENCODING_UNICODE) == 0;
 	}
 }

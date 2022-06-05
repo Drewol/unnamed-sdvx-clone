@@ -21,7 +21,7 @@ const BeatmapSettings& Beatmap::GetMapSettings() const
 
 AudioEffect Beatmap::GetEffect(EffectType type) const
 {
-	if(type >= EffectType::UserDefined0)
+	if (type >= EffectType::UserDefined0)
 	{
 		const AudioEffect* fx = m_customAudioEffects.Find(type);
 		assert(fx);
@@ -32,7 +32,7 @@ AudioEffect Beatmap::GetEffect(EffectType type) const
 
 AudioEffect Beatmap::GetFilter(EffectType type) const
 {
-	if(type >= EffectType::UserDefined0)
+	if (type >= EffectType::UserDefined0)
 	{
 		const AudioEffect* fx = m_customAudioFilters.Find(type);
 		assert(fx);
@@ -74,9 +74,9 @@ MapTime Beatmap::GetLastObjectTime() const
 		case ObjectType::Event:
 			continue;
 		case ObjectType::Hold:
-			return obj->time + ((const HoldObjectState*) obj.get())->duration;
+			return obj->time + ((const HoldObjectState*)obj.get())->duration;
 		case ObjectType::Laser:
-			return obj->time + ((const LaserObjectState*) obj.get())->duration;
+			return obj->time + ((const LaserObjectState*)obj.get())->duration;
 		default:
 			return obj->time;
 		}
@@ -92,7 +92,7 @@ MapTime Beatmap::GetLastObjectTimeIncludingEvents() const
 
 constexpr static double MEASURE_EPSILON = 0.005;
 
-inline static int GetBarCount(const TimingPoint& a, const TimingPoint&  b)
+inline static int GetBarCount(const TimingPoint& a, const TimingPoint& b)
 {
 	const MapTime measureDuration = b.time - a.time;
 	const double barCount = measureDuration / a.GetBarDuration();
@@ -241,13 +241,13 @@ void Beatmap::Shuffle(int seed, bool random, bool mirror)
 	if (!random)
 	{
 		assert(mirror);
-		ApplyShuffle({3, 2, 1, 0, 5, 4}, true);
+		ApplyShuffle({ 3, 2, 1, 0, 5, 4 }, true);
 
 		return;
 	}
 
 	std::default_random_engine engine(seed);
-	std::array<int, 6> swaps = {0, 1, 2, 3, 4, 5};
+	std::array<int, 6> swaps = { 0, 1, 2, 3, 4, 5 };
 
 	std::shuffle(swaps.begin(), swaps.begin() + 4, engine);
 	std::shuffle(swaps.begin() + 4, swaps.end(), engine);
@@ -593,7 +593,7 @@ BinaryStream& operator<<(BinaryStream& stream, BeatmapSettings& settings)
 
 bool BeatmapSettings::StaticSerialize(BinaryStream& stream, BeatmapSettings*& settings)
 {
-	if(stream.IsReading())
+	if (stream.IsReading())
 		settings = new BeatmapSettings();
 	stream << *settings;
 	return true;

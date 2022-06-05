@@ -41,8 +41,8 @@ inline static void ConvertKeyCodeToScanCode(GameConfig& config, std::vector<Game
 
 GameConfig::GameConfig()
 {
-    //XXX We can't do clear here as it leads to UB with the initialization of hitstat static values
-    // This sould be ok as Clear will be called in the Load function
+	//XXX We can't do clear here as it leads to UB with the initialization of hitstat static values
+	// This sould be ok as Clear will be called in the Load function
 }
 
 void GameConfig::SetKeyBinding(GameConfigKeys key, Graphics::Key value)
@@ -126,7 +126,7 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::DefaultMaxRewindMeasure, 1);
 
 	Set(GameConfigKeys::DefaultFailConditionType, 0);
-	Set(GameConfigKeys::DefaultFailConditionScore, (int32) MAX_SCORE);
+	Set(GameConfigKeys::DefaultFailConditionScore, (int32)MAX_SCORE);
 	Set(GameConfigKeys::DefaultFailConditionGrade, 0);
 	Set(GameConfigKeys::DefaultFailConditionMiss, 0);
 	Set(GameConfigKeys::DefaultFailConditionMissNear, 0);
@@ -322,13 +322,13 @@ void GameConfig::UpdateVersion()
 			GameConfigKeys::Key_Laser1Pos,
 			GameConfigKeys::Key_Back,
 			GameConfigKeys::Key_BackAlt,
-		});
+			});
 
 		++configVersion;
 	}
 
 	// 1 -> 2: Convert mouse sensitivity from old range to new range.
-	if (configVersion == 1) 
+	if (configVersion == 1)
 	{
 		float oldSens = GetFloat(GameConfigKeys::Mouse_Sensitivity);
 		float newSens = static_cast<float>(Input::CalculateSensFromPpr(6.0f / oldSens));

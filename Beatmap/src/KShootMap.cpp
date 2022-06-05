@@ -23,23 +23,23 @@ KShootTime::KShootTime(uint32_t block, uint32_t tick) : block(block), tick(tick)
 {
 }
 KShootTime::operator bool() const
-{ 
-	return block != -1; 
+{
+	return block != -1;
 }
 
 KShootMap::TickIterator::TickIterator(KShootMap& map, KShootTime start /*= KShootTime(0, 0)*/) : m_time(start), m_map(map)
 {
-	if(!m_map.GetBlock(m_time, m_currentBlock))
+	if (!m_map.GetBlock(m_time, m_currentBlock))
 		m_currentBlock = nullptr;
 }
 KShootMap::TickIterator& KShootMap::TickIterator::operator++()
 {
 	m_time.tick++;
-	if(m_time.tick >= m_currentBlock->ticks.size())
+	if (m_time.tick >= m_currentBlock->ticks.size())
 	{
 		m_time.tick = 0;
 		m_time.block++;
-		if(!m_map.GetBlock(m_time, m_currentBlock))
+		if (!m_map.GetBlock(m_time, m_currentBlock))
 			m_currentBlock = nullptr;
 	}
 	return *this;
@@ -89,21 +89,21 @@ bool ParseKShootCourse(BinaryStream& input, Map<String, String>& settings, Vecto
 	static const String lineEnding = "\r\n";
 
 	// Parse header (encoding-agnostic)
-	while(TextStream::ReadLine(input, line, lineEnding))
+	while (TextStream::ReadLine(input, line, lineEnding))
 	{
 		line.Trim();
 		lineNumber++;
-		if(line == "--")
+		if (line == "--")
 		{
 			break;
 		}
-		
+
 		String k, v;
 		if (line.empty())
 			continue;
 		if (line.substr(0, 2).compare("//") == 0)
 			continue;
-		if(!line.Split("=", &k, &v))
+		if (!line.Split("=", &k, &v))
 			return false;
 
 		settings.FindOrAdd(k) = v;
@@ -185,21 +185,21 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 	static const String lineEnding = "\r\n";
 
 	// Parse header (encoding-agnostic)
-	while(TextStream::ReadLine(input, line, lineEnding))
+	while (TextStream::ReadLine(input, line, lineEnding))
 	{
 		line.Trim();
 		lineNumber++;
-		if(line == c_sep)
+		if (line == c_sep)
 		{
 			break;
 		}
-		
+
 		String k, v;
 		if (line.empty())
 			continue;
 		if (line.substr(0, 2).compare("//") == 0)
 			continue;
-		if(!line.Split("=", &k, &v))
+		if (!line.Split("=", &k, &v))
 			return false;
 
 		settings.FindOrAdd(k) = v;
@@ -226,22 +226,22 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 		}
 	}
 
-	if(metadataOnly)
+	if (metadataOnly)
 		return true;
 
 	// Line by line parser
 	KShootBlock block;
 	KShootTick tick;
 	KShootTime time = KShootTime(0, 0);
-	while(TextStream::ReadLine(input, line, lineEnding))
+	while (TextStream::ReadLine(input, line, lineEnding))
 	{
-		if(line.empty())
+		if (line.empty())
 		{
 			continue;
 		}
 
 		lineNumber++;
-		if(line == c_sep)
+		if (line == c_sep)
 		{
 			// End this block
 			blocks.push_back(block);
@@ -251,7 +251,7 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 		}
 		else
 		{
-			if(line.empty())
+			if (line.empty())
 				continue;
 			if (line.substr(0, 2).compare("//") == 0)
 				continue;
@@ -259,11 +259,11 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 				continue;
 
 			String k, v;
-			if(line[0] == '#')
+			if (line[0] == '#')
 			{
 				Vector<String> strings = line.Explode(" ", false);
 				String type = strings[0];
-				if(strings.size() != 3)
+				if (strings.size() != 3)
 				{
 					Logf("Invalid define found in ksh file @%d: %s", Logger::Severity::Warning, lineNumber, line);
 					continue;
@@ -274,10 +274,10 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 
 				// Split up parameters
 				Vector<String> paramsString = strings[2].Explode(";");
-				for(auto param : paramsString)
+				for (auto param : paramsString)
 				{
 					String k, v;
-					if(!param.Split("=", &k, &v))
+					if (!param.Split("=", &k, &v))
 					{
 						Logf("Invalid parameter in custom effect definition for [%s]@%d: \"%s\"", Logger::Severity::Warning, def.typeName, lineNumber, line);
 						continue;
@@ -285,11 +285,11 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 					def.parameters.Add(k, v);
 				}
 
-				if(strings[0] == "#define_fx")
+				if (strings[0] == "#define_fx")
 				{
 					fxDefines.Add(def.typeName, def);
 				}
-				else if(strings[0] == "#define_filter")
+				else if (strings[0] == "#define_filter")
 				{
 					filterDefines.Add(def.typeName, def);
 				}
@@ -298,7 +298,7 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 					Logf("Unkown define statement in ksh @%d: \"%s\"", Logger::Severity::Warning, lineNumber, line);
 				}
 			}
-			else if(line.Split("=", &k, &v))
+			else if (line.Split("=", &k, &v))
 			{
 				KShootTickSetting ts;
 				ts.first = k;
@@ -317,22 +317,22 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 
 				line.Split("|", &tick.buttons, &tick.fx);
 				tick.fx.Split("|", &tick.fx, &tick.laser);
-				if(tick.buttons.length() != 4)
+				if (tick.buttons.length() != 4)
 				{
 					Logf("Invalid buttons at line %d", Logger::Severity::Error, lineNumber);
 					return false;
 				}
-				if(tick.fx.length() != 2)
+				if (tick.fx.length() != 2)
 				{
 					Logf("Invalid FX buttons at line %d", Logger::Severity::Error, lineNumber);
 					return false;
 				}
-				if(tick.laser.length() < 2)
+				if (tick.laser.length() < 2)
 				{
 					Logf("Invalid lasers at line %d", Logger::Severity::Error, lineNumber);
 					return false;
 				}
-				if(tick.laser.length() > 2)
+				if (tick.laser.length() > 2)
 				{
 					tick.add = tick.laser.substr(2);
 					tick.laser = tick.laser.substr(0, 2);
@@ -349,21 +349,21 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 }
 bool KShootMap::GetBlock(const KShootTime& time, KShootBlock*& tickOut)
 {
-	if(!time)
+	if (!time)
 		return false;
-	if(time.block >= blocks.size())
+	if (time.block >= blocks.size())
 		return false;
 	tickOut = &blocks[time.block];
 	return tickOut->ticks.size() > 0;
 }
 bool KShootMap::GetTick(const KShootTime& time, KShootTick*& tickOut)
 {
-	if(!time)
+	if (!time)
 		return false;
-	if(time.block >= blocks.size())
+	if (time.block >= blocks.size())
 		return false;
 	KShootBlock& b = blocks[time.block];
-	if(time.tick >= b.ticks.size() || time.tick < 0)
+	if (time.tick >= b.ticks.size() || time.tick < 0)
 		return false;
 	tickOut = &b.ticks[time.tick];
 	return true;
@@ -371,7 +371,7 @@ bool KShootMap::GetTick(const KShootTime& time, KShootTick*& tickOut)
 float KShootMap::TimeToFloat(const KShootTime& time) const
 {
 	KShootBlock* block;
-	if(!const_cast<KShootMap*>(this)->GetBlock(time, block))
+	if (!const_cast<KShootMap*>(this)->GetBlock(time, block))
 		return -1.0f;
 	float seg = (float)time.tick / (float)block->ticks.size();
 	return (float)time.block + seg;
@@ -386,7 +386,7 @@ float KShootMap::TranslateLaserChar(char c) const
 			uint32 numChars = 0;
 			auto AddRange = [&](char start, char end)
 			{
-				for(char c = start; c <= end; c++)
+				for (char c = start; c <= end; c++)
 				{
 					Add(c, numChars++);
 				}
@@ -399,11 +399,11 @@ float KShootMap::TranslateLaserChar(char c) const
 	static LaserCharacters laserCharacters;
 
 	uint32* index = laserCharacters.Find(c);
-	if(!index)
+	if (!index)
 	{
 		Logf("Invalid laser control point '%c'", Logger::Severity::Warning, c);
 		return 0.0f;
 	}
-	return (float)index[0] / (float)(laserCharacters.size()-1);
+	return (float)index[0] / (float)(laserCharacters.size() - 1);
 }
 const char* KShootMap::c_sep = "--";

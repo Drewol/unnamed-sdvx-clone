@@ -7,7 +7,7 @@ public:
 	Gauge() = default;
 	virtual ~Gauge() = default;
 	virtual bool Init(MapTotals mapTotals, uint16 total, MapTime length) = 0;
-	virtual void LongHit() = 0;	
+	virtual void LongHit() = 0;
 	virtual void CritHit() = 0;
 	virtual void NearHit() = 0;
 	virtual void LongMiss() = 0;

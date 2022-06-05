@@ -260,7 +260,7 @@ Color SettingsPage::ColorInput(const Color& val, const std::string_view& label, 
 
 		LayoutRowDynamic(1, 25);
 		if (useHSV == false) {
-			nkCol.r = FloatInput(nkCol.r, "#R:", 0,  1.0f, 0.01f, 0.005f);
+			nkCol.r = FloatInput(nkCol.r, "#R:", 0, 1.0f, 0.01f, 0.005f);
 			nkCol.g = FloatInput(nkCol.g, "#G:", 0, 1.0f, 0.01f, 0.005f);
 			nkCol.b = FloatInput(nkCol.b, "#B:", 0, 1.0f, 0.01f, 0.005f);
 			nkCol.a = FloatInput(nkCol.a, "#A:", 0, 1.0f, 0.01f, 0.005f);
@@ -319,7 +319,7 @@ public:
 
 protected:
 	bool& m_forceReload;
-	
+
 	void Load() override
 	{
 		m_currentProfile = g_gameConfig.GetString(GameConfigKeys::CurrentProfileName);
@@ -642,7 +642,7 @@ void SettingsPageCollection::UpdatePageRegions()
 
 	const float PAGE_HEADER_BOTTOM = static_cast<float>(g_resolution.y) - Math::Max(0.0f, pageHeaderSpacing);
 
-	m_profileButtonRegion = { SETTINGS_OFFSET_X, PAGE_HEADER_BOTTOM - m_pageButtonHeight*2, SETTINGS_HEADERS_WIDTH, m_pageButtonHeight };
+	m_profileButtonRegion = { SETTINGS_OFFSET_X, PAGE_HEADER_BOTTOM - m_pageButtonHeight * 2, SETTINGS_HEADERS_WIDTH, m_pageButtonHeight };
 	m_exitButtonRegion = { SETTINGS_OFFSET_X, PAGE_HEADER_BOTTOM - m_pageButtonHeight, SETTINGS_HEADERS_WIDTH, m_pageButtonHeight };
 }
 
@@ -709,7 +709,7 @@ void SettingsPageCollection::RenderPageHeaders()
 
 	const Vector2i mousePos = g_gameWindow->GetMousePos();
 
-	for (size_t i = 0; i+1 < m_pages.size(); ++i)
+	for (size_t i = 0; i + 1 < m_pages.size(); ++i)
 	{
 		const struct nk_rect rect = { m_pageHeaderRegion.x, m_pageHeaderRegion.y + i * m_pageButtonHeight, m_pageHeaderRegion.w, m_pageButtonHeight };
 
@@ -748,12 +748,12 @@ void SettingsPageCollection::ProcessTabHandleMouseHover(const Vector2i& mousePos
 		m_prevMouseInd = currInd;
 		return;
 	}
-	
+
 	// The Amazon dropdown trick from https://bjk5.com/post/44698559168/breaking-down-amazons-mega-dropdown
 	if (m_prevMousePos.x <= mousePos.x && mousePos.x <= m_pageContentRegion.x)
 	{
 		if (CompareLine(m_prevMousePos, { m_pageContentRegion.x, m_pageContentRegion.y }, mousePos) <= 0
-			&& CompareLine(m_prevMousePos, { m_pageContentRegion.x, m_pageContentRegion.y + m_pageContentRegion.h}, mousePos) >= 0)
+			&& CompareLine(m_prevMousePos, { m_pageContentRegion.x, m_pageContentRegion.y + m_pageContentRegion.h }, mousePos) >= 0)
 		{
 			currInd = m_prevMouseInd;
 		}
@@ -797,7 +797,7 @@ int SettingsPageCollection::GetPageIndFromMousePos(const Vector2i& mousePos) con
 	}
 
 	if (!HitCheck(m_pageHeaderRegion, mousePos)) return -1;
-	
+
 	const int index = static_cast<int>((mousePos.y - m_pageHeaderRegion.y) / m_pageButtonHeight);
 
 	if (index < 0 || index >= static_cast<int>(m_pages.size()))

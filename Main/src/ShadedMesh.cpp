@@ -37,7 +37,7 @@ void ShadedMesh::Draw() {
 	t *= Transform::Translation(m_pos);
 	t *= Transform::Scale(m_scale);
 	t *= Transform::Rotation(m_rotation);
-	rq->DrawScissored(g_application->GetCurrentGUIScissor() , t, m_mesh, m_material, m_params);
+	rq->DrawScissored(g_application->GetCurrentGUIScissor(), t, m_mesh, m_material, m_params);
 }
 
 void ShadedMeshOnTrack::DrawOnTrack() {
@@ -182,7 +182,7 @@ int lUseGameMesh(lua_State* L)
 {
 	ShadedMeshOnTrack* object;
 	GET_TRACK_MESH(L, object)
-	object->lUseGameMesh(L);
+		object->lUseGameMesh(L);
 	return 0;
 }
 
@@ -273,7 +273,7 @@ int lScaleToLength(lua_State* L)
 
 	float s = luaL_checknumber(L, 2) / object->GetLength();
 	object->GetScale().y = s;
-    return 0;
+	return 0;
 }
 
 
@@ -324,7 +324,7 @@ void ShadedMeshOnTrack::lUseGameMesh(lua_State* L) {
 	}
 	else
 	{
-		luaL_error(L, (String("Game mesh not found: ")+s).c_str());
+		luaL_error(L, (String("Game mesh not found: ") + s).c_str());
 	}
 }
 
@@ -336,7 +336,7 @@ int lDraw(lua_State* L) {
 
 #ifndef EMBEDDED //TODO: Some other wireframe mode should be possible in both GL versions
 		if (object->IsWireframe())
-			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 #endif
 		if (ShadedMeshOnTrack* objOnTrack = dynamic_cast<ShadedMeshOnTrack*>(object))
 		{
@@ -348,7 +348,7 @@ int lDraw(lua_State* L) {
 		}
 #ifndef EMBEDDED
 		if (object->IsWireframe())
-			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 #endif
 	}
 	else {
@@ -372,7 +372,7 @@ int lAddSkinTexture(lua_State* L) {
 int lAddSharedTexture(lua_State* L) {
 	ShadedMesh* object = *static_cast<ShadedMesh**>(lua_touserdata(L, 1));
 	auto key = luaL_checkstring(L, 3);
-	if (object->AddSharedTexture(luaL_checkstring(L, 2),key)) //Returns 1 on error
+	if (object->AddSharedTexture(luaL_checkstring(L, 2), key)) //Returns 1 on error
 	{
 		return luaL_error(L, "Could not find shared texture with key: '%s'", key);
 	}
@@ -465,7 +465,7 @@ int lSetParamVec4(lua_State* L)
 	w = luaL_checknumber(L, 6);
 	Vector4 vec = { x,y,z,w };
 	object->SetParam(name, vec);
-	
+
 	return 0;
 }
 
@@ -495,7 +495,7 @@ int __index(lua_State* L) {
 	fmap.Add("GetRotation", lGetRotation);
 	fmap.Add("SetWireframe", lSetWireframe);
 
-	constMap.Add("BLEND_ADD",  (int)MaterialBlendMode::Additive);
+	constMap.Add("BLEND_ADD", (int)MaterialBlendMode::Additive);
 	constMap.Add("BLEND_MULT", (int)MaterialBlendMode::Multiply);
 	constMap.Add("BLEND_NORM", (int)MaterialBlendMode::Normal);
 	constMap.Add("PRIM_TRILIST", (int)PrimitiveType::TriangleList);
@@ -518,7 +518,7 @@ int __index(lua_State* L) {
 		doubleConstMap.Add("TRACK_LENGTH", track.trackLength);
 		doubleConstMap.Add("TRACK_WIDTH", track.trackWidth);
 	}
-	
+
 
 	auto function = fmap.find(fname);
 
@@ -542,7 +542,7 @@ int __index(lua_State* L) {
 		lua_pushinteger(L, doubleConstValue->second);
 		return 1;
 	}
-		
+
 
 	return luaL_error(L, *Utility::Sprintf("ShadedMesh has no: '%s'", *fname));
 }

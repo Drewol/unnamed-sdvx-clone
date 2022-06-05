@@ -26,7 +26,7 @@ bool Path::Delete(const String& path)
 }
 bool Path::DeleteDir(const String& path)
 {
-	if(!ClearDir(path))
+	if (!ClearDir(path))
 		return false;
 	WString wpath = Utility::ConvertToWString(path);
 	return RemoveDirectoryW(*wpath) == TRUE;
@@ -35,11 +35,11 @@ bool Path::Rename(const String& srcFile, const String& dstFile, bool overwrite)
 {
 	WString wsrc = Utility::ConvertToWString(srcFile);
 	WString wdst = Utility::ConvertToWString(dstFile);
-	if(PathFileExistsW(*wdst) == TRUE)
+	if (PathFileExistsW(*wdst) == TRUE)
 	{
-		if(!overwrite)
+		if (!overwrite)
 			return false;
-		if(DeleteFileW(*wdst) == FALSE)
+		if (DeleteFileW(*wdst) == FALSE)
 		{
 			Logf("Failed to rename file, overwrite was true but the destination could not be removed", Logger::Severity::Warning);
 			return false;
@@ -95,17 +95,17 @@ bool Path::FileExists(const String& path)
 }
 String Path::Normalize(const String& path)
 {
-  wchar_t out[MAX_PATH] = {0};
-  WString wpath = Utility::ConvertToWString(path);
-  // Convert a unix style path so we can correctly handle it
-  std::replace(wpath.begin(), wpath.end(), L'/', static_cast<wchar_t>(sep));
-  // Remove any relative path . or ..
-  PathCanonicalizeW(out, *wpath);
-  return Utility::ConvertToUTF8(out);
+	wchar_t out[MAX_PATH] = { 0 };
+	WString wpath = Utility::ConvertToWString(path);
+	// Convert a unix style path so we can correctly handle it
+	std::replace(wpath.begin(), wpath.end(), L'/', static_cast<wchar_t>(sep));
+	// Remove any relative path . or ..
+	PathCanonicalizeW(out, *wpath);
+	return Utility::ConvertToUTF8(out);
 }
 bool Path::IsAbsolute(const String& path)
 {
-	if(path.length() > 2 && path[1] == ':')
+	if (path.length() > 2 && path[1] == ':')
 		return true;
 	return false;
 }

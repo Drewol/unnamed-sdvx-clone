@@ -25,7 +25,7 @@ String SearchParser::Parse(const String& input, const Vector<SearchKey> keys)
 		if (!keyName.empty())
 		{
 			bool found = false;
-			for (size_t j=i; j < raw.length(); j++)
+			for (size_t j = i; j < raw.length(); j++)
 			{
 				if (raw[j] == ':' || raw[j] == '=')
 				{
@@ -45,7 +45,7 @@ String SearchParser::Parse(const String& input, const Vector<SearchKey> keys)
 					break;
 				}
 
-				if (j-i >= keyName.length() || raw[j] != keyName[j - i])
+				if (j - i >= keyName.length() || raw[j] != keyName[j - i])
 					break;
 			}
 

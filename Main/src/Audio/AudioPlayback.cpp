@@ -15,7 +15,7 @@ AudioPlayback::~AudioPlayback()
 	m_CleanupDSP(m_buttonDSPs[1]);
 	m_CleanupDSP(m_laserDSP);
 }
-bool AudioPlayback::Init(class BeatmapPlayback &playback, const String &mapRootPath, bool preRender)
+bool AudioPlayback::Init(class BeatmapPlayback& playback, const String& mapRootPath, bool preRender)
 {
 	// Cleanup exising DSP's
 	m_currentHoldEffects[0] = nullptr;
@@ -32,7 +32,7 @@ bool AudioPlayback::Init(class BeatmapPlayback &playback, const String &mapRootP
 	// Set default effect type
 	SetLaserEffect(EffectType::PeakingFilter);
 
-	const BeatmapSettings &mapSettings = m_beatmap->GetMapSettings();
+	const BeatmapSettings& mapSettings = m_beatmap->GetMapSettings();
 	String audioPath = Path::Normalize(m_beatmapRootPath + Path::sep + mapSettings.audioNoFX);
 	audioPath.TrimBack(' ');
 	if (!Path::FileExists(audioPath))
@@ -173,7 +173,7 @@ bool AudioPlayback::HasEnded() const
 {
 	return m_music->HasEnded();
 }
-void AudioPlayback::SetEffect(uint32 index, HoldObjectState *object, class BeatmapPlayback &playback)
+void AudioPlayback::SetEffect(uint32 index, HoldObjectState* object, class BeatmapPlayback& playback)
 {
 	// Don't use effects when using an FX track
 	if (m_fxtrack)
@@ -184,11 +184,11 @@ void AudioPlayback::SetEffect(uint32 index, HoldObjectState *object, class Beatm
 	m_currentHoldEffects[index] = object;
 
 	// For Time based effects
-	const TimingPoint *timingPoint = playback.GetTimingPointAt(object->time);
+	const TimingPoint* timingPoint = playback.GetTimingPointAt(object->time);
 	// Duration of a single bar
 	double barDelay = timingPoint->numerator * timingPoint->beatDuration;
 
-	DSP *&dsp = m_buttonDSPs[index];
+	DSP*& dsp = m_buttonDSPs[index];
 
 	m_buttonEffects[index] = m_beatmap->GetEffect(object->effectType);
 
@@ -199,9 +199,9 @@ void AudioPlayback::SetEffect(uint32 index, HoldObjectState *object, class Beatm
 	Ref<AudioStream> audioTrack = m_GetDSPTrack();
 
 	dsp = m_buttonEffects[index].CreateDSP(m_playback->GetCurrentTimingPoint(),
-										   GetLaserFilterInput(),
-										   audioTrack->GetAudioSampleRate(),
-										   GetPlaybackSpeed());
+		GetLaserFilterInput(),
+		audioTrack->GetAudioSampleRate(),
+		GetPlaybackSpeed());
 	if (!dsp)
 		return;
 
@@ -234,7 +234,7 @@ void AudioPlayback::SetEffectEnabled(uint32 index, bool enabled)
 		m_buttonDSPs[index]->mix = m_effectMix[index];
 	}
 }
-void AudioPlayback::ClearEffect(uint32 index, HoldObjectState *object)
+void AudioPlayback::ClearEffect(uint32 index, HoldObjectState* object)
 {
 	assert(index <= 1);
 	if (m_currentHoldEffects[index] == object)
@@ -286,9 +286,9 @@ void AudioPlayback::SetLaserFilterInput(float input, bool active)
 			Ref<AudioStream> audioTrack = m_GetDSPTrack();
 
 			m_laserDSP = m_laserEffect.CreateDSP(m_playback->GetCurrentTimingPoint(),
-												 GetLaserFilterInput(),
-												 audioTrack->GetAudioSampleRate(),
-												 GetPlaybackSpeed());
+				GetLaserFilterInput(),
+				audioTrack->GetAudioSampleRate(),
+				GetPlaybackSpeed());
 			if (!m_laserDSP)
 			{
 				Logf("Failed to create laser DSP with type %d", Logger::Severity::Warning, m_laserEffect.type);
@@ -400,15 +400,15 @@ void AudioPlayback::ResetSwitchableTracks()
 	m_music->SetVolume(m_musicVolume);
 }
 
-BeatmapPlayback &AudioPlayback::GetBeatmapPlayback()
+BeatmapPlayback& AudioPlayback::GetBeatmapPlayback()
 {
 	return *m_playback;
 }
-const Beatmap &AudioPlayback::GetBeatmap() const
+const Beatmap& AudioPlayback::GetBeatmap() const
 {
 	return *m_beatmap;
 }
-const String &AudioPlayback::GetBeatmapRootPath() const
+const String& AudioPlayback::GetBeatmapRootPath() const
 {
 	return m_beatmapRootPath;
 }
@@ -434,7 +434,7 @@ void AudioPlayback::SetVolume(float volume)
 		if (it->m_audio)
 			it->m_audio->SetVolume(volume);
 }
-void AudioPlayback::m_CleanupDSP(DSP *&ptr)
+void AudioPlayback::m_CleanupDSP(DSP*& ptr)
 {
 	if (ptr)
 	{
@@ -460,14 +460,14 @@ void AudioPlayback::m_SetLaserEffectParameter(float input)
 	case EffectType::Bitcrush:
 	{
 		m_laserDSP->mix = m_laserEffect.mix.Sample(input);
-		auto *bcDSP = (BitCrusherDSP *)m_laserDSP;
+		auto* bcDSP = (BitCrusherDSP*)m_laserDSP;
 		bcDSP->SetPeriod((float)m_laserEffect.bitcrusher.reduction.Sample(input));
 		break;
 	}
 	case EffectType::Echo:
 	{
 		m_laserDSP->mix = m_laserEffect.mix.Sample(input);
-		auto *echoDSP = (EchoDSP *)m_laserDSP;
+		auto* echoDSP = (EchoDSP*)m_laserDSP;
 		echoDSP->feedback = m_laserEffect.echo.feedback.Sample(input);
 		break;
 	}
@@ -477,28 +477,28 @@ void AudioPlayback::m_SetLaserEffectParameter(float input)
 		if (input > 0.8f)
 			mix *= 1.0f - (input - 0.8f) / 0.2f;
 
-		auto *bqfDSP = (BQFDSP *)m_laserDSP;
+		auto* bqfDSP = (BQFDSP*)m_laserDSP;
 		bqfDSP->SetPeaking(m_laserEffect.peaking.q.Sample(input), m_laserEffect.peaking.freq.Sample(input), m_laserEffect.peaking.gain.Sample(input) * mix);
 		break;
 	}
 	case EffectType::LowPassFilter:
 	{
 		m_laserDSP->mix = m_laserEffectMix;
-		auto *bqfDSP = (BQFDSP *)m_laserDSP;
+		auto* bqfDSP = (BQFDSP*)m_laserDSP;
 		bqfDSP->SetLowPass(m_laserEffect.lpf.q.Sample(input) * mix + 0.1f, m_laserEffect.lpf.freq.Sample(input));
 		break;
 	}
 	case EffectType::HighPassFilter:
 	{
 		m_laserDSP->mix = m_laserEffectMix;
-		auto *bqfDSP = (BQFDSP *)m_laserDSP;
+		auto* bqfDSP = (BQFDSP*)m_laserDSP;
 		bqfDSP->SetHighPass(m_laserEffect.hpf.q.Sample(input) * mix + 0.1f, m_laserEffect.hpf.freq.Sample(input));
 		break;
 	}
 	case EffectType::PitchShift:
 	{
 		m_laserDSP->mix = m_laserEffect.mix.Sample(input);
-		auto *ps = (PitchShiftDSP *)m_laserDSP;
+		auto* ps = (PitchShiftDSP*)m_laserDSP;
 		ps->amount = m_laserEffect.pitchshift.amount.Sample(input);
 		break;
 	}
@@ -510,7 +510,7 @@ void AudioPlayback::m_SetLaserEffectParameter(float input)
 	case EffectType::Retrigger:
 	{
 		m_laserDSP->mix = m_laserEffect.mix.Sample(input);
-		auto *rt = (RetriggerDSP *)m_laserDSP;
+		auto* rt = (RetriggerDSP*)m_laserDSP;
 		rt->SetLength(actualLength);
 		break;
 	}
@@ -522,20 +522,20 @@ void AudioPlayback::m_SetLaserEffectParameter(float input)
 void AudioPlayback::m_PreRenderDSPTrack()
 {
 	ProfilerScope $("Pre-rendering FX effects");
-	Vector<DSP *> DSPs;
+	Vector<DSP*> DSPs;
 	for (const auto& chartObj : m_playback->GetBeatmap().GetObjectStates())
 	{
 		if (chartObj->type == ObjectType::Hold)
 		{
-			HoldObjectState *holdObj = (HoldObjectState *) chartObj.get();
+			HoldObjectState* holdObj = (HoldObjectState*)chartObj.get();
 			if (holdObj->effectType != EffectType::None)
 			{
 				//Add DSP
 				GameAudioEffect effect = m_beatmap->GetEffect(holdObj->effectType);
-				DSP *dsp = effect.CreateDSP(*m_playback->GetTimingPointAt(chartObj->time),
-											1.0f,
-											m_fxtrack->GetSampleRate(),
-											1.0f);
+				DSP* dsp = effect.CreateDSP(*m_playback->GetTimingPointAt(chartObj->time),
+					1.0f,
+					m_fxtrack->GetSampleRate(),
+					1.0f);
 				if (dsp != nullptr)
 				{
 					effect.SetParams(dsp, *this, holdObj);
@@ -553,7 +553,7 @@ void AudioPlayback::m_PreRenderDSPTrack()
 	m_fxtrack->PreRenderDSPs(DSPs);
 }
 
-GameAudioEffect::GameAudioEffect(const AudioEffect &other)
+GameAudioEffect::GameAudioEffect(const AudioEffect& other)
 {
-	*((AudioEffect *)this) = other;
+	*((AudioEffect*)this) = other;
 }

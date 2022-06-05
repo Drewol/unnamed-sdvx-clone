@@ -7,16 +7,16 @@
 #include "AudioStreamPcm.hpp"
 #include <unordered_map>
 
-using CreateFunc = Ref<AudioStream>(Audio *, const String &, bool);
+using CreateFunc = Ref<AudioStream>(Audio*, const String&, bool);
 
-static std::unordered_map<std::string, CreateFunc &> decoders = {
+static std::unordered_map<std::string, CreateFunc&> decoders = {
 	{"mp3", AudioStreamMp3::Create},
 	{"ogg", AudioStreamOgg::Create},
 	{"wav", AudioStreamMa::Create},
 	//{"wav", AudioStreamWav::Create},
 };
 
-static Ref<AudioStream> FindImplementation(Audio *audio, const String &path, bool preload)
+static Ref<AudioStream> FindImplementation(Audio* audio, const String& path, bool preload)
 {
 	Ref<AudioStream> impl;
 	// Try decoder based on extension
@@ -43,7 +43,7 @@ static Ref<AudioStream> FindImplementation(Audio *audio, const String &path, boo
 	return impl;
 }
 
-Ref<AudioStream> AudioStream::Create(Audio *audio, const String &path, bool preload)
+Ref<AudioStream> AudioStream::Create(Audio* audio, const String& path, bool preload)
 {
 	Ref<AudioStream> impl = FindImplementation(audio, path, preload);
 	if (impl)
@@ -51,7 +51,7 @@ Ref<AudioStream> AudioStream::Create(Audio *audio, const String &path, bool prel
 	return impl;
 }
 
-Ref<AudioStream> AudioStream::Clone(Audio *audio, Ref<AudioStream> source)
+Ref<AudioStream> AudioStream::Clone(Audio* audio, Ref<AudioStream> source)
 {
 	auto clone = AudioStreamPcm::Create(audio, source);
 	if (clone)

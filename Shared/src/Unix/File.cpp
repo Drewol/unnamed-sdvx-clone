@@ -42,7 +42,7 @@ bool File::OpenRead(const String& path)
 	Close();
 
 	int handle = open(*path, O_RDONLY);
-	if(handle == -1)
+	if (handle == -1)
 	{
 		Logf("Failed to open file for reading %s: %d", Logger::Severity::Warning, *path, errno);
 		return false;
@@ -57,13 +57,13 @@ bool File::OpenWrite(const String& path, bool append /*= false*/, bool noLog /*=
 	Close();
 
 	int flags = O_WRONLY | O_CREAT;
-	if(append)
+	if (append)
 		flags |= O_APPEND;
 	int handle = open(*path, flags, S_IRUSR | S_IWUSR | S_IROTH);
-	if(handle == -1)
+	if (handle == -1)
 	{
-    if(!noLog)
-    		Logf("Failed to open file for writing %s: %d", Logger::Severity::Warning, *path, errno);
+		if (!noLog)
+			Logf("Failed to open file for writing %s: %d", Logger::Severity::Warning, *path, errno);
 		return false;
 	}
 
@@ -73,7 +73,7 @@ bool File::OpenWrite(const String& path, bool append /*= false*/, bool noLog /*=
 }
 void File::Close()
 {
-	if(m_impl)
+	if (m_impl)
 	{
 		delete m_impl;
 		m_impl = nullptr;
@@ -123,24 +123,24 @@ uint64 File::GetLastWriteTime() const
 	struct stat sb;
 	fstat(m_impl->handle, &sb);
 
-	#ifdef __APPLE__
-		return sb.st_mtimespec.tv_sec * (uint64)1000000000L + sb.st_mtimespec.tv_nsec;
-	#else
-		return sb.st_mtim.tv_sec * (uint64)1000000000L + sb.st_mtim.tv_nsec;
-	#endif
+#ifdef __APPLE__
+	return sb.st_mtimespec.tv_sec * (uint64)1000000000L + sb.st_mtimespec.tv_nsec;
+#else
+	return sb.st_mtim.tv_sec * (uint64)1000000000L + sb.st_mtim.tv_nsec;
+#endif
 }
 
 uint64 File::GetLastWriteTime(const String& path)
 {
 	struct stat sb;
-	if(stat(*path, &sb) != 0)
+	if (stat(*path, &sb) != 0)
 		return 0;
 
-	#ifdef __APPLE__
-		return sb.st_mtimespec.tv_sec * (uint64)1000000000L + sb.st_mtimespec.tv_nsec;
-	#else
-		return sb.st_mtim.tv_sec * (uint64)1000000000L + sb.st_mtim.tv_nsec;
-	#endif
+#ifdef __APPLE__
+	return sb.st_mtimespec.tv_sec * (uint64)1000000000L + sb.st_mtimespec.tv_nsec;
+#else
+	return sb.st_mtim.tv_sec * (uint64)1000000000L + sb.st_mtim.tv_nsec;
+#endif
 }
 
 uint64 File::FileTimeToUnixTimestamp(uint64 fileTime) {

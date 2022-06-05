@@ -50,5 +50,5 @@ void ColorConfigEntry::FromString(const String& str)
 	sscanf(str.substr(2, 2).c_str(), "%X", &g);
 	sscanf(str.substr(4, 2).c_str(), "%X", &b);
 	sscanf(str.substr(6, 2).c_str(), "%X", &a);
-	data = Colori(r,g,b,a);
+	data = Colori(r, g, b, a);
 }

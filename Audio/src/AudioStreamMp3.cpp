@@ -19,9 +19,9 @@ int AudioStreamMp3::m_unsynchsafe(int in)
 int AudioStreamMp3::m_toLittleEndian(int num)
 {
 	return ((num >> 24) & 0xff) |	   // move byte 3 to byte 0
-		   ((num << 8) & 0xff0000) |   // move byte 1 to byte 2
-		   ((num >> 8) & 0xff00) |	   // move byte 2 to byte 1
-		   ((num << 24) & 0xff000000); // byte 0 to byte 3
+		((num << 8) & 0xff0000) |   // move byte 1 to byte 2
+		((num >> 8) & 0xff00) |	   // move byte 2 to byte 1
+		((num << 24) & 0xff000000); // byte 0 to byte 3
 }
 AudioStreamMp3::~AudioStreamMp3()
 {
@@ -34,7 +34,7 @@ AudioStreamMp3::~AudioStreamMp3()
 	}
 	delete[] m_readBuffer;
 }
-bool AudioStreamMp3::Init(Audio *audio, const String &path, bool preload)
+bool AudioStreamMp3::Init(Audio* audio, const String& path, bool preload)
 {
 	///TODO: Write non-preload functions
 	if (!AudioStreamBase::Init(audio, path, true)) // Always preload for now
@@ -52,7 +52,7 @@ bool AudioStreamMp3::Init(Audio *audio, const String &path, bool preload)
 	}
 	while (tag == "ID3")
 	{
-		tagSize += m_unsynchsafe(m_toLittleEndian(*(int32 *)(m_dataSource + 6 + tagSize))) + 10;
+		tagSize += m_unsynchsafe(m_toLittleEndian(*(int32*)(m_dataSource + 6 + tagSize))) + 10;
 		for (size_t i = 0; i < 3; i++)
 		{
 			tag[i] = m_dataSource[i + tagSize];
@@ -125,7 +125,7 @@ bool AudioStreamMp3::Init(Audio *audio, const String &path, bool preload)
 	// Total sample
 	m_samplesTotal = sampleOffset;
 
-	m_decoder = (mp3_decoder_t *)mp3_create();
+	m_decoder = (mp3_decoder_t*)mp3_create();
 	m_preloaded = false;
 	SetPosition_Internal(-400000);
 	int32 r = DecodeData_Internal();
@@ -201,7 +201,7 @@ uint64 AudioStreamMp3::GetSampleCount_Internal() const
 	return 0;
 }
 
-float *AudioStreamMp3::GetPCM_Internal()
+float* AudioStreamMp3::GetPCM_Internal()
 {
 	if (m_preloaded)
 		return &m_pcm.front();
@@ -244,7 +244,7 @@ int32 AudioStreamMp3::DecodeData_Internal()
 	int32 readData = 0;
 	while (true)
 	{
-		readData = mp3_decode(m_decoder, (uint8 *)m_dataSource + m_mp3dataOffset, (int)(m_mp3dataLength - m_mp3dataOffset), buffer, &info);
+		readData = mp3_decode(m_decoder, (uint8*)m_dataSource + m_mp3dataOffset, (int)(m_mp3dataLength - m_mp3dataOffset), buffer, &info);
 		m_mp3dataOffset += readData;
 		if (m_mp3dataOffset >= m_mp3dataLength) // EOF
 			return -1;
@@ -283,9 +283,9 @@ int32 AudioStreamMp3::DecodeData_Internal()
 	return samplesGotten;
 }
 
-Ref<AudioStream> AudioStreamMp3::Create(Audio *audio, const String &path, bool preload)
+Ref<AudioStream> AudioStreamMp3::Create(Audio* audio, const String& path, bool preload)
 {
-	AudioStreamMp3 *impl = new AudioStreamMp3();
+	AudioStreamMp3* impl = new AudioStreamMp3();
 	if (!impl->Init(audio, path, preload))
 	{
 		delete impl;

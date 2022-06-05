@@ -9,8 +9,8 @@ enum class TickFlags : uint8;
 
 struct ReplayJudgement
 {
-	uint8 rating:3;
-	uint8 type:5;
+	uint8 rating : 3;
+	uint8 type : 5;
 	uint8 lane = 0;
 	int16 delta = 0;
 	MapTime time = 0;
@@ -161,7 +161,7 @@ public:
 	Replay(ReplayType type) : m_type(type) {}
 
 	bool Save(String path);
-	static Replay* Load(String path, ReplayType type=ReplayType::Normal);
+	static Replay* Load(String path, ReplayType type = ReplayType::Normal);
 	static bool StaticSerialize(BinaryStream& stream, Replay*& obj);
 	static bool SerializeLegacy(BinaryStream& stream, Replay*& obj);
 
@@ -253,7 +253,7 @@ public:
 
 	const ReplayJudgement* PeekNextJudgement(int lane) const;
 
-	const ReplayJudgement* PopNextJudgement(int lane, bool score=true);
+	const ReplayJudgement* PopNextJudgement(int lane, bool score = true);
 
 	const ReplayJudgement* FindNextJudgement(int lane, MapTime future = 0) const;
 

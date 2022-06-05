@@ -3,9 +3,9 @@
 
 GraphicsTest::~GraphicsTest()
 {
-	if(m_gl)
+	if (m_gl)
 		delete m_gl;
-	if(m_window)
+	if (m_window)
 		delete m_window;
 }
 
@@ -14,7 +14,7 @@ bool GraphicsTest::Run()
 	m_window = new Graphics::Window();
 
 	m_gl = new OpenGL();
-	if(!m_gl->Init(*m_window, 0))
+	if (!m_gl->Init(*m_window, 0))
 	{
 		delete m_gl;
 		m_gl = nullptr;
@@ -23,7 +23,7 @@ bool GraphicsTest::Run()
 	m_window->Show();
 
 	Timer t;
-	while(m_window->Update())
+	while (m_window->Update())
 	{
 		float dt = t.SecondsAsFloat();
 		t.Restart();

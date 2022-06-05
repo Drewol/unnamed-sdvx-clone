@@ -8,7 +8,7 @@ class FileStreamBase : public BinaryStream
 protected:
 	File* m_file = nullptr;
 public:
-	FileStreamBase()= default;
+	FileStreamBase() = default;
 	FileStreamBase(File& file, bool isReading);
 	virtual void Seek(size_t pos);
 	virtual size_t Tell() const;

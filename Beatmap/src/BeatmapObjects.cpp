@@ -5,28 +5,28 @@
 void TObjectState<void>::SortArray(std::vector<std::unique_ptr<ObjectState>>& arr)
 {
 	std::sort(arr.begin(), arr.end(), [](const auto& l, const auto& r)
-	{
-		if(l->time == r->time)
 		{
-			// sort events on the same tick by their index
-			if (l->type == ObjectType::Event && r->type == ObjectType::Event)
-				return ((EventObjectState*) l.get())->interTickIndex < ((EventObjectState*) r.get())->interTickIndex;
+			if (l->time == r->time)
+			{
+				// sort events on the same tick by their index
+				if (l->type == ObjectType::Event && r->type == ObjectType::Event)
+					return ((EventObjectState*)l.get())->interTickIndex < ((EventObjectState*)r.get())->interTickIndex;
 
-			// Sort laser slams to come first
-			const bool ls = l->type == ObjectType::Laser && (((LaserObjectState*)l.get())->flags & LaserObjectState::flag_Instant);
-			const bool rs = r->type == ObjectType::Laser && (((LaserObjectState*)r.get())->flags & LaserObjectState::flag_Instant);
+				// Sort laser slams to come first
+				const bool ls = l->type == ObjectType::Laser && (((LaserObjectState*)l.get())->flags & LaserObjectState::flag_Instant);
+				const bool rs = r->type == ObjectType::Laser && (((LaserObjectState*)r.get())->flags & LaserObjectState::flag_Instant);
 
-			return ls > rs;
-		}
+				return ls > rs;
+			}
 
-		return l->time < r->time;
-	});
+			return l->time < r->time;
+		});
 }
 
 TObjectState<ObjectTypeData_Hold>* ObjectTypeData_Hold::GetRoot()
 {
 	TObjectState<ObjectTypeData_Hold>* ptr = (TObjectState<ObjectTypeData_Hold>*)this;
-	while(ptr->prev)
+	while (ptr->prev)
 		ptr = ptr->prev;
 	return ptr;
 }
@@ -34,14 +34,14 @@ TObjectState<ObjectTypeData_Hold>* ObjectTypeData_Hold::GetRoot()
 TObjectState<ObjectTypeData_Laser>* ObjectTypeData_Laser::GetRoot()
 {
 	TObjectState<ObjectTypeData_Laser>* ptr = (TObjectState<ObjectTypeData_Laser>*)this;
-	while(ptr->prev)
+	while (ptr->prev)
 		ptr = ptr->prev;
 	return ptr;
 }
 TObjectState<ObjectTypeData_Laser>* ObjectTypeData_Laser::GetTail()
 {
 	TObjectState<ObjectTypeData_Laser>* ptr = (TObjectState<ObjectTypeData_Laser>*)this;
-	while(ptr->next)
+	while (ptr->next)
 		ptr = ptr->next;
 	return ptr;
 }
@@ -52,7 +52,7 @@ float ObjectTypeData_Laser::GetDirection() const
 float ObjectTypeData_Laser::SamplePosition(MapTime time) const
 {
 	const LaserObjectState* state = (LaserObjectState*)this;
-	while(state->next && (state->time + state->duration) < time)
+	while (state->next && (state->time + state->duration) < time)
 	{
 		state = state->next;
 	}
@@ -124,7 +124,7 @@ bool MultiObjectState::StaticSerialize(BinaryStream& stream, MultiObjectState*& 
 	{
 		// Read type and create appropriate object
 		stream << type;
-		switch ((ObjectType)type) 
+		switch ((ObjectType)type)
 		{
 		case ObjectType::Single:
 			obj = (MultiObjectState*)new ButtonObjectState();
@@ -149,7 +149,7 @@ bool MultiObjectState::StaticSerialize(BinaryStream& stream, MultiObjectState*& 
 
 	// Pointer is always initialized here, serialize data
 	stream << obj->time; // Time always set
-	switch (obj->type) 
+	switch (obj->type)
 	{
 	case ObjectType::Single:
 		stream << obj->button.index;

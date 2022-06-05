@@ -43,16 +43,16 @@ namespace Graphics
 		Material currentMaterial;
 
 		// Create a new list of items
-		for(RenderQueueItem* item : m_orderedCommands)
+		for (RenderQueueItem* item : m_orderedCommands)
 		{
 			auto SetupMaterial = [&](Material& mat, MaterialParameterSet& params)
 			{
 				// Only bind params if material is already bound to context
-				if(currentMaterial == mat)
+				if (currentMaterial == mat)
 					mat->BindParameters(params, m_renderState.worldTransform);
 				else
 				{
-					if(initializedShaders.Contains(mat))
+					if (initializedShaders.Contains(mat))
 					{
 						// Only bind params and rebind
 						mat->BindParameters(params, m_renderState.worldTransform);
@@ -68,9 +68,9 @@ namespace Graphics
 				}
 
 				// Setup Render state for transparent object
-				if(mat->opaque)
+				if (mat->opaque)
 				{
-					if(blendEnabled)
+					if (blendEnabled)
 					{
 						glDisable(GL_BLEND);
 						blendEnabled = false;
@@ -78,14 +78,14 @@ namespace Graphics
 				}
 				else
 				{
-					if(!blendEnabled)
+					if (!blendEnabled)
 					{
 						glEnable(GL_BLEND);
 						blendEnabled = true;
 					}
-					if(activeBlendMode != mat->blendMode)
+					if (activeBlendMode != mat->blendMode)
 					{
-						switch(mat->blendMode)
+						switch (mat->blendMode)
 						{
 						case MaterialBlendMode::Normal:
 							glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
@@ -104,7 +104,7 @@ namespace Graphics
 			// Draw mesh helper
 			auto DrawOrRedrawMesh = [&](Mesh& mesh)
 			{
-				if(currentMesh == mesh)
+				if (currentMesh == mesh)
 					mesh->Redraw();
 				else
 				{
@@ -113,7 +113,7 @@ namespace Graphics
 				}
 			};
 
-			if(Cast<SimpleDrawCall>(item))
+			if (Cast<SimpleDrawCall>(item))
 			{
 				SimpleDrawCall* sdc = (SimpleDrawCall*)item;
 				m_renderState.worldTransform = sdc->worldTransform;
@@ -121,10 +121,10 @@ namespace Graphics
 
 				// Check if scissor is enabled
 				bool useScissor = (sdc->scissorRect.size.x >= 0);
-				if(useScissor)
+				if (useScissor)
 				{
 					// Apply scissor
-					if(!scissorEnabled)
+					if (!scissorEnabled)
 					{
 						glEnable(GL_SCISSOR_TEST);
 						scissorEnabled = true;
@@ -135,7 +135,7 @@ namespace Graphics
 				}
 				else
 				{
-					if(scissorEnabled)
+					if (scissorEnabled)
 					{
 						glDisable(GL_SCISSOR_TEST);
 						scissorEnabled = false;
@@ -143,13 +143,13 @@ namespace Graphics
 				}
 
 				DrawOrRedrawMesh(sdc->mesh);
-				#ifdef EMBEDDED
+#ifdef EMBEDDED
 				glUseProgram(0);
-				#endif
+#endif
 			}
-			else if(Cast<PointDrawCall>(item))
+			else if (Cast<PointDrawCall>(item))
 			{
-				if(scissorEnabled)
+				if (scissorEnabled)
 				{
 					// Disable scissor
 					glDisable(GL_SCISSOR_TEST);
@@ -160,21 +160,21 @@ namespace Graphics
 				m_renderState.worldTransform = Transform();
 				SetupMaterial(pdc->mat, pdc->params);
 				PrimitiveType pt = pdc->mesh->GetPrimitiveType();
-				if(pt >= PrimitiveType::LineList && pt <= PrimitiveType::LineStrip)
+				if (pt >= PrimitiveType::LineList && pt <= PrimitiveType::LineStrip)
 				{
 					glLineWidth(pdc->size);
 				}
 				else
 				{
-					#ifndef EMBEDDED
+#ifndef EMBEDDED
 					glPointSize(pdc->size);
-					#endif
+#endif
 				}
-				
+
 				DrawOrRedrawMesh(pdc->mesh);
-				#ifdef EMBEDDED
+#ifdef EMBEDDED
 				glUseProgram(0);
-				#endif
+#endif
 			}
 		}
 
@@ -182,7 +182,7 @@ namespace Graphics
 		glDisable(GL_BLEND);
 		glDisable(GL_SCISSOR_TEST);
 
-		if(clearQueue)
+		if (clearQueue)
 		{
 			Clear();
 		}
@@ -191,7 +191,7 @@ namespace Graphics
 	void RenderQueue::Clear()
 	{
 		// Cleanup the list of items
-		for(RenderQueueItem* item : m_orderedCommands)
+		for (RenderQueueItem* item : m_orderedCommands)
 		{
 			delete item;
 		}

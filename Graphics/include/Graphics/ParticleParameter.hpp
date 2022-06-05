@@ -101,7 +101,7 @@ namespace Graphics
 		};
 		T Sample(float in) override
 		{
-			if(in < fadeIn)
+			if (in < fadeIn)
 			{
 				return min * (in / fadeIn);
 			}
@@ -178,11 +178,11 @@ namespace Graphics
 		Transform mat;
 	public:
 		PPCone(Vector3 dir, float angle, float lengthMin, float lengthMax)
-			: lengthMin(lengthMin), lengthMax(lengthMax), angle(angle * Math::degToRad)
+			: lengthMin(lengthMin), lengthMax(lengthMax), angle(angle* Math::degToRad)
 		{
 			Vector3 normal = dir.Normalized();
 			Vector3 tangent = Vector3(normal.y, -normal.x, normal.z);
-			if(normal.x == 0 && normal.y == 0)
+			if (normal.x == 0 && normal.y == 0)
 				tangent = Vector3(normal.z, normal.y, -normal.x);
 			tangent = VectorMath::Cross(tangent, normal).Normalized();
 			Vector3 bitangent = VectorMath::Cross(tangent, normal);

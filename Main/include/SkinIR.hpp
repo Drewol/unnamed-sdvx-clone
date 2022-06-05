@@ -10,9 +10,9 @@ class SkinIR
 public:
 	SkinIR();
 	~SkinIR();
-    int lHeartbeat(struct lua_State* L);
-    int lChartTracked(struct lua_State* L);
-    int lRecord(struct lua_State* L);
+	int lHeartbeat(struct lua_State* L);
+	int lChartTracked(struct lua_State* L);
+	int lRecord(struct lua_State* L);
 	int lLeaderboard(struct lua_State* L);
 	void ProcessCallbacks();
 	void PushFunctions(struct lua_State* L);
@@ -28,7 +28,7 @@ private:
 
 	void m_requestLoop();
 	void m_PushResponse(struct lua_State* L, const cpr::Response& r);
-    void m_PushJSON(struct lua_State* L, const nlohmann::json& json);
-    void m_PushArray(struct lua_State* L, const nlohmann::json& json);
-    void m_PushObject(struct lua_State* L, const nlohmann::json& json);
+	void m_PushJSON(struct lua_State* L, const nlohmann::json& json);
+	void m_PushArray(struct lua_State* L, const nlohmann::json& json);
+	void m_PushObject(struct lua_State* L, const nlohmann::json& json);
 };

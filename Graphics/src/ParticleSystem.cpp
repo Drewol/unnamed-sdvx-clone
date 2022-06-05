@@ -33,19 +33,19 @@ namespace Graphics
 			glEnable(GL_BLEND);
 
 			// Tick all emitters and remove old ones
-			for(auto it = m_emitters.begin(); it != m_emitters.end();)
+			for (auto it = m_emitters.begin(); it != m_emitters.end();)
 			{
 				(*it)->Render(rs, deltaTime);
 
-				if(it->use_count() == 1)
+				if (it->use_count() == 1)
 				{
-					if((*it)->HasFinished())
+					if ((*it)->HasFinished())
 					{
 						// Remove unreferenced and finished emitters
 						it = m_emitters.erase(it);
 						continue;
 					}
-					else if((*it)->loops == 0)
+					else if ((*it)->loops == 0)
 					{
 						// Deactivate unreferenced infinte duration emitters
 						(*it)->Deactivate();
@@ -63,7 +63,7 @@ namespace Graphics
 		}
 		void Reset() override
 		{
-			for(auto em : m_emitters)
+			for (auto em : m_emitters)
 			{
 				em.reset();
 			}
@@ -93,7 +93,7 @@ namespace Graphics
 		float scale;
 		float fade;
 		float drag;
-		
+
 
 		bool IsAlive() const
 		{
@@ -108,8 +108,8 @@ namespace Graphics
 			// Velocity of startvelocity and spawn offset scale
 			velocity = emitter->m_param_StartVelocity->Init(et) * emitter->scale;
 			float spawnVelScale = emitter->m_param_SpawnVelocityScale->Init(et);
-			if(spawnVelScale > 0)
-				velocity += pos.Normalized() * spawnVelScale  * emitter->scale;
+			if (spawnVelScale > 0)
+				velocity += pos.Normalized() * spawnVelScale * emitter->scale;
 
 			// Add emitter offset to location
 			pos += emitter->position;
@@ -154,7 +154,7 @@ namespace Graphics
 		delete m_param_##__name; m_param_##__name = nullptr; }
 #include "ParticleParameters.hpp"
 
-		if(m_particles)
+		if (m_particles)
 		{
 			delete[] m_particles;
 		}
@@ -167,31 +167,31 @@ namespace Graphics
 
 		// Create new pool
 		m_poolSize = newCapacity;
-		if(newCapacity > 0)
+		if (newCapacity > 0)
 		{
 			m_particles = new Particle[m_poolSize];
 			for (size_t i = 0; i < m_poolSize; i++)
 			{
 				m_particles[i] = Particle();
 			}
-			
+
 		}
 		else
 		{
 			m_particles = nullptr;
 		}
 
-		if(oldParticles && m_particles)
+		if (oldParticles && m_particles)
 		{
 			memcpy(m_particles, oldParticles, Math::Min(oldSize, m_poolSize) * sizeof(Particle));
 		}
 
-		if(oldParticles)
+		if (oldParticles)
 			delete[] oldParticles;
 	}
 	void ParticleEmitter::Render(const class RenderState& rs, float deltaTime)
 	{
-		if(m_finished)
+		if (m_finished)
 			return;
 
 		uint32 maxDuration = (uint32)ceilf(m_param_Lifetime->GetMax());
@@ -200,7 +200,7 @@ namespace Graphics
 		// Round up to 64
 		maxParticles = (uint32)ceil((float)maxParticles / 64.0f) * 64;
 
-		if(maxParticles > m_poolSize)
+		if (maxParticles > m_poolSize)
 			m_ReallocatePool(maxParticles);
 
 		// Resulting vertex bufffer
@@ -208,7 +208,7 @@ namespace Graphics
 
 		// Increment emitter time
 		m_emitterTime += deltaTime;
-		while(m_emitterTime > duration)
+		while (m_emitterTime > duration)
 		{
 			m_emitterTime -= duration;
 			m_emitterLoopIndex++;
@@ -221,10 +221,10 @@ namespace Graphics
 		uint32 numSpawns = 0;
 		float spawnTimeOffset = 0.0f;
 		float spawnTimeOffsetStep = 0;
-		if(loops > 0 && m_emitterLoopIndex >= loops) // Should spawn particles ?
+		if (loops > 0 && m_emitterLoopIndex >= loops) // Should spawn particles ?
 			m_deactivated = true;
 
-		if(!m_deactivated)
+		if (!m_deactivated)
 		{
 			// Calculate number of new particles to spawn
 			float spawnsf;
@@ -234,15 +234,15 @@ namespace Graphics
 		}
 
 		bool updatedSomething = false;
-		for(uint32 i = 0; i < m_poolSize; i++)
+		for (uint32 i = 0; i < m_poolSize; i++)
 		{
 			Particle& p = m_particles[i];
 
 			bool render = false;
-			if(!m_particles[i].IsAlive())
+			if (!m_particles[i].IsAlive())
 			{
 				// Try to spawn a new particle in this slot
-				if(numSpawns > 0)
+				if (numSpawns > 0)
 				{
 					p.Init(this);
 					p.Simulate(this, spawnTimeOffset);
@@ -258,26 +258,26 @@ namespace Graphics
 				updatedSomething = true;
 			}
 
-			if(render)
+			if (render)
 			{
 				verts.Add({ p.pos, p.startColor.WithAlpha(p.fade), Vector4(p.startSize * p.scale, p.rotation, 0, 0) });
 			}
 		}
 
-		if(m_deactivated)
+		if (m_deactivated)
 		{
 			m_finished = !updatedSomething;
 		}
 
 		MaterialParameterSet params;
-		if(texture)
+		if (texture)
 		{
 			params.SetParameter("mainTex", texture);
 		}
 		material->Bind(rs, params);
 
 		// Select blending mode based on material
-		switch(material->blendMode)
+		switch (material->blendMode)
 		{
 		case MaterialBlendMode::Normal:
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -290,7 +290,7 @@ namespace Graphics
 			break;
 		}
 
-		m_mesh->SetData(verts);	
+		m_mesh->SetData(verts);
 		m_mesh->Draw();
 	}
 

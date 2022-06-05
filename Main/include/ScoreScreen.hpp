@@ -12,5 +12,5 @@ public:
 	static ScoreScreen* Create(class Game* game);
 	static ScoreScreen* Create(class Game* game, class ChallengeManager*);
 	static ScoreScreen* Create(class Game* game, String uid,
-            Vector<nlohmann::json> const*, MultiplayerScreen*);
+		Vector<nlohmann::json> const*, MultiplayerScreen*);
 };

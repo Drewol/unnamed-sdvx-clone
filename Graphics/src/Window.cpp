@@ -40,7 +40,7 @@ namespace Graphics
 		{
 			SDL_Quit();
 		}
-		static SDL &Main()
+		static SDL& Main()
 		{
 			static SDL sdl;
 			return sdl;
@@ -51,10 +51,10 @@ namespace Graphics
 	{
 	public:
 		// Handle to outer class to send delegates
-		Window &outer;
+		Window& outer;
 
 	public:
-		Window_Impl(Window &outer, Vector2i size, uint8 sampleCount) : outer(outer)
+		Window_Impl(Window& outer, Vector2i size, uint8 sampleCount) : outer(outer)
 		{
 			ProfilerScope $("Creating Window");
 			SDL::Main();
@@ -73,7 +73,7 @@ namespace Graphics
 			SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 
 			m_window = SDL_CreateWindow(*titleUtf8, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-										m_clntSize.x, m_clntSize.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+				m_clntSize.x, m_clntSize.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 			assert(m_window);
 
 			uint32 numJoysticks = SDL_NumJoysticks();
@@ -86,7 +86,7 @@ namespace Graphics
 				Logf("Listing %d Joysticks:", Logger::Severity::Info, numJoysticks);
 				for (uint32 i = 0; i < numJoysticks; i++)
 				{
-					SDL_Joystick *joystick = SDL_JoystickOpen(i);
+					SDL_Joystick* joystick = SDL_JoystickOpen(i);
 					if (!joystick)
 					{
 						Logf("[%d] <failed to open>", Logger::Severity::Warning, i);
@@ -95,7 +95,7 @@ namespace Graphics
 					String deviceName = SDL_JoystickName(joystick);
 
 					Logf("[%d] \"%s\" (%d buttons, %d axes, %d hats)", Logger::Severity::Info,
-						 i, deviceName, SDL_JoystickNumButtons(joystick), SDL_JoystickNumAxes(joystick), SDL_JoystickNumHats(joystick));
+						i, deviceName, SDL_JoystickNumButtons(joystick), SDL_JoystickNumAxes(joystick), SDL_JoystickNumHats(joystick));
 
 					SDL_JoystickClose(joystick);
 				}
@@ -113,7 +113,7 @@ namespace Graphics
 			SDL_DestroyWindow(m_window);
 		}
 
-		void SetWindowPos(const Vector2i &pos)
+		void SetWindowPos(const Vector2i& pos)
 		{
 			SDL_SetWindowPosition(m_window, pos.x, pos.y);
 		}
@@ -143,19 +143,19 @@ namespace Graphics
 		bool ShowYesNoMessage(const String& title, const String& message)
 		{
 			const SDL_MessageBoxButtonData buttons[] =
-				{
-					{SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 0, "no"},
-					{SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "yes"},
-				};
+			{
+				{SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 0, "no"},
+				{SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "yes"},
+			};
 			const SDL_MessageBoxData messageboxdata =
-				{
-					SDL_MESSAGEBOX_INFORMATION,
-					nullptr,
-					*title,
-					*message,
-					SDL_arraysize(buttons),
-					buttons,
-					nullptr};
+			{
+				SDL_MESSAGEBOX_INFORMATION,
+				nullptr,
+				*title,
+				*message,
+				SDL_arraysize(buttons),
+				buttons,
+				nullptr };
 			int buttonid;
 			if (SDL_ShowMessageBox(&messageboxdata, &buttonid) < 0)
 			{
@@ -172,7 +172,7 @@ namespace Graphics
 			return res;
 		}
 
-		void SetWindowSize(const Vector2i &size)
+		void SetWindowSize(const Vector2i& size)
 		{
 			SDL_SetWindowSize(m_window, size.x, size.y);
 		}
@@ -195,7 +195,7 @@ namespace Graphics
 		}
 
 		/* input handling */
-		void HandleKeyEvent(const SDL_Keysym &keySym, uint8 newState, int32 repeat, int32 delta)
+		void HandleKeyEvent(const SDL_Keysym& keySym, uint8 newState, int32 repeat, int32 delta)
 		{
 			const SDL_Scancode code = keySym.scancode;
 			auto m = static_cast<SDL_Keymod>(keySym.mod);
@@ -203,13 +203,13 @@ namespace Graphics
 			m_modKeys = ModifierKeys::None;
 
 			if ((m & KMOD_ALT) != 0)
-				(uint8 &)m_modKeys |= (uint8)ModifierKeys::Alt;
+				(uint8&)m_modKeys |= (uint8)ModifierKeys::Alt;
 			if ((m & KMOD_CTRL) != 0)
-				(uint8 &)m_modKeys |= (uint8)ModifierKeys::Ctrl;
+				(uint8&)m_modKeys |= (uint8)ModifierKeys::Ctrl;
 			if ((m & KMOD_SHIFT) != 0)
-				(uint8 &)m_modKeys |= (uint8)ModifierKeys::Shift;
+				(uint8&)m_modKeys |= (uint8)ModifierKeys::Shift;
 
-			uint8 &currentState = m_keyStates[code];
+			uint8& currentState = m_keyStates[code];
 
 			if (currentState != newState)
 			{
@@ -238,7 +238,7 @@ namespace Graphics
 		{
 			SDL_HideWindow(m_window);
 		}
-		void SetCaption(const WString &cap)
+		void SetCaption(const WString& cap)
 		{
 			m_caption = L"Window";
 			String titleUtf8 = Utility::ConvertToUTF8(m_caption);
@@ -256,9 +256,9 @@ namespace Graphics
 			if (image)
 			{
 				Vector2i size = image->GetSize();
-				void *bits = image->GetBits();
-				SDL_Surface *surf = SDL_CreateRGBSurfaceFrom(bits, size.x, size.y, 32, size.x * 4,
-															 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+				void* bits = image->GetBits();
+				SDL_Surface* surf = SDL_CreateRGBSurfaceFrom(bits, size.x, size.y, 32, size.x * 4,
+					0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
 				if (surf)
 				{
 					currentCursor = SDL_CreateColorCursor(surf, hotspot.x, hotspot.y);
@@ -296,25 +296,25 @@ namespace Graphics
 					}
 					else if (evt.type == SDL_EventType::SDL_JOYBUTTONDOWN)
 					{
-						Gamepad_Impl **gp = m_joystickMap.Find(evt.jbutton.which);
+						Gamepad_Impl** gp = m_joystickMap.Find(evt.jbutton.which);
 						if (gp)
 							gp[0]->HandleInputEvent(evt.jbutton.button, true, delta);
 					}
 					else if (evt.type == SDL_EventType::SDL_JOYBUTTONUP)
 					{
-						Gamepad_Impl **gp = m_joystickMap.Find(evt.jbutton.which);
+						Gamepad_Impl** gp = m_joystickMap.Find(evt.jbutton.which);
 						if (gp)
 							gp[0]->HandleInputEvent(evt.jbutton.button, false, delta);
 					}
 					else if (evt.type == SDL_EventType::SDL_JOYAXISMOTION)
 					{
-						Gamepad_Impl **gp = m_joystickMap.Find(evt.jaxis.which);
+						Gamepad_Impl** gp = m_joystickMap.Find(evt.jaxis.which);
 						if (gp)
 							gp[0]->HandleAxisEvent(evt.jaxis.axis, evt.jaxis.value);
 					}
 					else if (evt.type == SDL_EventType::SDL_JOYHATMOTION)
 					{
-						Gamepad_Impl **gp = m_joystickMap.Find(evt.jhat.which);
+						Gamepad_Impl** gp = m_joystickMap.Find(evt.jhat.which);
 						if (gp)
 							gp[0]->HandleHatEvent(evt.jhat.hat, evt.jhat.value);
 					}
@@ -322,30 +322,30 @@ namespace Graphics
 					{
 						switch (evt.button.button)
 						{
-							case SDL_BUTTON_LEFT:
-								outer.OnMousePressed.Call(MouseButton::Left);
-								break;
-							case SDL_BUTTON_MIDDLE:
-								outer.OnMousePressed.Call(MouseButton::Middle);
-								break;
-							case SDL_BUTTON_RIGHT:
-								outer.OnMousePressed.Call(MouseButton::Right);
-								break;
+						case SDL_BUTTON_LEFT:
+							outer.OnMousePressed.Call(MouseButton::Left);
+							break;
+						case SDL_BUTTON_MIDDLE:
+							outer.OnMousePressed.Call(MouseButton::Middle);
+							break;
+						case SDL_BUTTON_RIGHT:
+							outer.OnMousePressed.Call(MouseButton::Right);
+							break;
 						}
 					}
 					else if (evt.type == SDL_EventType::SDL_MOUSEBUTTONUP)
 					{
 						switch (evt.button.button)
 						{
-							case SDL_BUTTON_LEFT:
-								outer.OnMouseReleased.Call(MouseButton::Left);
-								break;
-							case SDL_BUTTON_MIDDLE:
-								outer.OnMouseReleased.Call(MouseButton::Middle);
-								break;
-							case SDL_BUTTON_RIGHT:
-								outer.OnMouseReleased.Call(MouseButton::Right);
-								break;
+						case SDL_BUTTON_LEFT:
+							outer.OnMouseReleased.Call(MouseButton::Left);
+							break;
+						case SDL_BUTTON_MIDDLE:
+							outer.OnMouseReleased.Call(MouseButton::Middle);
+							break;
+						case SDL_BUTTON_RIGHT:
+							outer.OnMouseReleased.Call(MouseButton::Right);
+							break;
 						}
 					}
 					else if (evt.type == SDL_EventType::SDL_MOUSEWHEEL)
@@ -419,8 +419,7 @@ namespace Graphics
 					outer.OnAnyEvent.Call(evt);
 					m_lastEventTick = tick;
 				}
-			}
-			while (eventCount == SIZE_EVENTS);
+			} while (eventCount == SIZE_EVENTS);
 
 			return !m_closed;
 		}
@@ -524,7 +523,7 @@ namespace Graphics
 					int borderTop = 0, borderLeft = 0, borderBottom = 0, borderRight = 0;
 					SDL_GetWindowBordersSize(m_window, &borderTop, &borderLeft, &borderBottom, &borderRight);
 
-					Shared::Recti windowRect(windowPos - Vector2i{ borderLeft, borderTop }, windowSize + Vector2i{ borderLeft+borderRight, borderTop+borderBottom });
+					Shared::Recti windowRect(windowPos - Vector2i{ borderLeft, borderTop }, windowSize + Vector2i{ borderLeft + borderRight, borderTop + borderBottom });
 
 					Vector<Shared::Recti> bounds;
 					GetDisplayBounds(bounds);
@@ -582,13 +581,13 @@ namespace Graphics
 
 					adjustedRect.pos = bounds[monitorId].pos + (bounds[monitorId].size - adjustedRect.size) / 2;
 
-					windowSize = adjustedRect.size - Vector2i{ borderLeft+borderRight, borderTop+borderBottom };
+					windowSize = adjustedRect.size - Vector2i{ borderLeft + borderRight, borderTop + borderBottom };
 
 					SetWindowSize(windowSize);
 					SetWindowPosToCenter(monitorId);
 				}
 			}
-				break;
+			break;
 			case Window::PosAndShape::Mode::WindowedFullscreen:
 				SetWindowedFullscreen(monitorId);
 				break;
@@ -600,9 +599,9 @@ namespace Graphics
 
 		inline bool IsFullscreen() const { return m_fullscreen; }
 
-		SDL_Window *m_window;
+		SDL_Window* m_window;
 
-		SDL_Cursor *currentCursor = nullptr;
+		SDL_Cursor* currentCursor = nullptr;
 
 		// Window Input State
 		Map<SDL_Scancode, uint8> m_keyStates;
@@ -610,7 +609,7 @@ namespace Graphics
 
 		// Gamepad input
 		Map<int32, Ref<Gamepad_Impl>> m_gamepads;
-		Map<SDL_JoystickID, Gamepad_Impl *> m_joystickMap;
+		Map<SDL_JoystickID, Gamepad_Impl*> m_joystickMap;
 
 		// Text input / IME stuff
 		TextComposition m_textComposition;
@@ -647,11 +646,11 @@ namespace Graphics
 	{
 		return m_impl->Update();
 	}
-	void *Window::Handle()
+	void* Window::Handle()
 	{
 		return m_impl->m_window;
 	}
-	void Window::SetCaption(const WString &cap)
+	void Window::SetCaption(const WString& cap)
 	{
 		m_impl->SetCaption(cap);
 	}
@@ -733,7 +732,7 @@ namespace Graphics
 	{
 		SDL_StopTextInput();
 	}
-	const Graphics::TextComposition &Window::GetTextComposition() const
+	const Graphics::TextComposition& Window::GetTextComposition() const
 	{
 		return m_impl->m_textComposition;
 	}
@@ -750,7 +749,7 @@ namespace Graphics
 
 	String Window::GetClipboard() const
 	{
-		char *utf8Clipboard = SDL_GetClipboardText();
+		char* utf8Clipboard = SDL_GetClipboardText();
 		String ret(utf8Clipboard);
 		SDL_free(utf8Clipboard);
 
@@ -767,7 +766,7 @@ namespace Graphics
 		uint32 numJoysticks = SDL_NumJoysticks();
 		for (uint32 i = 0; i < numJoysticks; i++)
 		{
-			SDL_Joystick *joystick = SDL_JoystickOpen(i);
+			SDL_Joystick* joystick = SDL_JoystickOpen(i);
 			if (!joystick)
 			{
 				continue;
@@ -782,12 +781,12 @@ namespace Graphics
 
 	Ref<Gamepad> Window::OpenGamepad(int32 deviceIndex)
 	{
-		Ref<Gamepad_Impl> *openGamepad = m_impl->m_gamepads.Find(deviceIndex);
+		Ref<Gamepad_Impl>* openGamepad = m_impl->m_gamepads.Find(deviceIndex);
 		if (openGamepad)
 			return Utility::CastRef<Gamepad_Impl, Gamepad>(*openGamepad);
 		Ref<Gamepad_Impl> newGamepad;
 
-		auto *gamepadImpl = new Gamepad_Impl();
+		auto* gamepadImpl = new Gamepad_Impl();
 		// Try to initialize new device
 		if (gamepadImpl->Init(this, deviceIndex))
 		{
@@ -808,7 +807,7 @@ namespace Graphics
 		return Utility::CastRef<Gamepad_Impl, Gamepad>(newGamepad);
 	}
 
-	void Window::SetMousePos(const Vector2i &pos)
+	void Window::SetMousePos(const Vector2i& pos)
 	{
 		SDL_WarpMouseInWindow(m_impl->m_window, pos.x, pos.y);
 	}

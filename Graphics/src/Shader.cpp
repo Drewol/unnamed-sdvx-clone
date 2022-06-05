@@ -45,14 +45,14 @@ namespace Graphics
 		~Shader_Impl()
 		{
 			// Cleanup OpenGL resource
-			if(glIsProgram(m_prog))
+			if (glIsProgram(m_prog))
 			{
 				glDeleteProgram(m_prog);
 			}
 
 #ifdef _WIN32
 			// Close change notification handle
-			if(m_changeNotification != INVALID_HANDLE_VALUE)
+			if (m_changeNotification != INVALID_HANDLE_VALUE)
 			{
 				CloseHandle(m_changeNotification);
 			}
@@ -61,7 +61,7 @@ namespace Graphics
 		void SetupChangeHandler()
 		{
 #ifdef _WIN32
-			if(m_changeNotification != INVALID_HANDLE_VALUE)
+			if (m_changeNotification != INVALID_HANDLE_VALUE)
 			{
 				CloseHandle(m_changeNotification);
 				m_changeNotification = INVALID_HANDLE_VALUE;
@@ -76,12 +76,12 @@ namespace Graphics
 		bool LoadProgram(uint32& programOut)
 		{
 			File in;
-			if(!in.OpenRead(m_sourcePath))
+			if (!in.OpenRead(m_sourcePath))
 				return false;
 
 			String sourceStr;
 			sourceStr.resize(in.GetSize());
-			if(sourceStr.size() == 0)
+			if (sourceStr.size() == 0)
 				return false;
 
 			in.Read(&sourceStr.front(), sourceStr.size());
@@ -94,7 +94,7 @@ namespace Graphics
 
 			int nStatus = 0;
 			glGetShaderiv(programOut, GL_COMPILE_STATUS, &nStatus);
-			if(nStatus == GL_FALSE)
+			if (nStatus == GL_FALSE)
 			{
 				static char infoLogBuffer[2048];
 				int s = 0;
@@ -113,16 +113,16 @@ namespace Graphics
 			return true;
 		}
 #else
-		
+
 		bool LoadProgram(uint32& programOut)
 		{
 			File in;
-			if(!in.OpenRead(m_sourcePath))
+			if (!in.OpenRead(m_sourcePath))
 				return false;
 
 			String sourceStr;
 			sourceStr.resize(in.GetSize());
-			if(sourceStr.size() == 0)
+			if (sourceStr.size() == 0)
 				return false;
 
 			in.Read(&sourceStr.front(), sourceStr.size());
@@ -136,12 +136,12 @@ namespace Graphics
 			}
 			const char* pChars = *sourceStr;
 			programOut = glCreateShaderProgramv(typeMap[(size_t)m_type], 1, &pChars);
-			if(programOut == 0)
+			if (programOut == 0)
 				return false;
 
 			int nStatus = 0;
 			glGetProgramiv(programOut, GL_LINK_STATUS, &nStatus);
-			if(nStatus == 0)
+			if (nStatus == 0)
 			{
 				static char infoLogBuffer[2048];
 				int s = 0;
@@ -159,21 +159,21 @@ namespace Graphics
 #endif
 			return true;
 		}
-		
+
 #endif
 
 		bool UpdateHotReload() override
 		{
 #ifdef _WIN32
-			if(m_changeNotification != INVALID_HANDLE_VALUE)
+			if (m_changeNotification != INVALID_HANDLE_VALUE)
 			{
-				if(WaitForSingleObject(m_changeNotification, 0) == WAIT_OBJECT_0)
+				if (WaitForSingleObject(m_changeNotification, 0) == WAIT_OBJECT_0)
 				{
 					uint64 newLwt = File::GetLastWriteTime(m_sourcePath);
-					if(newLwt != -1 && newLwt > m_lwt)
+					if (newLwt != -1 && newLwt > m_lwt)
 					{
 						uint32 newProgram = 0;
-						if(LoadProgram(newProgram))
+						if (LoadProgram(newProgram))
 						{
 							// Successfully reloaded
 							m_prog = newProgram;
@@ -193,17 +193,17 @@ namespace Graphics
 		{
 			m_sourcePath = Path::Normalize(name);
 			m_type = type;
-			
-			#ifdef EMBEDDED
+
+#ifdef EMBEDDED
 			m_prog = glCreateShader(typeMap[(size_t)type]);
-			#endif
-			
+#endif
+
 			return LoadProgram(m_prog);
 		}
 #ifndef EMBEDDED
 		void Bind() override
 		{
-			if(m_gl->m_activeShaders[(size_t)m_type] != this)
+			if (m_gl->m_activeShaders[(size_t)m_type] != this)
 			{
 				glUseProgramStages(m_gl->m_mainProgramPipeline, shaderStageMap[(size_t)m_type], m_prog);
 				m_gl->m_activeShaders[(size_t)m_type] = this;
@@ -280,7 +280,7 @@ namespace Graphics
 	Shader ShaderRes::Create(class OpenGL* gl, ShaderType type, const String& assetPath)
 	{
 		Shader_Impl* pImpl = new Shader_Impl(gl);
-		if(!pImpl->Init(type, assetPath))
+		if (!pImpl->Init(type, assetPath))
 		{
 			delete pImpl;
 			return Shader();
@@ -292,12 +292,12 @@ namespace Graphics
 	}
 	void ShaderRes::Unbind(class OpenGL* gl, ShaderType type)
 	{
-		#ifndef EMBEDDED
-		if(gl->m_activeShaders[(size_t)type] != 0)
+#ifndef EMBEDDED
+		if (gl->m_activeShaders[(size_t)type] != 0)
 		{
 			glUseProgramStages(gl->m_mainProgramPipeline, shaderStageMap[(size_t)type], 0);
 			gl->m_activeShaders[(size_t)type] = 0;
 		}
-		#endif
+#endif
 	}
 }

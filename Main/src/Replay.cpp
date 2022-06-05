@@ -79,7 +79,7 @@ bool Replay::SerializeLegacy(BinaryStream& stream, Replay*& obj)
 		obj->m_hitWindow.slam = 75;
 
 	// Maybe use current offset instead?
-	obj->SetOffsets(ReplayOffsets(0,0,0,0));
+	obj->SetOffsets(ReplayOffsets(0, 0, 0, 0));
 
 
 	obj->m_initialized = true;

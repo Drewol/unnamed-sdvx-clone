@@ -6,8 +6,8 @@
 struct SimpleHitStat
 {
 	// 0 = miss, 1 = near, 2 = crit, 3 = idle
-	uint8 rating:3;
-	uint8 type:5; // We use this to save info about a tick
+	uint8 rating : 3;
+	uint8 type : 5; // We use this to save info about a tick
 	uint8 lane;
 	int32 time;
 	int32 delta;
@@ -112,7 +112,7 @@ struct FolderIndex
 };
 
 
-struct ChallengeIndex 
+struct ChallengeIndex
 {
 	int32 id;
 	Vector<ChartIndex*> charts;
@@ -151,7 +151,7 @@ struct ChallengeIndex
 	void GenerateDescription();
 private:
 	static String ChallengeDescriptionVal(const nlohmann::json&, const String&, const String&, bool, int, int);
-	static String ChallengeDescriptionVal(const nlohmann::json&, const String&, bool, int mult=1, int add=0);
+	static String ChallengeDescriptionVal(const nlohmann::json&, const String&, bool, int mult = 1, int add = 0);
 	static const Map<String, std::pair<String, String>> ChallengeDescriptionStrings;
 };
 
@@ -225,9 +225,9 @@ public:
 	// Get a random chart
 	ChartIndex* GetRandomChart();
 
-	const std::map<int32, FolderIndex *>& GetFolderMap();
-	const std::map<int32, ChartIndex *>& GetChartMap();
-	const std::map<int32, ChallengeIndex *>& GetChallengeMap();
+	const std::map<int32, FolderIndex*>& GetFolderMap();
+	const std::map<int32, ChartIndex*>& GetChartMap();
+	const std::map<int32, ChallengeIndex*>& GetChallengeMap();
 
 
 	//Attempts to add to collection, if that fails attempt to remove from collection
@@ -237,7 +237,7 @@ public:
 
 	void UpdatePracticeSetup(PracticeSetupIndex* practiceSetup);
 	void UpdateChallengeResult(ChallengeIndex*, uint32 clearMark, uint32 bestScore);
-	
+
 	void RemoveSearchPath(const String& path);
 	void UpdateChartOffset(const ChartIndex* chart);
 

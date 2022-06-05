@@ -10,14 +10,14 @@
 #include "archive_entry.h"
 
 class StringEncodingDetectorInternal final : public TieredStringEncodingHeuristic
-<
+	<
 	// UTF-8 always take top priority
 	StringEncodingHeuristicCollection<UTF8Heuristic>,
 	// Japanese encodings take priority over others
 	StringEncodingHeuristicCollection<CP932Heuristic, CP954Heuristic>
 	// Disabled because they are not as frequent as ShiftJIS or EUC-JP
 	// StringEncodingHeuristicCollection<CP949Heuristic, CP850Heuristic, CP923Heuristic>
->
+	>
 {};
 
 StringEncodingDetector::StringEncodingDetector()
@@ -45,7 +45,7 @@ void StringEncodingDetector::End()
 	assert(!m_done);
 
 	m_internal->Finalize();
-	
+
 	const StringEncodingHeuristic& best = m_internal->GetBestHeuristic();
 	if (best.IsValid()) m_encoding = best.GetEncoding();
 	else m_encoding = StringEncoding::Unknown;

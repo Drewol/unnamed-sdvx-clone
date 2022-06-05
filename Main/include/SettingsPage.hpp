@@ -55,7 +55,7 @@ protected:
 	void LayoutRowStatic(int num_columns, int item_width, float height);
 
 	inline void LayoutRowDynamic(int num_columns) { LayoutRowDynamic(num_columns, m_lineHeight); }
-	inline void LayoutRowDynamic(int num_columns, int height) { LayoutRowDynamic(num_columns, static_cast<float>(height));  }
+	inline void LayoutRowDynamic(int num_columns, int height) { LayoutRowDynamic(num_columns, static_cast<float>(height)); }
 	void LayoutRowDynamic(int num_columns, float height);
 
 	inline void Separator() { Separator(m_lineHeight); }
@@ -91,15 +91,15 @@ protected:
 
 	template<typename ConstCharVec>
 	std::enable_if_t<std::is_same_v<typename ConstCharVec::value_type, const char*>, int>
-	SelectionInput(int val, const ConstCharVec& options, const std::string_view& label);
+		SelectionInput(int val, const ConstCharVec& options, const std::string_view& label);
 
 	template<typename ConstCharVec>
 	std::enable_if_t<std::is_same_v<typename ConstCharVec::value_type, const char*>, bool>
-	SelectionSetting(GameConfigKeys key, const ConstCharVec& options, const std::string_view& label);
+		SelectionSetting(GameConfigKeys key, const ConstCharVec& options, const std::string_view& label);
 
 	template<typename StringVec>
 	std::enable_if_t<std::is_same_v<typename StringVec::value_type, const char*> || std::is_same_v<typename StringVec::value_type::const_pointer, const char*>, bool>
-	StringSelectionSetting(GameConfigKeys key, const StringVec& options, const std::string_view& label);
+		StringSelectionSetting(GameConfigKeys key, const StringVec& options, const std::string_view& label);
 
 	int IntInput(int val, const std::string_view& label, int min, int max, int step = 1, float perPixel = 1.0f);
 	bool IntSetting(GameConfigKeys key, const std::string_view& label, int min, int max, int step = 1, float perPixel = 1.0f);
@@ -181,7 +181,7 @@ private:
 	void InitStyles();
 
 	Vector<std::unique_ptr<SettingsPage>> m_pages;
-	
+
 	float m_pageButtonHeight = 40;
 
 	constexpr static int PAGE_NAME_SIZE = 18;
@@ -227,7 +227,7 @@ SettingsPage::SelectionInput(int val, const ConstCharVec& options, const std::st
 
 		nk_combobox(m_nctx, const_cast<const char**>(options.data()), static_cast<int>(options.size()), &val, m_lineHeight, m_comboBoxSize);
 		UpdateLayoutMaxY((m_lineHeight + 5) * std::min(static_cast<int>(options.size()), 7));
-	} 
+	}
 	else
 	{
 		std::stringstream str;

@@ -9,7 +9,7 @@ size_t Thread::SetAffinityMask(size_t affinityMask)
 	for (uint32 j = 0; j < 8; j++)
 	{
 		size_t m = 1 << j;
-		if((affinityMask & m) != 0)
+		if ((affinityMask & m) != 0)
 			CPU_SET(j, &cpuset);
 	}
 	pthread_setaffinity_np(h, sizeof(cpu_set_t), &cpuset);
@@ -24,7 +24,7 @@ size_t Thread::SetCurrentThreadAffinityMask(size_t affinityMask)
 	for (uint32 j = 0; j < 8; j++)
 	{
 		size_t m = 1 << j;
-		if((affinityMask & m) != 0)
+		if ((affinityMask & m) != 0)
 			CPU_SET(j, &cpuset);
 	}
 	pthread_setaffinity_np(h, sizeof(cpu_set_t), &cpuset);

@@ -65,12 +65,12 @@ namespace Utility
 	const wchar_t* WSprintfArgFilter(const WString& in);
 
 	template<int N, typename... Args>
-	void BufferSprintf(char (&buffer)[N], const char* fmt, Args... args)
+	void BufferSprintf(char(&buffer)[N], const char* fmt, Args... args)
 	{
 #ifdef _WIN32
 		sprintf_s(buffer, N, fmt, SprintfArgFilter(args)...);
 #else
-		snprintf(buffer, N-1, fmt, SprintfArgFilter(args)...);
+		snprintf(buffer, N - 1, fmt, SprintfArgFilter(args)...);
 #endif
 	}
 
@@ -92,9 +92,9 @@ namespace Utility
 	{
 		static wchar_t buffer[8000];
 #ifdef _WIN32
-		swprintf(buffer, 8000-1, fmt, WSprintfArgFilter(args)...);
+		swprintf(buffer, 8000 - 1, fmt, WSprintfArgFilter(args)...);
 #else
-		swprintf(buffer, 8000-1, fmt, WSprintfArgFilter(args)...);
+		swprintf(buffer, 8000 - 1, fmt, WSprintfArgFilter(args)...);
 #endif
 		return WString(buffer);
 	}
@@ -147,14 +147,14 @@ template<typename T>
 bool StringBase<T>::Split(const StringBase& delim, StringBase* l, StringBase* r) const
 {
 	size_t f = find(delim);
-	if(f == (size_t)-1)
+	if (f == (size_t)-1)
 		return false;
 	StringBase selfCopy = *this;
-	if(r)
+	if (r)
 	{
 		*r = selfCopy.substr(f + delim.length());
 	}
-	if(l)
+	if (l)
 	{
 		*l = selfCopy.substr(0, f);
 	}
@@ -165,13 +165,13 @@ template<typename T>
 bool StringBase<T>::SplitLast(const StringBase& delim, StringBase* l, StringBase* r) const
 {
 	size_t f = find_last_of(delim);
-	if(f == -1)
+	if (f == -1)
 		return false;
-	if(l)
+	if (l)
 	{
 		*l = substr(0, f);
 	}
-	if(r)
+	if (r)
 	{
 		*r = substr(f + delim.length());
 	}
@@ -183,7 +183,7 @@ Vector<StringBase<T>> StringBase<T>::Explode(const StringBase& delim, bool keepE
 {
 	String a, b;
 	Vector<StringBase> res;
-	if(!Split(delim, &a, &b))
+	if (!Split(delim, &a, &b))
 	{
 		res.Add(*this);
 		return res;
@@ -191,10 +191,10 @@ Vector<StringBase<T>> StringBase<T>::Explode(const StringBase& delim, bool keepE
 
 	do
 	{
-		if(keepEmpty || !a.empty())
+		if (keepEmpty || !a.empty())
 			res.Add(a);
 
-	} while(b.Split(delim, &a, &b));
+	} while (b.Split(delim, &a, &b));
 
 	if (keepEmpty || !b.empty())
 		res.Add(b);
@@ -204,9 +204,9 @@ Vector<StringBase<T>> StringBase<T>::Explode(const StringBase& delim, bool keepE
 template<typename T>
 void StringBase<T>::TrimFront(T c)
 {
-	while(length() > 0)
+	while (length() > 0)
 	{
-		if(front() != c)
+		if (front() != c)
 			break;
 		this->erase(begin());
 	}
@@ -214,9 +214,9 @@ void StringBase<T>::TrimFront(T c)
 template<typename T>
 void StringBase<T>::TrimBack(T c)
 {
-	while(length() > 0)
+	while (length() > 0)
 	{
-		if(back() != c)
+		if (back() != c)
 			break;
 		this->erase(--end());
 	}
@@ -230,14 +230,14 @@ void StringBase<T>::Trim(T c)
 template<typename T>
 T* StringBase<T>::GetData()
 {
-	if(empty())
+	if (empty())
 		return nullptr;
 	return &front();
 }
 template<typename T>
 const T* StringBase<T>::GetData() const
 {
-	if(empty())
+	if (empty())
 		return nullptr;
 	return &front();
 }

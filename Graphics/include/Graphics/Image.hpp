@@ -49,5 +49,5 @@ namespace Graphics
 	typedef Ref<SpriteMapRes> SpriteMap;
 
 	DEFINE_RESOURCE_TYPE(Image, ImageRes)
-	DEFINE_RESOURCE_TYPE(SpriteMap, SpriteMapRes)
+		DEFINE_RESOURCE_TYPE(SpriteMap, SpriteMapRes)
 }

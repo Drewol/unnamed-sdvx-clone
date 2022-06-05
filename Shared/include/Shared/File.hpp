@@ -33,8 +33,8 @@ public:
 	static uint64 FileTimeToUnixTimestamp(uint64 fileTime);
 };
 
-/* 
-	Functions for resources compiled with the executable 
+/*
+	Functions for resources compiled with the executable
 	WINDOWS ONLY
 */
 namespace EmbeddedResource

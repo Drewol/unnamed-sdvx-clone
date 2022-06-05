@@ -7,7 +7,7 @@
 #include "Audio/Sample.hpp"
 #include "Beatmap/BeatmapPlayback.hpp"
 
-class CalibrationScreen: public IAsyncLoadableApplicationTickable
+class CalibrationScreen : public IAsyncLoadableApplicationTickable
 {
 public:
 	CalibrationScreen(struct nk_context* nk_ctx);

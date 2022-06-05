@@ -76,20 +76,20 @@ bool OffsetComputer::Compute(int& outOffset)
 	m_offsetCenter = outOffset;
 
 	ComputeEnergy();
-	
+
 	if (m_energy.empty())
 	{
 		Log("OffsetComputer::Compute: Insufficient data...", Logger::Severity::Warning);
 		return false;
 	}
 
-	std::array<int, MAX_OFFSET*2 + 1> fitnesses;
+	std::array<int, MAX_OFFSET * 2 + 1> fitnesses;
 
 	// This O(MAX_OFFSET*MAX_BEATS) is sub-optimal for computing convolution,
 	// but it's simple and doesn't matter a lot in practice.
-	for(MapTime offset = -MAX_OFFSET; offset <= MAX_OFFSET; ++offset)
+	for (MapTime offset = -MAX_OFFSET; offset <= MAX_OFFSET; ++offset)
 	{
-		fitnesses[MAX_OFFSET + offset] = ComputeFitness(offset+m_offsetCenter);
+		fitnesses[MAX_OFFSET + offset] = ComputeFitness(offset + m_offsetCenter);
 	}
 
 	std::vector<MapTime> peaks;
@@ -115,16 +115,16 @@ bool OffsetComputer::Compute(int& outOffset)
 
 	std::sort(peaks.begin(), peaks.end(), [&fitnesses](MapTime a, MapTime b) {
 		return fitnesses[a + MAX_OFFSET] > fitnesses[b + MAX_OFFSET];
-	});
+		});
 
 	for (size_t i = 0; i < 5 && i < peaks.size(); ++i)
 	{
-		Logf("offset %3d | score = %d", Logger::Severity::Info, peaks[i]+m_offsetCenter, fitnesses[peaks[i] + MAX_OFFSET]);
+		Logf("offset %3d | score = %d", Logger::Severity::Info, peaks[i] + m_offsetCenter, fitnesses[peaks[i] + MAX_OFFSET]);
 	}
 
-	Logf("OffsetComputer::Compute: Determined offset: %d (fitness = %d)", Logger::Severity::Info, peaks[0]+m_offsetCenter, fitnesses[peaks[0] + MAX_OFFSET]);
+	Logf("OffsetComputer::Compute: Determined offset: %d (fitness = %d)", Logger::Severity::Info, peaks[0] + m_offsetCenter, fitnesses[peaks[0] + MAX_OFFSET]);
 
-	outOffset = static_cast<int>(peaks[0]+m_offsetCenter);
+	outOffset = static_cast<int>(peaks[0] + m_offsetCenter);
 	return true;
 }
 
@@ -223,7 +223,7 @@ void OffsetComputer::ComputeEnergy()
 
 	m_energy.clear();
 	m_energy.resize(ENERGY_COUNT, 0);
-	
+
 	m_onsetScore.clear();
 	m_onsetScore.resize(ENERGY_COUNT, 0);
 
@@ -250,9 +250,9 @@ void OffsetComputer::ComputeEnergy()
 	int64 intervalSize = nextInd - ind;
 
 	int64 energyInd = 0;
-	
-	float prevAmp = ind <= 0 ? 0 : std::hypotf(m_pcm[2*ind - 2], m_pcm[2*ind - 1]);
-	float currAmp = ind < 0 ? 0 : std::hypotf(m_pcm[2*ind], m_pcm[2*ind + 1]);
+
+	float prevAmp = ind <= 0 ? 0 : std::hypotf(m_pcm[2 * ind - 2], m_pcm[2 * ind - 1]);
+	float currAmp = ind < 0 ? 0 : std::hypotf(m_pcm[2 * ind], m_pcm[2 * ind + 1]);
 
 	for (; ind < endInd; ++ind)
 	{
@@ -267,7 +267,7 @@ void OffsetComputer::ComputeEnergy()
 			if (energyInd >= COMPUTE_WINDOW) break;
 		}
 
-		const float nextAmp = ind < -1 || ind + 1 >= static_cast<int64>(m_pcmCount) ? 0 : std::hypotf(m_pcm[2*ind + 2], m_pcm[2*ind + 3]);
+		const float nextAmp = ind < -1 || ind + 1 >= static_cast<int64>(m_pcmCount) ? 0 : std::hypotf(m_pcm[2 * ind + 2], m_pcm[2 * ind + 3]);
 
 		// Compute energy based on Newton's laws (?)
 		const float v = (nextAmp - prevAmp) / 2;

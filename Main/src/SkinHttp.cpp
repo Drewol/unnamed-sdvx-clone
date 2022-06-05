@@ -35,7 +35,7 @@ void SkinHttp::m_requestLoop()
 }
 
 //https://stackoverflow.com/a/6142700
-cpr::Header SkinHttp::HeaderFromLuaTable(lua_State * L, int index)
+cpr::Header SkinHttp::HeaderFromLuaTable(lua_State* L, int index)
 {
 	cpr::Header ret;
 	if (!lua_istable(L, index))
@@ -47,8 +47,8 @@ cpr::Header SkinHttp::HeaderFromLuaTable(lua_State * L, int index)
 	while (lua_next(L, -2))
 	{
 		lua_pushvalue(L, -2);
-		const char *key = lua_tostring(L, -1);
-		const char *value = lua_tostring(L, -2);
+		const char* key = lua_tostring(L, -1);
+		const char* value = lua_tostring(L, -2);
 		ret[key] = value;
 		lua_pop(L, 2);
 	}
@@ -56,7 +56,7 @@ cpr::Header SkinHttp::HeaderFromLuaTable(lua_State * L, int index)
 	return ret;
 }
 
-void SkinHttp::m_PushResponse(lua_State * L, const cpr::Response & r)
+void SkinHttp::m_PushResponse(lua_State* L, const cpr::Response& r)
 {
 	auto pushString = [L](String key, String value)
 	{
@@ -98,7 +98,7 @@ SkinHttp::SkinHttp()
 SkinHttp::~SkinHttp()
 {
 	m_running = false;
-	if(m_requestThread.joinable())
+	if (m_requestThread.joinable())
 		m_requestThread.join();
 
 	while (!m_requests.empty())
@@ -114,7 +114,7 @@ SkinHttp::~SkinHttp()
 	m_boundStates.clear();
 }
 
-int SkinHttp::lGetAsync(lua_State * L)
+int SkinHttp::lGetAsync(lua_State* L)
 {
 	String url = luaL_checkstring(L, 2);
 	cpr::Header header = HeaderFromLuaTable(L, 3);
@@ -129,7 +129,7 @@ int SkinHttp::lGetAsync(lua_State * L)
 	return 0;
 }
 
-int SkinHttp::lPostAsync(lua_State * L)
+int SkinHttp::lPostAsync(lua_State* L)
 {
 	String url = luaL_checkstring(L, 2);
 	String payload = luaL_checkstring(L, 3);
@@ -145,7 +145,7 @@ int SkinHttp::lPostAsync(lua_State * L)
 	return 0;
 }
 
-int SkinHttp::lGet(lua_State * L)
+int SkinHttp::lGet(lua_State* L)
 {
 	String url = luaL_checkstring(L, 2);
 	cpr::Header header = HeaderFromLuaTable(L, 3);
@@ -154,7 +154,7 @@ int SkinHttp::lGet(lua_State * L)
 	return 1;
 }
 
-int SkinHttp::lPost(lua_State * L)
+int SkinHttp::lPost(lua_State* L)
 {
 	String url = luaL_checkstring(L, 2);
 	String payload = luaL_checkstring(L, 3);
@@ -192,7 +192,7 @@ void SkinHttp::ProcessCallbacks()
 	m_mutex.unlock();
 }
 
-void SkinHttp::PushFunctions(lua_State * L)
+void SkinHttp::PushFunctions(lua_State* L)
 {
 	auto bindable = new LuaBindable(L, "Http");
 	bindable->AddFunction("Get", this, &SkinHttp::lGet);
@@ -204,7 +204,7 @@ void SkinHttp::PushFunctions(lua_State * L)
 	m_boundStates.Add(L, bindable);
 }
 
-void SkinHttp::ClearState(lua_State * L)
+void SkinHttp::ClearState(lua_State* L)
 {
 	if (!m_boundStates.Contains(L))
 		return;

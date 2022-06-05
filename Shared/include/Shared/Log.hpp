@@ -5,7 +5,7 @@
 #include "Shared/String.hpp"
 #include "Shared/Unique.hpp"
 
-/* 
+/*
 	Logging utility class
 	formats loggin messages with time stamps and module names
 	allows message coloring on platforms that support it

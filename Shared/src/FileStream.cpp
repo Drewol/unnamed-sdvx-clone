@@ -165,7 +165,7 @@ size_t CompressedFileWriter::Serialize(void* data, size_t len)
 	m_z->next_in = (uint8*)data;
 	m_z->avail_in = len;
 
-	while(ok)
+	while (ok)
 	{
 		// Write to start of buffer every time
 		m_z->next_out = m_buffer;
@@ -173,7 +173,7 @@ size_t CompressedFileWriter::Serialize(void* data, size_t len)
 
 		int ret = deflate(m_z, Z_NO_FLUSH);
 
-		size_t clen = m_bufferLen- m_z->avail_out;
+		size_t clen = m_bufferLen - m_z->avail_out;
 		for (size_t amt, pos = 0; ok && pos < clen; pos += amt)
 		{
 			amt = m_file->Write(m_buffer + pos, clen - pos);

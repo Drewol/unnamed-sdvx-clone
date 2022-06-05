@@ -23,9 +23,9 @@ Test("Delegate.LambdaRValue")
 	Delegate<int> dv;
 	int testCounter = 0;
 	dv.AddLambda([&](int arg)
-	{
-		testCounter = arg;
-	});
+		{
+			testCounter = arg;
+		});
 
 	dv.Call(101);
 	TestEnsure(testCounter == 101);

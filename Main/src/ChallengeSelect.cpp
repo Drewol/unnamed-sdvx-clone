@@ -229,7 +229,7 @@ private:
 		}
 	}
 
-	void m_SetLuaChals(const char* key, const Map < int32, ChallengeSelectIndex> &collection, bool sorted)
+	void m_SetLuaChals(const char* key, const Map < int32, ChallengeSelectIndex>& collection, bool sorted)
 	{
 		lua_getglobal(m_lua, "chalwheel");
 		lua_pushstring(m_lua, key);
@@ -247,7 +247,7 @@ private:
 			}
 		}
 		else {
-			
+
 			for (auto& chal : collection)
 			{
 				m_PushChalToLua(chal.second, ++chalIndex);
@@ -317,7 +317,7 @@ public:
 
 	bool Init()
 	{
-		ChallengeFilter *lvFilter = new ChallengeFilter();
+		ChallengeFilter* lvFilter = new ChallengeFilter();
 		ChallengeFilter* flFilter = new ChallengeFilter();
 
 		AddFilter(lvFilter, FilterType::Level);
@@ -357,7 +357,7 @@ public:
 		{
 			if (filter->GetType() == FilterType::Folder)
 			{
-				FolderFilter *f = (FolderFilter *)filter;
+				FolderFilter* f = (FolderFilter*)filter;
 				delete f;
 			}
 			else
@@ -385,7 +385,7 @@ public:
 		return false;
 	}
 
-	void AddFilter(ChallengeFilter *filter, FilterType type)
+	void AddFilter(ChallengeFilter* filter, FilterType type)
 	{
 		if (type == FilterType::Level)
 			m_levelFilters.Add(filter);
@@ -393,7 +393,7 @@ public:
 			m_folderFilters.Add(filter);
 	}
 
-	void SelectFilter(ChallengeFilter *filter, FilterType type)
+	void SelectFilter(ChallengeFilter* filter, FilterType type)
 	{
 		uint8 t = type == FilterType::Folder ? 0 : 1;
 		int index = 0;
@@ -460,7 +460,7 @@ public:
 		}
 	}
 
-	void SetMapDB(MapDatabase *db)
+	void SetMapDB(MapDatabase* db)
 	{
 		m_mapDB = db;
 		UpdateFilters();
@@ -527,13 +527,13 @@ public:
 	}
 
 private:
-	void m_PushStringToTable(const char *name, const char *data)
+	void m_PushStringToTable(const char* name, const char* data)
 	{
 		lua_pushstring(m_lua, name);
 		lua_pushstring(m_lua, data);
 		lua_settable(m_lua, -3);
 	}
-	void m_PushStringToArray(int index, const char *data)
+	void m_PushStringToArray(int index, const char* data)
 	{
 		lua_pushinteger(m_lua, index);
 		lua_pushstring(m_lua, data);
@@ -578,14 +578,14 @@ private:
 	}
 
 	Ref<ChallengeSelectionWheel> m_selectionWheel;
-	Vector<ChallengeFilter *> m_folderFilters;
-	Vector<ChallengeFilter *> m_levelFilters;
+	Vector<ChallengeFilter*> m_folderFilters;
+	Vector<ChallengeFilter*> m_levelFilters;
 	int32 m_currentFolderSelection = 0;
 	int32 m_currentLevelSelection = 0;
 	bool m_selectingFolders = true;
-	ChallengeFilter *m_currentFilters[2] = {nullptr};
-	MapDatabase *m_mapDB;
-	lua_State *m_lua = nullptr;
+	ChallengeFilter* m_currentFilters[2] = { nullptr };
+	MapDatabase* m_mapDB;
+	lua_State* m_lua = nullptr;
 	std::unordered_set<std::string> m_folders;
 	std::unordered_set<std::string> m_collections;
 };
@@ -604,7 +604,7 @@ public:
 	~ChallengeSortSelection()
 	{
 		g_gameConfig.Set(GameConfigKeys::LastSortChal, m_selection);
-		for (ChallengeSort *s : m_sorts)
+		for (ChallengeSort* s : m_sorts)
 		{
 			delete s;
 		}
@@ -640,7 +640,7 @@ public:
 		return true;
 	}
 
-	void SetSelection(ChallengeSort *s)
+	void SetSelection(ChallengeSort* s)
 	{
 		m_selection = std::find(m_sorts.begin(), m_sorts.end(), s) - m_sorts.begin();
 		m_selectionWheel->SetSort(s);
@@ -678,7 +678,7 @@ public:
 	}
 
 private:
-	void m_PushStringToArray(int index, const char *data)
+	void m_PushStringToArray(int index, const char* data)
 	{
 		lua_pushinteger(m_lua, index);
 		lua_pushstring(m_lua, data);
@@ -708,9 +708,9 @@ private:
 	}
 
 	Ref<ChallengeSelectionWheel> m_selectionWheel;
-	Vector<ChallengeSort *> m_sorts;
+	Vector<ChallengeSort*> m_sorts;
 	int m_selection = 0;
-	lua_State *m_lua = nullptr;
+	lua_State* m_lua = nullptr;
 };
 
 
@@ -864,7 +864,7 @@ public:
 			g_application->DisposeLua(m_lua);
 	}
 
-	void OnSearchTermChanged(const String &search)
+	void OnSearchTermChanged(const String& search)
 	{
 		//m_filterSelection->AdvanceSelection(0);
 		if (search.empty())
@@ -873,7 +873,7 @@ public:
 		}
 		else
 		{
-			Map<int32, ChallengeIndex *> filter = m_mapDatabase->FindChallenges(search);
+			Map<int32, ChallengeIndex*> filter = m_mapDatabase->FindChallenges(search);
 			m_selectionWheel->SetFilter(filter);
 		}
 	}
@@ -891,7 +891,7 @@ public:
 
 		if (buttonCode == Input::Button::BT_S && !m_filterSelection->Active && !m_sortSelection->Active && !IsSuspended() && !m_transitionedToGame)
 		{
-			ChallengeIndex *folder = m_selectionWheel->GetSelection();
+			ChallengeIndex* folder = m_selectionWheel->GetSelection();
 			if (folder)
 			{
 				// TODO start the chal logic
@@ -985,7 +985,7 @@ public:
 				m_sortSelection->Active = !m_sortSelection->Active;
 			}
 			break;
-			default:
+		default:
 			break;
 		}
 	}
@@ -1100,7 +1100,7 @@ public:
 				ChallengeIndex* chal = m_selectionWheel->GetSelection();
 				String name = chal->title;
 
-				bool res = g_gameWindow->ShowYesNoMessage("Delete challenge?", "Are you sure you want to delete " + name + "\nThis will only delete "+chal->path+"\nThis cannot be undone...");
+				bool res = g_gameWindow->ShowYesNoMessage("Delete challenge?", "Are you sure you want to delete " + name + "\nThis will only delete " + chal->path + "\nThis cannot be undone...");
 				if (!res)
 					return;
 				Path::Delete(chal->path);
@@ -1380,49 +1380,49 @@ ChallengeOption<uint32> ChallengeManager::m_getOptionAsPositiveInteger(
 ChallengeRequirements ChallengeManager::m_processReqs(nlohmann::json req)
 {
 	ChallengeRequirements out;
-	out.clear =          m_getOptionAsBool(req,            "clear");
-	out.min_percentage = m_getOptionAsPositiveInteger(req, "min_percentage", 0,   200);
-	out.min_gauge =      m_getOptionAsFloat(req,           "min_gauge",      0.0, 1.0);
-	out.max_errors =     m_getOptionAsPositiveInteger(req, "max_errors");
-	out.max_nears =      m_getOptionAsPositiveInteger(req, "max_nears");
-	out.min_crits =      m_getOptionAsPositiveInteger(req, "min_crits");
-	out.min_chain =      m_getOptionAsPositiveInteger(req, "min_chain");
+	out.clear = m_getOptionAsBool(req, "clear");
+	out.min_percentage = m_getOptionAsPositiveInteger(req, "min_percentage", 0, 200);
+	out.min_gauge = m_getOptionAsFloat(req, "min_gauge", 0.0, 1.0);
+	out.max_errors = m_getOptionAsPositiveInteger(req, "max_errors");
+	out.max_nears = m_getOptionAsPositiveInteger(req, "max_nears");
+	out.min_crits = m_getOptionAsPositiveInteger(req, "min_crits");
+	out.min_chain = m_getOptionAsPositiveInteger(req, "min_chain");
 	return out;
 }
 
 ChallengeOptions ChallengeManager::m_processOptions(nlohmann::json j)
 {
 	ChallengeOptions out;
-	out.mirror =       m_getOptionAsBool(j,            "mirror");
-	out.excessive =    m_getOptionAsBool(j,            "excessive_gauge");
-	out.permissive  =    m_getOptionAsBool(j,          "permissive_gauge");
-	out.blastive =    m_getOptionAsBool(j,             "blastive_gauge");
-	out.gauge_level = m_getOptionAsFloat(j,            "gauge_level",    0.0, 10.0);
-	out.ars       =    m_getOptionAsBool(j,            "ars");
-	out.gauge_carry_over =    m_getOptionAsBool(j,	   "gauge_carry_over");
+	out.mirror = m_getOptionAsBool(j, "mirror");
+	out.excessive = m_getOptionAsBool(j, "excessive_gauge");
+	out.permissive = m_getOptionAsBool(j, "permissive_gauge");
+	out.blastive = m_getOptionAsBool(j, "blastive_gauge");
+	out.gauge_level = m_getOptionAsFloat(j, "gauge_level", 0.0, 10.0);
+	out.ars = m_getOptionAsBool(j, "ars");
+	out.gauge_carry_over = m_getOptionAsBool(j, "gauge_carry_over");
 	out.min_modspeed = m_getOptionAsPositiveInteger(j, "min_modspeed");
 	out.max_modspeed = m_getOptionAsPositiveInteger(j, "max_modspeed");
-	out.allow_cmod =   m_getOptionAsBool(j,            "allow_cmod");
-	out.allow_excessive =   m_getOptionAsBool(j,       "allow_excessive");
-	out.allow_permissive =   m_getOptionAsBool(j,      "allow_blastive");
-	out.allow_blastive =   m_getOptionAsBool(j,        "allow_permissive");
-	out.allow_ars =    m_getOptionAsBool(j,            "allow_ars");
-	out.hidden_min =   m_getOptionAsFloat(j,           "hidden_min",     0.0, 1.0);
-	out.sudden_min =   m_getOptionAsFloat(j,           "sudden_min",     0.0, 1.0);
-	out.crit_judge =   m_getOptionAsPositiveInteger(j, "crit_judgement", 0,   46);
-	out.near_judge =   m_getOptionAsPositiveInteger(j, "near_judgement", 0,   92);
-	out.hold_judge =   m_getOptionAsPositiveInteger(j, "hold_judgement", 0,   138);
+	out.allow_cmod = m_getOptionAsBool(j, "allow_cmod");
+	out.allow_excessive = m_getOptionAsBool(j, "allow_excessive");
+	out.allow_permissive = m_getOptionAsBool(j, "allow_blastive");
+	out.allow_blastive = m_getOptionAsBool(j, "allow_permissive");
+	out.allow_ars = m_getOptionAsBool(j, "allow_ars");
+	out.hidden_min = m_getOptionAsFloat(j, "hidden_min", 0.0, 1.0);
+	out.sudden_min = m_getOptionAsFloat(j, "sudden_min", 0.0, 1.0);
+	out.crit_judge = m_getOptionAsPositiveInteger(j, "crit_judgement", 0, 46);
+	out.near_judge = m_getOptionAsPositiveInteger(j, "near_judgement", 0, 92);
+	out.hold_judge = m_getOptionAsPositiveInteger(j, "hold_judgement", 0, 138);
 
 	// These reqs are checked at the end so we keep em as options
 	// TODO only do this on the global one? (overrides don't work for these)
 	out.average_percentage = m_getOptionAsPositiveInteger(j, "min_average_percentage", 0, 200);
-	out.average_gauge =      m_getOptionAsFloat(j,           "min_average_gauge",      0, 1.0);
-	out.average_errors =     m_getOptionAsPositiveInteger(j, "max_average_errors");
+	out.average_gauge = m_getOptionAsFloat(j, "min_average_gauge", 0, 1.0);
+	out.average_errors = m_getOptionAsPositiveInteger(j, "max_average_errors");
 	out.max_overall_errors = m_getOptionAsPositiveInteger(j, "max_overall_errors");
-	out.average_nears =      m_getOptionAsPositiveInteger(j, "max_average_nears");
-	out.max_overall_nears =  m_getOptionAsPositiveInteger(j, "max_overall_nears");
-	out.average_crits =      m_getOptionAsPositiveInteger(j, "min_average_crits");
-	out.min_overall_crits =  m_getOptionAsPositiveInteger(j, "min_overall_crits");
+	out.average_nears = m_getOptionAsPositiveInteger(j, "max_average_nears");
+	out.max_overall_nears = m_getOptionAsPositiveInteger(j, "max_overall_nears");
+	out.average_crits = m_getOptionAsPositiveInteger(j, "min_average_crits");
+	out.min_overall_crits = m_getOptionAsPositiveInteger(j, "min_overall_crits");
 
 	out.use_sdvx_complete_percentage = m_getOptionAsBool(j, "use_sdvx_complete_percentage");
 	return out;
@@ -1490,7 +1490,7 @@ bool ChallengeManager::StartChallenge(ChallengeSelect* sel, ChallengeIndex* chal
 			m_opts.push_back(m_processOptions(overrides[i]));
 		}
 	}
-	for (unsigned int i=m_reqs.size(); i<m_chal->charts.size(); i++)
+	for (unsigned int i = m_reqs.size(); i < m_chal->charts.size(); i++)
 	{
 		m_reqs.push_back(ChallengeRequirements());
 		m_opts.push_back(ChallengeOptions());
@@ -1660,7 +1660,7 @@ bool ChallengeManager::m_setupNextChart()
 	m_currentChart = m_chal->charts[m_chartIndex];
 	m_currentOptions = m_globalOpts.Merge(m_opts[m_chartIndex]);
 
-	if (m_currentOptions.min_modspeed.Get(0) > 
+	if (m_currentOptions.min_modspeed.Get(0) >
 		m_currentOptions.max_modspeed.Get(INT_MAX))
 	{
 		Log("Skipping setting 'max_modspeed': must be more than 'min_modspeed'", Logger::Severity::Warning);
@@ -1712,7 +1712,7 @@ bool ChallengeManager::m_setupNextChart()
 
 	if (m_currentOptions.gauge_carry_over.Get(false) && m_lastGauges.size() > 0)
 	{
-		auto setGauge = [=](void *screen) {
+		auto setGauge = [=](void* screen) {
 			if (screen == nullptr)
 				return;
 			game->SetAllGaugeValues(this->m_lastGauges);

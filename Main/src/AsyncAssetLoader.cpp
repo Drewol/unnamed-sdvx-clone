@@ -41,7 +41,7 @@ struct AsyncMeshLoadOperation : public AsyncLoadOperation
 		/// TODO: No mesh loading yet
 		return false;
 	}
-}; 
+};
 struct AsyncMaterialLoadOperation : public AsyncLoadOperation
 {
 	Material& target;
@@ -81,7 +81,7 @@ public:
 	Vector<AsyncLoadOperation*> loadables;
 	~AsyncAssetLoader_Impl()
 	{
-		for(auto& loadable : loadables)
+		for (auto& loadable : loadables)
 		{
 			delete loadable;
 		}
@@ -117,9 +117,9 @@ void AsyncAssetLoader::AddLoadable(IAsyncLoadable& loadable, const String& id /*
 bool AsyncAssetLoader::Load()
 {
 	bool success = true;
-	for(auto& ld : m_impl->loadables)
+	for (auto& ld : m_impl->loadables)
 	{
-		if(!ld->AsyncLoad())
+		if (!ld->AsyncLoad())
 		{
 			Logf("[AsyncLoad] Load failed on %s", Logger::Severity::Error, ld->name);
 			success = false;
@@ -130,9 +130,9 @@ bool AsyncAssetLoader::Load()
 bool AsyncAssetLoader::Finalize()
 {
 	bool success = true;
-	for(auto& ld : m_impl->loadables)
+	for (auto& ld : m_impl->loadables)
 	{
-		if(!ld->AsyncFinalize())
+		if (!ld->AsyncFinalize())
 		{
 			Logf("[AsyncLoad] Finalize failed on %s", Logger::Severity::Error, ld->name);
 			success = false;

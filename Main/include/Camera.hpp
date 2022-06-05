@@ -39,7 +39,7 @@ public:
 	// Changes the amount of roll applied when lasers are controlled, default = 1
 	void SetRollIntensity(float val);
 	void SetRollKeep(bool rollKeep);
-	
+
 	/*
 	Sets laser slam amount
 	@param index - index of the laser. 0 for blue laser, 1 for red laser
@@ -53,7 +53,7 @@ public:
 	@param slam - true when the current laser segment is a slam
 	*/
 	void SetRollIgnore(uint32 index, bool slam);
-	
+
 	/*
 	Sets slow tilt state
 	@param tilt - true when lasers are at 0/0 or -1/1
@@ -62,7 +62,7 @@ public:
 	void SetLasersActive(bool lasersActive);
 	void SetTargetRoll(float target);
 	void SetSpin(float direction, uint32 duration, uint8 type, class BeatmapPlayback& playback);
-	void SetXOffsetBounce(float direction, uint32 duration, uint32 amplitude, uint32 frequency, float decay, class BeatmapPlayback &playback);
+	void SetXOffsetBounce(float direction, uint32 duration, uint32 amplitude, uint32 frequency, float decay, class BeatmapPlayback& playback);
 	float GetRoll() const;
 	float GetCritLineRoll() const;
 	float GetActualRoll() const;
@@ -75,7 +75,7 @@ public:
 	// Enables/disables laser slams and roll ignore
 	void SetFancyHighwayTilt(bool fancyHighwaySetting);
 	void SetSlamShakeGuardDuration(int refreshRate);
-	
+
 	/*
 	Gets roll ignore timer for a laser
 	@param index - index of the laser. 0 for blue laser, 1 for red laser

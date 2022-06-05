@@ -11,7 +11,7 @@ public:
 	String composition;
 	uint32 backspaceCount;
 	bool active = false;
-	Delegate<const String &> OnTextChanged;
+	Delegate<const String&> OnTextChanged;
 
 	~TextInput()
 	{
@@ -21,12 +21,12 @@ public:
 		g_gameWindow->OnKeyPressed.RemoveAll(this);
 	}
 
-	void OnTextInput(const String &wstr)
+	void OnTextInput(const String& wstr)
 	{
 		input += wstr;
 		OnTextChanged.Call(input);
 	}
-	void OnTextComposition(const Graphics::TextComposition &comp)
+	void OnTextComposition(const Graphics::TextComposition& comp)
 	{
 		composition = comp.composition;
 	}

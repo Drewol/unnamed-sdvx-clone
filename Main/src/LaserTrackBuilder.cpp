@@ -22,14 +22,14 @@ LaserTrackBuilder::LaserTrackBuilder(class OpenGL* gl, class Track* track, uint3
 }
 Mesh LaserTrackBuilder::GenerateTrackMesh(class BeatmapPlayback& playback, LaserObjectState* laser)
 {
-	if(m_objectCache.Contains(laser))
+	if (m_objectCache.Contains(laser))
 		return m_objectCache[laser];
 
 	Mesh newMesh = MeshRes::Create(m_gl);
 
 	const float length = playback.ToViewDistance(laser->time, laser->duration);
 
-	if((laser->flags & LaserObjectState::flag_Instant) != 0) // Slam segment
+	if ((laser->flags & LaserObjectState::flag_Instant) != 0) // Slam segment
 	{
 		float left, right, offsetT, offsetB, uvT, uvB;
 		left = laser->points[0] * effectiveWidth - effectiveWidth * 0.5f;
@@ -51,7 +51,7 @@ Mesh LaserTrackBuilder::GenerateTrackMesh(class BeatmapPlayback& playback, Laser
 		bool swapped = false;
 
 
-		if(laser->points[0] > laser->points[1])
+		if (laser->points[0] > laser->points[1])
 		{
 			// <------
 			std::swap(left, right);
@@ -81,7 +81,7 @@ Mesh LaserTrackBuilder::GenerateTrackMesh(class BeatmapPlayback& playback, Laser
 			Rect3D leftCenter = Rect3D(left - actualLaserWidth, centerMiddle.Top() - halfLength, left + halfWidth, centerMiddle.Bottom() + halfLength);
 
 			Vector<MeshGenerators::SimpleVertex> leftVerts;
-			if(swapped)
+			if (swapped)
 			{
 
 				leftVerts =
@@ -109,7 +109,7 @@ Mesh LaserTrackBuilder::GenerateTrackMesh(class BeatmapPlayback& playback, Laser
 		{
 			Rect3D rightCenter = Rect3D(right - halfWidth, centerMiddle.Top() - halfLength, right + actualLaserWidth, centerMiddle.Bottom() + halfLength);
 			Vector<MeshGenerators::SimpleVertex> rightVerts;
-			if(swapped)
+			if (swapped)
 			{
 				rightVerts =
 				{
@@ -138,7 +138,7 @@ Mesh LaserTrackBuilder::GenerateTrackMesh(class BeatmapPlayback& playback, Laser
 	else
 	{
 		float prevLength = 0.0f;
-		if(laser->prev && (laser->prev->flags & LaserObjectState::flag_Instant) != 0)
+		if (laser->prev && (laser->prev->flags & LaserObjectState::flag_Instant) != 0)
 		{
 			// Previous slam length
 			prevLength = playback.ToViewDistance(laser->prev->time, slamDuration) * laserLengthScale;
@@ -185,7 +185,7 @@ Mesh LaserTrackBuilder::GenerateTrackMesh(class BeatmapPlayback& playback, Laser
 Mesh LaserTrackBuilder::GenerateTrackEntry(class BeatmapPlayback& playback, LaserObjectState* laser)
 {
 	assert(laser->prev == nullptr);
-	if(m_cachedEntries.Contains(laser))
+	if (m_cachedEntries.Contains(laser))
 		return m_cachedEntries[laser];
 
 	Mesh newMesh = MeshRes::Create(m_gl);
@@ -216,7 +216,7 @@ Mesh LaserTrackBuilder::GenerateTrackEntry(class BeatmapPlayback& playback, Lase
 Mesh LaserTrackBuilder::GenerateTrackExit(class BeatmapPlayback& playback, LaserObjectState* laser)
 {
 	assert(laser->next == nullptr);
-	if(m_cachedExits.Contains(laser))
+	if (m_cachedExits.Contains(laser))
 		return m_cachedExits[laser];
 
 	Mesh newMesh = MeshRes::Create(m_gl);
@@ -231,7 +231,7 @@ Mesh LaserTrackBuilder::GenerateTrackExit(class BeatmapPlayback& playback, Laser
 
 	// Length of this segment
 	float prevLength = 0.0f;
-	if((laser->flags & LaserObjectState::flag_Instant) != 0)
+	if ((laser->flags & LaserObjectState::flag_Instant) != 0)
 	{
 		prevLength = playback.ToViewDistance(laser->time, slamDuration) * laserLengthScale;
 	}
@@ -289,11 +289,11 @@ void LaserTrackBuilder::m_RecalculateConstants()
 void LaserTrackBuilder::m_Cleanup(MapTime newTime, Map<LaserObjectState*, Mesh>& arr)
 {
 	// Cleanup unused meshes
-	for(auto it = arr.begin(); it != arr.end();)
+	for (auto it = arr.begin(); it != arr.end();)
 	{
 		LaserObjectState* obj = it->first;
 		MapTime endTime = obj->time + obj->duration + 1000;
-		if(newTime > endTime)
+		if (newTime > endTime)
 		{
 			it = arr.erase(it);
 			continue;

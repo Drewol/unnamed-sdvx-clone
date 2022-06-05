@@ -10,38 +10,38 @@
 
 void SkinIR::m_PushArray(lua_State* L, const nlohmann::json& json)
 {
-    lua_newtable(L);
-    int index = 1;
+	lua_newtable(L);
+	int index = 1;
 
-    for(auto& el : json.items())
-    {
-        lua_pushinteger(L, index++);
-        m_PushJSON(L, el.value());
-        lua_settable(L, -3);
-    }
+	for (auto& el : json.items())
+	{
+		lua_pushinteger(L, index++);
+		m_PushJSON(L, el.value());
+		lua_settable(L, -3);
+	}
 }
 
 void SkinIR::m_PushObject(lua_State* L, const nlohmann::json& json)
 {
-    lua_newtable(L);
+	lua_newtable(L);
 
 
-    for(auto& el : json.items())
-    {
-        lua_pushstring(L, el.key().c_str());
-        m_PushJSON(L, el.value());
-        lua_settable(L, -3);
-    }
+	for (auto& el : json.items())
+	{
+		lua_pushstring(L, el.key().c_str());
+		m_PushJSON(L, el.value());
+		lua_settable(L, -3);
+	}
 }
 
 void SkinIR::m_PushJSON(lua_State* L, const nlohmann::json& json)
 {
-    if(json.is_array()) m_PushArray(L, json);
-    else if(json.is_object()) m_PushObject(L, json);
-    else if(json.is_boolean()) lua_pushboolean(L, json);
-    else if(json.is_string()) lua_pushstring(L, json.get_ref<const std::string&>().c_str());
-    else if(json.is_number()) lua_pushnumber(L, json);
-    else if(json.is_null()) lua_pushnil(L);
+	if (json.is_array()) m_PushArray(L, json);
+	else if (json.is_object()) m_PushObject(L, json);
+	else if (json.is_boolean()) lua_pushboolean(L, json);
+	else if (json.is_string()) lua_pushstring(L, json.get_ref<const std::string&>().c_str());
+	else if (json.is_number()) lua_pushnumber(L, json);
+	else if (json.is_null()) lua_pushnil(L);
 }
 
 void SkinIR::m_requestLoop()
@@ -76,40 +76,41 @@ void SkinIR::m_requestLoop()
 	}
 }
 
-void SkinIR::m_PushResponse(lua_State * L, const cpr::Response & r)
+void SkinIR::m_PushResponse(lua_State* L, const cpr::Response& r)
 {
-    if(r.status_code != 200)
-    {
-        Logf("Lua IR request failed with status code: %d", Logger::Severity::Warning, r.status_code);
+	if (r.status_code != 200)
+	{
+		Logf("Lua IR request failed with status code: %d", Logger::Severity::Warning, r.status_code);
 
-        m_PushJSON(L, nlohmann::json{
-            {"statusCode", 60},
-            {"description", "The request to the IR failed."}
-        });
-    }
-    else
-    {
-        try {
-            nlohmann::json json = nlohmann::json::parse(r.text);
+		m_PushJSON(L, nlohmann::json{
+			{"statusCode", 60},
+			{"description", "The request to the IR failed."}
+			});
+	}
+	else
+	{
+		try {
+			nlohmann::json json = nlohmann::json::parse(r.text);
 
-            if(!IR::ValidateReturn(json))
-            {
-                m_PushJSON(L, nlohmann::json{
-                    {"statusCode", 60},
-                    {"description", "The IR response was malformed."}
-                });
-            }
-            else m_PushJSON(L, json);
+			if (!IR::ValidateReturn(json))
+			{
+				m_PushJSON(L, nlohmann::json{
+					{"statusCode", 60},
+					{"description", "The IR response was malformed."}
+					});
+			}
+			else m_PushJSON(L, json);
 
-        } catch(nlohmann::json::parse_error& e) {
-            Log("Parsing JSON returned from IR failed.", Logger::Severity::Warning);
+		}
+		catch (nlohmann::json::parse_error& e) {
+			Log("Parsing JSON returned from IR failed.", Logger::Severity::Warning);
 
-            m_PushJSON(L, nlohmann::json{
-                {"statusCode", 60},
-                {"description", "The IR response was malformed."}
-            });
-        }
-    }
+			m_PushJSON(L, nlohmann::json{
+				{"statusCode", 60},
+				{"description", "The IR response was malformed."}
+				});
+		}
+	}
 }
 
 
@@ -122,7 +123,7 @@ SkinIR::SkinIR()
 SkinIR::~SkinIR()
 {
 	m_running = false;
-	if(m_requestThread.joinable())
+	if (m_requestThread.joinable())
 		m_requestThread.join();
 
 	while (!m_requests.empty())
@@ -140,20 +141,20 @@ SkinIR::~SkinIR()
 
 int SkinIR::lHeartbeat(struct lua_State* L)
 {
-    int callback = luaL_ref(L, LUA_REGISTRYINDEX);
-    AsyncRequest* r = new AsyncRequest();
-    r->r = IR::Heartbeat();
-    r->callback = callback;
-    r->L = L;
-    m_mutex.lock();
-    m_requests.push(r);
-    m_mutex.unlock();
-    return 0;
+	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
+	AsyncRequest* r = new AsyncRequest();
+	r->r = IR::Heartbeat();
+	r->callback = callback;
+	r->L = L;
+	m_mutex.lock();
+	m_requests.push(r);
+	m_mutex.unlock();
+	return 0;
 }
 
 int SkinIR::lChartTracked(struct lua_State* L)
 {
-    String hash = luaL_checkstring(L, 2);
+	String hash = luaL_checkstring(L, 2);
 	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
 	AsyncRequest* r = new AsyncRequest();
 	r->r = IR::ChartTracked(hash);
@@ -167,7 +168,7 @@ int SkinIR::lChartTracked(struct lua_State* L)
 
 int SkinIR::lRecord(struct lua_State* L)
 {
-    String hash = luaL_checkstring(L, 2);
+	String hash = luaL_checkstring(L, 2);
 	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
 	AsyncRequest* r = new AsyncRequest();
 	r->r = IR::Record(hash);
@@ -181,9 +182,9 @@ int SkinIR::lRecord(struct lua_State* L)
 
 int SkinIR::lLeaderboard(struct lua_State* L)
 {
-    String hash = luaL_checkstring(L, 2);
-    String mode = luaL_checkstring(L, 3);
-    int n = luaL_checkinteger(L, 4);
+	String hash = luaL_checkstring(L, 2);
+	String mode = luaL_checkstring(L, 3);
+	int n = luaL_checkinteger(L, 4);
 	int callback = luaL_ref(L, LUA_REGISTRYINDEX);
 	AsyncRequest* r = new AsyncRequest();
 	r->r = IR::Leaderboard(hash, mode, n);
@@ -224,19 +225,19 @@ void SkinIR::ProcessCallbacks()
 	m_mutex.unlock();
 }
 
-void SkinIR::PushFunctions(lua_State * L)
+void SkinIR::PushFunctions(lua_State* L)
 {
 	auto bindable = new LuaBindable(L, "IR");
 	bindable->AddFunction("Heartbeat", this, &SkinIR::lHeartbeat);
-    bindable->AddFunction("ChartTracked", this, &SkinIR::lChartTracked);
-    bindable->AddFunction("Record", this, &SkinIR::lRecord);
-    bindable->AddFunction("Leaderboard", this, &SkinIR::lLeaderboard);
+	bindable->AddFunction("ChartTracked", this, &SkinIR::lChartTracked);
+	bindable->AddFunction("Record", this, &SkinIR::lRecord);
+	bindable->AddFunction("Leaderboard", this, &SkinIR::lLeaderboard);
 	bindable->Push();
 	lua_settop(L, 0);
 	m_boundStates.Add(L, bindable);
 }
 
-void SkinIR::ClearState(lua_State * L)
+void SkinIR::ClearState(lua_State* L)
 {
 	if (!m_boundStates.Contains(L))
 		return;

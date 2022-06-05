@@ -5,7 +5,7 @@ class AudioStream;
 class PreviewPlayer
 {
 public:
-	void FadeTo(Ref<AudioStream> stream, int32 restart_pos=-1);
+	void FadeTo(Ref<AudioStream> stream, int32 restart_pos = -1);
 	void Update(float deltaTime);
 	void Pause();
 	void Restore();

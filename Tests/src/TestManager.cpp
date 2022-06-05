@@ -16,14 +16,14 @@ TestManager& TestManager::Get()
 
 int32 TestManager::RunAll()
 {
-	if(!m_Begin())
+	if (!m_Begin())
 		return -1;
 	Logf("Running tests for %s", Logger::Severity::Info, m_moduleName);
 
 	int32 failed = 0;
-	for(int32 i = 0; i < m_tests.size(); i++)
+	for (int32 i = 0; i < m_tests.size(); i++)
 	{
-		if(m_RunTest(m_tests[i]) != 0)
+		if (m_RunTest(m_tests[i]) != 0)
 			failed++;
 	}
 
@@ -35,7 +35,7 @@ int32 TestManager::RunAll()
 int32 TestManager::Run(const String& testID)
 {
 	size_t* testToRun = m_testsByName.Find(testID);
-	if(!testToRun)
+	if (!testToRun)
 	{
 		Logf("Test not found \"%s\"", Logger::Severity::Error, testID);
 		return 1;
@@ -44,12 +44,12 @@ int32 TestManager::Run(const String& testID)
 }
 int32 TestManager::Run(size_t testIndex)
 {
-	if(testIndex >= m_tests.size())
+	if (testIndex >= m_tests.size())
 	{
 		Logf("Invalid test index: %d", Logger::Severity::Error, testIndex);
 		return 1;
 	}
-	if(!m_Begin())
+	if (!m_Begin())
 		return -1;
 	int32 r = m_RunTest(m_tests[testIndex]);
 	m_End();
@@ -58,7 +58,7 @@ int32 TestManager::Run(size_t testIndex)
 Vector<String> TestManager::GetAvailableTests() const
 {
 	Vector<String> testNames;
-	for(auto& t : m_tests)
+	for (auto& t : m_tests)
 	{
 		testNames.Add(t->m_name);
 	}
@@ -77,7 +77,7 @@ bool TestManager::m_Begin()
 	};
 
 	void(*oldSigHandler)(int) = 0;
-	if(!Debug::IsDebuggerAttached())
+	if (!Debug::IsDebuggerAttached())
 	{
 		m_oldSigHandler = signal(SIGSEGV, SignalHandler);
 	}
@@ -87,9 +87,9 @@ bool TestManager::m_Begin()
 
 	// Create intermediate folder
 	m_testBasePath = Path::Absolute("TestFilesystem_" + m_moduleName);
-	if(Path::FileExists(m_testBasePath))
+	if (Path::FileExists(m_testBasePath))
 		Path::DeleteDir(m_testBasePath);
-	if(!Path::CreateDir(m_testBasePath))
+	if (!Path::CreateDir(m_testBasePath))
 	{
 		Logf("Failed to create folder for intermediate test files: %s", Logger::Severity::Info, m_testBasePath);
 		return false;
@@ -105,7 +105,7 @@ void TestManager::m_End()
 	Path::DeleteDir(m_testBasePath);
 
 	// Restore signal handler
-	if(!Debug::IsDebuggerAttached())
+	if (!Debug::IsDebuggerAttached())
 		signal(SIGSEGV, m_oldSigHandler);
 }
 
@@ -117,7 +117,7 @@ int32 TestManager::m_RunTest(TestEntry* test)
 
 	TestContext context(test->m_name, this);
 
-	if(Debug::IsDebuggerAttached())
+	if (Debug::IsDebuggerAttached())
 	{
 		// Don't catch any exceptions while debugging
 		test->m_function(context);
@@ -128,26 +128,26 @@ int32 TestManager::m_RunTest(TestEntry* test)
 		{
 			test->m_function(context);
 		}
-		catch(TestFailure tf)
+		catch (TestFailure tf)
 		{
 
 			Logger::Get().SetColor(Logger::Red);
 			Logger::Get().Write("Failed\n");
-			if(!tf.expression.empty())
+			if (!tf.expression.empty())
 				Logf("The test expression failed:\n\t%s", Logger::Severity::Error, tf.expression);
 			Log("Stack Trace:", Logger::Severity::Error);
 
 			size_t i = 0;
-			for(; i < tf.trace.size(); i++)
+			for (; i < tf.trace.size(); i++)
 			{
 				// Skip until wanted function
-				if(tf.trace[i].function.find("LocalTest") == 0)
+				if (tf.trace[i].function.find("LocalTest") == 0)
 					break;
 			}
-			if(i == tf.trace.size())
+			if (i == tf.trace.size())
 				i = 0; // Show everything if wanted symbol was not found
 
-			for(; i < tf.trace.size(); i++)
+			for (; i < tf.trace.size(); i++)
 			{
 				Debug::StackFrame sf = tf.trace[i];
 				Logf("%016X %s (%d:%s)", Logger::Severity::Error, sf.address, sf.function, sf.line, sf.file);

@@ -32,17 +32,17 @@ SkinConfig::SkinConfig(const String& skin)
 	File defFile;
 	String configPath = Path::Normalize(Path::Absolute("skins/" + skin + "/config-definitions.json"));
 	//Log(configPath);
-	if(defFile.OpenRead(configPath))
+	if (defFile.OpenRead(configPath))
 	{
 		auto showError = [](String message)
 		{
 			g_gameWindow->ShowMessageBox("Skin config parser error.", message, 0);
 		};
-		
+
 
 		Buffer buf;
 		buf.resize(defFile.GetSize());
-		
+
 		defFile.Read(buf.data(), buf.size());
 		String jsonData((char*)buf.data(), buf.size());
 		ordered_json definitions;
@@ -76,7 +76,7 @@ SkinConfig::SkinConfig(const String& skin)
 				showError(Utility::Sprintf("No type specified for: \"%s\"", key));
 				continue;
 			}
-			
+
 			values.at("type").get_to(type);
 
 			if (!inputModeMap.Contains(type))
@@ -156,7 +156,7 @@ SkinConfig::SkinConfig(const String& skin)
 					newsetting.colorSetting.hsv = false;
 				}
 			}
-				break;
+			break;
 			default:
 				break;
 			}
@@ -164,7 +164,7 @@ SkinConfig::SkinConfig(const String& skin)
 		}
 	}
 
-    InitDefaults();
+	InitDefaults();
 	Load(Path::Normalize(Path::Absolute("skins/" + skin + "/skin.cfg")));
 }
 
@@ -247,7 +247,7 @@ void SkinConfig::InitDefaults()
 		case SkinSetting::Type::Color:
 			Set(setting.key, *setting.colorSetting.def);
 			break;
-			default:
+		default:
 			break;
 		}
 
@@ -278,7 +278,7 @@ Color SkinConfig::GetColor(const String& key) const
 
 IConfigEntry* SkinConfig::GetEntry(const String& key) const
 {
-	if(!m_keys.Contains(key))
+	if (!m_keys.Contains(key))
 		return nullptr;
 
 	return m_entries.at(m_keys.at(key));

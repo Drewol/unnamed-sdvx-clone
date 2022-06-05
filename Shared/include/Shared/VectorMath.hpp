@@ -248,7 +248,7 @@ namespace VectorMath
 		VectorBase& operator+=(const VectorBase& r)
 		{
 			x += r.x, y += r.y;
-				return *this;
+			return *this;
 		}
 		VectorBase& operator-=(const VectorBase& r)
 		{
@@ -288,7 +288,7 @@ namespace VectorMath
 
 	// Dot product implementations
 	template<typename T, size_t Num>
-	static T Dot(const VectorBase<T, Num>& lhs, const VectorBase<T, Num>& rhs) 
+	static T Dot(const VectorBase<T, Num>& lhs, const VectorBase<T, Num>& rhs)
 	{
 		static_assert(sizeof(T) == 0, "Invalid vector types for dot product");
 	}
@@ -310,7 +310,7 @@ namespace VectorMath
 
 	// Cross product implementation
 	template<typename T>
-	static VectorBase<T,3> Cross(const VectorBase<T, 3>& lhs, const VectorBase<T, 3>& rhs)
+	static VectorBase<T, 3> Cross(const VectorBase<T, 3>& lhs, const VectorBase<T, 3>& rhs)
 	{
 		return VectorBase<T, 3>(lhs.y * rhs.z - lhs.z * rhs.y,
 			lhs.z * rhs.x - lhs.x * rhs.z,
@@ -380,7 +380,7 @@ namespace VectorMath
 	}
 	// Member normalized function
 	template<typename T>
-	VectorBase<T,4> VectorBase<T, 4>::Normalized() const
+	VectorBase<T, 4> VectorBase<T, 4>::Normalized() const
 	{
 		return Normalize(*this);
 	}

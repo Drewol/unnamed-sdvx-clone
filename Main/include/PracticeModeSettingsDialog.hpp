@@ -25,12 +25,12 @@ private:
 	Tab m_CreateFailConditionTab();
 	Tab m_CreateGameSettingTab();
 
-	inline MapTime m_MeasureToTime(int measure) const { return m_beatmap->GetMapTimeFromMeasureInd(measure-1); }
-	inline int m_TimeToMeasure(MapTime time) const { return m_beatmap->GetMeasureIndFromMapTime(time)+1; }
+	inline MapTime m_MeasureToTime(int measure) const { return m_beatmap->GetMapTimeFromMeasureInd(measure - 1); }
+	inline int m_TimeToMeasure(MapTime time) const { return m_beatmap->GetMeasureIndFromMapTime(time) + 1; }
 
 	void m_SetStartTime(MapTime time, int measure = -1);
 	void m_SetEndTime(MapTime time, int measure = -1);
-	
+
 	std::unique_ptr<GameFailCondition> m_CreateGameFailCondition(GameFailCondition::Type type);
 
 	ChartIndex* m_chartIndex;

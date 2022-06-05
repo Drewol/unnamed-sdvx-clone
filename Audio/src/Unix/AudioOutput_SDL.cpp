@@ -40,11 +40,11 @@ public:
 public:
 	AudioOutput_Impl()
 	{
-        int32 numAudioDrivers = SDL_GetNumAudioDrivers();
-        for(int32 i = 0; i < numAudioDrivers; i++)
+		int32 numAudioDrivers = SDL_GetNumAudioDrivers();
+		for (int32 i = 0; i < numAudioDrivers; i++)
 		{
-            const char* drvName = SDL_GetAudioDriver(i);
-            Logf("Audio driver [%d]: %s", Logger::Severity::Info, i, drvName);
+			const char* drvName = SDL_GetAudioDriver(i);
+			Logf("Audio driver [%d]: %s", Logger::Severity::Info, i, drvName);
 		}
 
 		SDLAudio::Main();
@@ -55,7 +55,7 @@ public:
 	}
 	void CloseDevice()
 	{
-		if(m_deviceId != 0)
+		if (m_deviceId != 0)
 			SDL_CloseAudioDevice(m_deviceId);
 		m_deviceId = 0;
 	}
@@ -77,20 +77,20 @@ public:
 		Logf("Using audio driver: %s", Logger::Severity::Info, audioDriverName);
 
 		int32 numAudioDevices = SDL_GetNumAudioDevices(0);
-		for(int32 i = 0; i < numAudioDevices; i++)
+		for (int32 i = 0; i < numAudioDevices; i++)
 		{
-            const char* devName = SDL_GetAudioDeviceName(i, 0);
-            Logf("Audio device [%d]: %s", Logger::Severity::Info, i, devName);
+			const char* devName = SDL_GetAudioDeviceName(i, 0);
+			Logf("Audio device [%d]: %s", Logger::Severity::Info, i, devName);
 		}
 
 
 		m_deviceId = SDL_OpenAudioDevice(dev, 0, &desiredSpec, &m_audioSpec, SDL_AUDIO_ALLOW_ANY_CHANGE);
-		if(m_deviceId == 0 || m_deviceId < 2)
+		if (m_deviceId == 0 || m_deviceId < 2)
 		{
-            const char* errMsg = SDL_GetError();
-            Logf("Failed to open SDL audio device: %s", Logger::Severity::Error, errMsg);
+			const char* errMsg = SDL_GetError();
+			Logf("Failed to open SDL audio device: %s", Logger::Severity::Error, errMsg);
 			return false;
-        }
+		}
 
 		SDL_PauseAudioDevice(m_deviceId, 0);
 		return true;
@@ -103,7 +103,7 @@ public:
 	static void SDLCALL FillBuffer(AudioOutput_Impl* self, float* data, int len)
 	{
 		uint32 bufferSamples = (uint32)(len / (4 * self->m_audioSpec.channels));
-		if(self->m_mixer)
+		if (self->m_mixer)
 			self->m_mixer->Mix(data, bufferSamples);
 	}
 };

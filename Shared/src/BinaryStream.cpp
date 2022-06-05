@@ -20,7 +20,7 @@
 bool BinaryStream::SerializeObject(String& obj)
 {
 	uint32 len;
-	if(IsReading())
+	if (IsReading())
 	{
 		*this << len;
 		obj.resize(len);
@@ -30,13 +30,13 @@ bool BinaryStream::SerializeObject(String& obj)
 		len = (uint32)obj.size();
 		*this << len;
 	}
-	Serialize(obj.GetData(), len); 
+	Serialize(obj.GetData(), len);
 	return true;
 }
 bool BinaryStream::SerializeObject(WString& obj)
 {
 	uint32 len;
-	if(IsReading())
+	if (IsReading())
 	{
 		*this << len;
 		obj.resize(len);

@@ -6,7 +6,7 @@ Map<int32, SongSelectIndex> LevelFilter::GetFiltered(const Map<int32, SongSelect
 	Map<int32, SongSelectIndex> filtered;
 	for (auto kvp : source)
 	{
-		for (auto chart: kvp.second.GetCharts())
+		for (auto chart : kvp.second.GetCharts())
 		{
 			if (chart->level == m_level)
 			{

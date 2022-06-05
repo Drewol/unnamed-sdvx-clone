@@ -12,11 +12,11 @@ struct TempButtonState
 	uint32 startTick;
 	uint32 numTicks = 0;
 	EffectType effectType = EffectType::None;
-	uint16 effectParams[2] = {0};
+	uint16 effectParams[2] = { 0 };
 	// If using the smalles grid to indicate hold note duration
 	bool fineSnap = false;
 	// Set for hold continuations, this is where there is a hold right after an existing one but with different effects
-	HoldObjectState *lastHoldObject = nullptr;
+	HoldObjectState* lastHoldObject = nullptr;
 
 	uint8 sampleIndex = 0xFF;
 	bool usingSample = false;
@@ -41,7 +41,7 @@ struct TempLaserState
 	uint8 effectParams = 0;
 	float startPosition; // Entry position
 	// Previous segment
-	LaserObjectState *last = nullptr;
+	LaserObjectState* last = nullptr;
 };
 
 class EffectTypeMap
@@ -72,15 +72,15 @@ public:
 	}
 
 	// Only checks if a mapping exists and returns this, or None
-	const EffectType *FindEffectType(const String &name) const
+	const EffectType* FindEffectType(const String& name) const
 	{
 		return effectTypes.Find(name);
 	}
 
 	// Adds or returns the enum value mapping to this effect
-	EffectType FindOrAddEffectType(const String &name)
+	EffectType FindOrAddEffectType(const String& name)
 	{
-		EffectType *id = effectTypes.Find(name);
+		EffectType* id = effectTypes.Find(name);
 		if (!id)
 			return effectTypes.Add(name, (EffectType)m_customEffectTypeID++);
 		return *id;
@@ -90,15 +90,15 @@ public:
 };
 
 template <typename T>
-void AssignAudioEffectParameter(EffectParam<T> &param, const String &paramName, Map<String, float> &floatParams, Map<String, int> &intParams)
+void AssignAudioEffectParameter(EffectParam<T>& param, const String& paramName, Map<String, float>& floatParams, Map<String, int>& intParams)
 {
-	float *fval = floatParams.Find(paramName);
+	float* fval = floatParams.Find(paramName);
 	if (fval)
 	{
 		param = *fval;
 		return;
 	}
-	int32 *ival = intParams.Find(paramName);
+	int32* ival = intParams.Find(paramName);
 	if (ival)
 	{
 		param = *ival;
@@ -124,11 +124,11 @@ struct MultiParam
 struct MultiParamRange
 {
 	MultiParamRange() = default;
-	MultiParamRange(const MultiParam &a)
+	MultiParamRange(const MultiParam& a)
 	{
 		params[0] = a;
 	}
-	MultiParamRange(const MultiParam &a, const MultiParam &b)
+	MultiParamRange(const MultiParam& a, const MultiParam& b)
 	{
 		params[0] = a;
 		params[1] = b;
@@ -169,7 +169,7 @@ struct MultiParamRange
 	MultiParam params[2];
 	bool isRange = false;
 };
-static MultiParam ParseParam(const String &in)
+static MultiParam ParseParam(const String& in)
 {
 	MultiParam ret;
 	if (in.find('/') != -1)
@@ -217,7 +217,7 @@ static MultiParam ParseParam(const String &in)
 	}
 	return ret;
 }
-AudioEffect ParseCustomEffect(const KShootEffectDefinition &def, Vector<String> &switchablePaths)
+AudioEffect ParseCustomEffect(const KShootEffectDefinition& def, Vector<String>& switchablePaths)
 {
 	static EffectTypeMap defaultEffects;
 	AudioEffect effect;
@@ -230,7 +230,7 @@ AudioEffect ParseCustomEffect(const KShootEffectDefinition &def, Vector<String> 
 		if (s.first == "type")
 		{
 			// Get the default effect for this name
-			const EffectType *type = defaultEffects.FindEffectType(s.second);
+			const EffectType* type = defaultEffects.FindEffectType(s.second);
 			if (!type)
 			{
 				Logf("Unknown base effect type for custom effect type: %s", Logger::Severity::Warning, s.second);
@@ -279,7 +279,7 @@ AudioEffect ParseCustomEffect(const KShootEffectDefinition &def, Vector<String> 
 				a = param.substr(0, split);
 				b = param.substr(split + 1);
 
-				MultiParamRange pr = {ParseParam(a), ParseParam(b)};
+				MultiParamRange pr = { ParseParam(a), ParseParam(b) };
 				if (pr.params[0].type != pr.params[1].type)
 				{
 					Logf("Non matching parameters types \"[%s, %s]\" for key: %s", Logger::Severity::Warning, s.first, param, s.first);
@@ -300,29 +300,29 @@ AudioEffect ParseCustomEffect(const KShootEffectDefinition &def, Vector<String> 
 		return effect;
 	}
 
-	auto AssignFloatIfSet = [&](EffectParam<float> &target, const String &name) {
-		auto *param = params.Find(name);
+	auto AssignFloatIfSet = [&](EffectParam<float>& target, const String& name) {
+		auto* param = params.Find(name);
 		if (param)
 		{
 			target = param->ToFloatParam();
 		}
 	};
-	auto AssignDurationIfSet = [&](EffectParam<EffectDuration> &target, const String &name) {
-		auto *param = params.Find(name);
+	auto AssignDurationIfSet = [&](EffectParam<EffectDuration>& target, const String& name) {
+		auto* param = params.Find(name);
 		if (param)
 		{
 			target = param->ToDurationParam();
 		}
 	};
-	auto AssignSamplesIfSet = [&](EffectParam<int32> &target, const String &name) {
-		auto *param = params.Find(name);
+	auto AssignSamplesIfSet = [&](EffectParam<int32>& target, const String& name) {
+		auto* param = params.Find(name);
 		if (param && param->params[0].type == MultiParam::Samples)
 		{
 			target = param->ToSamplesParam();
 		}
 	};
-	auto AssignIntIfSet = [&](EffectParam<int32> &target, const String &name) {
-		auto *param = params.Find(name);
+	auto AssignIntIfSet = [&](EffectParam<int32>& target, const String& name) {
+		auto* param = params.Find(name);
 		if (param)
 		{
 			target = param->ToSamplesParam();
@@ -396,7 +396,7 @@ AudioEffect ParseCustomEffect(const KShootEffectDefinition &def, Vector<String> 
 	return effect;
 };
 
-bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
+bool Beatmap::m_ProcessKShootMap(BinaryStream& input, bool metadataOnly)
 {
 	KShootMap kshootMap;
 	if (!kshootMap.Init(input, metadataOnly))
@@ -434,7 +434,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 		m_customAudioFilters.Add(type, ParseCustomEffect(it->second, m_switchablePaths));
 	}
 
-	auto ParseFilterType = [&](const String &str) {
+	auto ParseFilterType = [&](const String& str) {
 		EffectType type = EffectType::None;
 		if (str == "hpf1")
 		{
@@ -454,7 +454,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 		}
 		else
 		{
-			const EffectType *foundType = filterTypeMap.FindEffectType(str);
+			const EffectType* foundType = filterTypeMap.FindEffectType(str);
 			if (foundType)
 				type = *foundType;
 			else
@@ -466,7 +466,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 	// Process map settings
 	m_settings.previewOffset = 0;
 	m_settings.previewDuration = 0;
-	for (auto &s : kshootMap.settings)
+	for (auto& s : kshootMap.settings)
 	{
 		if (s.first == "title")
 			m_settings.title = s.second;
@@ -569,7 +569,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 	size_t refTimingPointInd = 0;
 	double refTimingPointTime = 0.0;
 
-	Vector<uint32> timingPointTicks = {0};
+	Vector<uint32> timingPointTicks = { 0 };
 
 	auto TickToMapTime = [&](uint32 tick) {
 		if (tick < timingPointTicks[refTimingPointInd])
@@ -579,15 +579,15 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 		}
 		while (refTimingPointInd + 1 < timingPointTicks.size() && timingPointTicks[refTimingPointInd + 1] <= tick)
 		{
-			const MapTime timeDiff = timingPointTicks[refTimingPointInd+1] - timingPointTicks[refTimingPointInd];
-			refTimingPointTime += Math::MSFromTicks((double) timeDiff, m_timingPoints[refTimingPointInd].GetBPM(), static_cast<double>(tickResolution));
+			const MapTime timeDiff = timingPointTicks[refTimingPointInd + 1] - timingPointTicks[refTimingPointInd];
+			refTimingPointTime += Math::MSFromTicks((double)timeDiff, m_timingPoints[refTimingPointInd].GetBPM(), static_cast<double>(tickResolution));
 			++refTimingPointInd;
 		}
 
 		const uint32 tickDiff = tick - timingPointTicks[refTimingPointInd];
 
 		double mapTime = refTimingPointTime;
-		mapTime += Math::MSFromTicks((double) tickDiff, m_timingPoints[refTimingPointInd].GetBPM(), static_cast<double>(tickResolution));
+		mapTime += Math::MSFromTicks((double)tickDiff, m_timingPoints[refTimingPointInd].GetBPM(), static_cast<double>(tickResolution));
 		return Math::RoundToInt(mapTime);
 	};
 
@@ -620,16 +620,16 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 	}
 
 	// Button hold states
-	TempButtonState *buttonStates[6] = {nullptr};
+	TempButtonState* buttonStates[6] = { nullptr };
 	// Laser segment states
-	TempLaserState *laserStates[2] = {nullptr};
+	TempLaserState* laserStates[2] = { nullptr };
 
-	EffectType currentButtonEffectTypes[2] = {EffectType::None};
+	EffectType currentButtonEffectTypes[2] = { EffectType::None };
 	// 2 per button
-	int16 currentButtonEffectParams[4] = {-1};
+	int16 currentButtonEffectParams[4] = { -1 };
 	const uint32 maxEffectParamsPerButtons = 2;
-	float laserRanges[2] = {1.0f, 1.0f};
-	MapTime lastLaserPointTime[2] = {0, 0};
+	float laserRanges[2] = { 1.0f, 1.0f };
+	MapTime lastLaserPointTime[2] = { 0, 0 };
 
 	// Stops will be applied after the scroll speed graph is constructed.
 	// Tuple of (stopBegin, stopEnd, isOverlappingStop)
@@ -641,22 +641,22 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 	bool isManualTilt = false;
 	for (KShootMap::TickIterator it(kshootMap); it; ++it)
 	{
-		const KShootBlock &block = it.GetCurrentBlock();
+		const KShootBlock& block = it.GetCurrentBlock();
 		KShootTime time = it.GetTime();
-		const KShootTick &tick = *it;
-		float fxSampleVolume[2] = {1.0, 1.0};
-		bool useFxSample[2] = {false, false};
-		uint8 fxSampleIndex[2] = {0, 0};
+		const KShootTick& tick = *it;
+		float fxSampleVolume[2] = { 1.0, 1.0 };
+		bool useFxSample[2] = { false, false };
+		uint8 fxSampleIndex[2] = { 0, 0 };
 		MapTime mapTime = TickToMapTime(currentTick);
 		bool lastTick = &block == &kshootMap.blocks.back() &&
-						&tick == &block.ticks.back();
+			&tick == &block.ticks.back();
 
 		// flag set when a new effect parameter is set and a new hold notes should be created
-		bool splitupHoldNotes[2] = {false, false};
+		bool splitupHoldNotes[2] = { false, false };
 
 		uint32 tickSettingIndex = 0;
 		// Process settings
-		for (auto &p : tick.settings)
+		for (auto& p : tick.settings)
 		{
 			// Functions that adds a new timing point at current location if it's not yet there
 			auto AddTimingPoint = [&](double newDuration, uint32 newNum, uint32 newDenom, int8 tickrateOffset) {
@@ -678,7 +678,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 			};
 
 			// Parser the effect and parameters of an FX button (1.60)
-			auto ParseFXAndParameters = [&](String in, int16 *paramsOut) {
+			auto ParseFXAndParameters = [&](String in, int16* paramsOut) {
 				// Clear parameters
 				memset(paramsOut, -1, sizeof(uint16) * maxEffectParamsPerButtons);
 
@@ -692,7 +692,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 				if (effectName.empty())
 					return EffectType::None;
 
-				const EffectType *type = effectTypeMap.FindEffectType(effectName);
+				const EffectType* type = effectTypeMap.FindEffectType(effectName);
 				if (type == nullptr)
 				{
 					Logf("Invalid custom effect name in ksh map: %s", Logger::Severity::Warning, effectName);
@@ -853,7 +853,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 			}
 			else if (p.first == "tilt")
 			{
-				EventObjectState *evt = new EventObjectState();
+				EventObjectState* evt = new EventObjectState();
 				evt->time = mapTime;
 				evt->interTickIndex = tickSettingIndex;
 				evt->key = EventKey::TrackRollBehaviour;
@@ -974,8 +974,8 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 		for (uint32 i = 0; i < 6; i++)
 		{
 			char c = i < 4 ? tick.buttons[i] : tick.fx[i - 4];
-			TempButtonState *&state = buttonStates[i];
-			HoldObjectState *lastHoldObject = nullptr;
+			TempButtonState*& state = buttonStates[i];
+			HoldObjectState* lastHoldObject = nullptr;
 
 			auto IsHoldState = [&]() {
 				return state && state->numTicks > 0 && state->fineSnap;
@@ -983,7 +983,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 			auto CreateButton = [&]() {
 				if (IsHoldState())
 				{
-					HoldObjectState *obj = lastHoldObject = new HoldObjectState();
+					HoldObjectState* obj = lastHoldObject = new HoldObjectState();
 					obj->time = TickToMapTime(state->startTick);
 					obj->index = i;
 					obj->duration = TickToMapTime(currentTick) - obj->time;
@@ -996,7 +996,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 				}
 				else
 				{
-					ButtonObjectState *obj = new ButtonObjectState();
+					ButtonObjectState* obj = new ButtonObjectState();
 
 					obj->time = TickToMapTime(state->startTick);
 					obj->index = i;
@@ -1063,14 +1063,14 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 					{
 						state->effectType = EffectType::Gate;
 						int16 paramMap[] = {
-							4, 8, 16, 32, 12, 24};
+							4, 8, 16, 32, 12, 24 };
 						state->effectParams[0] = paramMap[c - 'G'];
 					}
 					else if (c >= 'S' && c <= 'W') // Retrigger 8/16/32/12/24
 					{
 						state->effectType = EffectType::Retrigger;
 						int16 paramMap[] = {
-							8, 16, 32, 12, 24};
+							8, 16, 32, 12, 24 };
 						state->effectParams[0] = paramMap[c - 'S'];
 					}
 					else if (c == 'Q')
@@ -1096,7 +1096,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 						state->effectType = EffectType::TapeStop;
 						if (currentButtonEffectParams[i - 4] != -1)
 							memcpy(state->effectParams, currentButtonEffectParams + (i - 4) * maxEffectParamsPerButtons,
-								   sizeof(state->effectParams));
+								sizeof(state->effectParams));
 						else
 							state->effectParams[0] = 50;
 					}
@@ -1112,7 +1112,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 						state->effectType = currentButtonEffectTypes[i - 4];
 						if (currentButtonEffectParams[(i - 4) * maxEffectParamsPerButtons] != -1)
 							memcpy(state->effectParams, currentButtonEffectParams + (i - 4) * maxEffectParamsPerButtons,
-								   sizeof(state->effectParams));
+								sizeof(state->effectParams));
 						else
 						{
 							state->effectParams[0] = defaultEffectParams[state->effectType];
@@ -1152,7 +1152,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 							state->fineSnap = true;
 							state->effectType = currentButtonEffectTypes[i - 4];
 							memcpy(state->effectParams, currentButtonEffectParams + (i - 4) * maxEffectParamsPerButtons,
-								   sizeof(state->effectParams));						
+								sizeof(state->effectParams));
 						}
 					}
 				}
@@ -1171,7 +1171,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 		// Set laser states
 		for (uint32 i = 0; i < 2; i++)
 		{
-			TempLaserState *&state = laserStates[i];
+			TempLaserState*& state = laserStates[i];
 			char c = tick.laser[i];
 
 			// Function that creates a new segment out of the current state
@@ -1179,7 +1179,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 				// Process existing segment
 				//assert(state->numTicks > 0);
 
-				LaserObjectState *obj = new LaserObjectState();
+				LaserObjectState* obj = new LaserObjectState();
 
 				obj->time = TickToMapTime(state->startTick);
 				obj->tick = state->startTick;
@@ -1309,7 +1309,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 			else
 			{
 				float pos = kshootMap.TranslateLaserChar(c);
-				LaserObjectState *last = nullptr;
+				LaserObjectState* last = nullptr;
 				if (state)
 				{
 					last = CreateLaserSegment(pos);
@@ -1394,7 +1394,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 	}
 
 	// Add chart end event
-	EventObjectState *evt = new EventObjectState();
+	EventObjectState* evt = new EventObjectState();
 	evt->time = lastMapTime + 2000;
 	evt->key = EventKey::ChartEnd;
 	m_objectStates.emplace_back(std::unique_ptr<ObjectState>(*evt));

@@ -52,7 +52,7 @@ private:
 	float m_clearTransition = 0.0f;
 	//0 = fail, 1 = clear
 	Color m_clearColors[2] = { Color::White };
-	
+
 	GaugeType m_currentGaugeType = GaugeType::Normal;
 	Mesh m_guiMesh;
 	Mesh m_gaugeBorderMesh;
