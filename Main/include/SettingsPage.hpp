@@ -107,6 +107,7 @@ protected:
 	float FloatInput(float val, const std::string_view& label, float min, float max, float step, float perPixel);
 	bool FloatSetting(GameConfigKeys key, const std::string_view& label, float min, float max, float step = 0.01f);
 	bool PercentSetting(GameConfigKeys key, const std::string_view& label);
+	bool HighPercentSetting(GameConfigKeys key, const std::string_view& label);
 
 	Color ColorInput(const Color& val, const std::string_view& label, bool& useHSV);
 
