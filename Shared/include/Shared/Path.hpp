@@ -39,6 +39,7 @@ public:
 	// Copies a folder and all files in it
 	// the target directory must not exist
 	static bool CopyDir(String srcFolder, String dstFolder);
+	static bool CopyDirUnsafe(String srcFolder, String dstFolder);
 	// Go to specified path using the system default file browser
 	static bool ShowInFileBrowser(const String& path);
 	// Open external program with specified parameters (used to open charts in editor)

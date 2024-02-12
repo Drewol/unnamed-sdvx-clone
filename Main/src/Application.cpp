@@ -518,10 +518,9 @@ bool Application::ReloadConfig(const String& profile)
 
 bool Application::m_LoadConfig(String profileName /* must be by value */)
 {
-
 	bool successful = false;
-
-	String configPath = "Main.cfg";
+	String basePath = g_gameConfig.GetString(GameConfigKeys::DataFolder);
+	String configPath = basePath + std::string("Main.cfg");
 	File mainConfigFile;
 	if (mainConfigFile.OpenRead(Path::Absolute(configPath)))
 	{
@@ -576,9 +575,10 @@ void Application::m_SaveConfig()
 {
 	if (!g_gameConfig.IsDirty())
 		return;
-
+	String basePath = g_gameConfig.GetString(GameConfigKeys::DataFolder);
+	String configPath = basePath + std::string("Main.cfg");
+	
 	String profile = g_gameConfig.GetString(GameConfigKeys::CurrentProfileName);
-	String configPath = "Main.cfg";
 	if (profile == "Main")
 	{
 		//Save everything into main.cfg
@@ -975,7 +975,7 @@ bool Application::m_Init()
 		&custom_info);
 #endif
 #endif
-
+	g_gameConfig.Set(GameConfigKeys::DataFolder,g_gameConfig.GetDefaultDataFolder());
 	// Must have command line
 	assert(m_commandLine.size() >= 1);
 
@@ -991,42 +991,25 @@ bool Application::m_Init()
 			}
 		}
 	}
-
-	if (Path::gameDir.empty()) {
-		char* xdgDataDir = std::getenv("XDG_DATA_HOME");
-
-		if (xdgDataDir) {
-			String gameDir = Utility::Sprintf("%s%c%s", xdgDataDir, Path::sep, "unnamed-sdvx-clone");
-			auto executableDir = Path::RemoveLast(Path::GetExecutablePath());
-
-			Path::gameDir = gameDir;
-
-			if (!Path::IsDirectory(gameDir)) {
-				Logf("%s does not yet exist. Creating...", Logger::Severity::Info, *gameDir);
-
-				auto response = Path::CreateDir(gameDir);
-				if (response == 1) {
-					Logf("Created: %s", Logger::Severity::Info, *gameDir, response);
-				} else {
-					Logf("Failed creating directory %s. The game will probably crash soon.", Logger::Severity::Info, *gameDir, response);
-				}
-
-				std::list<String> requiredDirectories = { "skins", "fonts", "audio", "LightPlugins" };
-
-				for (String directory : requiredDirectories) {
-					auto sourceDir = Utility::Sprintf("%s%c%s", executableDir, Path::sep, directory);
-					auto destDir = Path::Absolute(directory);
-
-					response = Path::CopyDir(sourceDir, destDir);
-					if (response == 1) {
+	if(Path::gameDir.empty())
+	{
+		Path::gameDir = g_gameConfig.GetString(GameConfigKeys::DataFolder);
+	}
+	//Create the data folders if they doesn't exist
+	std::list<String> requiredDirectories = {"crash_dumps","replays","screenshots", "skins", "fonts", "audio", "LightPlugins" };
+	String executableDir = Path::RemoveLast(Path::GetExecutablePath());
+	for(auto directory : requiredDirectories)
+	{
+		auto sourceDir = Utility::Sprintf("%s%c%s", executableDir, Path::sep, directory);
+		String destDir = Path::Absolute(directory);
+		if (!Path::IsDirectory(destDir))
+		{
+			Logf("%s does not yet exist. Creating...", Logger::Severity::Info, *destDir);
+			auto response = Path::CopyDirUnsafe(sourceDir, destDir);
+			if (response == 1) {
 						Logf("Copied: %s to %s", Logger::Severity::Info, *sourceDir, *destDir, response);
 					} else {
 						Logf("Failed copying %s to %s. The game will probably crash soon.", Logger::Severity::Error, *sourceDir, *destDir, response);
-					}
-				}
-
-			} else {
-				Logf("Setting gamedir to $XDG_DATA_HOME (%s). If data is missing, you can either copy the game data in %s to that directory, unset the $XDG_DATA_HOME variable or run the game with -gamedir=%s", Logger::Severity::Warning, *gameDir, *executableDir, *executableDir);
 			}
 		}
 	}
@@ -1242,13 +1225,6 @@ bool Application::m_Init()
 	renderSema = SDL_CreateSemaphore(0);
 	m_renderThread = Thread(threadedRenderer);
 
-
-
-	///TODO: check if directory exists already?
-	Path::CreateDir(Path::Absolute("screenshots"));
-	Path::CreateDir(Path::Absolute("songs"));
-	Path::CreateDir(Path::Absolute("replays"));
-	Path::CreateDir(Path::Absolute("crash_dumps"));
 	Logger::Get().SetLogLevel(g_gameConfig.GetEnum<Logger::Enum_Severity>(GameConfigKeys::LogLevel));
 	return true;
 }

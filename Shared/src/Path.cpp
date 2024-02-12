@@ -13,7 +13,9 @@ String Path::Absolute(const String& path)
 		return path;
 
 	String baseDir = !gameDir.empty() ? gameDir : RemoveLast(GetExecutablePath());
-	return baseDir + sep + path;
+	if(baseDir[baseDir.length()-1] != sep)
+		baseDir.push_back(sep);
+	return baseDir + path;
 }
 String Path::RemoveLast(const String& path, String* lastOut /*= nullptr*/)
 {
@@ -182,12 +184,13 @@ bool Path::ClearDir(const String& path)
 	}
 	return true;
 }
-bool Path::CopyDir(String srcFolder, String dstFolder)
+bool Path::CopyDir(String srcFolder, String dstFolder){
+	CopyDirUnsafe(Absolute(srcFolder),Absolute(dstFolder));
+}
+bool Path::CopyDirUnsafe(String srcFolder, String dstFolder)
 {
-	srcFolder = Absolute(srcFolder);
 
 	// Remove trailing seperators
-	dstFolder = Absolute(dstFolder);
 	dstFolder.TrimBack(Path::sep);
 
 	if(!CreateDir(dstFolder))
