@@ -558,38 +558,21 @@ bool Scoring::IsLaserHeld(uint32 laserIndex, bool includeSlams) const
 	return false;
 }
 
-bool Scoring::IsLaserIdle(uint32 index) const
-{
-	return m_laserSegmentQueue.empty() && m_currentLaserSegments[0] == nullptr && m_currentLaserSegments[1] == nullptr;
-}
-
 bool Scoring::IsFailOut() const
 {
-	if (m_gaugeStack.size() == 0)
-		return true;
-
-	if (m_gaugeStack.size() == 1)
-		return m_gaugeStack.back()->FailOut();
-
-	for (auto g : m_gaugeStack)
-	{
-		// If there are any gauges left, then don't fail
-		if (!g->FailOut())
-			return false;
-	}
-	return true;
+	return std::all_of(m_gaugeStack.begin(), m_gaugeStack.end(), [](Gauge * g){ return g->FailOut(); });
 }
 
 Gauge* Scoring::GetTopGauge() const
 {
-	if (m_gaugeStack.size() > 0)
+	if (!m_gaugeStack.empty())
 	{
 		return m_gaugeStack.back();
 	}
 	return nullptr;
 }
 
-void Scoring::SetAllGaugeValues(const Vector<float> values, bool zeroRest)
+void Scoring::SetAllGaugeValues(const Vector<float>& values, bool zeroRest)
 {
 	unsigned int i = 0;
 	for (; i<m_gaugeStack.size() && i<values.size(); i++)

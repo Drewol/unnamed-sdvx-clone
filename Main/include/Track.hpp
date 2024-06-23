@@ -3,18 +3,14 @@
 #include "AsyncLoadable.hpp"
 #include <unordered_set>
 
-#define BT_DELAY_FADE_DURATION (4 / 60.f)
-#define BT_HIT_EFFECT_DURATION (4 / 60.f)
-#define FX_DELAY_FADE_DURATION (3 / 60.f)
-#define FX_HIT_EFFECT_DURATION (3 / 60.f)
-
 // Base class for sprite effects on the track
 struct TimedEffect
 {
 	explicit TimedEffect(float duration);
 	virtual ~TimedEffect() = default;
 	void Reset(float duration);
-	float GetRate() const { return time / duration; }
+
+	virtual float GetRate() const { return time / duration; }
 	virtual void Draw(class RenderQueue& rq) = 0;
 	virtual void Tick(float deltaTime);
 
@@ -30,7 +26,7 @@ struct ButtonHitEffect : TimedEffect
 	void Draw(class RenderQueue& rq) override;
 	void Tick(float deltaTime) override;
 	void Reset(int buttonCode, Color color, bool hold);
-	float GetRate() const { return Math::Min(time, hitEffectDuration) / duration; }
+	float GetRate() const override { return Math::Min(time, hitEffectDuration) / duration; }
 
 	uint32 buttonCode; // Only used for Draw
 	Color color;
@@ -52,7 +48,7 @@ struct ButtonHitRatingEffect : TimedEffect
 
 struct TimedHitEffect : TimedEffect
 {
-	TimedHitEffect(bool late);
+	explicit TimedHitEffect(bool late);
 	void Draw(class RenderQueue& rq) override;
 
 	bool late;
@@ -68,13 +64,13 @@ public:
 	static const float trackWidth;
 	static const float buttonWidth;
 	static const float laserWidth;
-	static const float fxbuttonWidth;
+	static const float fxButtonWidth;
 	static const float buttonTrackWidth;
 
 	float trackLength;
-	float trackTickLength;
-	float buttonLength;
-	float fxbuttonLength;
+	float trackTickLength = 0;
+	float buttonLength = 0;
+	float fxButtonLength = 0;
 	float distantButtonScale = 2.0f;
 
 	// Laser color setting
@@ -90,9 +86,9 @@ public:
 	class AsyncAssetLoader* loader = nullptr;
 
 	Track();
-	~Track();
-	virtual bool AsyncLoad() override;
-	virtual bool AsyncFinalize() override;
+	~Track() override;
+	bool AsyncLoad() override;
+	bool AsyncFinalize() override;
 	void Tick(class BeatmapPlayback& playback, float deltaTime);
 
 	// Draw black laser underlays for wide lasers or all lasers if lane is hidden
@@ -104,20 +100,16 @@ public:
 	// Things like the laser pointers, hit bar and effect
 	void DrawOverlays(RenderQueue& rq);
 	void DrawHitEffects(RenderQueue& rq);
-	// Draws a plane over the track
-	void DrawTrackOverlay(RenderQueue& rq, Texture texture, float heightOffset = 0.05f, float widthScale = 1.0f);
 	// Draw a centered sprite at pos, relative from the track
-	void DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, Color color = Color::White, float tilt = 0.0f);
-	void DrawCombo(RenderQueue& rq, uint32 score, Color color, float scale = 1.0f);
+	void DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, Color color = Color::White, float tilt = 0.0f) const;
 	void DrawTrackCover(RenderQueue& rq);
-	void DrawCalibrationCritLine(RenderQueue& rq);
+	void DrawCalibrationCritLine(RenderQueue& rq) const;
 
-	Vector3 TransformPoint(const Vector3& p);
+	Vector3 TransformPoint(const Vector3& p) const;
 
 	// Adds a sprite effect to the track
 	void AddEffect(struct TimedEffect* effect);
 	void AddHitEffect(uint32 buttonCode, Color color, bool hold = false);
-	void ClearEffects();
 
 	void SetViewRange(float newRange);
 	void SendLaserAlert(uint8 laserIdx);
@@ -125,25 +117,21 @@ public:
 	float GetViewRange() const;
 
 	// Normal/FX button X-axis placement
-	float GetButtonPlacement(uint32 buttonIdx);
+	float GetButtonPlacement(uint32 buttonIdx) const;
 
     void OnHoldEnter(Input::Button buttonCode);
 	void OnButtonReleased(Input::Button buttonCode);
-	void OnButtonReleasedDelta(Input::Button buttonCode, int32 delta);
+	void OnButtonReleasedDelta(Input::Button buttonCode, int32 _);
 
-	// Laser positions, as shown on the overlay
-	float laserPositions[2];
-	// Current lasers are extended
-	bool lasersAreExtend[2] = { false, false };
-	float laserPointerOpacity[2] = { 1.0f };
-	float laserAlertOpacity[2] = { 1.0f };
+    void SetVisualOffsets(float noteOffset, float laserOffset);
+	void SetLaserSpeedOffset(bool offset);
+
 	float hiddenCutoff = 0.0f;
 	float hiddenFadewindow = 0.2f;
 
 	float suddenCutoff = 0.5f;
 	float suddenFadewindow = 0.2f;
 
-	float laserSpeedOffset = 0.90f;
 	float centerSplit = 0.0f;
 
 	// Visible time elements on the playfield track
@@ -168,9 +156,9 @@ public:
 	Mesh buttonMesh;
 	Texture buttonTexture;
 	Texture buttonHoldTexture;
-	Mesh fxbuttonMesh;
-	Texture fxbuttonTexture;
-	Texture fxbuttonHoldTexture;
+	Mesh fxButtonMesh;
+	Texture fxButtonTexture;
+	Texture fxButtonHoldTexture;
 	Material holdButtonMaterial;
 	Material buttonMaterial;
 	Material trackCoverMaterial;
@@ -178,7 +166,6 @@ public:
 	Texture laserTailTextures[4]; // Entry and exit textures, both sides
 	Material laserMaterial;
 	Material blackLaserMaterial;
-	Texture laserAlertTextures[2];
 	Texture whiteTexture;
 
 	/* Overlay graphics */
@@ -187,16 +174,15 @@ public:
 	/* Scoring and feedback elements */
 	Texture scoreHitTexture;
 	Texture scoreHitTextures[3]; // Ok, Miss, Perfect
-	// Combo counter sprite sheet
-	Mesh comboSpriteMeshes[10];
+
 	/* Reusable sprite mesh and material */
 	Mesh centeredTrackMesh;
 	Material spriteMaterial;
 
 	// For flickering objects, like hold objects that are active
-	float objectGlow;
+	float objectGlow = 0;
 	// 20Hz flickering. 0 = Miss, 1 = Inactive, 2 & 3 = Active alternating.
-	int objectGlowState;
+	int objectGlowState = 0;
 
 	// Early/Late indicator
 	struct TimedHitEffect* timedHitEffect = nullptr;
@@ -208,8 +194,11 @@ public:
     float scrollSpeed = 0;
 
 private:
+	auto m_GetObjectPosition(BeatmapPlayback& playback, ObjectState* obj);
+	float m_GetVisualOffsetForObject(ObjectState* obj) const;
+
 	// Laser track generators
-	class LaserTrackBuilder* m_laserTrackBuilder[2] = { 0 };
+	class LaserTrackBuilder* m_laserTrackBuilder[2] = { nullptr };
 
 	const TimingPoint* m_lastTimingPoint = nullptr;
 
@@ -228,14 +217,13 @@ private:
 
 	float m_alertTimer[2] = { 10.0f, 10.0f };
 
-	// Camera variables Landscape, Portrait
-	float m_basePitch[2] = { -35.f, -47.f };
-	float m_baseRadius[2] = { 0.3f, 0.275f };
-	float m_pitchOffset[2] = { 0.05f, 0.265f }; // how far from the bottom of the screen should the crit line be
-	float m_fov[2] = { 70.f, 90.f };
-
 	// How much the track is hidden. 1.0 = fully hidden, 0.0 = fully visible
 	float m_trackHide = 0.0f;
 	float m_trackHideSpeed = 0.0f;
 	float m_btOverFxScale = 0.8f;
+
+	float m_laserOffset = 0; // Based off of percentage of trackLength
+	float m_noteOffset = 0; // [-1, 1]
+
+	float m_laserSpeedOffset = 0;
 };

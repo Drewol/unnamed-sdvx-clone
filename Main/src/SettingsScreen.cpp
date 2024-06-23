@@ -16,7 +16,7 @@ static inline const char* GetKeyNameFromScancodeConfig(int scancode)
 class SettingsPage_Input : public SettingsPage
 {
 public:
-	SettingsPage_Input(nk_context* nctx) : SettingsPage(nctx, "Input") {}
+	explicit SettingsPage_Input(nk_context* nctx) : SettingsPage(nctx, "Input") {}
 
 protected:
 	void Load() override
@@ -54,7 +54,7 @@ protected:
 
 		if (!m_gamePads.empty())
 		{
-			std::array<uint8, 16> newId;
+			std::array<uint8, 16> newId{};
 			memcpy(newId.data(), SDL_JoystickGetDeviceGUID(m_selectedPad).data, 16);
 			g_gameConfig.SetBlob<16>(GameConfigKeys::Controller_DeviceID, newId);
 		}
@@ -62,7 +62,7 @@ protected:
 
 	Vector<String> m_gamePadsStr;
 	Vector<const char*> m_gamePads;
-	int m_selectedPad;
+	int m_selectedPad{};
 
 	String m_controllerButtonNames[8];
 	String m_controllerLaserNames[2];
@@ -133,13 +133,13 @@ protected:
 
 		SectionHeader("Input Device");
 
-		if (m_gamePads.size() > 0)
+		if (!m_gamePads.empty())
 		{
 			int newPad = SelectionInput(m_selectedPad, m_gamePads, "Controller to use:");
 			if (newPad != m_selectedPad)
 			{
 				m_selectedPad = newPad;
-				std::array<uint8, 16> newId;
+				std::array<uint8, 16> newId{};
 				memcpy(newId.data(), SDL_JoystickGetDeviceGUID(m_selectedPad).data, 16);
 				g_gameConfig.SetBlob<16>(GameConfigKeys::Controller_DeviceID, newId);
 			}
@@ -432,7 +432,7 @@ private:
 class SettingsPage_Game : public SettingsPage
 {
 public:
-	SettingsPage_Game(nk_context* nctx) : SettingsPage(nctx, "Game") {}
+	explicit SettingsPage_Game(nk_context* nctx) : SettingsPage(nctx, "Game") {}
 
 protected:
 	void Load() override
@@ -466,7 +466,7 @@ protected:
 
 		LayoutRowDynamic(1);
 		if (nk_button_label(m_nctx, "Calibrate Offsets")) {
-			CalibrationScreen* cscreen = new CalibrationScreen(m_nctx);
+			auto* cscreen = new CalibrationScreen(m_nctx);
 			g_transition->TransitionTo(cscreen);
 			return;
 		}
@@ -554,7 +554,7 @@ private:
 class SettingsPage_Visual : public SettingsPage
 {
 public:
-	SettingsPage_Visual(nk_context* nctx) : SettingsPage(nctx, "Visual") {}
+	explicit SettingsPage_Visual(nk_context* nctx) : SettingsPage(nctx, "Visual") {}
 
 protected:
 	void Load() override
@@ -609,7 +609,10 @@ protected:
 
 		ToggleSetting(GameConfigKeys::DisableBackgrounds, "Disable song backgrounds");
 		ToggleSetting(GameConfigKeys::DelayedHitEffects, "Delayed fade button hit effects");
+		FloatSetting(GameConfigKeys::NoteVisualOffset, "Note visual offset", -100, 100, 0.1);
+		FloatSetting(GameConfigKeys::LaserVisualOffset, "Laser visual offset", -100, 100, 0.1);
 		FloatSetting(GameConfigKeys::DistantButtonScale, "Distant button scale", 1.0f, 5.0f);
+		ToggleSetting(GameConfigKeys::DistantLaserOffset, "Gradually offset distant lasers");
 
 		SectionHeader("Game UI");
 
@@ -685,7 +688,7 @@ private:
 class SettingsPage_System : public SettingsPage
 {
 public:
-	SettingsPage_System(nk_context* nctx) : SettingsPage(nctx, "System") {}
+	explicit SettingsPage_System(nk_context* nctx) : SettingsPage(nctx, "System") {}
 
 protected:
 	void Load() override
@@ -773,7 +776,7 @@ protected:
 #endif
 		if (nk_button_label(m_nctx, "Prune extra replays"))
 		{
-            BasicPrompt* w = new BasicPrompt(
+            auto* w = new BasicPrompt(
                 "Prune Extra Replays",
                 "How many replays per song would you like\nto keep? (>=1)",
                 "Prune Replays","3");
@@ -786,7 +789,7 @@ protected:
 
 		ToggleSetting(GameConfigKeys::CheckForUpdates, "Check for updates on startup");
 
-		if (m_channels.size() > 0)
+		if (!m_channels.empty())
 		{
 			StringSelectionSetting(GameConfigKeys::UpdateChannel, m_channels, "Update Channel:");
 		}
@@ -825,7 +828,7 @@ private:
 	uint32 m_chartsProcessed = 0;
 	uint32 m_replaysRemoved = 0;
 	bool m_removeMissingScores;
-	
+
 	BasicTextWindow* m_replayPruneWindow = nullptr;
 	size_t m_numReplaysToKeep = 1;
 	Map<int32, ChartIndex*>::const_iterator m_replayPruneIter;
@@ -897,7 +900,7 @@ private:
 
 				if (!Path::Delete(path))
 					continue;
-				
+
 				m_replaysRemoved++;
 			}
 			if (!m_removeMissingScores)
@@ -917,7 +920,7 @@ private:
 
 				if (!Path::Delete(s.fullPath))
 					continue;
-				
+
 				m_replaysRemoved++;
 			}
 		}
@@ -971,7 +974,7 @@ protected:
 		ToggleSetting(GameConfigKeys::DefaultIncSpeedOnSuccess, "Increase speed on success");
 		IntSetting(GameConfigKeys::DefaultIncSpeedAmount, "Increment (%p)", 1, 10);
 		IntSetting(GameConfigKeys::DefaultIncStreak, "Required streaks", 1, 10);
-		
+
 		Separator();
 
 		ToggleSetting(GameConfigKeys::DefaultLoopOnSuccess, "Loop on fail");
@@ -1000,7 +1003,7 @@ protected:
 class SettingsPage_Online : public SettingsPage
 {
 public:
-	SettingsPage_Online(nk_context* nctx) : SettingsPage(nctx, "Online") {}
+	explicit SettingsPage_Online(nk_context* nctx) : SettingsPage(nctx, "Online") {}
 	
 protected:
 	void Load() override
@@ -1058,7 +1061,7 @@ protected:
 class SettingsPage_Skin : public SettingsPage
 {
 public:
-	SettingsPage_Skin(nk_context* nctx) : SettingsPage(nctx, "Skin") {}
+	explicit SettingsPage_Skin(nk_context* nctx) : SettingsPage(nctx, "Skin") {}
 
 protected:
 	void Load() override
@@ -1423,7 +1426,7 @@ public:
 		return true;
 	}
 
-	void Tick(float deltatime) override
+	void Tick(float deltaTime) override
 	{
 		if (m_knobs && m_isGamepad)
 		{
@@ -1451,10 +1454,9 @@ public:
 		{
 			g_application->RemoveTickable(this);
 		}
-
 	}
 
-	void Render(float deltatime) override
+	void Render(float deltaTime) override
 	{
 		String prompt = "Press the key";
 
@@ -1483,7 +1485,8 @@ public:
 
 		prompt += " for " + m_keyName + ".";
 
-		g_application->FastText(prompt, static_cast<float>(g_resolution.x / 2), static_cast<float>(g_resolution.y / 2), 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
+		g_application->FastText(prompt, static_cast<float>(g_resolution.x / 2), static_cast<float>(g_resolution.y / 2),
+								40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 	}
 
 	void OnButtonPressed(uint8 key, int32 delta)
@@ -1502,7 +1505,7 @@ public:
 			g_gameConfig.Set(m_key, code);
 			m_completed = true; // Needs to be set because pressing right alt triggers two keypresses on the same frame.
 		}
-		else if (!m_isGamepad && m_knobs)
+		else if (!m_isGamepad)
 		{
 			switch (m_key)
 			{
@@ -1556,7 +1559,7 @@ public:
 
 ButtonBindingScreen* ButtonBindingScreen::Create(GameConfigKeys key, bool gamepad, int controllerIndex, bool isAlternative)
 {
-	ButtonBindingScreen_Impl* impl = new ButtonBindingScreen_Impl(key, gamepad, controllerIndex, isAlternative);
+	auto* impl = new ButtonBindingScreen_Impl(key, gamepad, controllerIndex, isAlternative);
 	return impl;
 }
 
@@ -1571,12 +1574,9 @@ private:
 	bool m_firstStart = false;
 	MouseLockHandle m_mouseLock;
 public:
-	LaserSensCalibrationScreen_Impl()
-	{
+	LaserSensCalibrationScreen_Impl() = default;
 
-	}
-
-	~LaserSensCalibrationScreen_Impl()
+	~LaserSensCalibrationScreen_Impl() override
 	{
 		g_input.OnButtonPressed.RemoveAll(this);
 	}
@@ -1585,6 +1585,7 @@ public:
 	{
 		g_input.GetInputLaserDir(0); //poll because there might be something idk
 
+		// Unused/defunct?
 		if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::LaserInputDevice) == InputDevice::Controller)
 		{
 			m_currentSetting = g_gameConfig.GetFloat(GameConfigKeys::Controller_Sensitivity);
@@ -1599,13 +1600,13 @@ public:
 		return true;
 	}
 
-	void Tick(float deltatime) override
+	void Tick(float deltaTime) override
 	{
 		m_delta += g_input.GetAbsoluteInputLaserDir(0);
 
 	}
 
-	void Render(float deltatime) override
+	void Render(float deltaTime) override
 	{
 		const Vector2 center = { static_cast<float>(g_resolution.x / 2), static_cast<float>(g_resolution.y / 2) };
 
@@ -1617,13 +1618,12 @@ public:
 				sens = Input::CalculateSensFromPpr(m_delta);
 			}
 
-
 			g_application->FastText("Turn left knob one revolution clockwise", center.x, center.y, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 			g_application->FastText("then press start.", center.x, center.y + 45, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 			if (g_gameConfig.GetEnum<Enum_InputDevice>(GameConfigKeys::LaserInputDevice) == InputDevice::Mouse)
 				g_application->FastText(Utility::Sprintf("Current Sens: %.2f, ppr: (%.0f)", sens, fabs(m_delta)), center.x, center.y + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 			else
-				g_application->FastText(Utility::Sprintf("Current Sens: %.2f", sens), center.x, center.y + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);	
+				g_application->FastText(Utility::Sprintf("Current Sens: %.2f", sens), center.x, center.y + 90, 40, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 
 		}
 		else
@@ -1685,4 +1685,3 @@ LaserSensCalibrationScreen* LaserSensCalibrationScreen::Create()
 	LaserSensCalibrationScreen* impl = new LaserSensCalibrationScreen_Impl();
 	return impl;
 }
-

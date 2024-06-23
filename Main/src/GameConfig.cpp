@@ -1,7 +1,5 @@
 #include "stdafx.h"
 #include "GameConfig.hpp"
-
-#include "Shared/Log.hpp"
 #include "HitStat.hpp"
 
 // When this should change, the UpdateVersion MUST be updated to update the old config files.
@@ -18,7 +16,7 @@ inline static void ConvertKeyCodeToScanCode(GameConfig& config, std::vector<Game
 		const int32 keycodeInt = config.GetInt(key);
 		if (keycodeInt < 0) continue;
 
-		const SDL_Keycode keycode = static_cast<SDL_Keycode>(keycodeInt);
+		const auto keycode = static_cast<SDL_Keycode>(keycodeInt);
 		const SDL_Scancode scancode = SDL_GetScancodeFromKey(keycode);
 
 		if (scancode != SDL_SCANCODE_UNKNOWN)
@@ -32,7 +30,7 @@ inline static void ConvertKeyCodeToScanCode(GameConfig& config, std::vector<Game
 
 			const String& fieldName = Enum_GameConfigKeys::ToString(key);
 
-			Logf("Unable to convert key \"%s\" (%d) into scancode, for config field \"%s\".", Logger::Severity::Error, keyName, keycode, fieldName.c_str());
+			Logf(R"(Unable to convert key "%s" (%d) into scancode, for config field "%s".)", Logger::Severity::Error, keyName, keycode, fieldName.c_str());
 			config.Set(key, -1);
 		}
 	}
@@ -41,12 +39,7 @@ inline static void ConvertKeyCodeToScanCode(GameConfig& config, std::vector<Game
 GameConfig::GameConfig()
 {
     //XXX We can't do clear here as it leads to UB with the initialization of hitstat static values
-    // This sould be ok as Clear will be called in the Load function
-}
-
-void GameConfig::SetKeyBinding(GameConfigKeys key, Graphics::Key value)
-{
-	SetEnum<Enum_Key>(key, value);
+    // This should be ok as Clear will be called in the Load function
 }
 
 void GameConfig::InitDefaults()
@@ -268,6 +261,10 @@ void GameConfig::InitDefaults()
 
 	Set(GameConfigKeys::CurrentProfileName, "Main");
 	Set(GameConfigKeys::UpdateChannel, "master");
+
+	Set(GameConfigKeys::NoteVisualOffset, 0.f);
+	Set(GameConfigKeys::LaserVisualOffset, 0.8f);
+	Set(GameConfigKeys::DistantLaserOffset, false);
 
 #ifndef EMBEDDED
 	Set(GameConfigKeys::KeepFontTexture, true);

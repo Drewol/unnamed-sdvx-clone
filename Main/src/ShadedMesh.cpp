@@ -314,8 +314,8 @@ void ShadedMeshOnTrack::lUseGameMesh(lua_State* L) {
 	}
 	else if (s == "fxbutton")
 	{
-		m_mesh = track.fxbuttonMesh;
-		m_length = track.fxbuttonLength;
+		m_mesh = track.fxButtonMesh;
+		m_length = track.fxButtonLength;
 	}
 	else if (s == "track")
 	{
@@ -514,11 +514,10 @@ int __index(lua_State* L) {
 		fmap.Add("SetClipWithTrack", lSetClipWithTrack);
 		Track& track = obj->GetGame()->GetTrack();
 		doubleConstMap.Add("BUTTON_TEXTURE_LENGTH", track.buttonLength);
-		doubleConstMap.Add("FXBUTTON_TEXTURE_LENGTH", track.fxbuttonLength);
+		doubleConstMap.Add("FXBUTTON_TEXTURE_LENGTH", track.fxButtonLength);
 		doubleConstMap.Add("TRACK_LENGTH", track.trackLength);
-		doubleConstMap.Add("TRACK_WIDTH", track.trackWidth);
+		doubleConstMap.Add("TRACK_WIDTH", Track::trackWidth);
 	}
-	
 
 	auto function = fmap.find(fname);
 

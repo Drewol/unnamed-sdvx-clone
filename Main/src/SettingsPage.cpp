@@ -73,7 +73,7 @@ void SettingsPage::SettingTextData::RenderPassword(nk_context* nctx)
 	// Hack taken from https://github.com/vurtun/nuklear/blob/a9e5e7299c19b8a8831a07173211fa8752d0cc8c/demo/overview.c#L549
 	const int old_len = m_len;
 
-	std::array<char, BUFFER_SIZE> tokenBuffer;
+	std::array<char, BUFFER_SIZE> tokenBuffer{};
 	std::fill(tokenBuffer.begin(), tokenBuffer.begin() + m_len, '*');
 
 	nk_sdl_text(nk_edit_string(nctx, NK_EDIT_FIELD, tokenBuffer.data(), &m_len, 1024, nk_filter_default));
@@ -259,14 +259,14 @@ Color SettingsPage::ColorInput(const Color& val, const std::string_view& label, 
 		useHSV = nk_option_label(m_nctx, "HSV", useHSV ? 1 : 0) == 1;
 
 		LayoutRowDynamic(1, 25);
-		if (useHSV == false) {
+		if (!useHSV) {
 			nkCol.r = FloatInput(nkCol.r, "#R:", 0,  1.0f, 0.01f, 0.005f);
 			nkCol.g = FloatInput(nkCol.g, "#G:", 0, 1.0f, 0.01f, 0.005f);
 			nkCol.b = FloatInput(nkCol.b, "#B:", 0, 1.0f, 0.01f, 0.005f);
 			nkCol.a = FloatInput(nkCol.a, "#A:", 0, 1.0f, 0.01f, 0.005f);
 		}
 		else {
-			std::array<float, 4> hsva;
+			std::array<float, 4> hsva{};
 			nk_colorf_hsva_fv(hsva.data(), nkCol);
 			hsva[0] = FloatInput(hsva[0], "#H:", 0, 1.0f, 0.01f, 0.05f);
 			hsva[1] = FloatInput(hsva[1], "#S:", 0, 1.0f, 0.01f, 0.05f);
@@ -279,7 +279,7 @@ Color SettingsPage::ColorInput(const Color& val, const std::string_view& label, 
 
 	LayoutRowDynamic(1);
 
-	return Color(nkCol.r, nkCol.g, nkCol.b, nkCol.a);
+	return {nkCol.r, nkCol.g, nkCol.b, nkCol.a};
 }
 
 void SettingsPage::Render(const struct nk_rect& rect)
@@ -315,11 +315,9 @@ void SettingsPage::Render(const struct nk_rect& rect)
 class SettingsPage_Profile : public SettingsPage
 {
 public:
-	SettingsPage_Profile(nk_context* nctx, bool& forceReload) : SettingsPage(nctx, "Profile"), m_forceReload(forceReload) {}
+	SettingsPage_Profile(nk_context* nctx, bool& forceReload) : SettingsPage(nctx, "Profile") {}
 
 protected:
-	bool& m_forceReload;
-	
 	void Load() override
 	{
 		m_currentProfile = g_gameConfig.GetString(GameConfigKeys::CurrentProfileName);
@@ -352,7 +350,6 @@ protected:
 
 		// Load new settings
 		g_application->ReloadConfig(newProfile);
-		m_forceReload = true;
 	}
 
 	Vector<String> m_profiles;
@@ -369,7 +366,7 @@ protected:
 		}
 		if (nk_button_label(m_nctx, "Create new profile"))
 		{
-			BasicPrompt* w = new BasicPrompt(
+			auto* w = new BasicPrompt(
 				"Create New Profile",
 				"Enter name for profile\n(This will copy your current profile)",
 				"Create Profile");

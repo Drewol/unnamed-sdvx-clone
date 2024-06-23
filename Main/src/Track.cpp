@@ -6,11 +6,12 @@
 #include "LaserTrackBuilder.hpp"
 #include "AsyncAssetLoader.hpp"
 #include <unordered_set>
+#include <utility>
 
 const float Track::trackWidth = 1.0f;
 const float Track::buttonWidth = 1.0f / 6;
 const float Track::laserWidth = buttonWidth;
-const float Track::fxbuttonWidth = buttonWidth * 2;
+const float Track::fxButtonWidth = buttonWidth * 2;
 const float Track::buttonTrackWidth = buttonWidth * 4;
 
 Track::Track()
@@ -51,7 +52,7 @@ bool Track::AsyncLoad()
 
 	// Load hit effect colors
 	Image hitColorPalette;
-	CheckedLoad(hitColorPalette = ImageRes::Create(Path::Absolute("skins/" + skin + "/textures/hitcolors.png")));
+	CheckedLoad(hitColorPalette = ImageRes::Create(Path::Absolute("skins/" + skin + "/textures/hitcolors.png")))
 	assert(hitColorPalette->GetSize().x >= 4);
 	for(uint32 i = 0; i < 4; i++)
 		hitColors[i] = hitColorPalette->GetBits()[i];
@@ -74,8 +75,8 @@ bool Track::AsyncLoad()
 	loader->AddTexture(buttonHoldTexture, "buttonhold.png");
 
 	// Load FX object
-	loader->AddTexture(fxbuttonTexture, "fxbutton.png");
-	loader->AddTexture(fxbuttonHoldTexture, "fxbuttonhold.png");
+	loader->AddTexture(fxButtonTexture, "fxbutton.png");
+	loader->AddTexture(fxButtonHoldTexture, "fxbuttonhold.png");
 
 	// Load Laser object
 	loader->AddTexture(laserTextures[0], "laser_l.png");
@@ -132,12 +133,12 @@ bool Track::AsyncFinalize()
 	buttonMesh = MeshGenerators::Quad(g_gl, Vector2(0.0f, 0.0f), Vector2(buttonWidth, buttonLength));
 	buttonMaterial->opaque = false;
 
-	fxbuttonTexture->SetMipmaps(true);
-	fxbuttonTexture->SetFilter(true, true, 16.0f);
-	fxbuttonHoldTexture->SetMipmaps(true);
-	fxbuttonHoldTexture->SetFilter(true, true, 16.0f);
-	fxbuttonLength = fxbuttonTexture->CalculateHeight(fxbuttonWidth);
-	fxbuttonMesh = MeshGenerators::Quad(g_gl, Vector2(0.0f, 0.0f), Vector2(fxbuttonWidth, fxbuttonLength));
+	fxButtonTexture->SetMipmaps(true);
+	fxButtonTexture->SetFilter(true, true, 16.0f);
+	fxButtonHoldTexture->SetMipmaps(true);
+	fxButtonHoldTexture->SetFilter(true, true, 16.0f);
+	fxButtonLength = fxButtonTexture->CalculateHeight(fxButtonWidth);
+	fxButtonMesh = MeshGenerators::Quad(g_gl, Vector2(0.0f, 0.0f), Vector2(fxButtonWidth, fxButtonLength));
 
 	holdButtonMaterial->opaque = false;
 
@@ -173,7 +174,7 @@ bool Track::AsyncFinalize()
 	{
 		m_laserTrackBuilder[i] = new LaserTrackBuilder(g_gl, this, i);
 		m_laserTrackBuilder[i]->laserBorderPixels = 12;
-		m_laserTrackBuilder[i]->laserLengthScale = trackLength / (GetViewRange() * laserSpeedOffset);
+		m_laserTrackBuilder[i]->laserLengthScale = trackLength / (GetViewRange() * m_laserSpeedOffset);
 		m_laserTrackBuilder[i]->Reset(); // Also initializes the track builder
 	}
 
@@ -195,7 +196,7 @@ bool Track::AsyncFinalize()
 
 		//track cover
 		pos = Vector2(-trackWidth * 0.5f * i, -trackLength);
-		size = Vector2(trackWidth / 2.0f, trackLength * 2.0);
+		size = Vector2(trackWidth / 2.0f, trackLength * 2.f);
 		rect = Rect(pos, size);
 		splitTrackCoverMesh[i] = MeshRes::Create(g_gl);
 		splitTrackCoverMesh[i]->SetPrimitiveType(PrimitiveType::TriangleList);
@@ -236,14 +237,14 @@ bool Track::AsyncFinalize()
 		{
 			if (i < 4)
 			{
-				bfx.delayFadeDuration = BT_DELAY_FADE_DURATION;
-				bfx.hitEffectDuration = BT_HIT_EFFECT_DURATION;
+				bfx.delayFadeDuration = 4 / 60.f;
+				bfx.hitEffectDuration = 4 / 60.f;
 				bfx.alphaScale = 0.6f; // Ranges from 0.6 to 0.85 depending on hispeed
 			}
 			else
 			{
-				bfx.delayFadeDuration = FX_DELAY_FADE_DURATION;
-				bfx.hitEffectDuration = FX_HIT_EFFECT_DURATION;
+				bfx.delayFadeDuration = 3 / 60.f;
+				bfx.hitEffectDuration = 3 / 60.f;
 				bfx.alphaScale = 0.45f;
 			}
 		}
@@ -259,6 +260,7 @@ bool Track::AsyncFinalize()
 
 	return success;
 }
+
 void Track::Tick(class BeatmapPlayback& playback, float deltaTime)
 {
 	const TimingPoint& currentTimingPoint = playback.GetCurrentTimingPoint();
@@ -298,37 +300,49 @@ void Track::Tick(class BeatmapPlayback& playback, float deltaTime)
 	m_trackHide = Math::Clamp(m_trackHide, 0.0f, 1.0f);
 
 	// Set Object glow
-	int32 startBeat = 0;
-	uint32 numBeats = playback.CountBeats(m_lastMapTime, currentTime - m_lastMapTime, startBeat, 4);
 	objectGlowState = currentTime % 100 < 50 ? 0 : 1;
 	m_lastMapTime = currentTime;
 
-	objectGlow = fabs((currentTime % 100) / 50.0 - 1) * 0.5 + 0.5;
-
-	/*
-	if(numBeats > 0)
-	{
-		objectGlow = 1.0f;
-	}
-	else
-	{
-		objectGlow -= 7.0f * deltaTime;
-		if(objectGlow < 0.0f)
-			objectGlow = 0.0f;
-	}
-	*/
+	objectGlow = fabsf((currentTime % 100) / 50.f - 1) * 0.5f + 0.5f;
 
 	// Perform laser track cache cleanup, etc.
-	for(uint32 i = 0; i < 2; i++)
+	for (auto & i : m_laserTrackBuilder)
 	{
-		m_laserTrackBuilder[i]->Update(m_lastMapTime);
+		i->Update(m_lastMapTime);
+	}
+}
 
-		//laserAlertOpacity[i] = (-pow(m_alertTimer[i], 2.0f) + (1.5f * m_alertTimer[i])) * 5.0f;
-		//laserAlertOpacity[i] = Math::Clamp<float>(laserAlertOpacity[i], 0.0f, 1.0f);
-		//m_alertTimer[i] += deltaTime;
+auto Track::m_GetObjectPosition(BeatmapPlayback& playback, ObjectState *obj)
+{
+	struct result {float position; bool dontUseScrollSpeedForPos;};
+	float visualOffset = m_GetVisualOffsetForObject(obj);
+
+	const bool dontUseScrollSpeedForPos =
+			obj->type == ObjectType::Hold ? ((MultiObjectState*)obj)->hold.GetRoot()->time <= playback.GetLastTime()
+			                              : obj->type == ObjectType::Laser && obj->time <= playback.GetLastTime();
+
+	float position;
+	if (obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
+	{
+		position = dontUseScrollSpeedForPos ? playback.TimeToViewDistanceIgnoringScrollSpeed(obj->time) : playback.TimeToViewDistance(obj->time);
+		position = position / m_viewRange;
+	}
+	else // laser
+	{
+		// Calculate height based on time on current track
+		float posMult = trackLength / (m_viewRange * m_laserSpeedOffset);
+		position = playback.TimeToViewDistance(obj->time) * posMult;
 	}
 
+	return result {position + visualOffset, dontUseScrollSpeedForPos};
+}
 
+float Track::m_GetVisualOffsetForObject(ObjectState* obj) const
+{
+	if (obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
+		return m_noteOffset;
+	else // laser
+		return m_laserOffset;
 }
 
 void Track::DrawLaserBase(RenderQueue& rq, class BeatmapPlayback& playback, const Vector<ObjectState*>& objects)
@@ -338,13 +352,10 @@ void Track::DrawLaserBase(RenderQueue& rq, class BeatmapPlayback& playback, cons
 		if (obj->type != ObjectType::Laser)
 			continue;
 
-		LaserObjectState* laser = (LaserObjectState*)obj;
+		auto* laser = (LaserObjectState*)obj;
 		if ((laser->flags & LaserObjectState::flag_Extended) != 0 || m_trackHide > 0.f)
 		{
-			// Calculate height based on time on current track
-			float viewRange = GetViewRange();
-			float position = playback.TimeToViewDistance(obj->time);
-			float posmult = trackLength / (m_viewRange * laserSpeedOffset);
+			auto [position, _] = m_GetObjectPosition(playback, obj);
 
 			Mesh laserMesh = m_laserTrackBuilder[laser->index]->GenerateTrackMesh(playback, laser);
 
@@ -353,7 +364,7 @@ void Track::DrawLaserBase(RenderQueue& rq, class BeatmapPlayback& playback, cons
 
 			// Get the length of this laser segment
 			Transform laserTransform = trackOrigin;
-			laserTransform *= Transform::Translation(Vector3{ 0.0f, posmult * position, 0.0f });
+			laserTransform *= Transform::Translation(Vector3{ 0.0f, position, 0.0f });
 
 			if (laserMesh)
 			{
@@ -404,24 +415,17 @@ void Track::DrawBase(class RenderQueue& rq)
 	}
 	
 }
+
 void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, ObjectState* obj, bool active, const std::unordered_set<MapTime> chipFXTimes[2])
 {
 	// Calculate height based on time on current track
-	float viewRange = GetViewRange();
-	float glow = 0.0f;
+	auto result = m_GetObjectPosition(playback, obj);
+	auto position = result.position; auto dontUseScrollSpeedForPos = result.dontUseScrollSpeedForPos; // Should be able to use binding decl., but C++ says no
 
-	const bool dontUseScrollSpeedForPos =
-		obj->type == ObjectType::Hold ? ((MultiObjectState*)obj)->hold.GetRoot()->time <= playback.GetLastTime()
-		: obj->type == ObjectType::Laser ? obj->time <= playback.GetLastTime()
-		: false;
-
-	float position = dontUseScrollSpeedForPos ? playback.TimeToViewDistanceIgnoringScrollSpeed(obj->time) : playback.TimeToViewDistance(obj->time);
-	position /= viewRange;
-
-	if(obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
+	if (obj->type == ObjectType::Single || obj->type == ObjectType::Hold)
 	{
 		bool isHold = obj->type == ObjectType::Hold;
-		MultiObjectState* mobj = (MultiObjectState*)obj;
+		auto* mobj = (MultiObjectState*)obj;
 		MaterialParameterSet params;
 		Material mat = buttonMaterial;
 		Mesh mesh;
@@ -431,24 +435,24 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 		float length;
 		float currentObjectGlow = active ? objectGlow : 0.3f;
 		int currentObjectGlowState = active ? 2 + objectGlowState : 0;
-		if(mobj->button.index < 4) // Normal button
+		if (mobj->button.index < 4) // Normal button
 		{
 			width = buttonWidth;
 			xposition = buttonTrackWidth * -0.5f + width * mobj->button.index;
 			int fxIdx = 0;
 			if (mobj->button.index < 2)
 			{
-				xposition -= 0.5 * centerSplit * buttonWidth;
+				xposition -= 0.5f * centerSplit * buttonWidth;
 			}
 			else 
 			{
-				xposition += 0.5 * centerSplit * buttonWidth;
+				xposition += 0.5f * centerSplit * buttonWidth;
 				fxIdx = 1;
 			}
 			if (!isHold && chipFXTimes[fxIdx].count(mobj->time))
 			{
 				xscale = m_btOverFxScale;
-				xposition += width * ((1.0 - xscale) / 2.0);
+				xposition += width * ((1.f - xscale) / 2.f);
 			}
 			length = buttonLength;
 			params.SetParameter("hasSample", mobj->button.hasSample);
@@ -457,8 +461,7 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 		}
 		else // FX Button
 		{
-			width = fxbuttonWidth;
-			xposition = buttonTrackWidth * -0.5f + fxbuttonWidth *(mobj->button.index - 4);
+			xposition = buttonTrackWidth * -0.5f + fxButtonWidth * (mobj->button.index - 4);
 			if (mobj->button.index < 5)
 			{
 				xposition -= 0.5f * centerSplit * buttonWidth;
@@ -467,15 +470,15 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 			{
 				xposition += 0.5f * centerSplit * buttonWidth;
 			}
-			length = fxbuttonLength;
+			length = fxButtonLength;
 			params.SetParameter("hasSample", mobj->button.hasSample);
-			params.SetParameter("mainTex", isHold ? fxbuttonHoldTexture : fxbuttonTexture);
-			mesh = fxbuttonMesh;
+			params.SetParameter("mainTex", isHold ? fxButtonHoldTexture : fxButtonTexture);
+			mesh = fxButtonMesh;
 		}
 
 		params.SetParameter("trackPos", position);
 
-		if(isHold)
+		if (isHold)
 		{
 			if(!active && mobj->hold.GetRoot()->time > playback.GetLastTime())
 				params.SetParameter("hitState", 1);
@@ -491,7 +494,7 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 		Transform buttonTransform = trackOrigin;
 		buttonTransform *= Transform::Translation(buttonPos);
 		float scale;
-		if(isHold) // Hold Note?
+		if (isHold) // Hold Note?
 		{
 			float trackScale = 0.0f;
 			if (dontUseScrollSpeedForPos)
@@ -511,12 +514,13 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 				trackScale = playback.ToViewDistance(mobj->time, mobj->hold.duration);
 			}
 
-			trackScale /= viewRange * length;
+			trackScale /= m_viewRange * length;
 			scale = trackScale * trackLength;
 
 			params.SetParameter("trackScale", trackScale);
 		}
-		else {
+		else
+		{
 			//Use actual distance from camera instead of position on the track?
 			scale = 1.0f + (Math::Max(1.0f, distantButtonScale) - 1.0f) * position;
 			params.SetParameter("trackScale", 1.0f / trackLength);
@@ -527,21 +531,18 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 		params.SetParameter("suddenCutoff", suddenCutoff); // Sudden cutoff (% of track)
 		params.SetParameter("suddenFadeWindow", suddenFadewindow); // Sudden cutoff (% of track)
 
-
 		buttonTransform *= Transform::Scale({ xscale, scale, 1.0f });
 		rq.Draw(buttonTransform, mesh, mat, params);
 	}
-	else if(obj->type == ObjectType::Laser) // Draw laser
+	else if (obj->type == ObjectType::Laser) // Draw laser
 	{
-		position = playback.TimeToViewDistance(obj->time);
-		float posmult = trackLength / (m_viewRange * laserSpeedOffset);
-		LaserObjectState* laser = (LaserObjectState*)obj;
+		auto* laser = (LaserObjectState*)obj;
 
 		// Draw segment function
-		auto DrawSegment = [&](Mesh mesh, Texture texture, int part)
+		auto DrawSegment = [&](const Mesh& mesh, Texture texture, int part)
 		{
 			MaterialParameterSet laserParams;
-			laserParams.SetParameter("trackPos", posmult * position / trackLength);
+			laserParams.SetParameter("trackPos", position / trackLength);
 			laserParams.SetParameter("trackScale", 1.0f / trackLength);
 			laserParams.SetParameter("hiddenCutoff", hiddenCutoff); // Hidden cutoff (% of track)
 			laserParams.SetParameter("hiddenFadeWindow", hiddenFadewindow); // Hidden cutoff (% of track)
@@ -559,25 +560,24 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 				laserParams.SetParameter("objectGlow", active ? objectGlow : 0.4f);
 				laserParams.SetParameter("hitState", active ? 2 + objectGlowState : 0);
 			}
-			laserParams.SetParameter("mainTex", texture);
+			laserParams.SetParameter("mainTex", std::move(texture));
 			laserParams.SetParameter("laserPart", part);
 
 			// Get the length of this laser segment
 			Transform laserTransform = trackOrigin;
-			laserTransform *= Transform::Translation(Vector3{ 0.0f, posmult * position,
-				0.0f });
+			laserTransform *= Transform::Translation(Vector3{ 0.0f, position, 0.0f });
 
 			// Set laser color
 			laserParams.SetParameter("color", laserColors[laser->index]);
 
-			if(mesh)
+			if (mesh)
 			{
 				rq.Draw(laserTransform, mesh, laserMaterial, laserParams);
 			}
 		};
 
 		// Draw entry?
-		if(!laser->prev)
+		if (!laser->prev)
 		{
 			Mesh laserTail = m_laserTrackBuilder[laser->index]->GenerateTrackEntry(playback, laser);
 			DrawSegment(laserTail, laserTailTextures[laser->index], 1);
@@ -588,7 +588,7 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 		DrawSegment(laserMesh, laserTextures[laser->index], 0);
 
 		// Draw exit?
-		if(!laser->next && (laser->flags & LaserObjectState::flag_Instant) != 0) // Only draw exit on slams
+		if (!laser->next && (laser->flags & LaserObjectState::flag_Instant)) // Only draw exit on slams
 		{
 			Mesh laserTail = m_laserTrackBuilder[laser->index]->GenerateTrackExit(playback, laser);
 			DrawSegment(laserTail, laserTailTextures[2 + laser->index], 2);
@@ -612,17 +612,7 @@ void Track::DrawHitEffects(RenderQueue& rq)
 		bfx.Draw(rq);
 }
 
-void Track::DrawTrackOverlay(RenderQueue& rq, Texture texture, float heightOffset /*= 0.05f*/, float widthScale /*= 1.0f*/)
-{
-	MaterialParameterSet params;
-	params.SetParameter("mainTex", texture);
-	Transform transform = trackOrigin;
-	transform *= Transform::Scale({ widthScale, 1.0f, 1.0f });
-	transform *= Transform::Translation({ 0.0f, heightOffset, 0.0f });
-	rq.Draw(transform, trackMesh, trackOverlay, params);
-}
-
-void Track::DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, Color color /*= Color::White*/, float tilt /*= 0.0f*/)
+void Track::DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, Color color /*= Color::White*/, float tilt /*= 0.0f*/) const
 {
 	Transform spriteTransform = trackOrigin;
 	spriteTransform *= Transform::Translation(pos);
@@ -631,40 +621,9 @@ void Track::DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, 
 		spriteTransform *= Transform::Rotation({ tilt, 0.0f, 0.0f });
 
 	MaterialParameterSet params;
-	params.SetParameter("mainTex", tex);
+	params.SetParameter("mainTex", std::move(tex));
 	params.SetParameter("color", color);
 	rq.Draw(spriteTransform, centeredTrackMesh, spriteMaterial, params);
-}
-
-void Track::DrawCombo(RenderQueue& rq, uint32 score, Color color, float scale)
-{
-	if(score == 0)
-		return;
-	Vector<Mesh> meshes;
-	while(score > 0)
-	{
-		uint32 c = score % 10;
-		meshes.Add(comboSpriteMeshes[c]);
-		score -= c;
-		score /= 10;
-	}
-	const float charWidth = trackWidth * 0.15f * scale;
-	const float seperation = charWidth * 0.7f;
-	float size = (float)(meshes.size()-1) * seperation;
-	float halfSize = size * 0.5f;
-
-	///TODO: cleanup
-	MaterialParameterSet params;
-	params.SetParameter("mainTex", 0);
-	params.SetParameter("color", color);
-	for(uint32 i = 0; i < meshes.size(); i++)
-	{
-		float xpos = -halfSize + seperation * (meshes.size()-1-i);
-		Transform t = trackOrigin;
-		t *= Transform::Translation({ xpos, 0.3f, -0.004f});
-		t *= Transform::Scale({charWidth, charWidth, 1.0f});
-		rq.Draw(t, meshes[i], spriteMaterial, params);
-	}
 }
 
 void Track::DrawTrackCover(RenderQueue& rq)
@@ -693,7 +652,7 @@ void Track::DrawTrackCover(RenderQueue& rq)
 	#endif
 }
 
-void Track::DrawCalibrationCritLine(RenderQueue& rq)
+void Track::DrawCalibrationCritLine(RenderQueue& rq) const
 {
 	Transform t = trackOrigin;
 	{
@@ -710,7 +669,7 @@ void Track::DrawCalibrationCritLine(RenderQueue& rq)
 	}
 }
 
-Vector3 Track::TransformPoint(const Vector3 & p)
+Vector3 Track::TransformPoint(const Vector3 & p) const
 {
 	return trackOrigin.TransformPoint(p);
 }
@@ -726,26 +685,14 @@ void Track::AddHitEffect(uint32 buttonCode, Color color, bool hold)
 	m_buttonHitEffects[buttonCode].Reset(buttonCode, color, hold);
 }
 
-void Track::ClearEffects()
-{
-	m_trackHide = 0.0f;
-	m_trackHideSpeed = 0.0f;
-
-	for(auto it = m_hitEffects.begin(); it != m_hitEffects.end(); it++)
-	{
-		delete *it;
-	}
-	m_hitEffects.clear();
-}
-
 void Track::SetViewRange(float newRange)
 {
-	if(newRange != m_viewRange)
+	if (newRange != m_viewRange)
 	{
 		m_viewRange = newRange;
 
 		// Update view range
-		float newLaserLengthScale = trackLength / (m_viewRange * laserSpeedOffset);
+		float newLaserLengthScale = trackLength / (m_viewRange * m_laserSpeedOffset);
 		m_laserTrackBuilder[0]->laserLengthScale = newLaserLengthScale;
 		m_laserTrackBuilder[1]->laserLengthScale = newLaserLengthScale;
 
@@ -771,31 +718,31 @@ float Track::GetViewRange() const
 	return m_viewRange;
 }
 
-float Track::GetButtonPlacement(uint32 buttonIdx)
+float Track::GetButtonPlacement(uint32 buttonIdx) const
 {
 	if (buttonIdx < 4)
 	{
 		float x = buttonIdx * buttonWidth - (buttonWidth * 1.5f);
 		if (buttonIdx < 2)
 		{
-			x -= 0.5 * centerSplit * buttonWidth;
+			x -= 0.5f * centerSplit * buttonWidth;
 		}
 		else
 		{
-			x += 0.5 * centerSplit * buttonWidth;
+			x += 0.5f * centerSplit * buttonWidth;
 		}
 		return x;
 	}
 	else
 	{
-		float x = (buttonIdx - 4) * fxbuttonWidth - (fxbuttonWidth * 0.5f);
+		float x = (buttonIdx - 4) * fxButtonWidth - (fxButtonWidth * 0.5f);
 		if (buttonIdx < 5)
 		{
-			x -= 0.5 * centerSplit * buttonWidth;
+			x -= 0.5f * centerSplit * buttonWidth;
 		}
 		else
 		{
-			x += 0.5 * centerSplit * buttonWidth;
+			x += 0.5f * centerSplit * buttonWidth;
 		}
 		return x;
 	}
@@ -817,7 +764,18 @@ void Track::OnButtonReleased(Input::Button buttonCode)
 	m_buttonHitEffects[buttonIndex].held = false;
 }
 
-void Track::OnButtonReleasedDelta(Input::Button buttonCode, int32 delta)
+void Track::OnButtonReleasedDelta(Input::Button buttonCode, int32 _)
 {
 	OnButtonReleased(buttonCode);
+}
+
+void Track::SetVisualOffsets(float noteOffset, float laserOffset)
+{
+	m_noteOffset = noteOffset / 100;
+	m_laserOffset = trackLength * laserOffset / 100;
+}
+
+void Track::SetLaserSpeedOffset(bool offset)
+{
+	m_laserSpeedOffset = offset ? 0.9 : 1;
 }

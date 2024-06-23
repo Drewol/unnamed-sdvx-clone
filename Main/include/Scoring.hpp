@@ -133,12 +133,9 @@ public:
 	// Check if a laser is currently held
 	bool IsLaserHeld(uint32 laserIndex, bool includeSlams = true) const;
 
-	// Checks if a laser is currently not used or needed soon
-	bool IsLaserIdle(uint32 index) const;
-
 	bool IsFailOut() const;
 	class Gauge* GetTopGauge() const;
-	void SetAllGaugeValues(const Vector<float>, bool zeroRest=true);
+	void SetAllGaugeValues(const Vector<float>&, bool zeroRest=true);
 	void GetAllGaugeValues(Vector<float>& out) const;
 
 	// Calculates the maximum score of the current map
@@ -378,4 +375,3 @@ private:
 		uint32 judgementsProcessed = 0;
 	} m_replayDebugInfo;
 };
-

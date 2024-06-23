@@ -227,7 +227,11 @@ DefineEnum(GameConfigKeys,
 		   MirrorChart,
 		   RandomizeChart,
 		   BackupGauge,
-		   UpdateChannel)
+		   UpdateChannel,
+
+		   NoteVisualOffset,
+		   LaserVisualOffset,
+		   DistantLaserOffset)
 
 // List of settings overriden by profiles
 extern ConfigBase::KeyList GameConfigProfileSettings;
@@ -294,7 +298,6 @@ DefineEnum(QualityLevel,
 {
 public:
 	GameConfig();
-	void SetKeyBinding(GameConfigKeys key, Key value);
 
 	static int32 VERSION;
 
@@ -302,7 +305,7 @@ public:
 	void UpdateVersion();
 
 protected:
-	virtual void InitDefaults() override;
+	void InitDefaults() override;
 };
 
 // Main config instance

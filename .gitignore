@@ -51,6 +51,10 @@ vcpkg_installed/
 *.vcxproj
 *.vcxproj.filters
 
+# CLion project files
+.idea/
+Testing/
+
 # Ignore local cmake files
 cmake_install.cmake
 CPackConfig.cmake
@@ -60,6 +64,8 @@ CMakeCache.txt
 CMakeFiles
 Makefile
 !docs/Makefile
+.cmake/
+vcpkg-manifest-install.log
 
 # Not adding photoshop source files for textures
 *.psd
@@ -67,4 +73,3 @@ Makefile
 # Document build files
 docs/build
 docs/source/_build
-
