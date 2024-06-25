@@ -240,6 +240,25 @@ bool SettingsPage::PercentSetting(GameConfigKeys key, const std::string_view& la
 	}
 }
 
+bool SettingsPage::HighPercentSetting(GameConfigKeys key, const std::string_view& label)
+{
+	float value = g_gameConfig.GetFloat(key);
+	const float prevValue = value;
+
+	nk_labelf(m_nctx, nk_text_alignment::NK_TEXT_LEFT, label.data(), value * 100);
+	nk_slider_float(m_nctx, 0, &value, 2, 0.005f);
+
+	if (value != prevValue)
+	{
+		g_gameConfig.Set(key, value);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 Color SettingsPage::ColorInput(const Color& val, const std::string_view& label, bool& useHSV) {
 	LayoutRowDynamic(1);
 	Label(label);
