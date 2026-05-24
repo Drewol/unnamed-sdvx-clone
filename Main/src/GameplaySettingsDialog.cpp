@@ -5,6 +5,54 @@
 #include "SongSelect.hpp"
 #include "GuiUtils.hpp"
 
+namespace
+{
+    BaseGameSettingsDialog::Setting CreateGaugeSetting()
+    {
+        BaseGameSettingsDialog::Setting setting = std::make_unique<BaseGameSettingsDialog::SettingData>("Gauge", SettingType::Enum);
+        const Vector<GaugeTypes> gauges = {
+            GaugeTypes::Normal,
+            GaugeTypes::Hard,
+            GaugeTypes::Permissive,
+            GaugeTypes::Blastive,
+            GaugeTypes::Maxxive,
+            GaugeTypes::Basic,
+            GaugeTypes::Easy,
+            GaugeTypes::MaimaiDx,
+        };
+        const Vector<String> names = {
+            "EFFECTIVE",
+            "EXCESSIVE",
+            "Permissive",
+            "Blastive",
+            "MAXXIVE",
+            "Basic Rate",
+            "Easy Rate",
+            "maimai DX Rate",
+        };
+
+        for (size_t i = 0; i < gauges.size(); ++i)
+        {
+            setting->enumSetting.enumToVal.Add(static_cast<uint32>(gauges[i]), static_cast<int>(i));
+            setting->enumSetting.options.Add(names[i]);
+        }
+
+        auto getter = [gauges](BaseGameSettingsDialog::SettingData& data) {
+            GaugeTypes gauge = g_gameConfig.GetEnum<Enum_GaugeTypes>(GameConfigKeys::GaugeType);
+            data.enumSetting.val = data.enumSetting.enumToVal[static_cast<uint32>(gauge)];
+        };
+
+        auto setter = [gauges](const BaseGameSettingsDialog::SettingData& data) {
+            g_gameConfig.SetEnum<Enum_GaugeTypes>(GameConfigKeys::GaugeType, gauges[data.enumSetting.val]);
+        };
+
+        setting->enumSetting.val = setting->enumSetting.enumToVal[static_cast<uint32>(g_gameConfig.GetEnum<Enum_GaugeTypes>(GameConfigKeys::GaugeType))];
+        setting->getter.AddLambda(std::move(getter));
+        setting->setter.AddLambda(std::move(setter));
+        return setting;
+    }
+}
+
 void GameplaySettingsDialog::InitTabs()
 {
     Tab offsetTab = std::make_unique<TabData>();
@@ -32,14 +80,15 @@ void GameplaySettingsDialog::InitTabs()
     // For now we can't set these like this in mp
     if (m_multiPlayerScreen == nullptr)
     {
-        gameTab->settings.push_back(CreateEnumSetting<Enum_GaugeTypes>(GameConfigKeys::GaugeType, "Gauge"));
+        gameTab->settings.push_back(CreateGaugeSetting());
         gameTab->settings.back()->setter.AddLambda([this](const auto& data) { this->ResetTabs(); });
         if (g_gameConfig.GetEnum<Enum_GaugeTypes>(GameConfigKeys::GaugeType) == GaugeTypes::Blastive)
         {
             gameTab->settings.push_back(CreateIntSetting(GameConfigKeys::BlastiveLevel, "Blastive Rate Level", { 1, 10 } ));
             gameTab->settings.back()->intSetting.div = 2;
         }
-        gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::BackupGauge, "Backup Gauge"));
+        gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::BackupGauge, "ARS"));
+        gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::SCritical, "S-CRITICAL"));
         gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::RandomizeChart, "Random"));
         gameTab->settings.push_back(CreateBoolSetting(GameConfigKeys::MirrorChart, "Mirror"));
     }

@@ -1,0 +1,15 @@
+# This is a generated file and its contents are an internal implementation detail.
+# The download step will be re-executed if anything in this file changes.
+# No other meaning or use of this file is supported.
+
+method=git
+command=D:/Apps/CMake/bin/cmake.exe;-DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE;-P;D:/GitHub/unnamed-sdvx-clone/build-noinstall/_deps/zlib-subbuild/zlib-populate-prefix/tmp/zlib-populate-gitclone.cmake
+source_dir=D:/GitHub/unnamed-sdvx-clone/build-noinstall/_deps/zlib-src
+work_dir=D:/GitHub/unnamed-sdvx-clone/build-noinstall/_deps
+repository=https://github.com/zlib-ng/zlib-ng
+remote=origin
+init_submodules=TRUE
+recurse_submodules=--recursive
+submodules=
+CMP0097=NEW
+      

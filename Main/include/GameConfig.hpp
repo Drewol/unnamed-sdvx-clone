@@ -227,6 +227,7 @@ DefineEnum(GameConfigKeys,
 		   MirrorChart,
 		   RandomizeChart,
 		   BackupGauge,
+		   SCritical,
 		   UpdateChannel)
 
 // List of settings overriden by profiles
@@ -236,7 +237,11 @@ DefineEnum(GaugeTypes,
 		   Normal,
 		   Hard,
 		   Permissive,
-	       Blastive)
+	       Blastive,
+	       Maxxive,
+	       Basic,
+	       Easy,
+	       MaimaiDx)
 
 DefineEnum(SpeedMods,
 		   XMod,

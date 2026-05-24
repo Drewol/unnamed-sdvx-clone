@@ -5,7 +5,6 @@
 #include "Background.hpp"
 #include "ShadedMesh.hpp"
 #include "Game.hpp"
-#include "Track.hpp"
 #include "Camera.hpp"
 #include "lua.hpp"
 #include "Gauge.hpp"
@@ -257,6 +256,8 @@ public:
 		fullscreenMaterialParams.SetParameter("tilt", tilt);
 		fullscreenMaterialParams.SetParameter("screenCenter", screenCenter);
 		fullscreenMaterialParams.SetParameter("timing", timing);
+		fullscreenMaterialParams.SetParameter("reverseColor", false);
+		fullscreenMaterialParams.SetParameter("reverseColorAmount", 0.0f);
 		if (foreground && frameBufferTexture)
 		{
 			frameBufferTexture->SetFromFrameBuffer();

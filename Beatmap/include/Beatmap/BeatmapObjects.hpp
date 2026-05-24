@@ -331,6 +331,9 @@ struct TimingPoint
 	uint8 denominator = 4;
 	/// Multiplier for tickrates (x 2^tickrateOffset)
 	int8 tickrateOffset = 0;
+	/// Chain tick note values below and above 255 BPM.
+	uint32 chainTicksBelow255 = 16;
+	uint32 chainTicksAbove255 = 8;
 };
 
 struct LaneHideTogglePoint {

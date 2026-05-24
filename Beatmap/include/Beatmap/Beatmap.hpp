@@ -67,6 +67,8 @@ public:
 
 	using LaneTogglePoints = Vector<LaneHideTogglePoint>;
 	using LaneTogglePointsIterator = LaneTogglePoints::const_iterator;
+	using ReverseColorTogglePoints = Vector<LaneHideTogglePoint>;
+	using ReverseColorTogglePointsIterator = ReverseColorTogglePoints::const_iterator;
 
 public:
 	bool Load(BinaryStream& input, bool metadataOnly = false);
@@ -75,6 +77,7 @@ public:
 	const BeatmapSettings& GetMapSettings() const;
 
 	const Vector<LaneHideTogglePoint>& GetLaneTogglePoints() const { return m_laneTogglePoints; }
+	const Vector<LaneHideTogglePoint>& GetReverseColorTogglePoints() const { return m_reverseColorTogglePoints; }
 
 	const Vector<String>& GetSamplePaths() const { return m_samplePaths; }
 	const Vector<String>& GetSwitchablePaths() const { return m_switchablePaths; }
@@ -166,6 +169,8 @@ public:
 
 	LaneTogglePointsIterator GetFirstLaneTogglePoint() const { return m_laneTogglePoints.begin(); }
 	LaneTogglePointsIterator GetEndLaneTogglePoint() const { return m_laneTogglePoints.end(); }
+	ReverseColorTogglePointsIterator GetFirstReverseColorTogglePoint() const { return m_reverseColorTogglePoints.begin(); }
+	ReverseColorTogglePointsIterator GetEndReverseColorTogglePoint() const { return m_reverseColorTogglePoints.end(); }
 
 	float GetGraphValueAt(EffectTimeline::GraphType type, MapTime mapTime) const;
 	bool CheckIfManualTiltInstant(MapTime bound, MapTime mapTime) const;
@@ -186,6 +191,7 @@ private:
 
 	LineGraph m_centerSplit;
 	Vector<LaneHideTogglePoint> m_laneTogglePoints;
+	Vector<LaneHideTogglePoint> m_reverseColorTogglePoints;
 	Map<String, Map<MapTime, String>> m_positionalOptions;
 
 	Vector<String> m_samplePaths;

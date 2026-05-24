@@ -1,0 +1,149 @@
+Detecting compiler hash for triplet x64-windows...
+Compiler found: D:/Apps/Visual Studio/Visual Studio 2026/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/cl.exe
+The following packages will be built and installed:
+  * brotli:x64-windows@1.2.0
+  * bzip2[core,tool]:x64-windows@1.0.8#6
+    curl[core,non-http,ssl,sspi]:x64-windows@8.18.0#1
+    freetype[brotli,bzip2,core,png,zlib]:x64-windows@2.13.3
+    libarchive[bzip2,core,lz4,lzma,lzo,xar]:x64-windows@3.8.5
+    libiconv:x64-windows@1.18#3
+    libjpeg-turbo:x64-windows@3.1.3
+  * liblzma:x64-windows@5.8.2#1
+  * libogg:x64-windows@1.3.6#1
+  * libpng:x64-windows@1.6.55
+    libvorbis:x64-windows@1.3.7#4
+  * lz4:x64-windows@1.10.0
+  * lzo:x64-windows@2.10#9
+    sdl2:x64-windows@2.32.10
+  * vcpkg-cmake:x64-windows@2024-04-23
+  * vcpkg-cmake-config:x64-windows@2024-05-23
+    zlib:x64-windows@1.3.1
+Additional packages (*) will be modified to complete this operation.
+Restored 17 package(s) from C:\Users\user\AppData\Local\vcpkg\archives in 364 ms. Use --debug to see more details.
+Installing 1/17 vcpkg-cmake:x64-windows@2024-04-23...
+vcpkg-cmake:x64-windows@2024-04-23 package ABI: 2ef88504cb709b78f1540685ef91c09832d8e37e29d703707667d8b4b73909cd
+Elapsed time to handle vcpkg-cmake:x64-windows: 101 ms
+Installing 2/17 zlib:x64-windows@1.3.1...
+zlib:x64-windows@1.3.1 package ABI: 54102f20d971199b735ab5dd0244e162b88bdd6b3805685537c8f04894b647d3
+Elapsed time to handle zlib:x64-windows: 49.1 ms
+Installing 3/17 vcpkg-cmake-config:x64-windows@2024-05-23...
+vcpkg-cmake-config:x64-windows@2024-05-23 package ABI: 8fe973245cfc9a55ba968a7ead6cb720b013d02a1c2715ab5e5e1fb6fb885663
+Elapsed time to handle vcpkg-cmake-config:x64-windows: 76.9 ms
+Installing 4/17 curl[core,non-http,ssl,sspi]:x64-windows@8.18.0#1...
+curl[core,non-http,ssl,sspi]:x64-windows@8.18.0#1 package ABI: adbe0870112454f15a5424fc1f3fa187dd599f95b53bd29c2ae8c97f5d79a0bb
+Elapsed time to handle curl:x64-windows: 112 ms
+Installing 5/17 libpng:x64-windows@1.6.55...
+libpng:x64-windows@1.6.55 package ABI: 450674d4f4ce6b2398cf627b0f6be07628a5f295d2d6c42df759fdb6d124a141
+Elapsed time to handle libpng:x64-windows: 100 ms
+Installing 6/17 bzip2[core,tool]:x64-windows@1.0.8#6...
+bzip2[core,tool]:x64-windows@1.0.8#6 package ABI: 355afa6dce9a694b6b53d1a77bc0fc123f69a0413dc625352b52724060914f80
+Elapsed time to handle bzip2:x64-windows: 57 ms
+Installing 7/17 brotli:x64-windows@1.2.0...
+brotli:x64-windows@1.2.0 package ABI: c7ac0c04fa887dfa1f6ace980a0fc70b506a049e4da52b7b18a15012a597fc23
+Elapsed time to handle brotli:x64-windows: 92.4 ms
+Installing 8/17 freetype[brotli,bzip2,core,png,zlib]:x64-windows@2.13.3...
+freetype[brotli,bzip2,core,png,zlib]:x64-windows@2.13.3 package ABI: e8c5601a2034c25e56d6fe6353086260f7e8b40218dcdc08698ac7bac864a135
+Elapsed time to handle freetype:x64-windows: 95.8 ms
+Installing 9/17 lzo:x64-windows@2.10#9...
+lzo:x64-windows@2.10#9 package ABI: 8051ac106b1ff7b8216932709f358d708b112ddb4e89e39784d107109dc08166
+Elapsed time to handle lzo:x64-windows: 76.6 ms
+Installing 10/17 liblzma:x64-windows@5.8.2#1...
+liblzma:x64-windows@5.8.2#1 package ABI: 8483a6c57b8691e6269604f8224274a7c3730f29f2e827cb60dda9c1795ffb82
+Elapsed time to handle liblzma:x64-windows: 127 ms
+Installing 11/17 lz4:x64-windows@1.10.0...
+lz4:x64-windows@1.10.0 package ABI: 7f314d0342f632d193371ef96b33e8a1242aca5e47a48bbfdfb059ac1d370adf
+Elapsed time to handle lz4:x64-windows: 78.4 ms
+Installing 12/17 libarchive[bzip2,core,lz4,lzma,lzo,xar]:x64-windows@3.8.5...
+libarchive[bzip2,core,lz4,lzma,lzo,xar]:x64-windows@3.8.5 package ABI: d07e4fc447efcd5cc03deb406778b75029a8a51ffeb25ec9d4824d002f1ed047
+Elapsed time to handle libarchive:x64-windows: 48.4 ms
+Installing 13/17 libiconv:x64-windows@1.18#3...
+libiconv:x64-windows@1.18#3 package ABI: 15df39325627c3de92a36f9257fc408ca28a494c1cf48e74822d82755cc08eab
+Elapsed time to handle libiconv:x64-windows: 60.9 ms
+Installing 14/17 libjpeg-turbo:x64-windows@3.1.3...
+libjpeg-turbo:x64-windows@3.1.3 package ABI: 3b7d26eaf77bfedacf3f3620297740fecb8a21733b18f668e4b971727e0de777
+Elapsed time to handle libjpeg-turbo:x64-windows: 69.5 ms
+Installing 15/17 libogg:x64-windows@1.3.6#1...
+libogg:x64-windows@1.3.6#1 package ABI: fbc2b85c63144696412825bd3e7513e0a0ccce91bd4e6d39c47fdea9436bec58
+Elapsed time to handle libogg:x64-windows: 73.6 ms
+Installing 16/17 libvorbis:x64-windows@1.3.7#4...
+libvorbis:x64-windows@1.3.7#4 package ABI: 0befb47f20ddb56c95045b3e64fc8efc242e94f87c5605ad4338a5e5a2f7d412
+Elapsed time to handle libvorbis:x64-windows: 92.3 ms
+Installing 17/17 sdl2:x64-windows@2.32.10...
+sdl2:x64-windows@2.32.10 package ABI: 3f13ddb52e34377da9063ae921145afd7d8ac6ec17019723775860a6318e141a
+Elapsed time to handle sdl2:x64-windows: 160 ms
+Installed contents are licensed to you by owners. Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
+Some packages did not declare an SPDX license. Check the `copyright` file for each package for more information about their licensing.
+Packages installed in this vcpkg installation declare the following licenses:
+(FTL OR GPL-2.0-or-later)
+BSD-2-Clause
+BSD-3-Clause
+ISC
+MIT
+Zlib
+bzip2-1.0.6
+curl
+libpng-2.0
+The package zlib is compatible with built-in CMake targets:
+
+    find_package(ZLIB REQUIRED)
+    target_link_libraries(main PRIVATE ZLIB::ZLIB)
+
+curl is compatible with built-in CMake targets:
+
+    find_package(CURL REQUIRED)
+    target_link_libraries(main PRIVATE CURL::libcurl)
+
+freetype is compatible with built-in CMake targets:
+
+    find_package(Freetype REQUIRED)
+    target_link_libraries(main PRIVATE Freetype::Freetype) # since CMake 3.10
+
+libarchive is compatible with the CMake Find Module:
+
+  find_package(LibArchive REQUIRED)
+  target_link_libraries(main PRIVATE LibArchive::LibArchive) # since CMake 3.17
+
+libarchive provides pkg-config modules:
+
+  # library that can create and read several streaming archive formats
+  libarchive
+
+libiconv provides CMake targets:
+
+  find_package(Iconv REQUIRED)
+  target_link_libraries(main PRIVATE Iconv::Iconv)
+
+libjpeg-turbo is compatible with built-in implementation-agnostic CMake targets:
+
+    find_package(JPEG REQUIRED)
+    target_link_libraries(main PRIVATE JPEG::JPEG)
+
+libjpeg-turbo provides CMake targets for the TurboJPEG C API:
+
+    find_package(libjpeg-turbo CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE $<IF:$<TARGET_EXISTS:libjpeg-turbo::turbojpeg>,libjpeg-turbo::turbojpeg,libjpeg-turbo::turbojpeg-static>)
+
+The package libvorbis provides CMake targets:
+
+    # Vorbis reference encoder and decoder, low-level API
+    find_package(Vorbis CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE Vorbis::vorbis)
+
+    # Audio stream decoding and basic manipulation, high-level API
+    find_package(Vorbis CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE Vorbis::vorbisfile)
+
+    # Convenience API for setting up an encoding environment
+    find_package(Vorbis CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE Vorbis::vorbisenc)
+
+sdl2 provides CMake targets:
+
+    find_package(SDL2 CONFIG REQUIRED)
+    target_link_libraries(main
+        PRIVATE
+        $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+    )
+
+All requested installations completed successfully in: 1.5 s

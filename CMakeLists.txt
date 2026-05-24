@@ -17,6 +17,7 @@ endif()
 option(BUILD_SHARED_LIBS "Build libraries as shared libraries" OFF)
 option(USC_GNU_WERROR "Set Werror for gcc." OFF)
 option(USE_SYSTEM_CPR "Use system CPR" OFF)
+set(CPR_USE_SYSTEM_CURL ON CACHE BOOL "Use vcpkg/system curl for cpr" FORCE)
 
 project(USC VERSION 0.6.0)
 if(WIN32 AND ${CMAKE_VERSION} VERSION_GREATER "3.12")
@@ -73,16 +74,35 @@ endif()
 
 # Set path for discord-rpc dependency so that it doesn't download old version
 if (${CMAKE_VERSION} VERSION_GREATER "4.0")
-    file(
-        MAKE_DIRECTORY
+    set(DISCORD_RPC_THIRDPARTY_DIR
         ${PROJECT_SOURCE_DIR}/third_party/discord-rpc/thirdparty/
     )
-    file(
-        CREATE_LINK
+    set(RAPIDJSONTEST
         ${PROJECT_SOURCE_DIR}/third_party/rapidjson
-        ${PROJECT_SOURCE_DIR}/third_party/discord-rpc/thirdparty/rapidjson
-        SYMBOLIC
+        CACHE PATH "Bundled rapidjson path for discord-rpc" FORCE
     )
+    set(RAPIDJSON
+        ${PROJECT_SOURCE_DIR}/third_party/rapidjson
+        CACHE PATH "Bundled rapidjson path for discord-rpc" FORCE
+    )
+    file(
+        MAKE_DIRECTORY
+        ${DISCORD_RPC_THIRDPARTY_DIR}
+    )
+    if (WIN32)
+        file(
+            COPY
+            ${PROJECT_SOURCE_DIR}/third_party/rapidjson
+            DESTINATION ${DISCORD_RPC_THIRDPARTY_DIR}
+        )
+    else()
+        file(
+            CREATE_LINK
+            ${PROJECT_SOURCE_DIR}/third_party/rapidjson
+            ${DISCORD_RPC_THIRDPARTY_DIR}/rapidjson
+            SYMBOLIC
+        )
+    endif()
 endif()
 
 # Set folder where to find FindXXX.cmake and

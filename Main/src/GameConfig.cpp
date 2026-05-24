@@ -258,6 +258,7 @@ void GameConfig::InitDefaults()
 	Set(GameConfigKeys::MirrorChart, false);
 	SetEnum<Enum_GaugeTypes>(GameConfigKeys::GaugeType, GaugeTypes::Normal);
 	Set(GameConfigKeys::BackupGauge, false);
+	Set(GameConfigKeys::SCritical, true);
 	Set(GameConfigKeys::BlastiveLevel, 1);
 
 	Set(GameConfigKeys::GameplaySettingsDialogLastTab, 0);

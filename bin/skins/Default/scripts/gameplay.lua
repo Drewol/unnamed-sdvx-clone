@@ -249,6 +249,14 @@ function LoadGauge(type)
         name = "permissive"
     elseif type == 3 then
         name = "blastive"
+    elseif type == 4 then
+        name = "hard"
+    elseif type == 5 then
+        name = "normal"
+    elseif type == 6 then
+        name = "normal"
+    elseif type == 7 then
+        name = "normal"
     else
         name = "normal"
     end
@@ -329,6 +337,10 @@ function ResetLayoutInformation()
         gauge_info.meshes[1] = LoadGauge(1)
         gauge_info.meshes[2] = LoadGauge(2)
         gauge_info.meshes[3] = LoadGauge(3)
+        gauge_info.meshes[4] = LoadGauge(4)
+        gauge_info.meshes[5] = LoadGauge(5)
+        gauge_info.meshes[6] = LoadGauge(6)
+        gauge_info.meshes[7] = LoadGauge(7)
     end
 
     do --update crit_base_info
@@ -934,6 +946,14 @@ function draw_gauge(gauge)
         c = {r = 1, g = 148.0/255.0, b = 32/255.0}
     elseif gauge.type == 3 then
         c = {r = 62/255.0, g = 175/255.0, b = 151/255.0}
+    elseif gauge.type == 4 then
+        c = {r = 210/255.0, g = 220/255.0, b = 230/255.0}
+    elseif gauge.type == 5 then
+        c = {r = 0.35, g = 0.9, b = 0.25}
+    elseif gauge.type == 6 then
+        c = {r = 1.0, g = 0.9, b = 0.25}
+    elseif gauge.type == 7 then
+        c = {r = 0.55, g = 0.95, b = 1.0}
     else
         c = {r = 1, g = 0.5, b = 0}
     end

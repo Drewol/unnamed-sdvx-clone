@@ -52,6 +52,15 @@ ClearMark Scoring::CalculateBadge(const ScoreIndex& score)
 		return ClearMark::NormalClear;
 	}
 
+	if (score.gaugeType == GaugeType::Maxxive && score.gauge > 0)
+		return ClearMark::HardClear;
+
+	if ((score.gaugeType == GaugeType::Basic || score.gaugeType == GaugeType::Easy) && score.gauge >= 0.70)
+		return ClearMark::NormalClear;
+
+	if (score.gaugeType == GaugeType::MaimaiDx && score.gauge >= 0.80)
+		return ClearMark::NormalClear;
+
 	if (score.gaugeType == GaugeType::Normal && score.gauge >= 0.70) //Normal Clear
 		return ClearMark::NormalClear;
 
@@ -176,9 +185,29 @@ void Scoring::Reset(const MapTimeRange& range)
 
 	uint16 total = m_playback->GetBeatmap().GetMapSettings().total;
 
-	if (m_options.backupGauge && m_options.gaugeType != GaugeType::Normal)
+	const bool usesEffectiveArs =
+		m_options.gaugeType == GaugeType::Hard ||
+		m_options.gaugeType == GaugeType::Permissive ||
+		m_options.gaugeType == GaugeType::Blastive ||
+		m_options.gaugeType == GaugeType::Maxxive;
+
+	if (m_options.backupGauge && usesEffectiveArs)
 	{
 		GaugeNormal* gauge = new GaugeNormal();
+		gauge->Init(mapTotals, total, m_endTime);
+		m_gaugeStack.push_back(gauge);
+	}
+
+	if (!m_options.backupGauge && m_options.gaugeType == GaugeType::Basic)
+	{
+		GaugeEasy* gauge = new GaugeEasy();
+		gauge->Init(mapTotals, total, m_endTime);
+		m_gaugeStack.push_back(gauge);
+	}
+
+	if (m_options.backupGauge && m_options.gaugeType == GaugeType::Maxxive)
+	{
+		GaugeHard* gauge = new GaugeHard();
 		gauge->Init(mapTotals, total, m_endTime);
 		m_gaugeStack.push_back(gauge);
 	}
@@ -198,6 +227,30 @@ void Scoring::Reset(const MapTimeRange& range)
 	else if (m_options.gaugeType == GaugeType::Blastive)
 	{
 		GaugeHard* gauge = new GaugeBlastive(m_options.gaugeLevel);
+		gauge->Init(mapTotals, total, m_endTime);
+		m_gaugeStack.push_back(gauge);
+	}
+	else if (m_options.gaugeType == GaugeType::Maxxive)
+	{
+		GaugeHard* gauge = new GaugeMaxxive();
+		gauge->Init(mapTotals, total, m_endTime);
+		m_gaugeStack.push_back(gauge);
+	}
+	else if (m_options.gaugeType == GaugeType::Basic)
+	{
+		GaugeBasic* gauge = new GaugeBasic();
+		gauge->Init(mapTotals, total, m_endTime);
+		m_gaugeStack.push_back(gauge);
+	}
+	else if (m_options.gaugeType == GaugeType::Easy)
+	{
+		GaugeEasy* gauge = new GaugeEasy();
+		gauge->Init(mapTotals, total, m_endTime);
+		m_gaugeStack.push_back(gauge);
+	}
+	else if (m_options.gaugeType == GaugeType::MaimaiDx)
+	{
+		GaugeMaimaiDx* gauge = new GaugeMaimaiDx(!m_options.backupGauge);
 		gauge->Init(mapTotals, total, m_endTime);
 		m_gaugeStack.push_back(gauge);
 	}
@@ -629,7 +682,7 @@ double Scoring::m_CalculateTicks(const TimingPoint* tp) const
 {
 	// Tick rate based on BPM
 	float offset = powf(2.0, tp->tickrateOffset);
-	const double tickNoteValue = (16 / (pow(2, Math::Max((int)(log2(tp->GetBPM())) - 7, 0)))) * offset;
+	const double tickNoteValue = (tp->GetBPM() <= 255.0 ? tp->chainTicksBelow255 : tp->chainTicksAbove255) * offset;
 	return tp->GetWholeNoteLength() / tickNoteValue;
 }
 
@@ -1270,7 +1323,10 @@ void Scoring::m_TickHit(ScoreTick* tick, uint32 index, MapTime delta /*= 0*/)
 		stat->rating = ScoreHitRating::Perfect;
 		stat->hold++;
 	}
-	m_UpdateGauges(stat->rating, tick->flags);
+	const bool sCritical = tick->HasFlag(TickFlags::Button)
+		&& stat->rating == ScoreHitRating::Perfect
+		&& abs(delta) <= (hitWindow.perfect / 2 + 1);
+	m_UpdateGauges(stat->rating, tick->flags, sCritical);
 	m_OnTickProcessed(tick, index);
 
 	// Count hits per category (miss,perfect,etc.)
@@ -1309,7 +1365,7 @@ void Scoring::m_TickMiss(ScoreTick* tick, uint32 index, MapTime delta)
 	categorizedHits[0]++;
 }
 
-void Scoring::m_UpdateGauges(ScoreHitRating rating, TickFlags flags)
+void Scoring::m_UpdateGauges(ScoreHitRating rating, TickFlags flags, bool sCritical)
 {
 	if (m_gaugeStack.size() == 1 && m_gaugeStack.back()->FailOut())
 	{
@@ -1334,7 +1390,7 @@ void Scoring::m_UpdateGauges(ScoreHitRating rating, TickFlags flags)
 		{
 			for (auto& g : m_gaugeStack)
 			{
-				g->LongHit();
+				g->LongHit(true);
 			}
 		}
 	}
@@ -1358,7 +1414,7 @@ void Scoring::m_UpdateGauges(ScoreHitRating rating, TickFlags flags)
 		{
 			for (auto& g : m_gaugeStack)
 			{
-				g->CritHit();
+				g->CritHit(sCritical);
 			}
 		}
 	}
@@ -1367,6 +1423,8 @@ void Scoring::m_UpdateGauges(ScoreHitRating rating, TickFlags flags)
 	{
 		Gauge* lostGauge = m_gaugeStack.back();
 		m_gaugeStack.pop_back();
+		if (lostGauge->GetType() == GaugeType::Basic && m_gaugeStack.back()->GetType() == GaugeType::Easy)
+			m_gaugeStack.back()->SetValue(0.0f);
 		OnGaugeChanged.Call(lostGauge, m_gaugeStack.back());
 		delete lostGauge;
 	}

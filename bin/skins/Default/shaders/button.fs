@@ -10,6 +10,9 @@ in vec4 position;
 
 uniform sampler2D mainTex;
 uniform bool hasSample;
+uniform bool reverseColor;
+uniform float reverseColorAmount;
+uniform ivec2 viewport;
 
 
 uniform float trackPos;
@@ -18,6 +21,14 @@ uniform float hiddenCutoff;
 uniform float hiddenFadeWindow;
 uniform float suddenCutoff;
 uniform float suddenFadeWindow;
+
+float reverseMask()
+{
+    float screenY = gl_FragCoord.y / float(viewport.y);
+    if(reverseColor)
+        return step(1.0 - reverseColorAmount, screenY);
+    return 1.0 - step(reverseColorAmount, screenY);
+}
 
 #ifdef EMBEDDED
 void main()
@@ -32,6 +43,7 @@ void main()
         mainColor.xyzw += addition;
     }
 
+    mainColor.xyz = mix(mainColor.xyz, vec3(1.0) - mainColor.xyz, reverseMask() * mainColor.a);
     target = mainColor;
 }
 
@@ -78,6 +90,7 @@ void main()
         mainColor.xyzw += addition;
     }
 
+    mainColor.xyz = mix(mainColor.xyz, vec3(1.0) - mainColor.xyz, reverseMask() * mainColor.a);
     target = mainColor;
     target *= hide();
 }

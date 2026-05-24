@@ -10,6 +10,17 @@ uniform sampler2D mainTex;
 uniform vec4 lCol;
 uniform vec4 rCol;
 uniform float hidden;
+uniform bool reverseColor;
+uniform float reverseColorAmount;
+uniform ivec2 viewport;
+
+float reverseMask()
+{
+    float screenY = gl_FragCoord.y / float(viewport.y);
+    if(reverseColor)
+        return step(1.0 - reverseColorAmount, screenY);
+    return 1.0 - step(reverseColorAmount, screenY);
+}
 
 void main()
 {	
@@ -32,5 +43,6 @@ void main()
         col.xyz = vec3(0.);
         col.a = col.a > 0.0 ? 0.3 : 0.0;
     }
+    col.xyz = mix(col.xyz, vec3(0.85), reverseMask() * col.a);
     target = col;
 }

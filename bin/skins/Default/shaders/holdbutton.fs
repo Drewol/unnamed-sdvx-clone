@@ -9,6 +9,9 @@ in vec4 position;
 #endif
 
 uniform sampler2D mainTex;
+uniform bool reverseColor;
+uniform float reverseColorAmount;
+uniform ivec2 viewport;
 uniform float objectGlow;
 uniform float trackPos;
 uniform float trackScale;
@@ -20,10 +23,19 @@ uniform float suddenFadeWindow;
 // 20Hz flickering. 0 = Miss, 1 = Inactive, 2 & 3 = Active alternating.
 uniform int hitState;
 
+float reverseMask()
+{
+    float screenY = gl_FragCoord.y / float(viewport.y);
+    if(reverseColor)
+        return step(1.0 - reverseColorAmount, screenY);
+    return 1.0 - step(reverseColorAmount, screenY);
+}
+
 #ifdef EMBEDDED
 void main()
 {    
     vec4 mainColor = texture(mainTex, fsTex.xy);
+    mainColor.xyz = mix(mainColor.xyz, vec3(1.0) - mainColor.xyz, reverseMask() * mainColor.a);
 
     target = mainColor;
 	target.xyz = target.xyz * (1.0 + objectGlow * 0.3);
@@ -64,6 +76,7 @@ float hide()
 void main()
 {    
     vec4 mainColor = texture(mainTex, fsTex.xy);
+    mainColor.xyz = mix(mainColor.xyz, vec3(1.0) - mainColor.xyz, reverseMask() * mainColor.a);
 
     target = mainColor;
 

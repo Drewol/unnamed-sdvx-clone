@@ -141,6 +141,7 @@ public:
 	// Called when a new timing point becomes active
 	Delegate<Beatmap::TimingPointsIterator> OnTimingPointChanged;
 	Delegate<Beatmap::LaneTogglePointsIterator> OnLaneToggleChanged;
+	Delegate<Beatmap::ReverseColorTogglePointsIterator> OnReverseColorToggleChanged;
 
 	Delegate<EventKey, EventData> OnEventChanged;
 
@@ -157,6 +158,8 @@ private:
 	Beatmap::TimingPointsIterator m_SelectTimingPoint(MapTime time, bool allowReset = false) const;
 	[[nodiscard]]
 	Beatmap::LaneTogglePointsIterator m_SelectLaneTogglePoint(MapTime time, bool allowReset = false) const;
+	[[nodiscard]]
+	Beatmap::ReverseColorTogglePointsIterator m_SelectReverseColorTogglePoint(MapTime time, bool allowReset = false) const;
 
 	// End object iterator, this is not a valid iterator, but points to the element after the last element
 	[[nodiscard]]
@@ -165,6 +168,8 @@ private:
 	bool IsEndTiming(const Beatmap::TimingPointsIterator& obj) const;
 	[[nodiscard]]
 	bool IsEndLaneToggle(const Beatmap::LaneTogglePointsIterator& obj) const;
+	[[nodiscard]]
+	bool IsEndReverseColorToggle(const Beatmap::ReverseColorTogglePointsIterator& obj) const;
 
 	// Current map position of this playback object
 	MapTime m_playbackTime;
@@ -179,6 +184,7 @@ private:
 
 	Beatmap::TimingPointsIterator m_currentTiming;
 	Beatmap::LaneTogglePointsIterator m_currentLaneTogglePoint;
+	Beatmap::ReverseColorTogglePointsIterator m_currentReverseColorTogglePoint;
 
 	TrackRollBehaviour m_currentTrackRollBehaviour = TrackRollBehaviour::Normal;
 	MapTime m_lastTrackRollBehaviourChange = 0;

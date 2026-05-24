@@ -107,7 +107,7 @@ end
 
 function getScoreBadgeDesc(s)
     if s.badge == 1 then
-        if s.gauge_type == 1 then return "crash"
+        if s.gauge_type ~= 0 then return "crash"
         else return string.format("%.1f%%", s.gauge * 100)
         end
     elseif 2 <= s.badge and s.badge <= 4 and s.misses < 10 then
@@ -401,7 +401,17 @@ draw_gauge_graph = function(chart, x, y, w, h, alpha, xfocus, xscale)
     
     gfx.StrokeWidth(2.0)
     if chart.gauge_type ~= 0 then
-        gfx.StrokeColor(255,80,0,alpha)
+        if chart.gauge_type == 4 then
+            gfx.StrokeColor(210,220,230,alpha)
+        elseif chart.gauge_type == 5 then
+            gfx.StrokeColor(90,230,65,alpha)
+        elseif chart.gauge_type == 6 then
+            gfx.StrokeColor(255,230,65,alpha)
+        elseif chart.gauge_type == 7 then
+            gfx.StrokeColor(140,240,255,alpha)
+        else
+            gfx.StrokeColor(255,80,0,alpha)
+        end
         gfx.Stroke()
     else
         gfx.StrokeColor(0,180,255,alpha)
