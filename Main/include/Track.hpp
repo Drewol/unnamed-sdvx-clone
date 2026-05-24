@@ -14,7 +14,8 @@ struct TimedEffect
 	explicit TimedEffect(float duration);
 	virtual ~TimedEffect() = default;
 	void Reset(float duration);
-	float GetRate() const { return time / duration; }
+	[[nodiscard]]
+	float GetRate() const noexcept { return time / duration; }
 	virtual void Draw(class RenderQueue& rq) = 0;
 	virtual void Tick(float deltaTime);
 
@@ -30,7 +31,8 @@ struct ButtonHitEffect : TimedEffect
 	void Draw(class RenderQueue& rq) override;
 	void Tick(float deltaTime) override;
 	void Reset(int buttonCode, Color color, bool hold);
-	float GetRate() const { return Math::Min(time, hitEffectDuration) / duration; }
+	[[nodiscard]]
+	float GetRate() const noexcept { return Math::Min(time, hitEffectDuration) / duration; }
 
 	uint32 buttonCode; // Only used for Draw
 	Color color;
@@ -43,11 +45,12 @@ struct ButtonHitEffect : TimedEffect
 // Button hit rating effect
 struct ButtonHitRatingEffect : TimedEffect
 {
-	ButtonHitRatingEffect(uint32 buttonCode, ScoreHitRating rating);
+	ButtonHitRatingEffect(uint32 buttonCode, ScoreHitRating rating, bool sCritical = false);
 	void Draw(class RenderQueue& rq) override;
 
 	uint32 buttonCode;
 	ScoreHitRating rating;
+	bool sCritical;
 };
 
 struct TimedHitEffect : TimedEffect
@@ -108,10 +111,12 @@ public:
 	void DrawTrackOverlay(RenderQueue& rq, Texture texture, float heightOffset = 0.05f, float widthScale = 1.0f);
 	// Draw a centered sprite at pos, relative from the track
 	void DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, Color color = Color::White, float tilt = 0.0f);
+	void DrawSpritePart(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, Rect uv, Color color = Color::White, float tilt = 0.0f);
 	void DrawCombo(RenderQueue& rq, uint32 score, Color color, float scale = 1.0f);
 	void DrawTrackCover(RenderQueue& rq);
 	void DrawCalibrationCritLine(RenderQueue& rq);
 
+	[[nodiscard]]
 	Vector3 TransformPoint(const Vector3& p);
 
 	// Adds a sprite effect to the track
@@ -122,9 +127,12 @@ public:
 	void SetViewRange(float newRange);
 	void SendLaserAlert(uint8 laserIdx);
 	void SetLaneHide(bool hidden, double duration);
+	void SetReverseColor(bool enabled, double duration);
+	[[nodiscard]]
 	float GetViewRange() const;
 
 	// Normal/FX button X-axis placement
+	[[nodiscard]]
 	float GetButtonPlacement(uint32 buttonIdx);
 
     void OnHoldEnter(Input::Button buttonCode);
@@ -145,6 +153,8 @@ public:
 
 	float laserSpeedOffset = 0.90f;
 	float centerSplit = 0.0f;
+	bool reverseColor = false;
+	float reverseColorAmount = 0.0f;
 
 	// Visible time elements on the playfield track
 	// a single unit is 1 beat in distance
@@ -237,5 +247,6 @@ private:
 	// How much the track is hidden. 1.0 = fully hidden, 0.0 = fully visible
 	float m_trackHide = 0.0f;
 	float m_trackHideSpeed = 0.0f;
+	float m_reverseColorSpeed = 0.0f;
 	float m_btOverFxScale = 0.8f;
 };

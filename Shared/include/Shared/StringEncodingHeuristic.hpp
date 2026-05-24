@@ -65,22 +65,28 @@ protected:
 public:
 	using Score = int32_t;
 
+	[[nodiscard]]
 	virtual StringEncoding GetEncoding() const { return StringEncoding::Unknown; }
 
-	inline Score GetScore() const { return m_score; }
+	[[nodiscard]]
+	inline Score GetScore() const noexcept { return m_score; }
+	[[nodiscard]]
 	inline size_t GetCount() const { return m_count; }
 
-	inline bool IsValid() const { return GetScore() >= 0; }
+	[[nodiscard]]
+	inline bool IsValid() const noexcept { return GetScore() >= 0; }
 
 	virtual bool Consume(const uint8_t ch) = 0;
 	virtual bool Finalize() = 0;
 
 	// Operators can be confusing (lower score: better)
-	inline bool Beats(const StringEncodingHeuristic& that) const { return !that.IsValid() || IsValid() && m_score < that.m_score; }
+	[[nodiscard]]
+	inline bool Beats(const StringEncodingHeuristic& that) const noexcept { return !that.IsValid() || IsValid() && m_score < that.m_score; }
 
 	void DebugPrint() const;
 
 protected:
+	[[nodiscard]]
 	virtual CharClass GetCharClass(const uint16_t ch) const = 0;
 	inline bool Process(const uint16_t ch) { return Process(GetCharClass(ch)); }
 
@@ -112,11 +118,14 @@ class NullHeuristic : public StringEncodingHeuristic
 public:
 	NullHeuristic() : StringEncodingHeuristic() { MarkInvalid(); }
 
+	[[nodiscard]]
 	bool Consume(const uint8_t ch) override { return false; }
+	[[nodiscard]]
 	bool Finalize() override { return false; }
 
 protected:
-	CharClass GetCharClass(const uint16_t ch) const { return CharClass::INVALID; }
+	[[nodiscard]]
+	CharClass GetCharClass(const uint16_t ch) const override { return CharClass::INVALID; }
 };
 
 // A heuristic for single-byte character encodings
@@ -135,6 +144,7 @@ public:
 	bool Finalize() override { if (m_hi) MarkInvalid(); return IsValid(); }
 
 protected:
+	[[nodiscard]]
 	virtual bool RequiresSecondByte(const uint8_t ch) const = 0;
 
 	uint8_t m_hi = 0;
@@ -148,7 +158,8 @@ class StringEncodingHeuristicCollection<Heuristic>
 {
 public:
 	StringEncodingHeuristicCollection() = default;
-	inline const StringEncodingHeuristic& GetBestHeuristic() const { return m_head; }
+	[[nodiscard]]
+	inline const StringEncodingHeuristic& GetBestHeuristic() const noexcept { return m_head; }
 	inline void Consume(const char c) { if(m_head.IsValid()) m_head.Consume(c); }
 	inline void Finalize() { m_head.Finalize(); }
 
@@ -207,6 +218,7 @@ class TieredStringEncodingHeuristic
 {
 public:
 	TieredStringEncodingHeuristic() = default;
+	[[nodiscard]]
 	inline const StringEncodingHeuristic& GetBestHeuristic() const
 	{
 		const StringEncodingHeuristic& heuristic = m_collection.GetBestHeuristic();
@@ -232,12 +244,14 @@ protected:
 class UTF8Heuristic : public StringEncodingHeuristic
 {
 public:
+	[[nodiscard]]
 	StringEncoding GetEncoding() const override { return StringEncoding::UTF8; }
 
 	bool Consume(const uint8_t ch) override;
 	bool Finalize() override { if (m_remaining) MarkInvalid(); return IsValid();}
 
 protected:
+	[[nodiscard]]
 	CharClass GetCharClass(const uint16_t ch) const override;
 
 	uint32_t m_currChar = 0;
@@ -247,41 +261,52 @@ protected:
 class CP850Heuristic : public SingleByteEncodingHeuristic
 {
 public:
+	[[nodiscard]]
 	StringEncoding GetEncoding() const override { return StringEncoding::CP850; }
 
 protected:
+	[[nodiscard]]
 	CharClass GetCharClass(const uint16_t ch) const override;
 };
 
 class CP923Heuristic : public SingleByteEncodingHeuristic
 {
 public:
+	[[nodiscard]]
 	StringEncoding GetEncoding() const override { return StringEncoding::CP923; }
 
 protected:
+	[[nodiscard]]
 	CharClass GetCharClass(const uint16_t ch) const override;
 };
 
 class CP932Heuristic : public TwoByteEncodingHeuristic
 {
 public:
+	[[nodiscard]]
 	StringEncoding GetEncoding() const override { return StringEncoding::CP932; }
 
 protected:
+	[[nodiscard]]
 	bool RequiresSecondByte(const uint8_t ch) const override;
+	[[nodiscard]]
 	CharClass GetCharClass(const uint16_t ch) const override;
 };
 
 class CP949Heuristic : public TwoByteEncodingHeuristic
 {
 public:
+	[[nodiscard]]
 	StringEncoding GetEncoding() const override { return StringEncoding::CP949; }
 
 private:
+	[[nodiscard]]
 	CharClass GetEUCKRCharClass(const uint16_t ch) const;
 
 protected:
+	[[nodiscard]]
 	bool RequiresSecondByte(const uint8_t ch) const override;
+	[[nodiscard]]
 	CharClass GetCharClass(const uint16_t ch) const override;
 };
 
@@ -289,10 +314,13 @@ protected:
 class CP954Heuristic : public TwoByteEncodingHeuristic
 {
 public:
+	[[nodiscard]]
 	StringEncoding GetEncoding() const override { return StringEncoding::CP954; }
 
 protected:
+	[[nodiscard]]
 	bool RequiresSecondByte(const uint8_t ch) const override;
+	[[nodiscard]]
 	CharClass GetCharClass(const uint16_t ch) const override;
 };
 

@@ -549,8 +549,18 @@ draw_gauge_graph = function(x, y, w, h, alpha, xfocus, xscale)
     end
 
     gfx.StrokeWidth(2.0)
-    if result.gauge_type == 1 then
-        gfx.StrokeColor(255,80,0,alpha)
+    if result.gauge_type ~= 0 then
+        if result.gauge_type == 4 then
+            gfx.StrokeColor(210,220,230,alpha)
+        elseif result.gauge_type == 5 then
+            gfx.StrokeColor(90,230,65,alpha)
+        elseif result.gauge_type == 6 then
+            gfx.StrokeColor(255,230,65,alpha)
+        elseif result.gauge_type == 7 then
+            gfx.StrokeColor(140,240,255,alpha)
+        else
+            gfx.StrokeColor(255,80,0,alpha)
+        end
         gfx.Stroke()
     else
         gfx.StrokeColor(0,180,255,alpha)

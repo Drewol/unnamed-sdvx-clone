@@ -42,11 +42,17 @@ public:
 	struct PlayOptions;
 
 	virtual ~Game() = default;
+	[[nodiscard]]
 	static Game* Create(ChartIndex* chart, PlayOptions&& options);
+	[[nodiscard]]
 	static Game* Create(MultiplayerScreen*, ChartIndex* chart, PlayOptions&& options);
+	[[nodiscard]]
 	static Game* Create(ChallengeManager*, ChartIndex* chart, PlayOptions&& options);
+	[[nodiscard]]
 	static Game* Create(const String& mapPath, PlayOptions&& options);
+	[[nodiscard]]
 	static Game* CreatePractice(ChartIndex* chart, PlayOptions&& options);
+	[[nodiscard]]
 	static PlaybackOptions PlaybackOptionsFromSettings();
 
 	struct PlayOptions
@@ -82,35 +88,49 @@ public:
 public:
 	// When the game is still going, false when the map is done, all ending sequences have played, etc.
 	// also false when the player leaves the game
+	[[nodiscard]]
 	virtual bool IsPlaying() const = 0;
 
+	[[nodiscard]]
 	virtual class Track& GetTrack() = 0;
+	[[nodiscard]]
 	virtual class Camera& GetCamera() = 0;
+	[[nodiscard]]
 	virtual class BeatmapPlayback& GetPlayback() = 0;
+	[[nodiscard]]
 	virtual class Scoring& GetScoring() = 0;
 	// Samples of the gauge for the performance graph
+	[[nodiscard]]
 	virtual const std::array<float, 256>& GetGaugeSamples() = 0;
+	[[nodiscard]]
 	virtual PlaybackOptions GetPlaybackOptions() = 0;
 	// Map jacket image
+	[[nodiscard]]
 	virtual Texture GetJacketImage() = 0;
 	// Difficulty data
+	[[nodiscard]]
 	virtual ChartIndex* GetChartIndex() = 0;
 	// The beatmap
+	[[nodiscard]]
 	virtual Ref<class Beatmap> GetBeatmap() = 0;
 	
 	// Whether the score can be scored
 	// (Full playthrough, playback speed at least x1)
+	[[nodiscard]]
 	virtual bool IsStorableScore() = 0;
 
 	// Current playback speed
 	// Warning: this returns 0 when the song is not playing (ex: end of the game).
+	[[nodiscard]]
 	virtual float GetPlaybackSpeed() = 0;
 
+	[[nodiscard]]
 	virtual const PlayOptions& GetPlayOptions() const = 0;
 
 	virtual class LuaBindable* MakeTrackLuaBindable(struct lua_State* L) = 0;
 
 	// Get lua state
+	[[nodiscard]]
 	virtual struct lua_State* GetLuaState() = 0;
 	// Set demo mode
 	virtual void SetDemoMode(bool value) = 0; 
@@ -120,17 +140,23 @@ public:
 	// Set song db for random song selection and practice mode setups
 	virtual void SetSongDB(class MapDatabase* db) = 0;
 	// The folder that contians the map
+	[[nodiscard]]
 	virtual const String& GetChartRootPath() const = 0;
 	// Setup and set gameplay lua
 	virtual void SetInitialGameplayLua(struct lua_State* L) = 0;
 	virtual void SetGameplayLua(struct lua_State* L) = 0;
 	// Full path to map
+	[[nodiscard]]
 	virtual const String& GetChartPath() const = 0;
 	// Is this a multiplayer game
+	[[nodiscard]]
 	virtual bool IsMultiplayerGame() const = 0;
 
+	[[nodiscard]]
 	virtual int GetRetryCount() const = 0;
+	[[nodiscard]]
 	virtual String GetMissionStr() const = 0;
+	[[nodiscard]]
 	virtual Replay* GetCurrentReplay() const = 0;
 
 	virtual void SetGauge(float) = 0;

@@ -100,6 +100,7 @@ private:
 
 	// Current lane toggle status
 	bool m_hideLane = false;
+	bool m_reverseColor = false;
 
 	// Use m-mod and what m-mod speed
 	SpeedMods m_speedMod;
@@ -689,6 +690,8 @@ public:
 		m_started = false;
 		m_ended = false;
 		m_hideLane = false;
+		m_reverseColor = false;
+		m_track->SetReverseColor(false, 0.0);
 		m_transitioning = false;
 		m_scoring.Reset(m_playOptions.range);
 		m_scoring.SetInput(&g_input);
@@ -1118,7 +1121,7 @@ public:
 			g_application->ScriptError("gameplay", m_lua); \
 		} \
 		lua_pop(m_lua, 1); \
-		} while (0)
+		} while (false)
 
 			// Render Critical Line Base
 			lua_getglobal(m_lua, "render_crit_base");
@@ -1371,6 +1374,7 @@ public:
 		m_playback = BeatmapPlayback(*m_beatmap);
 		m_playback.OnEventChanged.Add(this, &Game_Impl::OnEventChanged);
 		m_playback.OnLaneToggleChanged.Add(this, &Game_Impl::OnLaneToggleChanged);
+		m_playback.OnReverseColorToggleChanged.Add(this, &Game_Impl::OnReverseColorToggleChanged);
 		m_playback.OnFXBegin.Add(this, &Game_Impl::OnFXBegin);
 		m_playback.OnFXEnd.Add(this, &Game_Impl::OnFXEnd);
 		m_playback.OnLaserAlertEntered.Add(this, &Game_Impl::OnLaserAlertEntered);
@@ -2256,7 +2260,10 @@ public:
 		if (rating != ScoreHitRating::Idle)
 		{
 			// Floating text effect
-			m_track->AddEffect(new ButtonHitRatingEffect(buttonIdx, rating));
+			const bool sCritical = rating == ScoreHitRating::Perfect
+				&& g_gameConfig.GetBool(GameConfigKeys::SCritical)
+				&& std::abs(delta) <= (m_scoring.hitWindow.perfect / 2 + 1);
+			m_track->AddEffect(new ButtonHitRatingEffect(buttonIdx, rating, sCritical));
 
 			if (rating == ScoreHitRating::Good)
 			{
@@ -2408,6 +2415,13 @@ public:
 		double duration = m_currentTiming->beatDuration * 4.0f * (tp->duration / 192.0f) * 0.001f;
 		m_track->SetLaneHide(!m_hideLane, duration);
 		m_hideLane = !m_hideLane;
+	}
+
+	void OnReverseColorToggleChanged(Beatmap::ReverseColorTogglePointsIterator tp)
+	{
+		double duration = m_currentTiming->beatDuration * 4.0f * (tp->duration / 192.0f) * 0.001f;
+		m_reverseColor = !m_reverseColor;
+		m_track->SetReverseColor(m_reverseColor, duration);
 	}
 
 	void OnEventChanged(EventKey key, EventData data)
@@ -3706,6 +3720,14 @@ PlaybackOptions Game::PlaybackOptionsFromSettings()
 		options.gaugeType = GaugeType::Blastive;
 		options.gaugeLevel = (float)g_gameConfig.GetInt(GameConfigKeys::BlastiveLevel) / 2.0f;
 	}
+	else if (gaugeType == GaugeTypes::Maxxive)
+		options.gaugeType = GaugeType::Maxxive;
+	else if (gaugeType == GaugeTypes::Basic)
+		options.gaugeType = GaugeType::Basic;
+	else if (gaugeType == GaugeTypes::Easy)
+		options.gaugeType = GaugeType::Easy;
+	else if (gaugeType == GaugeTypes::MaimaiDx)
+		options.gaugeType = GaugeType::MaimaiDx;
 
 	options.mirror = g_gameConfig.GetBool(GameConfigKeys::MirrorChart);
 	options.random = g_gameConfig.GetBool(GameConfigKeys::RandomizeChart);

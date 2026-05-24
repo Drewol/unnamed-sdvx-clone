@@ -12,11 +12,17 @@ public:
 	bool StepRow();
 	void Rewind();
 	void Finish();
+	[[nodiscard]]
 	int32 IntColumn(int32 index = 0) const;
+	[[nodiscard]]
 	int64 Int64Column(int32 index = 0) const;
+	[[nodiscard]]
 	double DoubleColumn(int32 index = 0) const;
+	[[nodiscard]]
 	String StringColumn(int32 index = 0) const;
+	[[nodiscard]]
 	String StringColumnEmptyOnNull(int32 index = 0) const;
+	[[nodiscard]]
 	Buffer BlobColumn(int32 index = 0) const;
 	void BindInt(int32 index, const int32& value);
 	void BindInt64(int32 index, const int64& value);

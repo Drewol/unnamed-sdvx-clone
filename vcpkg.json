@@ -14,7 +14,7 @@
             "default-features": false,
             "features": [
                 "bzip2",
-                "libxml2",
+                "xar",
                 "lz4",
                 "lzma",
                 "lzo"

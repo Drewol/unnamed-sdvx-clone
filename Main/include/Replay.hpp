@@ -23,9 +23,11 @@ struct ReplayJudgement
 	ReplayJudgement(int8 r, HitStatType ty, int8 l, int16 d, MapTime t) :
 		rating(r), type((uint8)ty), lane(l), delta(d), time(t) {};
 
-	inline MapTime GetHitTime() const { return time + delta; }
-	inline HitStatType GetType() const { return HitStatType(type); }
-	inline void ToSimpleHitStat(SimpleHitStat& stat) const
+	[[nodiscard]]
+	inline MapTime GetHitTime() const noexcept { return time + delta; }
+	[[nodiscard]]
+	inline HitStatType GetType() const noexcept { return HitStatType(type); }
+	inline void ToSimpleHitStat(SimpleHitStat& stat) const noexcept
 	{
 		stat.rating = rating;
 		stat.type = type;
@@ -56,10 +58,11 @@ struct ForwardCompatStruct
 			return false;
 		return true;
 	}
-	void SetDone() {
+	void SetDone() noexcept {
 		version = V;
 	}
-	bool IsInitialized() const
+	[[nodiscard]]
+	bool IsInitialized() const noexcept
 	{
 		return version != 0;
 	}
@@ -170,7 +173,8 @@ public:
 		m_chartInfo = chart;
 		m_chartInfo.SetDone();
 	}
-	const ReplayChartInfo& GetChartInfo() const { return m_chartInfo; }
+	[[nodiscard]]
+	const ReplayChartInfo& GetChartInfo() const noexcept { return m_chartInfo; }
 
 	void AttachScoreInfo(ScoreIndex* score)
 	{
@@ -178,7 +182,8 @@ public:
 		m_scoreInfo = score;
 		m_scoreInfo.SetDone();
 	}
-	ReplayScoreInfo& GetScoreInfo() { return m_scoreInfo; }
+	[[nodiscard]]
+	ReplayScoreInfo& GetScoreInfo() noexcept { return m_scoreInfo; }
 
 	void AttachJudgementEvents(const Vector<SimpleHitStat>& v)
 	{
@@ -188,29 +193,34 @@ public:
 			m_judgementEvents.push_back(hs);
 	}
 
-	ReplayType GetType() const
+	[[nodiscard]]
+	ReplayType GetType() const noexcept
 	{
 		return m_type;
 	}
 
 	void SetHitWindow(const HitWindow& window) { m_hitWindow = window; }
-	const HitWindow& GetHitWindow() const { return m_hitWindow; }
+	[[nodiscard]]
+	const HitWindow& GetHitWindow() const noexcept { return m_hitWindow; }
 
 	void SetOffsets(const ReplayOffsets& offs)
 	{
 		m_offsets = offs;
 		m_offsets.SetDone();
 	}
-	ReplayOffsets& GetOffsets() { return m_offsets; }
+	[[nodiscard]]
+	ReplayOffsets& GetOffsets() noexcept { return m_offsets; }
 
-	void DoneInit()
+	void DoneInit() noexcept
 	{
 		m_initialized = true;
 	}
 
-	ScoreIndex* GetScoreIndex() const { return m_scoreIndex; }
+	[[nodiscard]]
+	ScoreIndex* GetScoreIndex() const noexcept { return m_scoreIndex; }
 
-	bool IsPlaying() const { return m_isPlaying; }
+	[[nodiscard]]
+	bool IsPlaying() const noexcept { return m_isPlaying; }
 
 	void Restart()
 	{
@@ -226,9 +236,11 @@ public:
 		}
 	}
 
-	uint32 CurrentMaxScore() const { return m_currentMaxScore; }
+	[[nodiscard]]
+	uint32 CurrentMaxScore() const noexcept { return m_currentMaxScore; }
 
-	uint32 CurrentScore() const { return m_currentScore; }
+	[[nodiscard]]
+	uint32 CurrentScore() const noexcept { return m_currentScore; }
 
 	// Put this replay into playback mode
 	void InitializePlayback()
@@ -239,6 +251,7 @@ public:
 
 	void UpdateToTime(MapTime lastTime);
 
+	[[nodiscard]]
 	bool HasJudgement(int lane) const
 	{
 		assert(m_isPlaying);
@@ -246,7 +259,8 @@ public:
 		return !m_playbackQueue[lane].empty();
 	}
 
-	const Vector<ReplayJudgement>& GetJudgements() const
+	[[nodiscard]]
+	const Vector<ReplayJudgement>& GetJudgements() const noexcept
 	{
 		return m_judgementEvents;
 	}

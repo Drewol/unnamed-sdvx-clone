@@ -36,16 +36,22 @@ public:
 	// Poll/Update input
 	void Update(float deltaTime);
 
+	[[nodiscard]]
 	bool GetButton(Button button) const;
+	[[nodiscard]]
 	float GetAbsoluteLaser(int laser) const;
+	[[nodiscard]]
 	bool Are3BTsHeld() const;
+	[[nodiscard]]
 	uint32 GetButtonBits() const;
 
 	// Controller state as a string
 	// Primarily used for debugging
+	[[nodiscard]]
 	String GetControllerStateString() const;
 
 	// Returns a handle to a mouse lock, release it to unlock the mouse
+	[[nodiscard]]
 	MouseLockHandle LockMouse();
 
 	// Event handlers
@@ -54,12 +60,17 @@ public:
 	virtual void OnMouseMotion(int32 x, int32 y);
 
 	// Request laser input state
+	[[nodiscard]]
 	float GetInputLaserDir(uint32 laserIdx);
 
 	// Request laser input state without sensitivity applied
+	[[nodiscard]]
 	float GetAbsoluteInputLaserDir(uint32 laserIdx);
+	[[nodiscard]]
 	static double CalculateRealMouseSens(double sensSetting);
+	[[nodiscard]]
 	static double EstimatePprFromSens(double sens);
+	[[nodiscard]]
 	static double CalculateSensFromPpr(double ppr);
 
 	// Button delegates

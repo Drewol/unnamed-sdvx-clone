@@ -11,5 +11,6 @@ protected:
 	Test() = default;
 public:
 	virtual ~Test() = default;
+	[[nodiscard]]
 	static Test* Create();
 };

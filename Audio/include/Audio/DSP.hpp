@@ -37,6 +37,7 @@ public:
 	// -1 to 1 LR pan value
 	float panning = 0.0f;
 	virtual void Process(float *out, uint32 numSamples);
+	[[nodiscard]]
 	virtual const char *GetName() const { return "PanDSP"; }
 };
 
@@ -46,6 +47,7 @@ public:
 	BQFDSP(uint32 sampleRate);
 
 	virtual void Process(float *out, uint32 numSamples);
+	[[nodiscard]]
 	virtual const char *GetName() const { return "BQFDSP"; }
 
 	// Sets the filter parameters
@@ -64,6 +66,7 @@ public:
 	CombinedFilterDSP(uint32 sampleRate);
 	void SetLowPass(float q, float freq, float peakQ, float peakGain);
 	void SetHighPass(float q, float freq, float peakQ, float peakGain);
+	[[nodiscard]]
 	virtual const char *GetName() const { return "CombinedFilterDSP"; }
 
 	virtual void Process(float *out, uint32 numSamples);
@@ -81,6 +84,7 @@ public:
 
 	float releaseTime = 0.1f;
 	virtual void Process(float *out, uint32 numSamples);
+	[[nodiscard]]
 	virtual const char *GetName() const { return "LimiterDSP"; }
 
 private:
@@ -96,6 +100,7 @@ public:
 	// Duration of samples, <1 = disable
 	void SetPeriod(float period = 0);
 	virtual void Process(float *out, uint32 numSamples);
+	[[nodiscard]]
 	virtual const char *GetName() const { return "BitCrusherDSP"; }
 
 private:
@@ -118,6 +123,7 @@ public:
 	float low = 0.1f;
 
 	virtual void Process(float *out, uint32 numSamples);
+	[[nodiscard]]
 	virtual const char *GetName() const { return "GateDSP"; }
 
 private:
@@ -137,6 +143,7 @@ public:
 	void SetLength(double length);
 
 	virtual void Process(float *out, uint32 numSamples);
+	[[nodiscard]]
 	virtual const char *GetName() const { return "TapeStopDSP"; }
 
 private:
@@ -157,6 +164,7 @@ public:
 	void SetMaxLength(uint32 length);
 
 	virtual void Process(float *out, uint32 numSamples);
+	[[nodiscard]]
 	virtual const char *GetName() const { return "RetriggerDSP"; }
 
 private:
@@ -182,6 +190,7 @@ public:
 	float q = 1.414f;
 
 	virtual void Process(float *out, uint32 numSamples);
+	[[nodiscard]]
 	virtual const char *GetName() const { return "WobbleDSP"; }
 
 private:
@@ -207,6 +216,7 @@ public:
 	void SetStage(uint32 stage);
 
 	virtual void Process(float *out, uint32 numSamples);
+	[[nodiscard]]
 	virtual const char *GetName() const { return "PhaserDSP"; }
 
 private:
@@ -230,6 +240,7 @@ public:
 	void SetVolume(float volume);
 
 	virtual void Process(float *out, uint32 numSamples);
+	[[nodiscard]]
 	virtual const char *GetName() const { return "FlangerDSP"; }
 
 private:
@@ -259,6 +270,7 @@ public:
 	float feedback = 0.6f;
 
 	virtual void Process(float *out, uint32 numSamples);
+	[[nodiscard]]
 	virtual const char *GetName() const { return "EchoDSP"; }
 
 private:
@@ -281,6 +293,7 @@ public:
 	float ratio = 5.0f;
 
 	virtual void Process(float *out, uint32 numSamples);
+	[[nodiscard]]
 	virtual const char *GetName() const { return "SidechainDSP"; }
 
 private:
@@ -302,6 +315,7 @@ public:
 	~PitchShiftDSP();
 
 	virtual void Process(float *out, uint32 numSamples);
+	[[nodiscard]]
 	virtual const char *GetName() const { return "PitchShiftDSP"; }
 
 private:

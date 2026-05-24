@@ -75,15 +75,18 @@ public:
     void Tick(float deltaTime);
     void Render(float deltaTime);
     bool Init();
+    [[nodiscard]]
     bool IsSelectionOnPressable();
 
     inline void AddTab(Tab tab) { m_tabs.emplace_back(std::move(tab)); }
 
-    inline bool IsActive() const { return m_active; }
-    inline bool IsInitialized() const { return m_isInitialized; }
+    [[nodiscard]]
+    inline bool IsActive() const noexcept { return m_active; }
+    [[nodiscard]]
+    inline bool IsInitialized() const noexcept { return m_isInitialized; }
 
-    inline void Open() { assert(!m_active); m_targetActive = true; }
-    inline void Close() { assert(m_active); m_targetActive = false; }
+    inline void Open() noexcept { assert(!m_active); m_targetActive = true; }
+    inline void Close() noexcept { assert(m_active); m_targetActive = false; }
 
     void ResetTabs();
 
@@ -93,19 +96,27 @@ protected:
     virtual void InitTabs() = 0;
     virtual void OnAdvanceTab() {};
 
+    [[nodiscard]]
     Setting CreateBoolSetting(GameConfigKeys key, String name);
+    [[nodiscard]]
     Setting CreateIntSetting(GameConfigKeys key, String name, Vector2i range, int step = 1);
+    [[nodiscard]]
     Setting CreateFloatSetting(GameConfigKeys key, String name, Vector2 range, float mult = 1.0f);
 
+    [[nodiscard]]
     Setting CreateBoolSetting(String label, bool& val);
+    [[nodiscard]]
     Setting CreateIntSetting(String label, int& val, Vector2i range, int step = 1);
+    [[nodiscard]]
     Setting CreateButton(String label, std::function<void(const BaseGameSettingsDialog::SettingData&)>&& callback);
 
     template <typename EnumClass>
+    [[nodiscard]]
     Setting CreateEnumSetting(GameConfigKeys key, String name);
 
-    inline int GetCurrentTab() const { return m_currentTab; }
-    inline void SetCurrentTab(int tabIndex) { m_currentTab = tabIndex; }
+    [[nodiscard]]
+    inline int GetCurrentTab() const noexcept { return m_currentTab; }
+    inline void SetCurrentTab(int tabIndex) noexcept { m_currentTab = tabIndex; }
 
     Vector2 m_pos = { 0.5f, 0.5f };
 

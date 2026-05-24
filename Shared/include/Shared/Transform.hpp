@@ -51,15 +51,23 @@ public:
 	static Transform LookAt(const Vector3& position, const Vector3& target, const Vector3& up = Vector3(0, 1, 0));
 	static Transform FromAxes(Vector3 bitangent, Vector3 tangent, Vector3 normal);
 
+	[[nodiscard]]
 	Vector3 GetPosition() const;
+	[[nodiscard]]
 	Vector3 GetScale() const;
+	[[nodiscard]]
 	Vector3 GetEuler() const;
 
+	[[nodiscard]]
 	Vector3 GetForward() const;
+	[[nodiscard]]
 	Vector3 GetUp() const;
+	[[nodiscard]]
 	Vector3 GetRight() const;
 
+	[[nodiscard]]
 	Vector3 TransformPoint(const Vector3& position) const;
+	[[nodiscard]]
 	Vector3 TransformDirection(const Vector3& direction) const;
 
 	float mat[16] = {
@@ -72,12 +80,15 @@ public:
 
 namespace ProjectionMatrix
 {
+	[[nodiscard]]
 	Transform CreatePerspective(float field_of_view, float aspect_ratio, float z_near, float z_far);
+	[[nodiscard]]
 	Transform CreateOrthographic(float left, float right, float bottom, float top, float z_near, float z_far);
 }
 
 namespace CameraMatrix
 {
 	// Inverts a matrix to create a camera matrix or the inverse camera matrix
+	[[nodiscard]]
 	Transform BillboardMatrix(const Transform& matrix);
 }

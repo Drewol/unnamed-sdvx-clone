@@ -15,7 +15,8 @@ public:
 		SCROLL_SPEED,
 	};
 
-	inline LineGraph& GetGraph(GraphType type)
+	[[nodiscard]]
+	inline LineGraph& GetGraph(GraphType type) noexcept
 	{
 		switch (type) {
 		case GraphType::ZOOM_BOTTOM: return m_zoomBottom;
@@ -29,7 +30,8 @@ public:
 		}
 	}
 
-	inline const LineGraph& GetGraph(GraphType type) const
+	[[nodiscard]]
+	inline const LineGraph& GetGraph(GraphType type) const noexcept
 	{
 		switch (type) {
 		case GraphType::ZOOM_BOTTOM: return m_zoomBottom;

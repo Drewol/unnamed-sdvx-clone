@@ -1,6 +1,9 @@
 # Unnamed SDVX clone ![language: C/C++](https://img.shields.io/badge/language-C%2FC%2B%2B-green.svg) [![Build](https://github.com/Drewol/unnamed-sdvx-clone/workflows/Build/badge.svg)](https://github.com/Drewol/unnamed-sdvx-clone/actions)
 A game based on [KShootMania](http://www.kshootmania.com/) and [SDVX](https://remywiki.com/What_is_SOUND_VOLTEX).
 
+### Project status
+This repository is practically in maintenance mode as I would much rather spend my time on the rewrite to Rust that can be found [here](https://github.com/Drewol/kson-rs).
+
 ### [**Download latest Windows build**](https://drewol.me/Downloads/Game.zip)
 
 ### [**FAQ**](https://github.com/Drewol/unnamed-sdvx-clone/wiki/F.-A.-Q.)

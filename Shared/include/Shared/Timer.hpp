@@ -44,34 +44,49 @@ public:
 		return std::chrono::duration_cast<dur>(std::chrono::high_resolution_clock::now() - m_start);
 	}
 
+	[[nodiscard]]
 	inline std::chrono::nanoseconds::rep Nanoseconds() const
 	{
 		return Duration<std::chrono::nanoseconds>().count();
 	}
+
+	[[nodiscard]]
 	inline std::chrono::microseconds::rep Microseconds() const
 	{
 		return Duration<std::chrono::microseconds>().count();
 	}
+
+	[[nodiscard]]
 	inline std::chrono::milliseconds::rep Milliseconds() const
 	{
 		return Duration<std::chrono::milliseconds>().count();
 	}
+	
+	[[nodiscard]]
 	inline std::chrono::seconds::rep Seconds() const
 	{
 		return Duration<std::chrono::seconds>().count();
 	}
+
+	[[nodiscard]]
 	inline std::chrono::minutes::rep Minutes() const
 	{
 		return Duration<std::chrono::minutes>().count();
 	}
+
+	[[nodiscard]]
 	inline std::chrono::hours::rep Hours() const
 	{
 		return Duration<std::chrono::hours>().count();
 	}
+
+	[[nodiscard]]
 	inline float SecondsAsFloat() const
 	{
 		return Duration<std::chrono::duration<float>>().count();
 	}
+
+	[[nodiscard]]
 	inline double SecondsAsDouble() const
 	{
 		return Duration<std::chrono::duration<double>>().count();

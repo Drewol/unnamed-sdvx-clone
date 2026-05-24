@@ -35,24 +35,30 @@ namespace Shared
 			: pos(pos), size(size)
 		{
 		}
-		T Left() const
+
+		[[nodiscard]]
+		T Left() const noexcept
 		{
 			return pos.x;
 		}
-		T Top() const
+		[[nodiscard]]
+		T Top() const noexcept
 		{
 			return pos.y;
 		}
-		T Bottom() const
+		[[nodiscard]]
+		T Bottom() const noexcept
 		{
 			return pos.y + size.y;
 		}
-		T Right() const
+		[[nodiscard]]
+		T Right() const noexcept
 		{
 			return pos.x + size.x;
 		}
 		// Moves the edges of this rectangle inward or outward
-		RectangleBase Offset(float amount) const
+		[[nodiscard]]
+		RectangleBase Offset(float amount) const noexcept
 		{
 			RectangleBase newRect = *this;
 			VectorType newSize = newRect.size + VectorType(amount);
@@ -67,7 +73,8 @@ namespace Shared
 			return newRect;
 		}
 		// Moves the upper and lower edges of this rectangle inward or outward
-		RectangleBase OffsetY(float amount) const
+		[[nodiscard]]
+		RectangleBase OffsetY(float amount) const noexcept
 		{
 			RectangleBase newRect = *this;
 			VectorType newSize = newRect.size + VectorType(0, amount);
@@ -80,7 +87,8 @@ namespace Shared
 			return newRect;
 		}
 		// Moves the upper and lower edges of this rectangle inward or outward
-		RectangleBase OffsetX(float amount) const
+		[[nodiscard]]
+		RectangleBase OffsetX(float amount) const noexcept
 		{
 			RectangleBase newRect = *this;
 			VectorType newSize = newRect.size + VectorType(amount, 0);
@@ -93,18 +101,21 @@ namespace Shared
 			return newRect;
 		}
 
-		inline bool Contains(const RectangleBase& other) const
+		[[nodiscard]]
+		inline bool Contains(const RectangleBase& other) const noexcept
 		{
 			return Left() <= other.Left() && other.Right() <= Right() && Top() <= other.Top() && other.Bottom() <= Bottom();
 		}
 
-		inline bool NotSmallerThan(const VectorType& other_size) const
+		[[nodiscard]]
+		inline bool NotSmallerThan(const VectorType& other_size) const noexcept
 		{
 			return size.x >= other_size.x && size.y >= other_size.y;
 		}
 
 		// Clamp the parameter to this rectangle
-		RectangleBase Clamp(const RectangleBase& other) const
+		[[nodiscard]]
+		RectangleBase Clamp(const RectangleBase& other) const noexcept
 		{
 			T top = Math::Max(other.Top(), Top());
 			T bottom = Math::Min(other.Bottom(), Bottom());
@@ -148,11 +159,13 @@ namespace Shared
 			pos = VectorType(left, bottom);
 			size = VectorType(right - left, top - bottom);
 		}
-		T Top() const
+		[[nodiscard]]
+		T Top() const noexcept
 		{
 			return pos.y + size.y;
 		}
-		T Bottom() const
+		[[nodiscard]]
+		T Bottom() const noexcept
 		{
 			return pos.y;
 		}

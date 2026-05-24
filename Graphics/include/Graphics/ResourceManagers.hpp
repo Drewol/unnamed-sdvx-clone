@@ -30,6 +30,7 @@ namespace Graphics
 		static void AssignResourceManager(ResourceType type, IResourceManager* mgr);
 
 		template<ResourceType E>
+		[[nodiscard]]
 		static ResourceManager<typename ResourceManagerTypes<E>::Type>& GetResourceManager()
 		{
 			return *(ResourceManager<typename ResourceManagerTypes<E>::Type>*)GetResourceManager(E);

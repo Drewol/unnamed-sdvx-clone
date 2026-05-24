@@ -19,6 +19,7 @@ namespace Graphics
 		virtual T Init(float systemTime) { return Sample(systemTime); }
 		// Used to process over lifetime events
 		virtual T Sample(float duration) = 0;
+		[[nodiscard]]
 		virtual T GetMax() = 0;
 		virtual IParticleParameter<T>* Duplicate() const = 0;
 	};
@@ -32,10 +33,12 @@ namespace Graphics
 	{
 	public:
 		PPConstant(const T& val) : val(val) {};
+		[[nodiscard]]
 		T Sample(float in) override
 		{
 			return val;
 		}
+		[[nodiscard]]
 		T GetMax() override
 		{
 			return val;
@@ -75,10 +78,12 @@ namespace Graphics
 	{
 	public:
 		PPRange(const T& min, const T& max) : min(min), max(max) { delta = max - min; };
+		[[nodiscard]]
 		T Sample(float in) override
 		{
 			return (max - min) * in + min;
 		}
+		[[nodiscard]]
 		T GetMax() override
 		{
 			return Math::Max(max, min);
@@ -99,6 +104,7 @@ namespace Graphics
 			delta = max - min;
 			rangeOut = 1.0f - fadeIn;
 		};
+		[[nodiscard]]
 		T Sample(float in) override
 		{
 			if(in < fadeIn)
@@ -110,6 +116,7 @@ namespace Graphics
 				return (in - fadeIn) / rangeOut * (max - min) + min;
 			}
 		}
+		[[nodiscard]]
 		T GetMax() override
 		{
 			return Math::Max(max, min);
@@ -129,10 +136,12 @@ namespace Graphics
 		PPSphere(float radius) : radius(radius)
 		{
 		}
+		[[nodiscard]]
 		Vector3 Sample(float in) override
 		{
 			return Vector3(Random::FloatRange(-1.0f, 1.0f), Random::FloatRange(-1.0f, 1.0f), Random::FloatRange(-1.0f, 1.0f)) * radius;
 		}
+		[[nodiscard]]
 		Vector3 GetMax() override
 		{
 			return Vector3(radius);
@@ -149,6 +158,7 @@ namespace Graphics
 		PPBox(Vector3 size) : size(size)
 		{
 		}
+		[[nodiscard]]
 		Vector3 Sample(float in) override
 		{
 			Vector3 offset = -size * 0.5f;
@@ -157,6 +167,7 @@ namespace Graphics
 			offset.z += Random::Float() * size.z;
 			return offset;
 		}
+		[[nodiscard]]
 		Vector3 GetMax() override
 		{
 			return size;
@@ -188,6 +199,7 @@ namespace Graphics
 			Vector3 bitangent = VectorMath::Cross(tangent, normal);
 			mat = Transform::FromAxes(bitangent, tangent, normal);
 		}
+		[[nodiscard]]
 		virtual Vector3 Sample(float in) override
 		{
 			float length = Random::FloatRange(lengthMin, lengthMax);
@@ -210,6 +222,7 @@ namespace Graphics
 			v *= length;
 			return v;
 		}
+		[[nodiscard]]
 		Vector3 GetMax() override
 		{
 			return Vector3(0, 0, lengthMax);

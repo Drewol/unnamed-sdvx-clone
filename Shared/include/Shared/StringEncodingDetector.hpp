@@ -20,7 +20,8 @@ public:
 	inline void Feed(const char* data) { Feed(data, strlen(data)); }
 	inline void Feed(const String& str) { Feed(str.c_str(), str.size()); }
 
-	inline StringEncoding GetEncoding() { if (!m_done) End(); return m_encoding; }
+	[[nodiscard]]
+	inline StringEncoding GetEncoding() noexcept { if (!m_done) End(); return m_encoding; }
 
 	inline static StringEncoding Detect(const char* data, const size_t len);
 	inline static StringEncoding Detect(const char* data) { return Detect(data, strlen(data)); }

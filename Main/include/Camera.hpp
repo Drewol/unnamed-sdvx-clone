@@ -63,12 +63,19 @@ public:
 	void SetTargetRoll(float target);
 	void SetSpin(float direction, uint32 duration, uint8 type, class BeatmapPlayback& playback);
 	void SetXOffsetBounce(float direction, uint32 duration, uint32 amplitude, uint32 frequency, float decay, class BeatmapPlayback &playback);
+	[[nodiscard]]
 	float GetRoll() const;
+	[[nodiscard]]
 	float GetCritLineRoll() const;
+	[[nodiscard]]
 	float GetActualRoll() const;
+	[[nodiscard]]
 	float GetHorizonHeight();
+	[[nodiscard]]
 	Vector2i GetScreenCenter();
+	[[nodiscard]]
 	float GetShakeOffset();
+	[[nodiscard]]
 	bool GetRollKeep();
 	void SetManualTilt(bool manualTilt);
 	void SetManualTiltInstant(bool instant);
@@ -81,6 +88,7 @@ public:
 	@param index - index of the laser. 0 for blue laser, 1 for red laser
 	@return the roll ignore timer for the given laser index
 	*/
+	[[nodiscard]]
 	float GetRollIgnoreTimer(uint32 index);
 
 	/*
@@ -88,15 +96,19 @@ public:
 	@param index - index of the laser. 0 for blue laser, 1 for red laser
 	@return the slam amount for the given laser index
 	*/
+	[[nodiscard]]
 	float GetSlamAmount(uint32 index);
 
 	// Gets the spin angle for the background shader
-	float GetBackgroundSpin() const { return m_bgSpin; }
+	[[nodiscard]]
+	float GetBackgroundSpin() const noexcept { return m_bgSpin; }
 
+	[[nodiscard]]
 	Vector2 Project(const Vector3& pos);
 
 	// Generates a new render state for drawing from this cameras Point of View
 	// the clipped boolean indicates whenether to clip the cameras clipping planes to the track range
+	[[nodiscard]]
 	RenderState CreateRenderState(bool clipped);
 
 	// The track being watched

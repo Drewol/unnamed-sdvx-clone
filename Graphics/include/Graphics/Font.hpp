@@ -17,8 +17,10 @@ namespace Graphics
 		Ref<class MeshRes> mesh;
 	public:
 		~TextRes();
+		[[nodiscard]]
 		Ref<class TextureRes> GetTexture();
-		Ref<class MeshRes> GetMesh() { return mesh; }
+		[[nodiscard]]
+		Ref<class MeshRes> GetMesh() const noexcept { return mesh; }
 		void Draw();
 		//width, line height, base height
 		Vector3 size;

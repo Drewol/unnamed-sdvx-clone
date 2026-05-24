@@ -14,6 +14,7 @@ struct KShootTickSetting
 class KShootTick
 {
 public:
+	[[nodiscard]]
 	String ToString() const;
 	void Clear();
 
@@ -34,8 +35,8 @@ public:
 class KShootTime
 {
 public:
-	KShootTime();;
-	KShootTime(uint32_t block, uint32_t tick);;
+	KShootTime();
+	KShootTime(uint32_t block, uint32_t tick);
 	operator bool() const;
 	uint32_t block;
 	uint32_t tick;
@@ -63,7 +64,9 @@ public:
 		operator bool() const;
 		KShootTick& operator*();
 		KShootTick* operator->();
+		[[nodiscard]]
 		const KShootTime& GetTime() const;
+		[[nodiscard]]
 		const KShootBlock& GetCurrentBlock() const;
 	private:
 		KShootMap& m_map;
@@ -75,9 +78,13 @@ public:
 	KShootMap();
 	~KShootMap();
 	bool Init(BinaryStream& input, bool metadataOnly);
+	[[nodiscard]]
 	bool GetBlock(const KShootTime& time, KShootBlock*& tickOut);
+	[[nodiscard]]
 	bool GetTick(const KShootTime& time, KShootTick*& tickOut);
+	[[nodiscard]]
 	float TimeToFloat(const KShootTime& time) const;
+	[[nodiscard]]
 	float TranslateLaserChar(char c) const;
 
 	Map<String, String> settings;

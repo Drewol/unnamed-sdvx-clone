@@ -1680,6 +1680,14 @@ bool ChallengeManager::m_setupNextChart()
 		opts.gaugeType = GaugeType::Blastive;
 		opts.gaugeLevel = (float)g_gameConfig.GetInt(GameConfigKeys::BlastiveLevel) / 2.0f;
 	}
+	if (gaugeType == GaugeTypes::Maxxive && m_currentOptions.allow_excessive.Get(true))
+		opts.gaugeType = GaugeType::Maxxive;
+	if (gaugeType == GaugeTypes::Basic)
+		opts.gaugeType = GaugeType::Basic;
+	if (gaugeType == GaugeTypes::Easy)
+		opts.gaugeType = GaugeType::Easy;
+	if (gaugeType == GaugeTypes::MaimaiDx)
+		opts.gaugeType = GaugeType::MaimaiDx;
 
 	opts.backupGauge = g_gameConfig.GetBool(GameConfigKeys::BackupGauge) && m_currentOptions.allow_ars.Get(true);
 
@@ -1754,7 +1762,7 @@ void ChallengeManager::ReportScore(Game* game, ClearMark clearMark)
 		}
 		else if (clearMark < ClearMark::NormalClear)
 		{
-			bool canFail = game->GetPlaybackOptions().gaugeType == GaugeType::Hard;
+			bool canFail = game->GetPlaybackOptions().gaugeType != GaugeType::Normal;
 			if (canFail)
 			{
 				// If we failed part way though we can use our distance as our percentage

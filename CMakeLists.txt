@@ -17,10 +17,14 @@ endif()
 option(BUILD_SHARED_LIBS "Build libraries as shared libraries" OFF)
 option(USC_GNU_WERROR "Set Werror for gcc." OFF)
 option(USE_SYSTEM_CPR "Use system CPR" OFF)
+set(CPR_USE_SYSTEM_CURL ON CACHE BOOL "Use vcpkg/system curl for cpr" FORCE)
 
 project(USC VERSION 0.6.0)
 if(WIN32 AND ${CMAKE_VERSION} VERSION_GREATER "3.12")
     cmake_policy(SET CMP0079 NEW)
+endif()
+if (${CMAKE_VERSION} VERSION_GREATER "4.0")
+    set(CMAKE_POLICY_VERSION_MINIMUM 3.12)
 endif()
 # Project configurations
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
@@ -66,6 +70,39 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         COMMAND_ERROR_IS_FATAL ANY
     )
     set(LibArchive_INCLUDE_DIR "${LIBARCHIVE_PREFIX}/include")
+endif()
+
+# Set path for discord-rpc dependency so that it doesn't download old version
+if (${CMAKE_VERSION} VERSION_GREATER "4.0")
+    set(DISCORD_RPC_THIRDPARTY_DIR
+        ${PROJECT_SOURCE_DIR}/third_party/discord-rpc/thirdparty/
+    )
+    set(RAPIDJSONTEST
+        ${PROJECT_SOURCE_DIR}/third_party/rapidjson
+        CACHE PATH "Bundled rapidjson path for discord-rpc" FORCE
+    )
+    set(RAPIDJSON
+        ${PROJECT_SOURCE_DIR}/third_party/rapidjson
+        CACHE PATH "Bundled rapidjson path for discord-rpc" FORCE
+    )
+    file(
+        MAKE_DIRECTORY
+        ${DISCORD_RPC_THIRDPARTY_DIR}
+    )
+    if (WIN32)
+        file(
+            COPY
+            ${PROJECT_SOURCE_DIR}/third_party/rapidjson
+            DESTINATION ${DISCORD_RPC_THIRDPARTY_DIR}
+        )
+    else()
+        file(
+            CREATE_LINK
+            ${PROJECT_SOURCE_DIR}/third_party/rapidjson
+            ${DISCORD_RPC_THIRDPARTY_DIR}/rapidjson
+            SYMBOLIC
+        )
+    endif()
 endif()
 
 # Set folder where to find FindXXX.cmake and
@@ -147,6 +184,7 @@ if(MSVC)
     set_target_properties(nanovg PROPERTIES FOLDER "Third Party")
     set_target_properties(sqlite3 PROPERTIES FOLDER "Third Party")
     set_target_properties(discord-rpc PROPERTIES FOLDER "Third Party")
+    set_target_properties(rapidjson PROPERTIES FOLDER "Third Party")
     set_target_properties(minimp3 PROPERTIES FOLDER "Third Party")
     set_target_properties(soundtouch PROPERTIES FOLDER "Third Party")
     set_target_properties(lua PROPERTIES FOLDER "Third Party")

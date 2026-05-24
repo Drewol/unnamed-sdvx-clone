@@ -60,6 +60,7 @@ public:
 	~ItemSelectionWheel() {}
 
 
+	[[nodiscard]]
 	uint32 GetCurrentItemIndex() {
 		if (m_sortVec.empty())
 			return -1;
@@ -189,7 +190,7 @@ public:
 		if (m_randomVec.size() == 1) {
 			itemIndex = m_randomVec.back();
 		} else {
-			uint32 selection = Random::IntRange(0, (int32)m_randomVec.size() - 1);
+			uint32 selection = Random::IntRange(0, static_cast<int32>(m_randomVec.size()) - 1);
 			itemIndex = m_randomVec.at(selection);
 			m_randomVec[selection] = m_randomVec.back();
 		}
@@ -202,7 +203,7 @@ public:
 	{
 		for (const auto &it : m_SourceCollection())
 		{
-			if (m_getDBEntryFromItemIndex((const ItemSelectIndex)it.second)->id == (int32)id)
+			if (m_getDBEntryFromItemIndex((const ItemSelectIndex)it.second)->id == static_cast<int32>(id))
 			{
 				SelectItemByItemIndex(it.first);
 				break;
@@ -306,6 +307,7 @@ public:
 		}
 	}
 
+	[[nodiscard]]
 	SortType GetSortType() const
 	{
 		if (m_currentSort)
@@ -411,6 +413,7 @@ public:
 		m_SetCurrentItems();
 	}
 
+	[[nodiscard]]
 	DBIndex *GetSelection() const
 	{
 		ItemSelectIndex const *item = m_SourceCollection().Find(

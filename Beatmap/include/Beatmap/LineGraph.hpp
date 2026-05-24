@@ -16,7 +16,8 @@ public:
         explicit Point(double val) : value(val, val) {}
         explicit Point(double start, double end) : value(start, end) {}
 
-        inline bool IsSlam() const { return value.first != value.second; }
+        [[nodiscard]]
+        inline bool IsSlam() const noexcept { return value.first != value.second; }
 
         std::pair<double, double> value;
         std::pair<double, double> curve = {};
@@ -40,18 +41,23 @@ public:
     /// Returns the value being extended.
     double Extend(MapTime time);
 
+    [[nodiscard]]
     double Integrate(MapTime begin, MapTime end) const;
 
     /// When you know for certain that curr->first &lt;= begin &lt;= end &lt;= std::next(curr)-&gt;first
+    [[nodiscard]]
     double Integrate(PointsIterator curr, MapTime begin, MapTime end) const;
+    [[nodiscard]]
     double Integrate(PointsIterator curr) const;
 
-    inline PointsIterator lower_bound(MapTime time) const
+    [[nodiscard]]
+    inline PointsIterator lower_bound(MapTime time) const noexcept
     {
         return m_points.lower_bound(time);
     }
 
-    inline PointsIterator upper_bound(MapTime time) const
+    [[nodiscard]]
+    inline PointsIterator upper_bound(MapTime time) const noexcept
     {
         return m_points.upper_bound(time);
     }
@@ -61,55 +67,66 @@ public:
         return m_points.erase(time);
     }
 
+    [[nodiscard]]
     inline const Point& at(MapTime time) const
     {
         return m_points.at(time);
     }
 
+    [[nodiscard]]
     inline Map<MapTime, Point>::iterator begin()
     {
         return m_points.begin();
     }
 
+    [[nodiscard]]
     inline PointsIterator begin() const
     {
         return m_points.begin();
     }
 
+    [[nodiscard]]
     inline PointsIterator cbegin() const
     {
         return m_points.cbegin();
     }
 
+    [[nodiscard]]
     inline Map<MapTime, Point>::iterator end()
     {
         return m_points.end();
     }
 
+    [[nodiscard]]
     inline PointsIterator end() const
     {
         return m_points.end();
     }
 
+    [[nodiscard]]
     inline PointsIterator cend() const
     {
         return m_points.cend();
     }
 
+    [[nodiscard]]
     inline std::size_t size() const
     {
         return m_points.size();
     }
 
+    [[nodiscard]]
     inline bool empty() const
     {
         return m_points.empty();
     }
 
+    [[nodiscard]]
     inline std::size_t count(MapTime mapTime) const
     {
         return m_points.count(mapTime);
     }
 
+    [[nodiscard]]
     double ValueAt(MapTime mapTime) const;
 };

@@ -30,6 +30,7 @@ namespace Interpolation
 		CubicBezier(Predefined predefined);
 		CubicBezier(float a, float b, float c, float d);
 		CubicBezier(double a, double b, double c, double d);
+		[[nodiscard]]
 		float Sample(float in) const;
 		float operator()(float in) const;
 
@@ -43,9 +44,11 @@ namespace Interpolation
 	typedef CubicBezier TimeFunction;
 
 	template<typename T>
-	T Lerp(T a, T b, float f, TimeFunction timeFunction = Linear)
+	[[nodiscard]]
+	T Lerp(T a, T b, float f, TimeFunction timeFunction = Linear) noexcept
 	{
 		return a + (b - a) * timeFunction(f);
 	}
+	[[nodiscard]]
 	int32 Lerp(int32 a, int32 b, float f, TimeFunction timeFunction = Linear);
 }

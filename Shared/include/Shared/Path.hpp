@@ -14,9 +14,12 @@ class Path
 {
 public:
 	// Working dir
+	[[nodiscard]]
 	static String GetCurrentPath();
+	[[nodiscard]]
 	static String GetExecutablePath();
 	// The filename of the executable
+	[[nodiscard]]
 	static String GetModuleName();
 
 	// Create a new directory
@@ -44,24 +47,31 @@ public:
 	// Open external program with specified parameters (used to open charts in editor)
 	static bool Run(const String& programPath, const String& parameters);
 
-	// Generatea a temporary file name that can be used for temporary files (undefined location)
+	// Generates a temporary file name that can be used for temporary files (undefined location)
 	// This file is always a non-existing file
+	[[nodiscard]]
 	static String GetTemporaryPath();
-	// Generatea a temporary file path with custom requirements such as the folder that should contain the file and a prefix for the file name
+	// Generates a temporary file path with custom requirements such as the folder that should contain the file and a prefix for the file name
 	// This file is always a non-existing file
+	[[nodiscard]]
 	static String GetTemporaryFileName(const String& path, const String& prefix = String());
 
 	static Vector<String> GetSubDirs(const String& path);
 
 	// Check if the given path points to a directory
+	[[nodiscard]]
 	static bool IsDirectory(const String& path);
 	// Check if a file/folder exists at given location
+	[[nodiscard]]
 	static bool FileExists(const String& path);
 	// Converts a path to a standard format with all duplicate slashes removed and set to the platform default '\' on windows
+	[[nodiscard]]
 	static String Normalize(const String& path);
 	// Return the absolute path variant of the given input path
+	[[nodiscard]]
 	static String Absolute(const String& path);
 	// Check if the given path is absolute (false if relative)
+	[[nodiscard]]
 	static bool IsAbsolute(const String& path);
 	// Removes the last directory or filename ('/' seperated)
 	// returns the removed element in lastOut if set
@@ -70,6 +80,7 @@ public:
 	static String RemoveBase(String path, String base);
 
 	// Returns the extension found in given input path
+	[[nodiscard]]
 	static String GetExtension(const String& path);
 	// Replace the extension in the input path(if any) and replaces it with a new one (or add one if none exists)
 	// If the new extension is empty the '.' character that would normally come before the new extension is removed
@@ -78,7 +89,9 @@ public:
 	// Removes the first argument without spaces or within quotes from the input string and returns it
 	static String ExtractPathFromCmdLine(String& input);
 	// Same as ExtractPathFromCmdLine but returns the result in an array and keeps the input intact
+	[[nodiscard]]
 	static Vector<String> SplitCommandLine(const String& input);
+	[[nodiscard]]
 	static Vector<String> SplitCommandLine(int argc, char** argv);
 	
 	// The character seperating directories/files 

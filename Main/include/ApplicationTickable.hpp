@@ -20,10 +20,13 @@ public:
 	virtual void OnRestore() {};
 
 	// Return true to override application ticking behaviour
+	[[nodiscard]]
 	virtual bool GetTickRate(int32& rate) { return false; };
 
-	bool IsSuspended() const { return m_suspended; }
-	bool IsSuccessfullyInitialized() const { return m_successfullyInitialized; }
+	[[nodiscard]]
+	bool IsSuspended() const noexcept { return m_suspended; }
+	[[nodiscard]]
+	bool IsSuccessfullyInitialized() const noexcept { return m_successfullyInitialized; }
 
 private:
 	void m_Suspend();

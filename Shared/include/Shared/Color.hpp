@@ -37,10 +37,12 @@ public:
 	Color(const VectorMath::VectorBase<uint8, 4>& icolor);
 	bool operator ==(const Color& other) const;
 	bool operator !=(const Color& other) const;
+	[[nodiscard]]
 	Colori ToRGBA8() const;
 	// Returns the same color, but with a different alpha value
 	Color WithAlpha(float a) const;
 	// Color from hue, saturation and value
+	[[nodiscard]]
 	static Color FromHSV(float hue, float saturation, float value);
 
 	static const Color White;
@@ -53,4 +55,3 @@ public:
 	static const Color Cyan;
 };
 
- 

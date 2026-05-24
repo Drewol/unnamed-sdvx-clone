@@ -44,8 +44,10 @@ public:
 
 	// use accessor functions just in case these need to be virtual for some reason later
 	// keep the api easy to play with
-	FolderIndex* GetFolder() const { return m_folder; }
-	Vector<ChartIndex*> GetCharts() const { return m_charts; }
+	[[nodiscard]]
+	FolderIndex* GetFolder() const noexcept { return m_folder; }
+	[[nodiscard]]
+	Vector<ChartIndex*> GetCharts() const noexcept { return m_charts; }
 
 };
 
@@ -59,8 +61,11 @@ protected:
 	SongSelect() = default;
 public:
 	virtual ~SongSelect() = default;
+	[[nodiscard]]
 	static SongSelect* Create();
+	[[nodiscard]]
 	static SongSelect* Create(MultiplayerScreen*);
 
+	[[nodiscard]]
 	virtual ChartIndex* GetCurrentSelectedChart() { return 0; }
 };

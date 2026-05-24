@@ -81,7 +81,8 @@ public:
 		m_topicHandlers.erase(topic);
 	}
 
-	bool IsOpen()
+	[[nodiscard]]
+	bool IsOpen() const noexcept
 	{
 		return m_open;
 	}

@@ -28,6 +28,7 @@ bool BeatmapPlayback::Reset(MapTime initTime, MapTime start)
 
 	m_currentTiming = m_beatmap->GetFirstTimingPoint();
 	m_currentLaneTogglePoint = m_beatmap->GetFirstLaneTogglePoint();
+	m_currentReverseColorTogglePoint = m_beatmap->GetFirstReverseColorTogglePoint();
 
 	m_currentTrackRollBehaviour = TrackRollBehaviour::Normal;
 	m_lastTrackRollBehaviourChange = 0;
@@ -105,6 +106,13 @@ void BeatmapPlayback::Update(MapTime newTime)
 	{
 		m_currentLaneTogglePoint = laneToggleEnd;
 		OnLaneToggleChanged.Call(m_currentLaneTogglePoint);
+	}
+
+	Beatmap::ReverseColorTogglePointsIterator reverseColorToggleEnd = m_SelectReverseColorTogglePoint(m_playbackTime);
+	if (reverseColorToggleEnd != m_currentReverseColorTogglePoint)
+	{
+		m_currentReverseColorTogglePoint = reverseColorToggleEnd;
+		OnReverseColorToggleChanged.Call(m_currentReverseColorTogglePoint);
 	}
 
 	// Advance objects
@@ -607,6 +615,29 @@ Beatmap::LaneTogglePointsIterator BeatmapPlayback::m_SelectLaneTogglePoint(MapTi
 	return objStart;
 }
 
+Beatmap::ReverseColorTogglePointsIterator BeatmapPlayback::m_SelectReverseColorTogglePoint(MapTime time, bool allowReset) const
+{
+	Beatmap::ReverseColorTogglePointsIterator objStart = m_currentReverseColorTogglePoint;
+
+	if (IsEndReverseColorToggle(objStart))
+		return objStart;
+
+	if (objStart->time > time && allowReset)
+		objStart = m_beatmap->GetFirstReverseColorTogglePoint();
+
+	while (true)
+	{
+		if (!IsEndReverseColorToggle(objStart + 1) && (objStart + 1)->time <= time)
+		{
+			objStart = objStart + 1;
+		}
+		else
+			break;
+	}
+
+	return objStart;
+}
+
 Beatmap::ObjectsIterator BeatmapPlayback::m_SelectHitObject(MapTime time, bool allowReset) const
 {
 	Beatmap::ObjectsIterator objStart = m_currObject;
@@ -644,6 +675,11 @@ bool BeatmapPlayback::IsEndTiming(const Beatmap::TimingPointsIterator& obj) cons
 bool BeatmapPlayback::IsEndLaneToggle(const Beatmap::LaneTogglePointsIterator& obj) const
 {
 	return obj == m_beatmap->GetEndLaneTogglePoint();
+}
+
+bool BeatmapPlayback::IsEndReverseColorToggle(const Beatmap::ReverseColorTogglePointsIterator& obj) const
+{
+	return obj == m_beatmap->GetEndReverseColorTogglePoint();
 }
 
 Vector<String> BeatmapPlayback::GetStateString() const

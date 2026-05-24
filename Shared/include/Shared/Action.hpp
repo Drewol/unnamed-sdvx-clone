@@ -56,7 +56,8 @@ public:
 		assert(IsBound());
 		return m_binding->Call(args...);
 	}
-	bool IsBound() const
+	[[nodiscard]]
+	bool IsBound() const noexcept
 	{
 		return m_binding != nullptr;
 	}
@@ -104,6 +105,7 @@ public:
 	Action<T> Get;
 	Action<void, T> Set;
 protected:
+	[[nodiscard]]
 	inline T m_Get() const
 	{
 		if(Get.IsBound())

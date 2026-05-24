@@ -31,6 +31,7 @@ using Ref = std::shared_ptr<T>;
 namespace Utility
 {
     template<typename T>
+    [[nodiscard]]
 	Ref<T> MakeRef(T* obj)
 	{
 		Ref<T> ret = std::make_shared<T>();
@@ -38,6 +39,7 @@ namespace Utility
         return ret;
 	}
     template<typename F, typename T>
+    [[nodiscard]]
     Ref<T> CastRef(const Ref<F>& a) {
         return std::dynamic_pointer_cast<T>(a);
     }

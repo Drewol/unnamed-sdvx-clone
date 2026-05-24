@@ -9,14 +9,18 @@ public:
 	void Update(MapTime newTime);
 
 	// Generates a normal segment
+	[[nodiscard]]
 	Mesh GenerateTrackMesh(class BeatmapPlayback& playback, LaserObjectState* laser);
 
 	// Generate the starting segment of a laser
+	[[nodiscard]]
 	Mesh GenerateTrackEntry(class BeatmapPlayback& playback, LaserObjectState* laser);
 	// Generate the ending segment of a laser
+	[[nodiscard]]
 	Mesh GenerateTrackExit(class BeatmapPlayback& playback, LaserObjectState* laser);
 
 	// Laser length scale at a given position
+	[[nodiscard]]
 	float GetLaserLengthScaleAt(MapTime time);
 
 	// Used to generate larges meshes but allow the texture to match the actual laser width

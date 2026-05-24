@@ -17,6 +17,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <filesystem>
 // Convenience
 #define MAX_PATH PATH_MAX
 
@@ -132,15 +133,16 @@ bool Path::FileExists(const String& path)
 }
 String Path::Normalize(const String& path)
 {
-	char out[MAX_PATH];
-	realpath(*path, out);
+    auto s = std::filesystem::weakly_canonical(*path).string();
+	char* out = s.data();
+
 	for(uint32 i = 0; i < MAX_PATH; i++)
 	{
 		if(out[i] == '\\')
 			out[i] = sep;
-		if (out[i] == '\0')
-			return out;
+		if (out[i] == '\0') break;
 	}
+
 	return out;
 }
 bool Path::IsAbsolute(const String& path)

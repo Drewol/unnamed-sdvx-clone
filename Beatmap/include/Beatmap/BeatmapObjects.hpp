@@ -31,11 +31,17 @@ struct MapTimeRange
 	constexpr MapTimeRange& operator= (const MapTimeRange&) noexcept = default;
 	constexpr MapTimeRange& operator= (MapTimeRange&&) noexcept = default;
 
+	[[nodiscard]]
 	constexpr bool HasEnd() const noexcept { return begin < end; }
+	[[nodiscard]]
 	constexpr MapTime Length() const noexcept { return HasEnd() ? end - begin : 0; }
+	[[nodiscard]]
 	constexpr MapTime Length(const MapTime defaultEnd) const noexcept { return HasEnd() ? end - begin : defaultEnd - begin; }
+	[[nodiscard]]
 	constexpr bool Includes(const MapTime t, const bool includingEnd = false) const noexcept { return begin <= t && (!HasEnd() || (includingEnd ? t <= end : t < end)); }
+	[[nodiscard]]
 	constexpr bool Includes(const MapTimeRange& other) const noexcept { return Includes(other.begin) && (other.HasEnd() ? Includes(other.end, true) : !HasEnd());}
+	[[nodiscard]]
 	constexpr bool Overlaps(const MapTimeRange& other) const noexcept { if (begin <= other.begin) return Includes(other.begin); else return other.Includes(begin); }
 
 	MapTime begin, end;
@@ -180,19 +186,26 @@ struct SpinStruct
 struct ObjectTypeData_Laser
 {
 	// Retrieves the starting laser point
+	[[nodiscard]]
 	TObjectState<ObjectTypeData_Laser>* GetRoot();
-	inline const TObjectState<ObjectTypeData_Laser>* GetRoot() const
+	[[nodiscard]]
+	inline const TObjectState<ObjectTypeData_Laser>* GetRoot() const noexcept
 	{
 		return const_cast<ObjectTypeData_Laser*>(this)->GetRoot();
 	}
 
 	// Ending point of laser
+	[[nodiscard]]
 	TObjectState<ObjectTypeData_Laser>* GetTail();
+	[[nodiscard]]
 	float GetDirection() const;
+	[[nodiscard]]
 	float SamplePosition(MapTime time) const;
 	// Convert extended range to normal range
+	[[nodiscard]]
 	static float ConvertToNormalRange(float inputRange);
 	// Convert normal range to extended range
+	[[nodiscard]]
 	static float ConvertToExtendedRange(float inputRange);
 
 	// Time to a direction change, returns -1 if there are no direction changes in this section
@@ -301,9 +314,12 @@ struct TimingPoint
 {
 	static bool StaticSerialize(BinaryStream &stream, TimingPoint *&out);
 
-	double GetWholeNoteLength() const { return beatDuration * 4; }
-	double GetBarDuration() const { return GetWholeNoteLength() * ((double)numerator / (double)denominator); }
-	double GetBPM() const { return 60000.0 / beatDuration; }
+	[[nodiscard]]
+	double GetWholeNoteLength() const noexcept { return beatDuration * 4; }
+	[[nodiscard]]
+	double GetBarDuration() const noexcept { return GetWholeNoteLength() * ((double)numerator / (double)denominator); }
+	[[nodiscard]]
+	double GetBPM() const noexcept { return 60000.0 / beatDuration; }
 
 	/// Position in ms when this timing point appears
 	MapTime time = 0;
@@ -315,6 +331,9 @@ struct TimingPoint
 	uint8 denominator = 4;
 	/// Multiplier for tickrates (x 2^tickrateOffset)
 	int8 tickrateOffset = 0;
+	/// Chain tick note values below and above 255 BPM.
+	uint32 chainTicksBelow255 = 16;
+	uint32 chainTicksAbove255 = 8;
 };
 
 struct LaneHideTogglePoint {

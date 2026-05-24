@@ -11,7 +11,9 @@ public:
 	FileStreamBase()= default;
 	FileStreamBase(File& file, bool isReading);
 	virtual void Seek(size_t pos);
+	[[nodiscard]]
 	virtual size_t Tell() const;
+	[[nodiscard]]
 	virtual size_t GetSize() const;
 	File& GetFile();
 };

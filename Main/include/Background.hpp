@@ -9,6 +9,7 @@ public:
 	virtual ~Background() = default;
 	virtual bool Init(bool foreground) = 0;
 	virtual void Render(float deltaTime) = 0;
+	virtual void SetReverseColor(bool enabled, double duration) {}
 
 	class Game* game;
 };

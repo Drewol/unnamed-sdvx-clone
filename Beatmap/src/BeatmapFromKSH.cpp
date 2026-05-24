@@ -611,6 +611,7 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 		startLaneTogglePoint.time = 0;
 		startLaneTogglePoint.duration = 1;
 		m_laneTogglePoints.Add(std::move(startLaneTogglePoint));
+
 	}
 
 	// Stop here if we're only going for metadata
@@ -754,6 +755,23 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 				int8 value = atoi(*p.second);
 				AddTimingPoint(currTimingPoint->beatDuration, currTimingPoint->numerator, currTimingPoint->denominator, value);
 			}
+			else if (p.first == "chain_per_tick")
+			{
+				String below255, above255;
+				if (p.second.Split(".", &below255, &above255))
+				{
+					const uint32 below = Math::Max(1, atoi(*below255));
+					const uint32 above = Math::Max(1, atoi(*above255));
+					AddTimingPoint(currTimingPoint->beatDuration, currTimingPoint->numerator, currTimingPoint->denominator, currTimingPoint->tickrateOffset);
+					TimingPoint& lastTimingPoint = *m_timingPoints.rbegin();
+					lastTimingPoint.chainTicksBelow255 = below;
+					lastTimingPoint.chainTicksAbove255 = above;
+				}
+				else
+				{
+					Logf("Invalid chain_per_tick value \"%s\". Expected chain_per_tick=16.8", Logger::Severity::Warning, p.second.c_str());
+				}
+			}
 			else if (p.first == "laserrange_l")
 			{
 				laserRanges[0] = 2.0f;
@@ -845,6 +863,13 @@ bool Beatmap::m_ProcessKShootMap(BinaryStream &input, bool metadataOnly)
 				point.time = mapTime;
 				point.duration = atol(*p.second);
 				m_laneTogglePoints.Add(std::move(point));
+			}
+			else if (p.first == "reverse_color")
+			{
+				LaneHideTogglePoint point;
+				point.time = mapTime;
+				point.duration = atol(*p.second);
+				m_reverseColorTogglePoints.Add(std::move(point));
 			}
 			else if (p.first == "center_split")
 			{

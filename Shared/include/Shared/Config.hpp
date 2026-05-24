@@ -25,6 +25,7 @@ public:
 	void Save(BinaryStream& stream, KeyList* ignore = nullptr, KeyList* only = nullptr);
 	bool Save(const String& path, KeyList* ignore = nullptr, KeyList* only = nullptr);
 
+	[[nodiscard]]
 	bool IsDirty() const;
 
 	// Resets config back to default state
@@ -34,7 +35,8 @@ public:
 	void Update(ConfigBase& other, KeyList* ignore = nullptr, KeyList* only = nullptr);
 
 	// Only really useful for profiles
-	const KeyList& GetKeysInFile() { return m_entriesInFile;  }
+	[[nodiscard]]
+	const KeyList& GetKeysInFile() noexcept { return m_entriesInFile;  }
 
 protected:
 	ConfigBase();
@@ -70,28 +72,34 @@ public:
 		return it != m_entries.end();
 	}
 
+	[[nodiscard]]
 	int32 GetInt(KeyType key) const
 	{
 		return GetEnsure<IntConfigEntry>(key)->data;
 	}
+	[[nodiscard]]
 	float GetFloat(KeyType key) const
 	{
 		return GetEnsure<FloatConfigEntry>(key)->data;
 	}
+	[[nodiscard]]
 	String GetString(KeyType key) const
 	{
 		return GetEnsure<StringConfigEntry>(key)->data;
 	}
+	[[nodiscard]]
 	bool GetBool(KeyType key) const
 	{
 		return GetEnsure<BoolConfigEntry>(key)->data;
 	}
 	template<size_t N>
+	[[nodiscard]]
 	std::array<uint8, N> GetBlob(KeyType key) const {
 		return GetEnsure<BlobConfigEntry<N>>(key)->data;
 	}
 
 	template<typename EnumClass1>
+	[[nodiscard]]
 	typename EnumClass1::EnumType GetEnum(KeyType key) const
 	{
 		return GetEnsure<EnumConfigEntry<EnumClass1>>(key)->data;
@@ -169,7 +177,8 @@ public:
 
 private:
 	// Create or returns with type checking
-	template<typename T> T* SetEnsure(KeyType key)
+	template<typename T>
+	T* SetEnsure(KeyType key)
 	{
 		IConfigEntry** found = m_entries.Find((uint32)key);
 		if(found)
@@ -187,7 +196,9 @@ private:
 		}
 	}
 	// Gets the wanted type with type checking and seeing if it exists
-	template<typename T> const T* GetEnsure(KeyType key) const
+	template<typename T>
+	[[nodiscard]]
+	const T* GetEnsure(KeyType key) const
 	{
 		IConfigEntry*const* found = m_entries.Find((uint32)key);
 		assert(found);

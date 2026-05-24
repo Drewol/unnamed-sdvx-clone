@@ -33,7 +33,9 @@ namespace Graphics
 		void InitResourceManagers();
 		bool Init(Window& window, uint32 antialiasing);
 
+		[[nodiscard]]
 		Recti GetViewport() const;
+		[[nodiscard]]
 		uint32 GetFramebufferHandle();
 		void SetViewport(Vector2i size);
 		void SetViewport(Recti vp);
@@ -41,6 +43,7 @@ namespace Graphics
 		void ReleaseCurrent();
 
 		// Check if the calling thread is the thread that runs this OpenGL context
+		[[nodiscard]]
 		bool IsOpenGLThread() const;
 
 		virtual void SwapBuffers();

@@ -62,13 +62,21 @@ public:
 	void Set(const String& key, const int32& value);
 	void Set(const String& key, const bool& value);
 	void Set(const String& key, const Color& value);
+	[[nodiscard]]
 	int GetInt(const String& key) const;
+	[[nodiscard]]
 	float GetFloat(const String& key) const;
+	[[nodiscard]]
 	const String& GetString(const String& key) const;
+	[[nodiscard]]
 	bool GetBool(const String& key) const;
+	[[nodiscard]]
 	Color GetColor(const String& key) const;
+	[[nodiscard]]
 	IConfigEntry* GetEntry(const String& key) const;
+	[[nodiscard]]
 	bool IsSet(const String& key) const;
+	[[nodiscard]]
 	const Vector<SkinSetting>& GetSettings() const;
 
 private:

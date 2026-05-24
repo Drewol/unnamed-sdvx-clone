@@ -58,12 +58,12 @@ bool GaugeNormal::Init(MapTotals mapTotals, uint16 total, MapTime length)
 	return true;
 }
 
-void GaugeNormal::LongHit()
+void GaugeNormal::LongHit(bool)
 {
 	m_gauge = Math::Min(1.0f, m_gauge + m_tickGaugeGain);
 }
 
-void GaugeNormal::CritHit()
+void GaugeNormal::CritHit(bool)
 {
 	m_gauge = Math::Min(1.0f, m_gauge + m_shortGaugeGain);
 }
@@ -90,7 +90,7 @@ bool GaugeNormal::GetClearState() const
 
 const char* GaugeNormal::GetName() const
 {
-	return "Normal";
+	return "EFFECTIVE";
 }
 
 GaugeType GaugeNormal::GetType() const
@@ -122,7 +122,7 @@ bool GaugeHard::GetClearState() const
 
 const char* GaugeHard::GetName() const
 {
-	return "Hard";
+	return "EXCESSIVE";
 }
 
 bool GaugeHard::FailOut() const
@@ -189,4 +189,182 @@ GaugeType GaugeBlastive::GetType() const
 uint32 GaugeWithLevel::GetOpts() const
 {
 	return (uint32)(2 * m_level);
+}
+
+bool GaugeMaxxive::Init(MapTotals, uint16, MapTime length)
+{
+	m_gauge = 1.0f;
+	InitSamples(length);
+	return true;
+}
+
+void GaugeMaxxive::LongHit(bool)
+{
+}
+
+void GaugeMaxxive::CritHit(bool)
+{
+}
+
+void GaugeMaxxive::NearHit()
+{
+	m_gauge = Math::Max(0.0f, m_gauge - 0.04f);
+}
+
+void GaugeMaxxive::LongMiss()
+{
+	m_gauge = Math::Max(0.0f, m_gauge - 0.05f);
+}
+
+void GaugeMaxxive::ShortMiss()
+{
+	m_gauge = Math::Max(0.0f, m_gauge - 0.20f);
+}
+
+const char* GaugeMaxxive::GetName() const
+{
+	return "MAXXIVE";
+}
+
+GaugeType GaugeMaxxive::GetType() const
+{
+	return GaugeType::Maxxive;
+}
+
+bool GaugeRateBase::Init(MapTotals mapTotals, uint16, MapTime length)
+{
+	m_gauge = m_startGauge;
+	const uint32 gaugeUnits = mapTotals.numTicks + (mapTotals.numSingles * 4);
+	m_remainingGaugeUnits = gaugeUnits;
+	if (gaugeUnits > 0)
+	{
+		m_critLongGain = m_critTotal / (float)gaugeUnits;
+		m_critShortGain = m_critLongGain * 4.0f;
+		m_nearLongGain = m_nearTotal / (float)gaugeUnits;
+		m_nearShortGain = m_nearLongGain * 4.0f;
+	}
+	InitSamples(length);
+	return true;
+}
+
+void GaugeRateBase::m_Add(float amount)
+{
+	m_gauge = Math::Min(1.0f, m_gauge + amount);
+}
+
+void GaugeRateBase::m_ConsumeShort()
+{
+	if (m_remainingGaugeUnits >= 4)
+		m_remainingGaugeUnits -= 4;
+	else
+		m_remainingGaugeUnits = 0;
+}
+
+void GaugeRateBase::m_ConsumeLong()
+{
+	if (m_remainingGaugeUnits > 0)
+		m_remainingGaugeUnits--;
+}
+
+void GaugeRateBase::LongHit(bool)
+{
+	m_Add(m_critLongGain);
+	m_ConsumeLong();
+}
+
+void GaugeRateBase::CritHit(bool)
+{
+	m_Add(m_critShortGain);
+	m_ConsumeShort();
+}
+
+void GaugeRateBase::NearHit()
+{
+	m_Add(m_nearShortGain);
+	m_ConsumeShort();
+}
+
+void GaugeRateBase::LongMiss()
+{
+	m_gauge = Math::Max(0.0f, m_gauge - m_longMissDrain);
+	m_ConsumeLong();
+}
+
+void GaugeRateBase::ShortMiss()
+{
+	m_gauge = Math::Max(0.0f, m_gauge - m_shortMissDrain);
+	m_ConsumeShort();
+}
+
+bool GaugeRateBase::GetClearState() const
+{
+	return m_gauge >= 0.7f;
+}
+
+const char* GaugeBasic::GetName() const
+{
+	return "Basic Rate";
+}
+
+bool GaugeBasic::FailOut() const
+{
+	return m_gauge == 0.0f;
+}
+
+GaugeType GaugeBasic::GetType() const
+{
+	return GaugeType::Basic;
+}
+
+const char* GaugeEasy::GetName() const
+{
+	return "Easy Rate";
+}
+
+GaugeType GaugeEasy::GetType() const
+{
+	return GaugeType::Easy;
+}
+
+bool GaugeMaimaiDx::Init(MapTotals mapTotals, uint16 total, MapTime length)
+{
+	GaugeRateBase::Init(mapTotals, total, length);
+	m_sCriticalLongGain = m_critLongGain * 1.01f;
+	m_sCriticalShortGain = m_critShortGain * 1.01f;
+	return true;
+}
+
+void GaugeMaimaiDx::LongHit(bool sCritical)
+{
+	m_Add(sCritical ? m_sCriticalLongGain : m_critLongGain);
+	m_ConsumeLong();
+}
+
+void GaugeMaimaiDx::CritHit(bool sCritical)
+{
+	m_Add(sCritical ? m_sCriticalShortGain : m_critShortGain);
+	m_ConsumeShort();
+}
+
+bool GaugeMaimaiDx::GetClearState() const
+{
+	return m_gauge >= 0.8f;
+}
+
+const char* GaugeMaimaiDx::GetName() const
+{
+	return "maimai DX Rate";
+}
+
+bool GaugeMaimaiDx::FailOut() const
+{
+	if (!m_crashEnabled)
+		return false;
+
+	return m_gauge + (m_sCriticalLongGain * (float)m_remainingGaugeUnits) < 0.8f;
+}
+
+GaugeType GaugeMaimaiDx::GetType() const
+{
+	return GaugeType::MaimaiDx;
 }

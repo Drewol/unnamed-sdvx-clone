@@ -21,6 +21,7 @@ public:
 	// Seek from the end of the file
 	void SeekReverse(size_t pos);
 	size_t Tell() const;
+	[[nodiscard]]
 	size_t GetSize() const;
 	size_t Read(void* data, size_t len);
 	size_t Write(const void* data, size_t len);
@@ -29,7 +30,9 @@ public:
 	uint64 GetLastWriteTime() const;
 
 	// Get the last write time of a file at a given path
+	[[nodiscard]]
 	static uint64 GetLastWriteTime(const String& path);
+	[[nodiscard]]
 	static uint64 FileTimeToUnixTimestamp(uint64 fileTime);
 };
 

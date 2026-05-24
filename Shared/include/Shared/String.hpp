@@ -41,7 +41,9 @@ public:
 	void TrimFront(T c);
 	void TrimBack(T c);
 	void Trim(T c = ' ');
+	[[nodiscard]]
 	T* GetData();
+	[[nodiscard]]
 	const T* GetData() const;
 };
 

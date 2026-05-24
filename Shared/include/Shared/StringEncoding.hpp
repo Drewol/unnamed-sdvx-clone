@@ -19,7 +19,8 @@ enum class StringEncoding
 	CP954, EUC_JP = CP954
 };
 
-constexpr const char* GetDisplayString(const StringEncoding encoding)
+[[nodiscard]]
+constexpr const char* GetDisplayString(const StringEncoding encoding) noexcept
 {
 	switch (encoding)
 	{

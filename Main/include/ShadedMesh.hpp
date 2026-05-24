@@ -16,23 +16,27 @@ public:
 	void SetPrimitiveType(const PrimitiveType& type);
 	void SetOpaque(bool opaque);
 
-	void SetPos(float x, float y, float z)
+	void SetPos(float x, float y, float z) noexcept
 	{
 		m_pos = Vector3(x, y, z);
 	}
-	Vector3& GetPos() { return m_pos; }
-	void SetScale(float x, float y, float z)
+	[[nodiscard]]
+	Vector3& GetPos() noexcept { return m_pos; }
+	void SetScale(float x, float y, float z) noexcept
 	{
 		m_scale = Vector3(x, y, z);
 	}
-	Vector3& GetScale() { return m_scale; }
-	void SetRotation(float x, float y, float z)
+	[[nodiscard]]
+	Vector3& GetScale() noexcept { return m_scale; }
+	void SetRotation(float x, float y, float z) noexcept
 	{
 		m_rotation = Vector3(x, y, z);
 	}
-	Vector3& GetRotation() { return m_rotation; }
-	bool IsWireframe() const { return m_isWireframe; }
-	void SetIsWireframe(bool b) { m_isWireframe = b; }
+	[[nodiscard]]
+	Vector3& GetRotation() noexcept { return m_rotation; }
+	[[nodiscard]]
+	bool IsWireframe() const noexcept { return m_isWireframe; }
+	void SetIsWireframe(bool b) noexcept { m_isWireframe = b; }
 
 	template<typename T>
 	void SetParam(const String& name, const T& value) {
@@ -67,11 +71,13 @@ public:
 	void lUseGameMesh(struct lua_State* L);
 
 
-	void SetLength(float l) { m_length = l; }
-	float GetLength() { return m_length; }
-	void SetClipping(bool c) { m_clip = c; }
+	void SetLength(float l) noexcept { m_length = l; }
+	[[nodiscard]]
+	float GetLength() noexcept { return m_length; }
+	void SetClipping(bool c) noexcept { m_clip = c; }
 
-	Game* GetGame() { return m_game; };
+	[[nodiscard]]
+	Game* GetGame() noexcept { return m_game; };
 
 private:
 	class Game* m_game = nullptr;

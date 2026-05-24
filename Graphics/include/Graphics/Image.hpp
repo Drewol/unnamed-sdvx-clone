@@ -11,15 +11,22 @@ namespace Graphics
 	{
 	public:
 		virtual ~ImageRes() = default;
+		[[nodiscard]]
 		static Ref<ImageRes> Create(const String& assetPath);
+		[[nodiscard]]
 		static Ref<ImageRes> Create(Vector2i size = Vector2i());
+		[[nodiscard]]
 		static Ref<ImageRes> Create(Buffer& b);
+		[[nodiscard]]
 		static Ref<ImageRes> Screenshot(class OpenGL* gl, Vector2i size = Vector2i(), Vector2i pos = Vector2i());
 	public:
 		virtual void SetSize(Vector2i size) = 0;
 		virtual void ReSize(Vector2i size) = 0;
+		[[nodiscard]]
 		virtual Vector2i GetSize() const = 0;
+		[[nodiscard]]
 		virtual Colori* GetBits() = 0;
+		[[nodiscard]]
 		virtual const Colori* GetBits() const = 0;
 		virtual void SavePNG(const String& file) = 0;
 	};
@@ -40,7 +47,9 @@ namespace Graphics
 	public:
 		virtual uint32 AddSegment(Ref<ImageRes> image) = 0;
 		virtual void Clear() = 0;
+		[[nodiscard]]
 		virtual Ref<ImageRes> GetImage() = 0;
+		[[nodiscard]]
 		virtual Ref<class TextureRes> GenerateTexture(class OpenGL* gl) = 0;
 		virtual Shared::Recti GetCoords(uint32 nIndex) = 0;
 	};

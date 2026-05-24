@@ -25,6 +25,7 @@ public:
 		assert(!m_useCompression);
 		return FileStreamBase::Tell();
 	}
+	[[nodiscard]]
 	virtual size_t GetSize() const override
 	{
 		assert(!m_useCompression);

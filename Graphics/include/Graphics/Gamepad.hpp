@@ -8,10 +8,14 @@ class Gamepad
 public:
 	virtual ~Gamepad() = default;
 
+	[[nodiscard]]
 	virtual bool GetButton(uint8 button) const = 0;
+	[[nodiscard]]
 	virtual float GetAxis(uint8 idx) const = 0;
 
+	[[nodiscard]]
 	virtual uint32 NumButtons() const = 0;
+	[[nodiscard]]
 	virtual uint32 NumAxes() const = 0;
 
 	// Gamepad button event

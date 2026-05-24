@@ -108,8 +108,11 @@ namespace VectorMath
 			return VectorBase(-x, -y, -z, -w);
 		}
 
+		[[nodiscard]]
 		T Length() const;
+		[[nodiscard]]
 		T LengthSquared() const;
+		[[nodiscard]]
 		VectorBase Normalized() const;
 	};
 	/* Vector 3 */
@@ -200,8 +203,11 @@ namespace VectorMath
 			return VectorBase(-x, -y, -z);
 		}
 
+		[[nodiscard]]
 		T Length() const;
+		[[nodiscard]]
 		T LengthSquared() const;
+		[[nodiscard]]
 		VectorBase Normalized() const;
 	};
 	/* Vector 2 */
@@ -281,43 +287,52 @@ namespace VectorMath
 			return VectorBase(-x, -y);
 		}
 
+		[[nodiscard]]
 		T Length() const;
+		[[nodiscard]]
 		T LengthSquared() const;
+		[[nodiscard]]
 		VectorBase Normalized() const;
 	};
 
 	// Dot product implementations
 	template<typename T, size_t Num>
-	static T Dot(const VectorBase<T, Num>& lhs, const VectorBase<T, Num>& rhs) 
+	[[nodiscard]]
+	static T Dot(const VectorBase<T, Num>& lhs, const VectorBase<T, Num>& rhs) noexcept
 	{
 		static_assert(sizeof(T) == 0, "Invalid vector types for dot product");
 	}
 	template<typename T>
-	static T Dot(const VectorBase<T, 2>& lhs, const VectorBase<T, 2>& rhs)
+	[[nodiscard]]
+	static T Dot(const VectorBase<T, 2>& lhs, const VectorBase<T, 2>& rhs) noexcept
 	{
 		return lhs.x * rhs.x + lhs.y * rhs.y;
 	}
 	template<typename T>
-	static T Dot(const VectorBase<T, 3>& lhs, const VectorBase<T, 3>& rhs)
+	[[nodiscard]]
+	static T Dot(const VectorBase<T, 3>& lhs, const VectorBase<T, 3>& rhs) noexcept
 	{
 		return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
 	}
 	template<typename T>
-	static T Dot(const VectorBase<T, 4>& lhs, const VectorBase<T, 4>& rhs)
+	[[nodiscard]]
+	static T Dot(const VectorBase<T, 4>& lhs, const VectorBase<T, 4>& rhs) noexcept
 	{
 		return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w;
 	}
 
 	// Cross product implementation
 	template<typename T>
-	static VectorBase<T,3> Cross(const VectorBase<T, 3>& lhs, const VectorBase<T, 3>& rhs)
+	[[nodiscard]]
+	static VectorBase<T,3> Cross(const VectorBase<T, 3>& lhs, const VectorBase<T, 3>& rhs) noexcept
 	{
 		return VectorBase<T, 3>(lhs.y * rhs.z - lhs.z * rhs.y,
 			lhs.z * rhs.x - lhs.x * rhs.z,
 			lhs.x * rhs.y - lhs.y * rhs.x);
 	}
 	template<typename T>
-	static float Cross2D(const VectorBase<T, 2>& lhs, const VectorBase<T, 2>& rhs)
+	[[nodiscard]]
+	static float Cross2D(const VectorBase<T, 2>& lhs, const VectorBase<T, 2>& rhs) noexcept
 	{
 		return lhs.x * rhs.y - lhs.y * rhs.x;
 	}
@@ -359,21 +374,25 @@ namespace VectorMath
 
 	// Vector normalization
 	template<typename T, size_t Num>
+	[[nodiscard]]
 	static VectorBase<T, Num> Normalize(const VectorBase<T, Num>& lhs)
 	{
 		static_assert(sizeof(T) == 0, "Invalid vector type for normalize");
 	}
 	template<typename T>
+	[[nodiscard]]
 	static VectorBase<T, 4> Normalize(const VectorBase<T, 4>& lhs)
 	{
 		return lhs / lhs.Length();
 	}
 	template<typename T>
+	[[nodiscard]]
 	static VectorBase<T, 3> Normalize(const VectorBase<T, 3>& lhs)
 	{
 		return lhs / lhs.Length();
 	}
 	template<typename T>
+	[[nodiscard]]
 	static VectorBase<T, 2> Normalize(const VectorBase<T, 2>& lhs)
 	{
 		return lhs / lhs.Length();
@@ -397,7 +416,8 @@ namespace VectorMath
 
 	// Vector lerp
 	template<typename T, size_t Num>
-	VectorBase<T, Num> Lerp(const VectorBase<T, Num>& a, const VectorBase<T, Num>& b, float pos)
+	[[nodiscard]]
+	VectorBase<T, Num> Lerp(const VectorBase<T, Num>& a, const VectorBase<T, Num>& b, float pos) noexcept
 	{
 		VectorBase<T, Num> d = b - a;
 		return a + d * pos;

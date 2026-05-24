@@ -12,6 +12,7 @@ namespace Graphics
 		uint32 parameterType;
 
 		template<typename T>
+		[[nodiscard]]
 		static MaterialParameter Create(const T& obj, uint32 type)
 		{
 			MaterialParameter r;
@@ -26,6 +27,7 @@ namespace Graphics
 			memcpy(parameterData.data(), &obj, sizeof(T));
 		}
 		template<typename T>
+		[[nodiscard]]
 		const T& Get()
 		{
 			assert(sizeof(T) == parameterData.size());
@@ -76,8 +78,10 @@ namespace Graphics
 	public:
 		virtual ~MaterialRes() = default;
 		// Create a default material
+		[[nodiscard]]
 		static Ref<MaterialRes> Create(class OpenGL* gl);
 		// Create a material that has both a vertex and fragment shader
+		[[nodiscard]]
 		static Ref<MaterialRes> Create(class OpenGL* gl, const String& vsPath, const String& fsPath);
 
 		bool opaque = true;
@@ -89,6 +93,7 @@ namespace Graphics
 
 		// Only binds parameters to the current shader
 		virtual void BindParameters(const MaterialParameterSet& params, const Transform& worldTransform) = 0;
+		[[nodiscard]]
 		virtual bool HasUniform(String name) = 0;
 		// Bind only shaders/pipeline to context
 		virtual void BindToContext() = 0;

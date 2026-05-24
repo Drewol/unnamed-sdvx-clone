@@ -26,8 +26,10 @@ class ItemSort
 		ItemSort(String name, bool dir) : m_name(name),m_dir(dir) {};
 		virtual ~ItemSort() = default;
 
+		[[nodiscard]]
 		virtual SortType GetType() const { return NO_SORT; };
-		String GetName() const { return m_name; }
+		[[nodiscard]]
+		String GetName() const noexcept { return m_name; }
 		virtual void SortInplace(Vector<uint32>& vec, const Map<int32,
 			ItemIndex>& collection) {};
 	protected:
@@ -57,6 +59,7 @@ class ScoreSort : public TitleSort
 		ScoreSort(String name, bool dir) : TitleSort(name, dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				SongSelectIndex>& collection) override;
+		[[nodiscard]]
 		SortType GetType() const override
 		{ 
 			return m_dir? SortType::SCORE_DESC : SortType::SCORE_ASC;
@@ -71,6 +74,7 @@ class DateSort : public TitleSort
 		DateSort(String name, bool dir) : TitleSort(name, dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				SongSelectIndex>& collection) override;
+		[[nodiscard]]
 		SortType GetType() const override
 		{ 
 			return m_dir? SortType::DATE_DESC : SortType::DATE_ASC;
@@ -85,6 +89,7 @@ class ArtistSort : public TitleSort
 		ArtistSort(String name, bool dir) : TitleSort(name, dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				SongSelectIndex>& collection) override;
+		[[nodiscard]]
 		SortType GetType() const override
 		{ 
 			return m_dir? SortType::ARTIST_DESC : SortType::ARTIST_ASC;
@@ -99,6 +104,7 @@ class EffectorSort : public TitleSort
 		EffectorSort(String name, bool dir) : TitleSort(name, dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				SongSelectIndex>& collection) override;
+		[[nodiscard]]
 		SortType GetType() const override
 		{ 
 			return m_dir? SortType::EFFECTOR_DESC : SortType::EFFECTOR_ASC;
@@ -111,6 +117,7 @@ class ClearMarkSort : public TitleSort
 		ClearMarkSort(String name, bool dir) : TitleSort(name, dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				SongSelectIndex>& collection) override;
+		[[nodiscard]]
 		SortType GetType() const override
 		{ 
 			return m_dir? SortType::EFFECTOR_DESC : SortType::EFFECTOR_ASC;
@@ -129,6 +136,7 @@ class ChallengeTitleSort : public ChallengeSort
 				ChallengeSelectIndex>& collection) override;
 		virtual bool CompareChallenges(const ChallengeSelectIndex& song_a,
 				const ChallengeSelectIndex& song_b);
+		[[nodiscard]]
 		SortType GetType() const override
 		{ 
 			return m_dir? SortType::TITLE_DESC : SortType::TITLE_ASC;
@@ -141,6 +149,7 @@ class ChallengeDateSort : public ChallengeTitleSort
 		ChallengeDateSort(String name, bool dir) : ChallengeTitleSort(name, dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				ChallengeSelectIndex>& collection) override;
+		[[nodiscard]]
 		SortType GetType() const override
 		{ 
 			return m_dir? SortType::DATE_DESC : SortType::DATE_ASC;
@@ -153,6 +162,7 @@ class ChallengeScoreSort : public ChallengeTitleSort
 		ChallengeScoreSort(String name, bool dir) : ChallengeTitleSort(name, dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				ChallengeSelectIndex>& collection) override;
+		[[nodiscard]]
 		SortType GetType() const override
 		{ 
 			return m_dir? SortType::DATE_DESC : SortType::DATE_ASC;
@@ -165,6 +175,7 @@ class ChallengeClearMarkSort : public ChallengeTitleSort
 		ChallengeClearMarkSort(String name, bool dir) : ChallengeTitleSort(name, dir) {};
 		void SortInplace(Vector<uint32>& vec, const Map<int32,
 				ChallengeSelectIndex>& collection) override;
+		[[nodiscard]]
 		SortType GetType() const override
 		{ 
 			return m_dir? SortType::DATE_DESC : SortType::DATE_ASC;

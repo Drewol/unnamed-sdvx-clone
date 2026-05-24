@@ -22,11 +22,15 @@ public:
 	// Should stop mixing
 	void Stop();
 
+	[[nodiscard]]
 	uint32_t GetNumChannels() const;
+	[[nodiscard]]
 	uint32_t GetSampleRate() const;
 
 	// The actual length of the buffer in seconds
+	[[nodiscard]]
 	double GetBufferLength() const;
+	[[nodiscard]]
 	bool IsIntegerFormat() const;
 
 private:

@@ -51,6 +51,7 @@ struct HitWindow
 	constexpr bool operator== (const HitWindow& that) const noexcept { return perfect == that.perfect && good == that.good && hold == that.hold && miss == that.miss && slam == that.slam; }
 	constexpr bool operator<= (const HitWindow& that) const noexcept { return perfect <= that.perfect && good <= that.good && hold <= that.hold && miss <= that.miss && slam <= that.slam; }
 
+	[[nodiscard]]
 	constexpr Type GetType() const noexcept { if (*this <= HARD) return Type::Hard; else if (*this <= NORMAL) return Type::Normal; else return Type::None; }
 
 	inline bool Validate()

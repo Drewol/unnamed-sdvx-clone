@@ -15,6 +15,7 @@ String Path::Absolute(const String& path)
 	String baseDir = !gameDir.empty() ? gameDir : RemoveLast(GetExecutablePath());
 	return baseDir + sep + path;
 }
+
 String Path::RemoveLast(const String& path, String* lastOut /*= nullptr*/)
 {
 	String left;
@@ -22,6 +23,7 @@ String Path::RemoveLast(const String& path, String* lastOut /*= nullptr*/)
 		return left;
 	return path;
 }
+
 String Path::RemoveBase(String path, String base)
 {
 	size_t targetOffset = 0;
@@ -59,6 +61,7 @@ String Path::RemoveBase(String path, String base)
 	}
 	return path.substr(targetOffset);
 }
+
 String Path::GetExtension(const String& path)
 {
 	size_t dotPos = path.find_last_of(".");
@@ -69,6 +72,7 @@ String Path::GetExtension(const String& path)
 		return path.substr(dotPos + 1);
 	return String();
 }
+
 String Path::ExtractPathFromCmdLine(String& input)
 {
 	String r;
@@ -98,6 +102,7 @@ String Path::ExtractPathFromCmdLine(String& input)
 	input.Trim();
 	return r;
 }
+
 Vector<String> Path::SplitCommandLine(const String& input)
 {
 	String buffer = input;
@@ -131,6 +136,7 @@ String Path::GetModuleName()
 	Path::RemoveLast(moduleName, &moduleName);
 	return moduleName;
 }
+
 bool Path::CreateDirRecursive(String path)
 {
 	String path1;
@@ -164,6 +170,7 @@ bool Path::CreateDirRecursive(String path)
 
 	return true;
 }
+
 bool Path::ClearDir(const String& path)
 {
 	Vector<FileInfo> files = Files::ScanFiles(path);
@@ -182,6 +189,7 @@ bool Path::ClearDir(const String& path)
 	}
 	return true;
 }
+
 bool Path::CopyDir(String srcFolder, String dstFolder)
 {
 	srcFolder = Absolute(srcFolder);

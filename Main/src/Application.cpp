@@ -281,7 +281,7 @@ int copyArchiveData(archive *ar, archive *aw)
 	size_t size;
 	la_int64_t offset;
 
-	for (;;)
+	while (true)
 	{
 		r = archive_read_data_block(ar, &buff, &size, &offset);
 		if (r == ARCHIVE_EOF)
@@ -338,7 +338,7 @@ void Application::m_unpackSkins()
 		bool singleDir = false;
 		bool otherFiles = false;
 
-		for (;;)
+		while (true)
 		{
 			res = archive_read_next_header(a, &entry);
 			if (res == ARCHIVE_EOF)
@@ -999,16 +999,20 @@ bool Application::m_Init()
 			String gameDir = Utility::Sprintf("%s%c%s", xdgDataDir, Path::sep, "unnamed-sdvx-clone");
 
 			auto gameDataSourceDir = Path::RemoveLast(Path::GetExecutablePath());
-			String xdgDataDirs(std::getenv("XDG_DATA_DIRS"));
-			// iterate over XDG_DATA_DIRS and look for a folder with the correct name
-			// if it exists, overwrite gameDataSourceDir with it and break
-			std::stringstream ss (xdgDataDirs);
-			String dir;
-			while (getline (ss, dir, ':')) {
-				String fullDir = Utility::Sprintf("%s%c%s", dir, Path::sep, "unnamed-sdvx-clone");
-				if (Path::IsDirectory(fullDir)) {
-					gameDataSourceDir = fullDir;
-					break;
+			if (const char *xdgDataDirs = std::getenv("XDG_DATA_DIRS")) {
+				String xdgDataDirsStr(xdgDataDirs);
+				// iterate over XDG_DATA_DIRS and look for a folder with the correct name
+				// if it exists, overwrite gameDataSourceDir with it and break
+				if (!xdgDataDirsStr.empty()) {
+					std::stringstream ss (xdgDataDirsStr);
+					String dir;
+					while (getline (ss, dir, ':')) {
+						String fullDir = Utility::Sprintf("%s%c%s", dir, Path::sep, "unnamed-sdvx-clone");
+						if (Path::IsDirectory(fullDir)) {
+							gameDataSourceDir = fullDir;
+							break;
+						}
+					}
 				}
 			}
 

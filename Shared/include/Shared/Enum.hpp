@@ -43,11 +43,16 @@ public:
 		}
 	}
 
+	[[nodiscard]]
 	inline auto begin() { return names.begin(); }
+	[[nodiscard]]
 	inline auto begin() const { return names.begin(); }
+	[[nodiscard]]
 	inline auto end() { return names.end(); }
+	[[nodiscard]]
 	inline auto end() const { return names.end(); }
 
+	[[nodiscard]]
 	const String& ToString(EnumType e) const
 	{
 		static String dummy = "<invalid>";
@@ -55,6 +60,7 @@ public:
 		return it == names.end() ? dummy : it->second;
 	}
 
+	[[nodiscard]]
 	EnumType FromString(const String& str) const
 	{
 		auto it = rev.find(str);
@@ -69,6 +75,7 @@ template<typename EnumType>
 class BitflagEnumConversion
 {
 public:
+	[[nodiscard]]
 	static String ToString(EnumStringMap<EnumType>& stringMap, EnumType e)
 	{
 		String result;
@@ -85,6 +92,7 @@ public:
 		}
 		return result;
 	}
+	[[nodiscard]]
 	static EnumType FromString(EnumStringMap<EnumType>& stringMap, String str)
 	{
 		uint32 result = 0;
@@ -151,15 +159,18 @@ _n& operator^=(_n& l, _n r) { l = (_n)((uint32)(l) ^ (uint32)(r)); return l;}
 struct Enum_##_n\
 {\
 	typedef _n EnumType;\
+	[[nodiscard]]\
 	static EnumStringMap<EnumType>& GetMap()\
 	{\
 		static EnumStringMap<EnumType> m(Enum_ArgsToString(__VA_ARGS__));\
 		return m;\
 	}\
+	[[nodiscard]]\
 	static const String& ToString(EnumType e)\
 	{\
 		return GetMap().ToString(e);\
 	}\
+	[[nodiscard]]\
 	static EnumType FromString(const String& str)\
 	{\
 		return GetMap().FromString(str);\
@@ -175,20 +186,24 @@ DeclareBitwiseEnumOps(_n)\
 struct Enum_##_n\
 {\
 	typedef _n EnumType;\
+	[[nodiscard]]\
 	static EnumStringMap<EnumType>& GetMap()\
 	{\
 		static EnumStringMap<EnumType> m(Enum_ArgsToString(__VA_ARGS__));\
 		return m;\
 	}\
+	[[nodiscard]]\
 	static String ToString(EnumType e)\
 	{\
 		return BitflagEnumConversion<EnumType>::ToString(GetMap(), e);\
 	}\
+	[[nodiscard]]\
 	static EnumType FromString(const String& str)\
 	{\
 		return BitflagEnumConversion<EnumType>::FromString(GetMap(), str);\
 	}\
-	bool HasFlag(EnumType in, EnumType flag)\
+	[[nodiscard]]\
+	bool HasFlag(EnumType in, EnumType flag) noexcept\
 	{\
 		return ((in) & (flag)) == (flag);\
 	}\

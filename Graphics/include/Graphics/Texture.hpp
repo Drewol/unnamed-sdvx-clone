@@ -34,17 +34,22 @@ namespace Graphics
 		virtual void SetFromFrameBuffer(Vector2i pos = { 0, 0 }) = 0;
 		virtual void SetMipmaps(bool enabled) = 0;
 		virtual void SetFilter(bool enabled, bool mipFiltering = true, float anisotropic = 1.0f) = 0;
+		[[nodiscard]]
 		virtual const Vector2i& GetSize() const = 0;
 
 		// Gives the aspect ratio correct height for a given width
+		[[nodiscard]]
 		float CalculateHeight(float width);
 		// Gives the aspect ratio correct width for a given height
+		[[nodiscard]]
 		float CalculateWidth(float height);
 
 		// Binds the texture to a given texture unit (default = 0)
 		virtual void Bind(uint32 index = 0) = 0;
+		[[nodiscard]]
 		virtual uint32 Handle() = 0;
 		virtual void SetWrap(TextureWrap u, TextureWrap v) = 0;
+		[[nodiscard]]
 		virtual TextureFormat GetFormat() const = 0;
 	};
 

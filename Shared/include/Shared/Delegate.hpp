@@ -133,7 +133,8 @@ public:
 	}
 
 	// True if anything function is handling this delegate being called
-	bool IsHandled() const
+	[[nodiscard]]
+	bool IsHandled() const noexcept
 	{
 		return !staticMap.empty() || !objectMap.empty() || !lambdaMap.empty();
 	}

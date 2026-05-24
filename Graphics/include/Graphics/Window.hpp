@@ -39,7 +39,8 @@ namespace Graphics
 			PosAndShape(Mode mode, const Vector2i& pos, const Vector2i& size, int32 monitorId, const Vector2i& fullscreenSize)
 				: mode(mode), windowPos(pos), windowSize(size), monitorId(monitorId), fullscreenSize(fullscreenSize){}
 
-			inline static Mode FlagsToMode(bool fullscreen, bool windowedFullscreen)
+			[[nodiscard]]
+			inline static Mode FlagsToMode(bool fullscreen, bool windowedFullscreen) noexcept
 			{
 				return fullscreen ? windowedFullscreen ? Mode::WindowedFullscreen : Mode::Fullscreen : Mode::Windowed;
 			}
@@ -89,26 +90,33 @@ namespace Graphics
 		void SetWindowStyle(WindowStyle style);
 
 		// Get full window position
+		[[nodiscard]]
 		Vector2i GetWindowPos() const;
 
 		// Window Client area size
+		[[nodiscard]]
 		Vector2i GetWindowSize() const;
 
 		// Set vsync setting
 		void SetVSync(int8 setting);
 
 		// Window is active
+		[[nodiscard]]
 		bool IsActive() const;
 		
 		// Set window client area size
 		void SetPosAndShape(const PosAndShape& posAndShape, bool ensureInBound);
+		[[nodiscard]]
 		bool IsFullscreen() const;
 
+		[[nodiscard]]
 		int GetDisplayIndex() const;
 		
 		// Checks if a key is pressed
+		[[nodiscard]]
 		bool IsKeyPressed(SDL_Scancode key) const;
 
+		[[nodiscard]]
 		ModifierKeys GetModifierKeys() const;
 
 		// Start allowing text input
@@ -116,6 +124,7 @@ namespace Graphics
 		// Stop allowing text input
 		void StopTextInput();
 		// Used to get current IME working data
+		[[nodiscard]]
 		const TextComposition& GetTextComposition() const;
 
 		// Show a simple message box
@@ -126,15 +135,20 @@ namespace Graphics
 		bool ShowYesNoMessage(const String& title, const String& message);
 
 		// Get the text currently in the clipboard
+		[[nodiscard]]
 		String GetClipboard() const;
 
 		// The number of available gamepad devices
+		[[nodiscard]]
 		int32 GetNumGamepads() const;
 		// List of gamepad device names
+		[[nodiscard]]
 		Vector<String> GetGamepadDeviceNames() const;
 		// Open a gamepad within the range of the number of gamepads
+		[[nodiscard]]
 		Ref<Gamepad> OpenGamepad(int32 deviceIndex);
 		// Get time since last window event in milliseconds
+		[[nodiscard]]
 		uint32 GetIdleTimsMs();
 
 

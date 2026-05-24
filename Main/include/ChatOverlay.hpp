@@ -26,7 +26,8 @@ public:
 	bool OnKeyPressedConsume(SDL_Scancode key);
 	void OpenChat();
 	void CloseChat();
-	bool IsOpen() {
+	[[nodiscard]]
+	bool IsOpen() const noexcept {
 		return m_isOpen;
 	}
 	void EnableOpeningChat() {

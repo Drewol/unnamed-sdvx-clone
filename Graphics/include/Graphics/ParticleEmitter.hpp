@@ -44,8 +44,9 @@ namespace Graphics
 	}
 #include <Graphics/ParticleParameters.hpp>
 
-	// True after all loops are done playing
-		bool HasFinished() const { return m_finished; }
+		// True after all loops are done playing
+		[[nodiscard]]
+		bool HasFinished() const noexcept { return m_finished; }
 
 		// Restarts a particle emitter
 		void Reset();

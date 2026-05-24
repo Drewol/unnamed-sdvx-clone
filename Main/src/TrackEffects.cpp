@@ -73,7 +73,7 @@ void ButtonHitEffect::Draw(class RenderQueue& rq)
 	track->DrawSprite(rq, Vector3(x, hitEffectSize.y * 0.5f, 0.0f), hitEffectSize, track->scoreHitTexture, c);
 }
 
-ButtonHitRatingEffect::ButtonHitRatingEffect(uint32 buttonCode, ScoreHitRating rating) : TimedEffect(0.3f), buttonCode(buttonCode), rating(rating)
+ButtonHitRatingEffect::ButtonHitRatingEffect(uint32 buttonCode, ScoreHitRating rating, bool sCritical) : TimedEffect(0.3f), buttonCode(buttonCode), rating(rating), sCritical(sCritical)
 {
 	assert(buttonCode < 6);
 	if(rating == ScoreHitRating::Miss)
@@ -138,7 +138,40 @@ void ButtonHitRatingEffect::Draw(class RenderQueue& rq)
 		// Intensity scale
 		Utility::Reinterpret<Vector3>(c) *= iScale;
 
-		track->DrawSprite(rq, Vector3(x, y + hitEffectSize.y * 0.5f, -0.02f), hitEffectSize, hitTexture, c, 0.0f);
+		if (sCritical && rating == ScoreHitRating::Perfect)
+		{
+			static const Color colors[] = {
+				Color(1.0f, 0.12f, 0.08f, 1.0f),
+				Color(1.0f, 0.38f, 0.05f, 1.0f),
+				Color(1.0f, 0.86f, 0.08f, 1.0f),
+				Color(0.25f, 1.0f, 0.16f, 1.0f),
+				Color(0.20f, 0.95f, 1.0f, 1.0f),
+				Color(1.0f, 0.12f, 0.08f, 1.0f),
+				Color(1.0f, 0.38f, 0.05f, 1.0f),
+				Color(1.0f, 0.86f, 0.08f, 1.0f),
+			};
+			constexpr int numLetters = 8;
+			const float letterWidth = hitEffectSize.x / numLetters;
+			const float baseX = x - hitEffectSize.x * 0.5f + letterWidth * 0.5f;
+			for (int i = 0; i < numLetters; ++i)
+			{
+				Color letterColor = colors[i].WithAlpha(c.w);
+				Utility::Reinterpret<Vector3>(letterColor) *= iScale;
+				Rect uv(i / (float)numLetters, 0.0f, 1.0f / (float)numLetters, 1.0f);
+				track->DrawSpritePart(
+					rq,
+					Vector3(baseX + letterWidth * i, y + hitEffectSize.y * 0.5f, -0.02f),
+					Vector2(letterWidth, hitEffectSize.y),
+					hitTexture,
+					uv,
+					letterColor,
+					0.0f);
+			}
+		}
+		else
+		{
+			track->DrawSprite(rq, Vector3(x, y + hitEffectSize.y * 0.5f, -0.02f), hitEffectSize, hitTexture, c, 0.0f);
+		}
 	}
 }
 

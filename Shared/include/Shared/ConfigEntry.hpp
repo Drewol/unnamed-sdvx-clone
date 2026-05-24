@@ -18,13 +18,17 @@ public:
 
 	virtual ~IConfigEntry() = default;
 	// Converts entry to string value
+	[[nodiscard]]
 	virtual String ToString() const = 0;
 	// Sets the current entry from a string value
 	virtual void FromString(const String& str) = 0;
 
+	[[nodiscard]]
 	virtual EntryType GetType() = 0;
 
-	template<typename T> T* As() { return dynamic_cast<T*>(this); }
+	template<typename T>
+	[[nodiscard]]
+	T* As() { return dynamic_cast<T*>(this); }
 };
 
 class IntConfigEntry : public IConfigEntry
@@ -32,9 +36,11 @@ class IntConfigEntry : public IConfigEntry
 public:
 	int32 data;
 public:
+	[[nodiscard]]
 	virtual String ToString() const override;
 	virtual void FromString(const String& str) override;
-	EntryType GetType() override { return EntryType::Integer; };
+	[[nodiscard]]
+	EntryType GetType() noexcept override { return EntryType::Integer; };
 };
 
 class BoolConfigEntry : public IConfigEntry
@@ -42,9 +48,11 @@ class BoolConfigEntry : public IConfigEntry
 public:
 	bool data;
 public:
+	[[nodiscard]]
 	virtual String ToString() const override;
 	virtual void FromString(const String& str) override;
-	EntryType GetType() override { return EntryType::Boolean; };
+	[[nodiscard]]
+	EntryType GetType() noexcept override { return EntryType::Boolean; };
 };
 
 class FloatConfigEntry : public IConfigEntry
@@ -52,9 +60,11 @@ class FloatConfigEntry : public IConfigEntry
 public:
 	float data;
 public:
+	[[nodiscard]]
 	virtual String ToString() const override;
 	virtual void FromString(const String& str) override;
-	EntryType GetType() override { return EntryType::Float; };
+	[[nodiscard]]
+	EntryType GetType() noexcept override { return EntryType::Float; };
 };
 
 class StringConfigEntry : public IConfigEntry
@@ -62,18 +72,22 @@ class StringConfigEntry : public IConfigEntry
 public:
 	String data;
 public:
+	[[nodiscard]]
 	virtual String ToString() const override;
 	virtual void FromString(const String& str) override;
-	EntryType GetType() override { return EntryType::String; };
+	[[nodiscard]]
+	EntryType GetType() noexcept override { return EntryType::String; };
 };
 
 class ColorConfigEntry : public IConfigEntry
 {
 public:
 	Color data;
+	[[nodiscard]]
 	virtual String ToString() const override;
 	virtual void FromString(const String& str) override;
-	EntryType GetType() override { return EntryType::Color; };
+	[[nodiscard]]
+	EntryType GetType() noexcept override { return EntryType::Color; };
 };
 
 template<typename EnumClass>
@@ -82,6 +96,7 @@ class EnumConfigEntry : public IConfigEntry
 public:
 	typename EnumClass::EnumType data;
 public:
+	[[nodiscard]]
 	virtual String ToString() const override
 	{
 		return EnumClass::ToString(data);
@@ -90,7 +105,8 @@ public:
 	{
 		data = EnumClass::FromString(str);
 	}
-	EntryType GetType() override { return EntryType::Enum; };
+	[[nodiscard]]
+	EntryType GetType() noexcept override { return EntryType::Enum; };
 };
 
 template<size_t N>
@@ -100,6 +116,7 @@ class BlobConfigEntry : public IConfigEntry
 public:
 	std::array<uint8, N> data;
 public:
+	[[nodiscard]]
 	virtual String ToString() const override
 	{
 		String ret = "";
@@ -124,5 +141,6 @@ public:
 			data.at(i) = value;
 		}
 	}
-	EntryType GetType() override { return EntryType::Blob; };
+	[[nodiscard]]
+	EntryType GetType() noexcept override { return EntryType::Blob; };
 };

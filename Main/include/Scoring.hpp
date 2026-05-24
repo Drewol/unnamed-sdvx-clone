@@ -38,12 +38,16 @@ public:
 	ScoreTick(ObjectState* object) : object(object) {};
 
 	// Returns the time frame in which this tick can be hit
+	[[nodiscard]]
 	MapTime GetHitWindow(const HitWindow& hitWindow) const;
 	// Hit rating when hitting object at given time
+	[[nodiscard]]
 	ScoreHitRating GetHitRating(const HitWindow& hitWindow, MapTime currentTime) const;
 	// Hit rating when hitting object give a delta 
+	[[nodiscard]]
 	ScoreHitRating GetHitRatingFromDelta(const HitWindow& hitWindow, MapTime delta) const;
 	// Check a flag
+	[[nodiscard]]
 	bool HasFlag(TickFlags flag) const;
 	void SetFlag(TickFlags flag);
 
@@ -61,8 +65,10 @@ struct AutoplayInfo
     float buttonAnimationTimer[6] = { 0 };
 	bool replay = false;
 
-    bool IsAutoplayButtons() const { return autoplay || autoplayButtons; };
-	bool IsReplayingButtons() const { return replay; };
+	[[nodiscard]]
+    bool IsAutoplayButtons() const noexcept { return autoplay || autoplayButtons; };
+	[[nodiscard]]
+	bool IsReplayingButtons() const noexcept { return replay; };
 };
 
 // Various information about all the objects in a map
@@ -88,7 +94,9 @@ public:
 	Scoring();
 	~Scoring();
 
+	[[nodiscard]]
 	static ClearMark CalculateBadge(const ScoreIndex& score);
+	[[nodiscard]]
 	static ClearMark CalculateBestBadge(Vector<ScoreIndex*> scores);
 
 	// Needs to be set to find out which objects are active/hittable
@@ -114,56 +122,83 @@ public:
 	// Updates the list of objects that are possible to hit
 	void Tick(float deltaTime);
 
+	[[nodiscard]]
 	float GetLaserPosition(uint32 index, float pos);
+	[[nodiscard]]
 	float GetLaserRollOutput(uint32 index);
 	// Check if any lasers are currently active
+	[[nodiscard]]
 	bool GetLaserActive();
+	[[nodiscard]]
 	bool GetFXActive();
+	[[nodiscard]]
 	float GetLaserOutput();
 
+	[[nodiscard]]
 	float GetMeanHitDelta(bool absolute = false);
+	[[nodiscard]]
 	int16 GetMedianHitDelta(bool absolute = false);
 
 	// Check if an object is currently held
 	//	works only for lasers and hold buttons
+	[[nodiscard]]
 	bool IsObjectHeld(ObjectState* object);
 	// Check if an object is currently held, by object index
 	//	Buttons[0,5], Lasers[6,7]
+	[[nodiscard]]
 	bool IsObjectHeld(uint32 index) const;
 	// Check if a laser is currently held
+	[[nodiscard]]
 	bool IsLaserHeld(uint32 laserIndex, bool includeSlams = true) const;
 
 	// Checks if a laser is currently not used or needed soon
+	[[nodiscard]]
 	bool IsLaserIdle(uint32 index) const;
 
+	[[nodiscard]]
 	bool IsFailOut() const;
+	[[nodiscard]]
 	class Gauge* GetTopGauge() const;
 	void SetAllGaugeValues(const Vector<float>, bool zeroRest=true);
 	void GetAllGaugeValues(Vector<float>& out) const;
 
 	// Calculates the maximum score of the current map
+	[[nodiscard]]
 	MapTotals CalculateMapTotals() const;
 
 	// Actual score, in the range 0-10,000,000
+	[[nodiscard]]
 	uint32 CalculateCurrentScore() const;
+	[[nodiscard]]
 	uint32 CalculateScore(uint32 hitScore) const;
 
+	[[nodiscard]]
 	uint32 CalculateCurrentDisplayScore() const;
+	[[nodiscard]]
 	uint32 CalculateCurrentDisplayScore(const Replay* replay) const;
+	[[nodiscard]]
 	uint32 CalculateCurrentDisplayScore(uint32 currHit, uint32 currMaxHit) const;
 
 	// The score if the rest would be played perfectly
+	[[nodiscard]]
 	uint32 CalculateCurrentMaxPossibleScore() const;
+	[[nodiscard]]
 	uint32 CalculateCurrentMaxPossibleScore(uint32 currHit, uint32 currMaxHit) const;
 
 	// The score based on the current pace
+	[[nodiscard]]
 	uint32 CalculateCurrentAverageScore(uint32 currHit, uint32 currMaxHit) const;
 
-	inline uint32 GetMisses() const { return categorizedHits[0]; }
-	inline uint32 GetGoods() const { return categorizedHits[1]; }
-	inline uint32 GetPerfects() const { return categorizedHits[2]; }
-	inline bool IsPerfect() const { return GetMisses() == 0 && GetGoods() == 0; }
-	inline bool IsFullCombo() const { return GetMisses() == 0; }
+	[[nodiscard]]
+	inline uint32 GetMisses() const noexcept { return categorizedHits[0]; }
+	[[nodiscard]]
+	inline uint32 GetGoods() const noexcept { return categorizedHits[1]; }
+	[[nodiscard]]
+	inline uint32 GetPerfects() const noexcept { return categorizedHits[2]; }
+	[[nodiscard]]
+	inline bool IsPerfect() const noexcept { return GetMisses() == 0 && GetGoods() == 0; }
+	[[nodiscard]]
+	inline bool IsFullCombo() const noexcept { return GetMisses() == 0; }
 
 	bool HoldObjectAvailable(uint32 index, bool checkIfPassedCritLine);
 
@@ -272,7 +307,7 @@ private:
 	void m_OnTickProcessed(ScoreTick* tick, uint32 index);
 	void m_TickHit(ScoreTick* tick, uint32 index, MapTime delta = 0);
 	void m_TickMiss(ScoreTick* tick, uint32 index, MapTime delta);
-	void m_UpdateGauges(ScoreHitRating rating, TickFlags flags);
+	void m_UpdateGauges(ScoreHitRating rating, TickFlags flags, bool sCritical = false);
 	void m_UpdateGaugeSamples();
 	void m_CleanupTicks();
 	void m_CleanupGauges();

@@ -13,7 +13,8 @@ protected:
 public:
 	Optional() : m_hasValue(false) {}
 	Optional(T v) : m_hasValue(true), m_val(v) {}
-	bool HasValue() const { return m_hasValue; }
+	[[nodiscard]]
+	bool HasValue() const noexcept { return m_hasValue; }
 	T operator*() const
 	{
 		assert(m_hasValue);
@@ -34,7 +35,8 @@ protected:
 public:
 	ChallengeOption() : Optional<T>(), m_isNull(false) {}
 	ChallengeOption(T v) : Optional<T>(v), m_isNull(false) {}
-	bool IsNull() const { return m_isNull; }
+	[[nodiscard]]
+	bool IsNull() const noexcept { return m_isNull; }
 	void Reset()
 	{
 		Optional<T>::Reset();
@@ -47,6 +49,7 @@ public:
 		return *this;
 	}
 	// Get the value with an default if it is not set
+	[[nodiscard]]
 	T Get(const T& def) const
 	{
 		if (!this->HasValue())
@@ -77,10 +80,12 @@ public:
 	ChallengeRequirement(T v) : ChallengeOption<T>(v), m_passed(false) {}
 	ChallengeRequirement(const ChallengeOption<T>& o) : ChallengeOption<T>(o), m_passed(false) {}
 	// This will be true if marked as passed or no value
-	bool PassedOrIgnored() const { return !this->HasValue() || m_passed; }
+	[[nodiscard]]
+	bool PassedOrIgnored() const noexcept { return !this->HasValue() || m_passed; }
 	// This will be true if marked as passed or null
-	bool PassedOrNull() const { return m_passed || this->IsNull(); }
-	void MarkPassed() { m_passed = true; }
+	[[nodiscard]]
+	bool PassedOrNull() const noexcept { return m_passed || this->IsNull(); }
+	void MarkPassed() noexcept { m_passed = true; }
 	void Reset()
 	{
 		ChallengeOption<T>::Reset();
@@ -160,6 +165,7 @@ struct ChallengeRequirements
 #undef CHALLENGE_REQ_DEC
 	// This takes a second evaluated reqs which override this one
 	// if the second set doesn't have an active member, this one is used
+	[[nodiscard]]
 	bool Passed(struct ChallengeRequirements& over)
 	{
 #define CHALLENGE_REQ_PASSED_OVERRIDE(t, n) res = res && (over. n.PassedOrNull() || n.PassedOrIgnored()); \
@@ -179,6 +185,7 @@ if (!res) { \
 #undef CHALLENGE_REQS_MERGE
 		return out;
 	}
+	[[nodiscard]]
 	bool Passed()
 	{
 #define CHALLENGE_REQ_PASSED(t, n) res = res && (n.PassedOrIgnored()); \
@@ -286,33 +293,47 @@ private:
 	float m_totalGauge = 0.0;
 	Vector<float> m_lastGauges;
 public:
-	bool RunningChallenge() { return m_running; }
+	[[nodiscard]]
+	bool RunningChallenge() noexcept { return m_running; }
 	bool StartChallenge(class ChallengeSelect* sel, ChallengeIndex* chal);
 	friend class Game;
 	void ReportScore(Game*, ClearMark);
-	const ChallengeOptions& GetCurrentOptions() { return m_currentOptions; }
+	[[nodiscard]]
+	const ChallengeOptions& GetCurrentOptions() noexcept { return m_currentOptions; }
 	bool ReturnToSelect();
-	const Vector<ChallengeResult>& GetResults() { return m_results; }
-	const OverallChallengeResult& GetOverallResults() { return m_overallResults; }
-	const Vector<ChartIndex*>& GetCharts() { return m_chal->charts; }
-	ChallengeIndex* GetChallenge() { return m_chal; }
-	ChallengeResult& GetCurrentResultForUpdating() { return m_results[m_chartIndex]; }
+	[[nodiscard]]
+	const Vector<ChallengeResult>& GetResults() noexcept { return m_results; }
+	[[nodiscard]]
+	const OverallChallengeResult& GetOverallResults() noexcept { return m_overallResults; }
+	[[nodiscard]]
+	const Vector<ChartIndex*>& GetCharts() noexcept { return m_chal->charts; }
+	[[nodiscard]]
+	ChallengeIndex* GetChallenge() noexcept { return m_chal; }
+	[[nodiscard]]
+	ChallengeResult& GetCurrentResultForUpdating() noexcept { return m_results[m_chartIndex]; }
 
 
 private:
+	[[nodiscard]]
 	ChallengeOption<uint32> m_getOptionAsPositiveInteger(
 		nlohmann::json reqs, String name, int64 min=0, int64 max=INT_MAX);
 
+	[[nodiscard]]
 	ChallengeOption<float> m_getOptionAsFloat(
 		nlohmann::json reqs, String name, float min=-INFINITY, float max=INFINITY);
 
+	[[nodiscard]]
 	ChallengeOption<bool> m_getOptionAsBool(
 		nlohmann::json reqs, String name);
 
+		[[nodiscard]]
 	ChallengeRequirements m_processReqs(nlohmann::json req);
+	[[nodiscard]]
 	ChallengeOptions m_processOptions(nlohmann::json req);
 
+	[[nodiscard]]
 	bool m_setupNextChart();
+	[[nodiscard]]
 	bool m_finishedAllCharts(bool passed);
 };
 
@@ -329,7 +350,8 @@ public:
 	}
 
 	int32 id;
-	ChallengeIndex* GetChallenge() const { return m_challenge; }
+	[[nodiscard]]
+	ChallengeIndex* GetChallenge() const noexcept { return m_challenge; }
 };
 
 class ChallengeSelect : public IAsyncLoadableApplicationTickable
@@ -341,7 +363,9 @@ protected:
 	virtual MapDatabase* GetMapDatabase() = 0;
 public:
 	virtual ~ChallengeSelect() = default;
+	[[nodiscard]]
 	static ChallengeSelect* Create();
 
+	[[nodiscard]]
 	virtual ChallengeIndex* GetCurrentSelectedChallenge() { return 0; }
 };

@@ -30,15 +30,20 @@ namespace Graphics
 		virtual bool UpdateHotReload() = 0;
 		#ifndef EMBEDDED
 		virtual void Bind() = 0;
+		[[nodiscard]]
 		virtual bool IsBound() const = 0;
+		[[nodiscard]]
 		virtual uint32 GetLocation(const String& name) const = 0;
+		[[nodiscard]]
 		uint32 operator[](const char* name) const
 		{
 			return GetLocation(name);
 		}
 		#endif
+		[[nodiscard]]
 		virtual uint32 Handle() = 0;
 
+		[[nodiscard]]
 		virtual String GetOriginalName() const = 0;
 	};
 

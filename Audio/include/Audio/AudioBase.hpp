@@ -9,7 +9,9 @@ protected:
 	DSP() = default; // Abstract
 	DSP(const DSP &) = delete;
 
+	[[nodiscard]]
 	uint32 GetStartSample() const;
+	[[nodiscard]]
 	uint32 GetCurrentSample() const;
 
 	// Smpling rate of m_audio (not m_audioBase)
@@ -28,6 +30,7 @@ public:
 
 	// Process <numSamples> amount of samples in stereo float format
 	virtual void Process(float *out, uint32 numSamples) = 0;
+	[[nodiscard]]
 	virtual const char *GetName() const = 0;
 
 	float mix = 1.0f;
@@ -49,20 +52,25 @@ public:
 	virtual void Process(float *out, uint32 numSamples) = 0;
 
 	// Gets the playback position in millisecond
+	[[nodiscard]]
 	virtual int32 GetPosition() const = 0;
 
 	// Get the sample rate of this audio stream
+	[[nodiscard]]
 	virtual uint32 GetSampleRate() const = 0;
 
 	// Get the exact playback position in samples
+	[[nodiscard]]
 	virtual uint64 GetSamplePos() const = 0;
 
 	// Get the sample rate of the audio connected to this
+	[[nodiscard]]
 	uint32 GetAudioSampleRate() const;
 
 	// Gets pcm data from a decoded stream, nullptr if not available
 	virtual float *GetPCM() = 0;
 	// Gets pcm sample count
+	[[nodiscard]]
 	virtual uint64 GetPCMCount() const = 0;
 	virtual void PreRenderDSPs(Vector<DSP *> &DSPs) = 0;
 
@@ -79,7 +87,8 @@ public:
 	{
 		m_volume = volume;
 	}
-	float GetVolume() const
+	[[nodiscard]]
+	float GetVolume() const noexcept
 	{
 		return m_volume;
 	}

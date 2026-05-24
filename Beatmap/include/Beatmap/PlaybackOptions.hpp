@@ -6,6 +6,10 @@ enum class GaugeType : uint16 {
 	Hard,
 	Permissive,
 	Blastive,
+	Maxxive,
+	Basic,
+	Easy,
+	MaimaiDx,
 };
 
 enum class AutoFlags : uint8 {

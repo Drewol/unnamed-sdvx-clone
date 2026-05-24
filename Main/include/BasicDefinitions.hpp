@@ -18,12 +18,14 @@ enum class ClearMark : uint8
 
 extern const std::array<const char*, 14> GRADE_MARK_STR;
 
-inline const char* ToDisplayString(GradeMark grade)
+[[nodiscard]]
+inline const char* ToDisplayString(GradeMark grade) noexcept
 {
 	return GRADE_MARK_STR[static_cast<std::uint_fast8_t>(grade)];
 }
 
-inline uint32 ToMinScore(GradeMark grade)
+[[nodiscard]]
+inline uint32 ToMinScore(GradeMark grade) noexcept
 {
 	switch (grade)
 	{
@@ -47,7 +49,8 @@ inline uint32 ToMinScore(GradeMark grade)
 	return 0;
 }
 
-inline GradeMark ToGradeMark(uint32 score)
+[[nodiscard]]
+inline GradeMark ToGradeMark(uint32 score) noexcept
 {
 	if (score >= ToMinScore(GradeMark::S))    return GradeMark::S;
 	if (score >= ToMinScore(GradeMark::AAAp)) return GradeMark::AAAp;
@@ -61,7 +64,8 @@ inline GradeMark ToGradeMark(uint32 score)
 	return GradeMark::D;
 }
 
-inline GradeMark ToGradeMarkExt(uint32 score)
+[[nodiscard]]
+inline GradeMark ToGradeMarkExt(uint32 score) noexcept
 {
 	if (score >= ToMinScore(GradeMark::PUC))   return GradeMark::PUC;
 	if (score >= ToMinScore(GradeMark::S_999)) return GradeMark::S_999;
@@ -72,7 +76,8 @@ inline GradeMark ToGradeMarkExt(uint32 score)
 
 extern const std::array<const char*, 6> CLEAR_MARK_STR;
 
-inline const char* ToDisplayString(ClearMark mark)
+[[nodiscard]]
+inline const char* ToDisplayString(ClearMark mark) noexcept
 {
 	return CLEAR_MARK_STR[static_cast<std::uint_fast8_t>(mark)];
 }

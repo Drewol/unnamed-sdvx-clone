@@ -59,18 +59,21 @@ namespace Shared
 		}
 
 		// Total width of the margin (left + right)
-		T Width() const
+		[[nodiscard]]
+		T Width() const noexcept
 		{
 			return left + right;
 		}
 		// Total height of the margin (top + bottom)
-		T Height() const
+		[[nodiscard]]
+		T Height() const noexcept
 		{
 			return top + bottom;
 		}
 
 		// Size (Width, Height)
-		VectorMath::VectorBase<T, 2> GetSize() const
+		[[nodiscard]]
+		VectorMath::VectorBase<T, 2> GetSize() const noexcept
 		{
 			return VectorMath::VectorBase<T, 2>(Width(), Height());
 		}

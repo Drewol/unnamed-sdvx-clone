@@ -24,7 +24,9 @@ public:
 	// Removes an AudioBase so it is no longer rendered
 	void Deregister(AudioBase* audio);
 
+	[[nodiscard]]
 	uint32 GetSampleRate() const;
+	[[nodiscard]]
 	double GetSecondsPerSample() const;
 
 	float globalVolume = 1.0f;

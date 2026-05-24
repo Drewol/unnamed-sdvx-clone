@@ -7,16 +7,21 @@
 class StringEncodingConverter final
 {
 public:
+	[[nodiscard]]
 	static String ToUTF8(StringEncoding encoding, const char* str, const size_t str_len);
+	[[nodiscard]]
 	inline static String ToUTF8(StringEncoding encoding, const char* str) { return ToUTF8(encoding, str, strlen(str)); }
+	[[nodiscard]]
 	inline static String ToUTF8(StringEncoding encoding, const String& str) { return ToUTF8(encoding, str.c_str(), str.size()); }
 
 	static String PathnameToUTF8(StringEncoding encoding, struct archive_entry* entry);
 
-	inline static constexpr bool NeedsConversion(StringEncoding encoding);
+	[[nodiscard]]
+	inline static constexpr bool NeedsConversion(StringEncoding encoding) noexcept;
 
 private:
-	inline static constexpr const char* GetIConvArg(const StringEncoding encoding);
+	[[nodiscard]]
+	inline static constexpr const char* GetIConvArg(const StringEncoding encoding) noexcept;
 
 	StringEncodingConverter() = delete;
 	~StringEncodingConverter() = delete;
@@ -24,7 +29,7 @@ private:
 	constexpr static size_t BUFFER_SIZE = 64;
 };
 
-inline constexpr bool StringEncodingConverter::NeedsConversion(StringEncoding encoding)
+inline constexpr bool StringEncodingConverter::NeedsConversion(StringEncoding encoding) noexcept
 {
 	switch (encoding)
 	{
@@ -36,7 +41,7 @@ inline constexpr bool StringEncodingConverter::NeedsConversion(StringEncoding en
 	}
 }
 
-inline constexpr const char* StringEncodingConverter::GetIConvArg(const StringEncoding encoding)
+inline constexpr const char* StringEncodingConverter::GetIConvArg(const StringEncoding encoding) noexcept
 {
 	switch (encoding)
 	{

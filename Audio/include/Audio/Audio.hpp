@@ -20,14 +20,18 @@ public:
 
 	// Opens a stream at path
 	//	settings preload loads the whole file into memory before playing
+	[[nodiscard]]
 	Ref<AudioStream> CreateStream(const String& path, bool preload = false);
 	// Open a wav file at path
+	[[nodiscard]]
 	Sample CreateSample(const String& path);
 
 	// Target/Output sample rate
+	[[nodiscard]]
 	uint32 GetSampleRate() const;
 
 	// Private
+	[[nodiscard]]
 	class Audio_Impl* GetImpl();
 
 	// Calculated audio latency by the audio driver (currently unused)

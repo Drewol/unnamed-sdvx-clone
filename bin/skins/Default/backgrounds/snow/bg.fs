@@ -14,8 +14,20 @@ uniform float objectGlow;
 uniform sampler2D mainTex;
 uniform float tilt;
 uniform float clearTransition;
+uniform bool reverseColor;
+uniform float reverseColorAmount;
+
+vec4 applyReverseColor(vec4 col)
+{
+    float screenY = gl_FragCoord.y / float(viewport.y);
+    float mask = reverseColor ? step(1.0 - reverseColorAmount, screenY) : 1.0 - step(reverseColorAmount, screenY);
+    col.xyz = mix(col.xyz, vec3(1.0) - col.xyz, mask * col.a);
+    return col;
+}
 
 void main()
 {
 
+    target = vec4(0.0);
+    target = applyReverseColor(target);
 }

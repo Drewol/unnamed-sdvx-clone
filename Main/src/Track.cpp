@@ -296,6 +296,8 @@ void Track::Tick(class BeatmapPlayback& playback, float deltaTime)
 	// Update track hide status
 	m_trackHide += m_trackHideSpeed * deltaTime;
 	m_trackHide = Math::Clamp(m_trackHide, 0.0f, 1.0f);
+	reverseColorAmount += m_reverseColorSpeed * deltaTime;
+	reverseColorAmount = Math::Clamp(reverseColorAmount, 0.0f, 1.0f);
 
 	// Set Object glow
 	int32 startBeat = 0;
@@ -339,7 +341,7 @@ void Track::DrawLaserBase(RenderQueue& rq, class BeatmapPlayback& playback, cons
 			continue;
 
 		LaserObjectState* laser = (LaserObjectState*)obj;
-		if ((laser->flags & LaserObjectState::flag_Extended) != 0 || m_trackHide > 0.f)
+		if ((laser->flags & LaserObjectState::flag_Extended) != 0 || m_trackHide > 0.f || reverseColorAmount > 0.0f)
 		{
 			// Calculate height based on time on current track
 			float viewRange = GetViewRange();
@@ -372,6 +374,8 @@ void Track::DrawBase(class RenderQueue& rq)
 	params.SetParameter("lCol", laserColors[0]);
 	params.SetParameter("rCol", laserColors[1]);
 	params.SetParameter("hidden", m_trackHide);
+	params.SetParameter("reverseColor", reverseColor);
+	params.SetParameter("reverseColorAmount", reverseColorAmount);
 
 	if (centerSplit != 0.0f)
 	{
@@ -386,6 +390,8 @@ void Track::DrawBase(class RenderQueue& rq)
 	// Draw the main beat ticks on the track
 	params.SetParameter("mainTex", trackTickTexture);
 	params.SetParameter("hasSample", false);
+	params.SetParameter("reverseColor", false);
+	params.SetParameter("reverseColorAmount", 0.0f);
 	for (float f : m_barTicks)
 	{
 		float fLocal = f / m_viewRange;
@@ -453,6 +459,8 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 			length = buttonLength;
 			params.SetParameter("hasSample", mobj->button.hasSample);
 			params.SetParameter("mainTex", isHold ? buttonHoldTexture : buttonTexture);
+			params.SetParameter("reverseColor", reverseColor);
+			params.SetParameter("reverseColorAmount", reverseColorAmount);
 			mesh = buttonMesh;
 		}
 		else // FX Button
@@ -470,6 +478,8 @@ void Track::DrawObjectState(RenderQueue& rq, class BeatmapPlayback& playback, Ob
 			length = fxbuttonLength;
 			params.SetParameter("hasSample", mobj->button.hasSample);
 			params.SetParameter("mainTex", isHold ? fxbuttonHoldTexture : fxbuttonTexture);
+			params.SetParameter("reverseColor", false);
+			params.SetParameter("reverseColorAmount", 0.0f);
 			mesh = fxbuttonMesh;
 		}
 
@@ -636,6 +646,26 @@ void Track::DrawSprite(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, 
 	rq.Draw(spriteTransform, centeredTrackMesh, spriteMaterial, params);
 }
 
+void Track::DrawSpritePart(RenderQueue& rq, Vector3 pos, Vector2 size, Texture tex, Rect uv, Color color /*= Color::White*/, float tilt /*= 0.0f*/)
+{
+	Transform spriteTransform = trackOrigin;
+	spriteTransform *= Transform::Translation(pos);
+	spriteTransform *= Transform::Scale({ size.x, size.y, 1.0f });
+	if (tilt != 0.0f)
+		spriteTransform *= Transform::Rotation({ tilt, 0.0f, 0.0f });
+
+	Vector<MeshGenerators::SimpleVertex> verts;
+	MeshGenerators::GenerateSimpleXYQuad(Rect(-0.5f, -0.5f, 1.0f, 1.0f), uv, verts);
+	Mesh mesh = MeshRes::Create(g_gl);
+	mesh->SetPrimitiveType(PrimitiveType::TriangleList);
+	mesh->SetData(verts);
+
+	MaterialParameterSet params;
+	params.SetParameter("mainTex", tex);
+	params.SetParameter("color", color);
+	rq.Draw(spriteTransform, mesh, spriteMaterial, params);
+}
+
 void Track::DrawCombo(RenderQueue& rq, uint32 score, Color color, float scale)
 {
 	if(score == 0)
@@ -730,6 +760,9 @@ void Track::ClearEffects()
 {
 	m_trackHide = 0.0f;
 	m_trackHideSpeed = 0.0f;
+	reverseColor = false;
+	reverseColorAmount = 0.0f;
+	m_reverseColorSpeed = 0.0f;
 
 	for(auto it = m_hitEffects.begin(); it != m_hitEffects.end(); it++)
 	{
@@ -764,6 +797,18 @@ void Track::SendLaserAlert(uint8 laserIdx)
 void Track::SetLaneHide(bool hide, double duration)
 {
 	m_trackHideSpeed = hide ? 1.0f / duration : -1.0f / duration;
+}
+
+void Track::SetReverseColor(bool enabled, double duration)
+{
+	reverseColor = enabled;
+	if (duration <= 0.0)
+	{
+		reverseColorAmount = enabled ? 1.0f : 0.0f;
+		m_reverseColorSpeed = 0.0f;
+		return;
+	}
+	m_reverseColorSpeed = (enabled ? 1.0f : -1.0f) / (float)duration;
 }
 
 float Track::GetViewRange() const

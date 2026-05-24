@@ -48,16 +48,21 @@ public:
 	void RemoveTickable(class IApplicationTickable *tickable, bool noDelete = false);
 
 	// Current running map path (full file path)
+	[[nodiscard]]
 	String GetCurrentMapPath();
 
 	// Current loaded skin;
+	[[nodiscard]]
 	String GetCurrentSkin();
 
 	// Retrieves application command line parameters
+	[[nodiscard]]
 	const Vector<String> &GetAppCommandLine() const;
 
 	// Gets a basic template for a render state, with all the application variables initialized
+	[[nodiscard]]
 	RenderState GetRenderStateBase() const;
+	[[nodiscard]]
 	RenderQueue *GetRenderQueueBase();
 
 #ifdef LoadImage
@@ -83,13 +88,21 @@ public:
 
 	void WarnGauge();
 	int FastText(String text, float x, float y, int size, int align, const Color& color = Color::White);
-	float GetAppTime() const { return m_appTime; }
+	[[nodiscard]]
+	float GetAppTime() const noexcept { return m_appTime; }
+	[[nodiscard]]
 	float GetRenderFPS() const;
+	[[nodiscard]]
 	Material GetFontMaterial() const;
+	[[nodiscard]]
 	Material GetGuiTexMaterial() const;
+	[[nodiscard]]
 	Material GetGuiFillMaterial() const;
+	[[nodiscard]]
 	Transform GetGUIProjection() const;
+	[[nodiscard]]
 	Transform GetCurrentGUITransform() const;
+	[[nodiscard]]
 	Rect GetCurrentGUIScissor() const;
 	void StoreNamedSample(String name, Sample sample);
 	void PlayNamedSample(String name, bool loop);
@@ -109,14 +122,17 @@ public:
 	void CheckForUpdate();
 	void ForceRender();
 	void SetLuaBindings(struct lua_State* state);
+	[[nodiscard]]
 	Vector<String> GetLightPluginList();
 	void RenderTickables();
+	[[nodiscard]]
 	struct NVGcontext* GetVGContext();
 	void SetRgbLights(int left, int pos, Colori color);
 	void SetButtonLights(uint32 buttonbits);
 
 	//if empty: no update avaiable
 	//else: index 0 = url, index 1 = version
+	[[nodiscard]]
 	Vector<String> GetUpdateAvailable();
 
 	AutoplayInfo* autoplayInfo = nullptr;
@@ -209,6 +225,7 @@ class SharedTexture {
 public:
 	SharedTexture() = default;
 	~SharedTexture();
+	[[nodiscard]]
 	bool Valid();
 	int nvgTexture = 0;
 	Texture texture;

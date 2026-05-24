@@ -3,6 +3,8 @@
 
 class SettingsPage
 {
+public:
+	virtual ~SettingsPage() = default;
 protected:
 	SettingsPage(nk_context* nctx, const std::string_view& name) : m_nctx(nctx), m_name(name) {}
 

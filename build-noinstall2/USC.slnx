@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Solution>
+	<Configurations>
+		<BuildType Name="Debug"/>
+		<BuildType Name="Release"/>
+		<Platform Name="x64"/>
+	</Configurations>
+	<Project Path="updater/updater.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="a41c3ddc-b4ba-3ee1-8c55-54c92b4257bf">
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		<BuildDependency Project="third_party/cpr/cpr/cpr.vcxproj"/>
+	</Project>
+	<Project Path="Main/usc-game.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="7dc6635a-7e12-336c-979e-858c065eb25a" DefaultStartup="true">
+		<BuildDependency Project="Audio/Audio.vcxproj"/>
+		<BuildDependency Project="Beatmap/Beatmap.vcxproj"/>
+		<BuildDependency Project="third_party/GLEW.vcxproj"/>
+		<BuildDependency Project="GUI/GUI.vcxproj"/>
+		<BuildDependency Project="Graphics/Graphics.vcxproj"/>
+		<BuildDependency Project="Shared/Shared.vcxproj"/>
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		<BuildDependency Project="third_party/cpr/cpr/cpr.vcxproj"/>
+		<BuildDependency Project="third_party/discord-rpc/src/discord-rpc.vcxproj"/>
+		<BuildDependency Project="third_party/lua-5.3.5/lua.vcxproj"/>
+		<BuildDependency Project="third_party/minimp3.vcxproj"/>
+		<BuildDependency Project="third_party/nanovg.vcxproj"/>
+		<BuildDependency Project="third_party/soundtouch.vcxproj"/>
+		<BuildDependency Project="third_party/sqlite3.vcxproj"/>
+	</Project>
+	<Folder Name="/CMakePredefinedTargets/">
+		<Project Path="ALL_BUILD.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="22d171f9-dcff-3547-a774-e6004294b15d">
+			<BuildDependency Project="Audio/Audio.vcxproj"/>
+			<BuildDependency Project="Beatmap/Beatmap.vcxproj"/>
+			<BuildDependency Project="third_party/GLEW.vcxproj"/>
+			<BuildDependency Project="GUI/GUI.vcxproj"/>
+			<BuildDependency Project="Graphics/Graphics.vcxproj"/>
+			<BuildDependency Project="Shared/Shared.vcxproj"/>
+			<BuildDependency Project="Tests/Tests.vcxproj"/>
+			<BuildDependency Project="Tests.Game/Tests.Game.vcxproj"/>
+			<BuildDependency Project="Tests.Shared/Tests.Shared.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="third_party/cpr/cpr/cpr.vcxproj"/>
+			<BuildDependency Project="third_party/discord-rpc/src/discord-rpc.vcxproj"/>
+			<BuildDependency Project="third_party/lua-5.3.5/lua.vcxproj"/>
+			<BuildDependency Project="third_party/minimp3.vcxproj"/>
+			<BuildDependency Project="third_party/nanovg.vcxproj"/>
+			<BuildDependency Project="third_party/soundtouch.vcxproj"/>
+			<BuildDependency Project="third_party/sqlite3.vcxproj"/>
+			<BuildDependency Project="updater/updater.vcxproj"/>
+			<BuildDependency Project="Main/usc-game.vcxproj"/>
+		</Project>
+		<Project Path="INSTALL.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="6e2c7e69-0cfe-3e64-8246-d0add895582d">
+			<BuildDependency Project="ALL_BUILD.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+		</Project>
+		<Project Path="ZERO_CHECK.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="1f545a08-9f34-3f1f-ac24-dc72d9f5481f"/>
+	</Folder>
+	<Folder Name="/Libraries/">
+		<Project Path="Audio/Audio.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="fdd2ab56-d80d-3fab-b286-a75df31bbc12">
+			<BuildDependency Project="Shared/Shared.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="third_party/lua-5.3.5/lua.vcxproj"/>
+			<BuildDependency Project="third_party/minimp3.vcxproj"/>
+			<BuildDependency Project="third_party/soundtouch.vcxproj"/>
+		</Project>
+		<Project Path="Beatmap/Beatmap.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="2add2cb7-4d66-33dd-95da-751fb8815c16">
+			<BuildDependency Project="Shared/Shared.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="third_party/lua-5.3.5/lua.vcxproj"/>
+			<BuildDependency Project="third_party/sqlite3.vcxproj"/>
+		</Project>
+		<Project Path="GUI/GUI.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="4afb1eb9-9750-3ef2-b1ab-22aeca36423a">
+			<BuildDependency Project="third_party/GLEW.vcxproj"/>
+			<BuildDependency Project="Graphics/Graphics.vcxproj"/>
+			<BuildDependency Project="Shared/Shared.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="third_party/lua-5.3.5/lua.vcxproj"/>
+			<BuildDependency Project="third_party/nanovg.vcxproj"/>
+		</Project>
+		<Project Path="Graphics/Graphics.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="a0a1e2eb-63a9-38d7-89a1-6fd36e4469fe">
+			<BuildDependency Project="third_party/GLEW.vcxproj"/>
+			<BuildDependency Project="Shared/Shared.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="third_party/lua-5.3.5/lua.vcxproj"/>
+		</Project>
+		<Project Path="Shared/Shared.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="355390e4-b944-3f25-a50f-e470c00770e3">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="third_party/lua-5.3.5/lua.vcxproj"/>
+		</Project>
+	</Folder>
+	<Folder Name="/Tests/">
+		<Project Path="Tests/Tests.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="ed4774ef-9655-3945-86d2-adc687975829">
+			<BuildDependency Project="Shared/Shared.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="third_party/lua-5.3.5/lua.vcxproj"/>
+		</Project>
+		<Project Path="Tests.Game/Tests.Game.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="8f14270e-6b30-33e1-8a90-a179aa6bc5e5">
+			<BuildDependency Project="Audio/Audio.vcxproj"/>
+			<BuildDependency Project="Beatmap/Beatmap.vcxproj"/>
+			<BuildDependency Project="third_party/GLEW.vcxproj"/>
+			<BuildDependency Project="GUI/GUI.vcxproj"/>
+			<BuildDependency Project="Graphics/Graphics.vcxproj"/>
+			<BuildDependency Project="Shared/Shared.vcxproj"/>
+			<BuildDependency Project="Tests/Tests.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="third_party/lua-5.3.5/lua.vcxproj"/>
+			<BuildDependency Project="third_party/minimp3.vcxproj"/>
+			<BuildDependency Project="third_party/nanovg.vcxproj"/>
+			<BuildDependency Project="third_party/soundtouch.vcxproj"/>
+			<BuildDependency Project="third_party/sqlite3.vcxproj"/>
+		</Project>
+		<Project Path="Tests.Shared/Tests.Shared.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="ebb1f27a-3e0d-3169-9864-14d37395c7a1">
+			<BuildDependency Project="Shared/Shared.vcxproj"/>
+			<BuildDependency Project="Tests/Tests.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="third_party/lua-5.3.5/lua.vcxproj"/>
+		</Project>
+	</Folder>
+	<Folder Name="/Third Party/">
+		<Project Path="third_party/GLEW.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="74175f8c-d115-3b22-818f-9968eeac5aab">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="third_party/cpr/cpr/cpr.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="9ba2b92f-31ff-3d43-b85c-114c4b46d5b3">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="third_party/discord-rpc/src/discord-rpc.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="3ef5c075-aa2c-3d2c-95a0-1df89ba0367b">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="third_party/lua-5.3.5/lua.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="7902703f-8dc9-350e-a2ea-75a8c2030950">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="third_party/minimp3.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="73481252-69b2-3a80-b3ae-a3897f74f880">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="third_party/nanovg.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="26061286-a066-31d9-971a-5ee7c8108735">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="third_party/soundtouch.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="94b93875-b146-38d4-90cd-13df3b2586fa">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="third_party/sqlite3.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="cc56d7e4-96fc-3f98-9ce6-6824b0d47206">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+	</Folder>
+</Solution>

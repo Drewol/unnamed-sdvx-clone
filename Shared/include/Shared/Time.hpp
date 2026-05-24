@@ -10,11 +10,9 @@ class Time
 {
 public:
 	Time(time_t t) : m_time(t) {};
-	Time(std::chrono::time_point<std::chrono::system_clock> tp)
-	{
-		m_time = std::chrono::system_clock::to_time_t(tp);
-	};
-	static Time Now()
+	Time(std::chrono::time_point<std::chrono::system_clock> tp) : m_time(std::chrono::system_clock::to_time_t(tp)) {};
+	[[nodiscard]]
+	static Time Now() noexcept
 	{
 		return Time(std::time(nullptr));
 	}
@@ -36,7 +34,8 @@ public:
 		std::strftime(buffer, 128, *format, m_tm);
 		return String(buffer);
 	}
-	time_t Data()
+	[[nodiscard]]
+	time_t Data() noexcept
 	{
 		return m_time;
 	}

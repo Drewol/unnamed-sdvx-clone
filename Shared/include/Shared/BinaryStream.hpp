@@ -97,9 +97,11 @@ public:
 		m_isOk = true;
 	}
 	// Tells the position of the stream
+	[[nodiscard]]
 	virtual size_t Tell() const = 0;
 	// Returns the current size of the stream
 	//	either the max amount of readable data or the amount of currently written data
+	[[nodiscard]]
 	virtual size_t GetSize() const = 0;
 
 	// Stream operators
@@ -110,16 +112,19 @@ public:
 		return *this;
 	}
 	// Check if stream operator<< was successfull
-	bool IsOk() const
+	[[nodiscard]]
+	bool IsOk() const noexcept
 	{
 		return m_isOk;
 	}
 
-	bool IsReading() const 
+	[[nodiscard]]
+	bool IsReading() const noexcept
 	{
 		return m_isReading;
 	}
-	bool IsWriting() const
+	[[nodiscard]]
+	bool IsWriting() const noexcept
 	{
 		return !m_isReading;
 	}

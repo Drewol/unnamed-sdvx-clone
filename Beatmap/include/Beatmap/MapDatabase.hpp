@@ -129,6 +129,7 @@ struct ChallengeIndex
 	bool missingChart;
 
 	// Access settings and check if they are actually loaded
+	[[nodiscard]]
 	const nlohmann::json& GetSettings()
 	{
 		if (settings.is_null() || settings.is_discarded())
@@ -198,6 +199,7 @@ public:
 	// Checks the background scanning and actualized the current map database
 	void Update();
 
+	[[nodiscard]]
 	bool IsSearching() const;
 	void StartSearching();
 	void PauseSearching();
@@ -217,16 +219,24 @@ public:
 	ChartIndex* FindFirstChartByPath(const String&);
 	ChartIndex* FindFirstChartByHash(const String&);
 	ChartIndex* FindFirstChartByNameAndLevel(const String&, int32 level);
+	[[nodiscard]]
 	FolderIndex* GetFolder(int32 idx);
+	[[nodiscard]]
 	Vector<String> GetCollections();
+	[[nodiscard]]
 	Vector<String> GetCollectionsForMap(int32 mapid);
+	[[nodiscard]]
 	Vector<PracticeSetupIndex*> GetOrAddPracticeSetups(int32 chartId, const PracticeSetupIndex& defaultOptions);
 
 	// Get a random chart
+	[[nodiscard]]
 	ChartIndex* GetRandomChart();
 
+	[[nodiscard]]
 	const std::map<int32, FolderIndex *>& GetFolderMap();
+	[[nodiscard]]
 	const std::map<int32, ChartIndex *>& GetChartMap();
+	[[nodiscard]]
 	const std::map<int32, ChallengeIndex *>& GetChallengeMap();
 
 
