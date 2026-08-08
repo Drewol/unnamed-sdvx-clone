@@ -86,12 +86,13 @@ bool ParseKShootCourse(BinaryStream& input, Map<String, String>& settings, Vecto
 
 	uint32_t lineNumber = 0;
 	String line;
-	static const String lineEnding = "\r\n";
+	static const String lineEnding = "\n";
 
 	// Parse header (encoding-agnostic)
 	while(TextStream::ReadLine(input, line, lineEnding))
 	{
 		line.Trim();
+		line.TrimBack('\r');
 		lineNumber++;
 		if(line == "--")
 		{
@@ -133,6 +134,7 @@ bool ParseKShootCourse(BinaryStream& input, Map<String, String>& settings, Vecto
 	while (TextStream::ReadLine(input, line, lineEnding))
 	{
 		line.Trim();
+		line.TrimBack('\r');
 		lineNumber++;
 		if (line.empty() || line[0] != '[')
 			continue;
@@ -182,12 +184,13 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 
 	uint32_t lineNumber = 0;
 	String line;
-	static const String lineEnding = "\r\n";
+	static const String lineEnding = "\n";
 
 	// Parse header (encoding-agnostic)
 	while(TextStream::ReadLine(input, line, lineEnding))
 	{
 		line.Trim();
+		line.TrimBack('\r');
 		lineNumber++;
 		if(line == c_sep)
 		{
@@ -235,6 +238,7 @@ bool KShootMap::Init(BinaryStream& input, bool metadataOnly)
 	KShootTime time = KShootTime(0, 0);
 	while(TextStream::ReadLine(input, line, lineEnding))
 	{
+		line.TrimBack('\r');
 		if(line.empty())
 		{
 			continue;
