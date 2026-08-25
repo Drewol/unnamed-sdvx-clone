@@ -38,8 +38,10 @@ private:
 	int32 m_hitcount = 0;
 	bool m_autoCalibrate = false;
 	bool m_hasRenderedOnce = false;
+	std::queue<SDL_Event> m_eventQueue;
 
 	void m_OnButtonPressed(Input::Button buttonCode, int32 delta);
 	void m_OnButtonReleased(Input::Button buttonCode, int32 delta);
+	void m_OnSDLEvent(SDL_Event evt);
 	float m_average(const Vector<int>& values);
 };
