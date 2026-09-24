@@ -12,7 +12,9 @@ BasicNuklearGui::~BasicNuklearGui()
 
 void BasicNuklearGui::UpdateNuklearInput(SDL_Event evt)
 {
-	if (!m_isOpen)
+	// While suspended Tick doesn't drain the queue, so queueing here would
+	// replay every buffered event into nuklear on restore.
+	if (!m_isOpen || (m_canSuspend && IsSuspended()))
 		return;
 	m_eventQueue.push(evt);
 }

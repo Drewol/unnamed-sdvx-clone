@@ -15,6 +15,7 @@ CalibrationScreen::~CalibrationScreen()
 {
 	g_input.OnButtonPressed.RemoveAll(this);
 	g_input.OnButtonReleased.RemoveAll(this);
+	g_gameWindow->OnAnyEvent.RemoveAll(this);
 }
 
 bool CalibrationScreen::AsyncLoad()
@@ -60,6 +61,11 @@ bool CalibrationScreen::AsyncFinalize()
 
 	g_input.OnButtonPressed.Add(this, &CalibrationScreen::m_OnButtonPressed);
 	g_input.OnButtonReleased.Add(this, &CalibrationScreen::m_OnButtonReleased);
+
+	// The settings screen that owns m_ctx is suspended while this screen is
+	// active, so its nuklear input pump is not running and this screen has to
+	// feed the mouse/keyboard events to nuklear itself.
+	g_gameWindow->OnAnyEvent.Add(this, &CalibrationScreen::m_OnSDLEvent);
 
 	return m_track.AsyncFinalize();
 }
@@ -218,6 +224,14 @@ void CalibrationScreen::Render(float deltaTime)
 
 void CalibrationScreen::Tick(float deltaTime)
 {
+	nk_input_begin(m_ctx);
+	while (!m_eventQueue.empty())
+	{
+		nk_sdl_handle_event(&m_eventQueue.front());
+		m_eventQueue.pop();
+	}
+	nk_input_end(m_ctx);
+
 	m_lastTime = 2000 + (m_timer.Milliseconds() % 2000);
 	m_lastTime -= m_audioOffset;
 
@@ -274,6 +288,11 @@ void CalibrationScreen::m_OnButtonPressed(Input::Button buttonCode, int32 delta)
 		}
 
 	}
+}
+
+void CalibrationScreen::m_OnSDLEvent(SDL_Event evt)
+{
+	m_eventQueue.push(evt);
 }
 
 void CalibrationScreen::m_OnButtonReleased(Input::Button buttonCode, int32 delta)
