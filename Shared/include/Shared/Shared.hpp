@@ -11,6 +11,7 @@
 
 // Reference counting
 #include "Ref.hpp"
+#include "Resource.hpp"
 
 // Filsystem headers
 #include "FileSystem.hpp"

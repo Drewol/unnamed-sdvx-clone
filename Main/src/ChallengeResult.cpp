@@ -120,7 +120,7 @@ public:
 			const ChartIndex* chart = charts[i];
 			const ChallengeResult& cres = res[i];
 
-			String jacketPath = Path::RemoveLast(chart->path, nullptr) + Path::sep + chart->jacket_path;
+			String jacketPath = g_application->RegisterChartResource(*chart, chart->jacket_path);
 			m_PushStringToTable("jacketPath", jacketPath);
 			m_PushStringToTable("title", chart->title);
 			m_PushStringToTable("artist", chart->artist);

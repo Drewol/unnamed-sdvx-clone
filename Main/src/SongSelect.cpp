@@ -23,7 +23,9 @@
 #include "PreviewPlayer.hpp"
 #include "ItemSelectionWheel.hpp"
 #include "Audio/OffsetComputer.hpp"
+#include "BackbeatCatalog.hpp"
 #include "Search.hpp"
+#include <unordered_map>
 
 /*
 	Song preview player with fade-in/out
@@ -427,7 +429,7 @@ private:
 		{
 			lua_pushinteger(m_lua, ++diffIndex);
 			lua_newtable(m_lua);
-			m_PushStringToTable("jacketPath", Path::Normalize(song.GetFolder()->path + "/" + diff->jacket_path).c_str());
+			m_PushStringToTable("jacketPath", g_application->RegisterChartResource(*diff, diff->jacket_path).c_str());
 			m_PushIntToTable("level", diff->level);
 			m_PushIntToTable("difficulty", diff->diff_index);
 			m_PushIntToTable("id", diff->id);
@@ -662,6 +664,64 @@ public:
 	// Check if any new folders or collections should be added and add them
 	void UpdateFilters()
 	{
+		std::unordered_set<std::string> activeChartSets;
+		auto updateChartSet = [&](const String& key, const String& name, const String& sortKey,
+			FilterType type, const Vector<int32>& chartIds)
+		{
+			if (chartIds.empty())
+				return;
+			activeChartSets.insert(key);
+			auto existing = m_chartSets.find(key);
+			if (existing != m_chartSets.end())
+			{
+				existing->second->Update(name, sortKey, chartIds);
+				return;
+			}
+			ChartSetFilter* filter = new ChartSetFilter(name, sortKey, type, chartIds);
+			AddFilter(filter, type);
+			m_chartSets.emplace(key, filter);
+		};
+
+		for (const TableIndex& table : m_mapDB->GetTables())
+		{
+			String symbol = table.symbol.empty() ? table.name : table.symbol;
+			String sortPrefix = "Table: " + table.name;
+			for (size_t i = 0; i < table.levels.size(); i++)
+				updateChartSet("table:level:" + table.url + ":" + std::to_string(i),
+					"Table: " + symbol + table.levels[i].name,
+					sortPrefix + Utility::Sprintf("/1/%08d", (int)i), FilterType::Table, table.levels[i].chartIds);
+			for (size_t i = 0; i < table.folders.size(); i++)
+				updateChartSet("table:folder:" + table.url + ":" + std::to_string(i),
+					"Table: " + symbol + " (" + table.folders[i].name + ")",
+					sortPrefix + Utility::Sprintf("/2/%08d", (int)i), FilterType::Table, table.folders[i].chartIds);
+		}
+		for (const PackIndex& pack : m_mapDB->GetPacks())
+		{
+			String name = "Pack: " + pack.name;
+			updateChartSet("pack:" + pack.url, name, name, FilterType::Pack, pack.chartIds);
+		}
+
+		for (auto entry = m_chartSets.begin(); entry != m_chartSets.end();)
+		{
+			if (activeChartSets.count(entry->first))
+			{
+				++entry;
+				continue;
+			}
+			ChartSetFilter* filter = entry->second;
+			if (m_currentFilters[0] == filter)
+			{
+				auto all = std::find_if(m_folderFilters.begin(), m_folderFilters.end(),
+					[](SongFilter* candidate) { return candidate->GetType() == FilterType::All; });
+				m_currentFilters[0] = all == m_folderFilters.end() ? nullptr : *all;
+			}
+			auto position = std::find(m_folderFilters.begin(), m_folderFilters.end(), filter);
+			if (position != m_folderFilters.end())
+				m_folderFilters.erase(position);
+			delete filter;
+			entry = m_chartSets.erase(entry);
+		}
+
 		for (std::string c : m_mapDB->GetCollections())
 		{
 			if (m_collections.find(c) == m_collections.end())
@@ -691,9 +751,9 @@ public:
 
 		//sort the new folderfilter vector
 		m_folderFilters.Sort([](const SongFilter *a, const SongFilter *b) {
-			String aupper = a->GetName();
+			String aupper = a->GetSortKey();
 			aupper.ToUpper();
-			String bupper = b->GetName();
+			String bupper = b->GetSortKey();
 			bupper.ToUpper();
 			return aupper.compare(bupper) < 0;
 		});
@@ -770,6 +830,7 @@ private:
 	lua_State *m_lua = nullptr;
 	std::unordered_set<std::string> m_folders;
 	std::unordered_set<std::string> m_collections;
+	std::unordered_map<std::string, ChartSetFilter*> m_chartSets;
 };
 
 /*
@@ -974,6 +1035,7 @@ private:
 	int32 m_lastMapIndex = -1;
 
 	DBUpdateScreen* m_dbUpdateScreen = nullptr;
+	Ref<BackbeatCatalog> m_backbeatCatalog;
 
 public:
 	SongSelect_Impl() : m_settDiag(this) {}
@@ -994,6 +1056,10 @@ public:
 
 		// Setup the map database
 		m_mapDatabase->AddSearchPath(g_gameConfig.GetString(GameConfigKeys::SongFolder));
+
+		m_backbeatCatalog = GetBackbeatCatalog();
+		if (m_backbeatCatalog->IsOpen())
+			(void)m_backbeatCatalog->Prepare();
 
 		return true;
 	}
@@ -1017,6 +1083,14 @@ public:
 			return;
 		g_application->RemoveTickable(m_dbUpdateScreen);
 		m_dbUpdateScreen = NULL;
+	}
+
+	void m_StartSearchingWithBackbeatRefresh()
+	{
+		bool reloadsDatabase = !m_mapDatabase->IsSearching();
+		if (reloadsDatabase && m_backbeatCatalog && m_backbeatCatalog->IsOpen())
+			(void)m_backbeatCatalog->PullCatalog();
+		m_mapDatabase->StartSearching();
 	}
 
 	String m_getCurrentChartName()
@@ -1215,12 +1289,7 @@ public:
 
 	void m_updatePreview(ChartIndex *diff, bool mapChanged)
 	{
-		String mapRootPath = diff->path.substr(0, diff->path.find_last_of(Path::sep));
-
-		// Set current preview audio
-		String audioPath = mapRootPath + Path::sep + diff->preview_file;
-
-		PreviewParams params = {audioPath, static_cast<uint32>(diff->preview_offset), static_cast<uint32>(diff->preview_length)};
+		PreviewParams params = {diff->GetStableKey() + ":" + diff->preview_file, static_cast<uint32>(diff->preview_offset), static_cast<uint32>(diff->preview_length)};
 
 		/* A lot of pre-effected charts use different audio files for each difficulty; these
 		 * files differ only in their effects, so the preview offset and duration remain the
@@ -1234,7 +1303,7 @@ public:
 
 		if (newPreview)
 		{
-			Ref<AudioStream> previewAudio = g_audio->CreateStream(audioPath);
+			Ref<AudioStream> previewAudio = g_audio->CreateStream(diff->ResolvePath(diff->preview_file));
 			if (previewAudio)
 			{
 				previewAudio->SetPosition(diff->preview_offset);
@@ -1247,7 +1316,7 @@ public:
 			{
 				params = {"", 0, 0};
 
-				Logf("Failed to load preview audio from [%s]", Logger::Severity::Warning, audioPath);
+				Logf("Failed to load preview audio [%s] from %s", Logger::Severity::Warning, diff->preview_file, diff->backbeat_bundle_id.empty() ? "disk" : "backbeat");
 				if (m_previewParams != params)
 					m_previewPlayer.FadeTo(Ref<AudioStream>());
 			}
@@ -1528,7 +1597,7 @@ public:
 			}
 			else if (code == SDL_SCANCODE_F5)
 			{
-				m_mapDatabase->StartSearching();
+				m_StartSearchingWithBackbeatRefresh();
 				OnSearchTermChanged(m_searchInput->input);
 			}
 			else if (code == SDL_SCANCODE_F1 && m_hasCollDiag)
@@ -1551,10 +1620,17 @@ public:
 			}
 			else if (code == SDL_SCANCODE_F11)
 			{
+				ChartIndex* chart = GetCurrentSelectedChart();
+				String chartPath = chart && chart->backbeat_bundle_id.empty() ? chart->path : "";
+				if (chartPath.empty())
+				{
+					g_gameWindow->ShowMessageBox("Managed by Backbeat", "This chart does not have a writable filesystem path.", 0);
+					return;
+				}
 				String paramFormat = g_gameConfig.GetString(GameConfigKeys::EditorParamsFormat);
 				String path = Path::Normalize(g_gameConfig.GetString(GameConfigKeys::EditorPath));
 				String param = Utility::Sprintf(paramFormat.c_str(),
-												Utility::Sprintf("\"%s\"", Path::Absolute(GetCurrentSelectedChart()->path)));
+												Utility::Sprintf("\"%s\"", Path::Absolute(chartPath)));
 				Path::Run(path, param.GetData());
 			}
 			else if (code == SDL_SCANCODE_F12 && m_shiftDown)
@@ -1568,9 +1644,12 @@ public:
 			}
 			else if (code == SDL_SCANCODE_F12)
 			{
-				FolderIndex* sel = m_selectionWheel->GetSelection();
-				if (sel) {
-					Path::ShowInFileBrowser(sel->path);
+				ChartIndex* chart = GetCurrentSelectedChart();
+				String chartPath = chart && chart->backbeat_bundle_id.empty() ? chart->path : "";
+				if (!chartPath.empty()) {
+					Path::ShowInFileBrowser(Path::RemoveLast(chartPath, nullptr));
+				} else if (chart) {
+					g_gameWindow->ShowMessageBox("Managed by Backbeat", "This chart is stored in Backbeat and has no folder to reveal.", 0);
 				}
 			}
 			else if (code == SDL_SCANCODE_TAB)
@@ -1597,6 +1676,12 @@ public:
 				m_previewPlayer.StopCurrent();
 
 				ChartIndex* chart = m_selectionWheel->GetSelectedChart();
+				String nativeChartPath = chart && chart->backbeat_bundle_id.empty() ? chart->path : "";
+				if (nativeChartPath.empty())
+				{
+					g_gameWindow->ShowMessageBox("Managed by Backbeat", "Remove this chart from Backbeat instead.", 0);
+					return;
+				}
 				FolderIndex* folder = m_mapDatabase->GetFolder(chart->folderId);
 
 				bool deleteFolder = m_shiftDown !=0 || folder->charts.size() == 1;
@@ -1607,7 +1692,7 @@ public:
 						"Are you sure you want to delete " + folder->path + " and all its difficulties\nThis cannot be undone");
 					if (!res)
 						return;
-					Path::DeleteDir(folder->path);
+					Path::DeleteDir(Path::RemoveLast(nativeChartPath, nullptr));
 				}
 				else
 				{
@@ -1616,10 +1701,10 @@ public:
 						"Are you sure you want to delete " + name + "\nThis will only delete " + chart->path + "\nThis cannot be undone...");
 					if (!res)
 						return;
-					Path::Delete(chart->path);
+					Path::Delete(nativeChartPath);
 				}
 				// Seems to have an issue here where it can get stuck in the other thread
-				m_mapDatabase->StartSearching();
+				m_StartSearchingWithBackbeatRefresh();
 				OnSearchTermChanged(m_searchInput->input);
 				// TODO if last chart in folder then remove whole folder
 			}

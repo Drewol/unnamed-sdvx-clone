@@ -14,6 +14,24 @@ bool Beatmap::Load(BinaryStream& input, bool metadataOnly)
 	return m_ProcessKShootMap(input, metadataOnly);
 }
 
+bool Beatmap::Load(const Resource& resource, bool metadataOnly)
+{
+	if (resource.IsPath())
+	{
+		File file;
+		if (!file.OpenRead(resource.GetPath()))
+			return false;
+		FileReader reader(file);
+		return Load(reader, metadataOnly);
+	}
+	if (resource.IsValid())
+	{
+		MemoryReader reader(*resource.GetBytes());
+		return Load(reader, metadataOnly);
+	}
+	return false;
+}
+
 const BeatmapSettings& Beatmap::GetMapSettings() const
 {
 	return m_settings;

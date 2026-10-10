@@ -32,23 +32,13 @@
 #include <ShadedMesh.hpp>
 
 // Try load map helper
-Ref<Beatmap> TryLoadMap(const String& path)
+Ref<Beatmap> TryLoadMap(const Resource& resource)
 {
-	// Load map file
 	Beatmap* newMap = new Beatmap();
-	File mapFile;
-	if(!mapFile.OpenRead(path))
-	{
-		delete newMap;
-		return Ref<Beatmap>();
-	}
-	FileReader reader(mapFile);
-	if(!newMap->Load(reader))
-	{
-		delete newMap;
-		return Ref<Beatmap>();
-	}
-	return Ref<Beatmap>(newMap);
+	if (newMap->Load(resource))
+		return Ref<Beatmap>(newMap);
+	delete newMap;
+	return Ref<Beatmap>();
 }
 
 /* 
@@ -61,6 +51,7 @@ public:
 	String m_chartRootPath;
 	String m_chartPath;
 	ChartIndex* m_chartIndex = nullptr;
+	Ref<ChartSource> m_chartSource;
 
 private:
 	bool m_playing = true;
@@ -206,6 +197,7 @@ public:
 	{
 		// Store path to map
 		m_chartPath = Path::Normalize(mapPath);
+		m_chartSource = std::make_shared<DiskChartSource>(m_chartPath);
 		// Get Parent path
 		m_chartRootPath = Path::RemoveLast(m_chartPath, nullptr);
 
@@ -219,6 +211,7 @@ public:
 		// Store path to map
 		m_chartPath = Path::Normalize(chart->path);
 		m_chartIndex = chart;
+		m_chartSource = chart->chartData;
 
 		// Get Parent path
 		m_chartRootPath = Path::RemoveLast(m_chartPath, nullptr);
@@ -284,13 +277,7 @@ public:
 				&& !m_challengeManager->GetCurrentOptions().allow_cmod.Get(true))
 			m_speedMod = SpeedMods::MMod;
 
-		if(!Path::FileExists(m_chartPath))
-		{
-			Logf("Couldn't find chart at %s", Logger::Severity::Error, m_chartPath);
-			return false;
-		}
-
-		m_beatmap = TryLoadMap(m_chartPath);
+		m_beatmap = TryLoadMap(m_chartSource->LoadChart());
 
 		// Check failure of above loading attempts
 		if(!m_beatmap)
@@ -444,7 +431,7 @@ public:
 			return false;
 
 		// Load beatmap audio
-		if(!m_audioPlayback.Init(m_playback, m_chartRootPath, g_gameConfig.GetBool(GameConfigKeys::PrerenderEffects)))
+		if(!m_audioPlayback.Init(m_playback, m_chartSource, g_gameConfig.GetBool(GameConfigKeys::PrerenderEffects)))
 			return false;
 
 		m_songOffset = 0;
@@ -572,7 +559,6 @@ public:
 		int64 endTime = startTime + (m_playOptions.range.Length(m_endTime) + GetAudioLeadIn()) / 1000;
 		g_application->DiscordPresenceSong(mapSettings, startTime, endTime);
 
-		String jacketPath = m_chartRootPath + "/" + mapSettings.jacketPath;
 		// Set gameplay table
 		SetInitialGameplayLua(m_lua);
 
@@ -1350,7 +1336,7 @@ public:
 			}
 			else
 			{
-				m_fxSamples[i] = g_application->LoadSample(m_chartRootPath + "/" + samples[i], true);
+				m_fxSamples[i] = g_audio->CreateSample(m_chartSource->ResolvePath(samples[i]));
 			}
 			if (!m_fxSamples[i])
 			{
@@ -3222,6 +3208,14 @@ public:
 	{
 		return m_chartPath;
 	}
+	Resource ResolveChartResource(const String& relativePath) const override
+	{
+		return m_chartSource->ResolvePath(relativePath);
+	}
+	Ref<ChartSource> GetChartSource() const override
+	{
+		return m_chartSource;
+	}
 	bool IsMultiplayerGame() const override
 	{
 		return m_multiplayer != nullptr;
@@ -3484,7 +3478,9 @@ public:
 
 		auto mapSettings = GetBeatmap()->GetMapSettings();
 		lua_newtable(L);
-		String jacketPath = m_chartRootPath + "/" + mapSettings.jacketPath;
+		String jacketPath = m_chartIndex
+			? g_application->RegisterChartResource(*m_chartIndex, mapSettings.jacketPath)
+			: m_chartSource->ResolvePath(mapSettings.jacketPath).GetPath();
 		pushStringToTable("jacketPath", jacketPath);
 		pushStringToTable("title", mapSettings.title);
 		pushStringToTable("artist", mapSettings.artist);

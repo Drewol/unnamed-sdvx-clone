@@ -2,6 +2,8 @@
 #include "Beatmap.hpp"
 #include "json.hpp"
 #include "PlaybackOptions.hpp"
+#include <Shared/ChartSource.hpp>
+#include <functional>
 
 struct SimpleHitStat
 {
@@ -94,7 +96,22 @@ struct ChartIndex
 	int32 preview_length;
 	uint64 lwt;
 	int32 custom_offset = 0;
+	String backbeat_bundle_id;
 	Vector<ScoreIndex*> scores;
+	Ref<ChartSource> chartData;
+
+	[[nodiscard]] Resource LoadChart() const
+	{
+		return chartData->LoadChart();
+	}
+	[[nodiscard]] Resource ResolvePath(const String& relativePath) const
+	{
+		return chartData->ResolvePath(relativePath);
+	}
+	[[nodiscard]] String GetStableKey() const
+	{
+		return backbeat_bundle_id.empty() ? "disk:" + path : "backbeat:" + backbeat_bundle_id;
+	}
 };
 
 // Map located in database
@@ -111,6 +128,28 @@ struct FolderIndex
 	Vector<ChartIndex*> charts;
 };
 
+struct TableSectionIndex
+{
+	String name;
+	Vector<int32> chartIds;
+};
+
+struct TableIndex
+{
+	String url;
+	String name;
+	String symbol;
+	Vector<TableSectionIndex> levels;
+	Vector<TableSectionIndex> folders;
+};
+
+struct PackIndex
+{
+	String url;
+	String name;
+	Vector<int32> chartIds;
+};
+
 
 struct ChallengeIndex 
 {
@@ -118,6 +157,8 @@ struct ChallengeIndex
 	Vector<ChartIndex*> charts;
 	int32 totalNumCharts; // Note: This is not the number found
 	nlohmann::json settings;
+	String storedSettings;
+	String sourceKey;
 	String title;
 	int32 clearMark;
 	int32 bestScore;
@@ -138,7 +179,10 @@ struct ChallengeIndex
 	}
 	void ReloadSettings()
 	{
-		settings = LoadJson(path);
+		if (storedSettings.empty())
+			settings = LoadJson(path);
+		else
+			settings = nlohmann::json::parse(storedSettings, nullptr, false);
 		if (!BasicValidate()) // Only keep if valid
 			settings = nlohmann::json();
 	}
@@ -206,7 +250,6 @@ public:
 	void ResumeSearching();
 	void StopSearching();
 	void LoadDatabaseWithoutSearching();
-
 	// Finds maps using the search query provided
 	// search artist/title/tags for maps for any space separated terms
 	Map<int32, FolderIndex*> FindFolders(const String& search);
@@ -225,6 +268,10 @@ public:
 	Vector<String> GetCollections();
 	[[nodiscard]]
 	Vector<String> GetCollectionsForMap(int32 mapid);
+	[[nodiscard]]
+	const Vector<TableIndex>& GetTables() const;
+	[[nodiscard]]
+	const Vector<PackIndex>& GetPacks() const;
 	[[nodiscard]]
 	Vector<PracticeSetupIndex*> GetOrAddPracticeSetups(int32 chartId, const PracticeSetupIndex& defaultOptions);
 

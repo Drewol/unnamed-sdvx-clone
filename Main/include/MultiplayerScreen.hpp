@@ -71,7 +71,7 @@ public:
 
 	void PerformScoreTick(Scoring& scoring, MapTime time);
 	void SendFinalScore(class Game* game, ClearMark clearState);
-	void GetMapBPMForSpeed(const String path, struct MultiplayerBPMInfo& info);
+	void GetMapBPMForSpeed(const ChartIndex& chart, struct MultiplayerBPMInfo& info);
 
 	[[nodiscard]]
 	ChartIndex* GetCurrentSelectedChart() const;
@@ -238,6 +238,7 @@ private:
 
 	// Instance of the database, used to look up songs
 	MapDatabase* m_mapDatabase;
+	Ref<class BackbeatCatalog> m_backbeatCatalog;
 
 	float m_advanceDiff = 0.0f;
 	float m_advanceRoom = 0.0f;

@@ -2,6 +2,7 @@
 #include "BeatmapObjects.hpp"
 #include "AudioEffects.hpp"
 #include "EffectTimeline.hpp"
+#include <Shared/Resource.hpp>
 
 /* Global settings stored in a beatmap */
 struct BeatmapSettings
@@ -70,6 +71,7 @@ public:
 
 public:
 	bool Load(BinaryStream& input, bool metadataOnly = false);
+	bool Load(const Resource& resource, bool metadataOnly = false);
 
 	/// Returns the settings of the map, contains metadata + song/image paths.
 	const BeatmapSettings& GetMapSettings() const;

@@ -98,9 +98,7 @@ jobs:
             - name: Install packages
               run: brew install freetype libvorbis sdl2 libpng jpeg-turbo libarchive
             - name: cmake
-              env:
-                DCMAKE_BUILD_TYPE: Release
-              run: cmake .
+              run: cmake -DCMAKE_BUILD_TYPE=Release -DUSC_GNU_WERROR=Off .
             - name: make
               run: make
             - name: Upload artifact

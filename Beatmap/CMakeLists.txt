@@ -36,6 +36,7 @@ target_include_directories(Beatmap PRIVATE
 
 ## Local Dependencies
 target_link_libraries(Beatmap Shared)
+target_link_libraries(Beatmap BackbeatIntegration)
 
 ## 3rd Party dependencies
 target_link_libraries(Beatmap sqlite3)

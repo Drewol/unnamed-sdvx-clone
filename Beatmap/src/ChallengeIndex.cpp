@@ -225,7 +225,7 @@ void ChallengeIndex::GenerateDescription()
 	// If no overrides don't do anything
 	if (!settings.contains("overrides"))
 	{
-		this->reqText = desc;
+		this->reqText = desc.empty() ? "No requirements" : desc;
 		return;
 	}
 

@@ -61,6 +61,16 @@ public:
 
 		return true;
 	}
+	bool Init(const Resource& resource)
+	{
+		if (resource.IsPath())
+			return Init(resource.GetPath());
+		if (!resource.IsValid())
+			return false;
+		ma_decoder_config config = ma_decoder_config_init(ma_format_f32, 2, g_audio->GetSampleRate());
+		const Ref<Buffer>& bytes = resource.GetBytes();
+		return ma_decode_memory(bytes->data(), bytes->size(), &config, &m_length, (void **)&m_pcm) == MA_SUCCESS;
+	}
 	virtual void Process(float *out, uint32 numSamples) override
 	{
 		if (!m_playing)
@@ -142,5 +152,18 @@ Sample SampleRes::Create(Audio *audio, const String &path)
 
 	audio->GetImpl()->Register(res);
 
+	return Sample(res);
+}
+
+Sample SampleRes::Create(Audio *audio, const Resource& resource)
+{
+	Sample_Impl *res = new Sample_Impl();
+	res->m_audio = audio;
+	if (!res->Init(resource))
+	{
+		delete res;
+		return {};
+	}
+	audio->GetImpl()->Register(res);
 	return Sample(res);
 }

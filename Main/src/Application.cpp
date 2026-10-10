@@ -15,6 +15,7 @@
 #include "SkinConfig.hpp"
 #include "ShadedMesh.hpp"
 #include "IR.hpp"
+#include <Backbeat/BackbeatStore.hpp>
 
 #ifdef EMBEDDED
 #define NANOVG_GLES2_IMPLEMENTATION
@@ -1839,6 +1840,38 @@ int Application::LoadImageJob(const String &path, Vector2i size, int placeholder
 	return ret;
 }
 
+String Application::RegisterChartResource(const ChartIndex& chart, const String& relativePath)
+{
+	if (chart.backbeat_bundle_id.empty())
+		return chart.ResolvePath(relativePath).GetPath();
+	return "bkb://" + chart.backbeat_bundle_id + "/" + relativePath;
+}
+
+Resource Application::ResolveResource(const String& path)
+{
+	const String prefix = "bkb://";
+	if (path.compare(0, prefix.size(), prefix) != 0)
+		return Resource::FromPath(path);
+	size_t pathStart = path.find('/', prefix.size());
+	if (pathStart == String::npos)
+		return {};
+	String bundleId = path.substr(prefix.size(), pathStart - prefix.size());
+	if (bundleId.empty())
+		return {};
+	return GetBackbeatStore()->ResolvePath(bundleId, path.substr(pathStart + 1));
+}
+
+int Application::CreateImage(const String& path, int imageFlags)
+{
+	Resource resource = ResolveResource(path);
+	if (!resource.IsValid())
+		return 0;
+	if (resource.IsPath())
+		return nvgCreateImage(g_guiState.vg, resource.GetPath().c_str(), imageFlags);
+	const Ref<Buffer>& bytes = resource.GetBytes();
+	return nvgCreateImageMem(g_guiState.vg, imageFlags, bytes->data(), (int)bytes->size());
+}
+
 void Application::SetScriptPath(lua_State *s)
 {
 	//Set path for 'require' (https://stackoverflow.com/questions/4125971/setting-the-global-lua-path-variable-from-c-c?lq=1)
@@ -3005,7 +3038,7 @@ bool JacketLoadingJob::Run()
 	}
 	else
 	{
-		loadedImage = ImageRes::Create(imagePath);
+		loadedImage = ImageRes::Create(g_application->ResolveResource(imagePath));
 		if (loadedImage)
 		{
 			if (loadedImage->GetSize().x > w || loadedImage->GetSize().y > h)

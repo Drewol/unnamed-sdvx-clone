@@ -43,6 +43,12 @@ add_library(sqlite3
     sqlite3/sqlite3ext.h
 )
 target_include_directories(sqlite3 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/sqlite3)
+target_compile_definitions(sqlite3 PRIVATE
+    SQLITE_ENABLE_COLUMN_METADATA
+    SQLITE_ENABLE_FTS5
+    SQLITE_THREADSAFE=1
+    SQLITE_USE_URI=1
+)
 
 #rapidjson -- add as interface library to prevent building it
 add_library(rapidjson INTERFACE)

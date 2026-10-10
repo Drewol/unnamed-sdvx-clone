@@ -202,11 +202,9 @@ public:
 			
 			if (chart)
 			{
-				String path = Path::RemoveLast(chart->path);
-
 				if (m_jacketImg)
 					nvgDeleteImage(g_application->GetVGContext(), m_jacketImg);
-				m_jacketImg = nvgCreateImage(g_application->GetVGContext(), (path + Path::sep + chart->jacket_path).c_str(), 0);
+				m_jacketImg = g_application->CreateImage(g_application->RegisterChartResource(*chart, chart->jacket_path), 0);
 			}
 
 			auto pushStringToTable = [this](const char *name, String data) {

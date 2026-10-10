@@ -276,26 +276,35 @@ private:
 		ScoreIndex* newScore = new ScoreIndex();
 		ChartIndex* chart = game->GetChartIndex();
 
-		// If chart file can't be opened, use existing hash.
 		String hash = chart->hash;
 
-
-		File chartFile;
-		if (chartFile.OpenRead(chart->path))
+		Resource chartResource = chart->LoadChart();
+		uint32_t digest[5];
+		sha1::SHA1 s;
+		bool hashed = false;
+		if (chartResource.IsPath())
 		{
+			File chartFile;
 			char data_buffer[0x80];
-			uint32_t digest[5];
-			sha1::SHA1 s;
-
-			size_t amount_read = 0;
-			size_t read_size;
-			do
+			if (chartFile.OpenRead(chartResource.GetPath()))
 			{
-				read_size = chartFile.Read(data_buffer, sizeof(data_buffer));
-				amount_read += read_size;
-				s.processBytes(data_buffer, read_size);
-			} while (read_size != 0);
-
+				size_t read_size;
+				do
+				{
+					read_size = chartFile.Read(data_buffer, sizeof(data_buffer));
+					s.processBytes(data_buffer, read_size);
+				} while (read_size != 0);
+				hashed = true;
+			}
+		}
+		else if (chartResource.IsValid())
+		{
+			const Ref<Buffer>& bytes = chartResource.GetBytes();
+			s.processBytes(bytes->data(), bytes->size());
+			hashed = true;
+		}
+		if (hashed)
+		{
 			s.getDigest(digest);
 			hash = Utility::Sprintf("%08x%08x%08x%08x%08x", digest[0], digest[1], digest[2], digest[3], digest[4]);
 		}
@@ -689,7 +698,8 @@ public:
 
 		// Used for jacket images
 		m_beatmapSettings = game->GetBeatmap()->GetMapSettings();
-		m_jacketPath = Path::Normalize(game->GetChartRootPath() + Path::sep + m_beatmapSettings.jacketPath);
+		ChartIndex* scoreChart = game->GetChartIndex();
+		m_jacketPath = scoreChart ? g_application->RegisterChartResource(*scoreChart, m_beatmapSettings.jacketPath) : Path::Normalize(game->GetChartRootPath() + Path::sep + m_beatmapSettings.jacketPath);
 		m_jacketImage = game->GetJacketImage();
 
 		// Don't save the score if autoplay was on or if the song was launched using command line

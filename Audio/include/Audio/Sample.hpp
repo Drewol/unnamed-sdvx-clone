@@ -9,6 +9,7 @@ class SampleRes : public AudioBase
 public:
 	[[nodiscard]]
 	static Ref<SampleRes> Create(class Audio* audio, const String& path);
+	static Ref<SampleRes> Create(class Audio* audio, const Resource& resource);
 	virtual ~SampleRes() = default;
 
 public:

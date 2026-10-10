@@ -22,6 +22,7 @@
 #include <Audio/Audio.hpp>
 #include "Gauge.hpp"
 #include "Search.hpp"
+#include "BackbeatCatalog.hpp"
 
 
 using ChalItemSelectionWheel = ItemSelectionWheel<ChallengeSelectIndex, ChallengeIndex>;
@@ -278,14 +279,12 @@ private:
 		for (auto& diff : chal->charts)
 		{
 
-			String folder_path = Path::RemoveLast(diff->path, nullptr);
 			lua_pushinteger(m_lua, ++chartIndex);
 			lua_newtable(m_lua);
 			m_PushStringToTable("title", diff->title.c_str());
 			m_PushStringToTable("artist", diff->artist.c_str());
 			m_PushStringToTable("bpm", diff->bpm.c_str());
-			m_PushStringToTable("jacketPath", Path::Normalize(folder_path + "/" + diff->jacket_path).c_str());
-			Logf("Jacket path: %s", Logger::Severity::Info, Path::Normalize(folder_path + "/" + diff->jacket_path).c_str());
+			m_PushStringToTable("jacketPath", g_application->RegisterChartResource(*diff, diff->jacket_path).c_str());
 
 			m_PushIntToTable("level", diff->level);
 			m_PushIntToTable("difficulty", diff->diff_index);
@@ -719,6 +718,7 @@ class ChallengeSelect_Impl : public ChallengeSelect
 private:
 	Timer m_dbUpdateTimer;
 	MapDatabase* m_mapDatabase = nullptr;
+	Ref<BackbeatCatalog> m_backbeatCatalog;
 
 	// Map selection wheel
 	Ref<ChallengeSelectionWheel> m_selectionWheel;
@@ -771,6 +771,9 @@ public:
 
 		// Setup the map database
 		m_mapDatabase->AddSearchPath(g_gameConfig.GetString(GameConfigKeys::SongFolder));
+		m_backbeatCatalog = GetBackbeatCatalog();
+		if (m_backbeatCatalog->IsOpen())
+			(void)m_backbeatCatalog->Prepare();
 
 		return true;
 	}
@@ -1070,6 +1073,9 @@ public:
 			}
 			else if (code == SDL_SCANCODE_F5)
 			{
+				bool reloadsDatabase = !m_mapDatabase->IsSearching();
+				if (reloadsDatabase && m_backbeatCatalog && m_backbeatCatalog->IsOpen())
+					(void)m_backbeatCatalog->PullCatalog();
 				m_mapDatabase->StartSearching();
 				OnSearchTermChanged(m_searchInput->input);
 			}
@@ -1085,7 +1091,13 @@ public:
 			}
 			else if (code == SDL_SCANCODE_F12)
 			{
-				Path::ShowInFileBrowser(m_selectionWheel->GetSelection()->path);
+				ChallengeIndex* chal = m_selectionWheel->GetSelection();
+				if (!chal->sourceKey.empty())
+				{
+					g_gameWindow->ShowMessageBox("Managed by Backbeat", "This course is stored in Backbeat and has no folder to reveal.", 0);
+					return;
+				}
+				Path::ShowInFileBrowser(chal->path);
 			}
 			else if (code == SDL_SCANCODE_TAB)
 			{
@@ -1096,14 +1108,22 @@ public:
 				m_searchInput->SetActive(false);
 			}
 			else if (code == SDL_SCANCODE_DELETE)
-			{
-				ChallengeIndex* chal = m_selectionWheel->GetSelection();
-				String name = chal->title;
+				{
+					ChallengeIndex* chal = m_selectionWheel->GetSelection();
+					if (!chal->sourceKey.empty())
+					{
+						g_gameWindow->ShowMessageBox("Managed by Backbeat", "Remove this course from Backbeat instead.", 0);
+						return;
+					}
+					String name = chal->title;
 
 				bool res = g_gameWindow->ShowYesNoMessage("Delete challenge?", "Are you sure you want to delete " + name + "\nThis will only delete "+chal->path+"\nThis cannot be undone...");
 				if (!res)
 					return;
 				Path::Delete(chal->path);
+				bool reloadsDatabase = !m_mapDatabase->IsSearching();
+				if (reloadsDatabase && m_backbeatCatalog && m_backbeatCatalog->IsOpen())
+					(void)m_backbeatCatalog->PullCatalog();
 				m_mapDatabase->StartSearching();
 				OnSearchTermChanged(m_searchInput->input);
 			}

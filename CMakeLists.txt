@@ -136,7 +136,9 @@ include(${PROJECT_SOURCE_DIR}/cmake/Macros.cmake)
 
 # Sub-Project directories
 add_subdirectory(third_party)
+include(${PROJECT_SOURCE_DIR}/third_party/backbeat/Backbeat.cmake)
 add_subdirectory(Shared)
+add_subdirectory(Backbeat)
 add_subdirectory(Graphics)
 add_subdirectory(Main)
 add_subdirectory(Audio)
@@ -172,6 +174,7 @@ if(MSVC)
 
     # My libraries in the libraries folder
     set_target_properties(Shared PROPERTIES FOLDER Libraries)
+    set_target_properties(BackbeatIntegration PROPERTIES FOLDER Libraries)
     set_target_properties(Graphics PROPERTIES FOLDER Libraries)
     set_target_properties(Audio PROPERTIES FOLDER Libraries)
     set_target_properties(Beatmap PROPERTIES FOLDER Libraries)

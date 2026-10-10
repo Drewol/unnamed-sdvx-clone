@@ -148,6 +148,10 @@ public:
 	// Full path to map
 	[[nodiscard]]
 	virtual const String& GetChartPath() const = 0;
+	[[nodiscard]]
+	virtual Resource ResolveChartResource(const String& relativePath) const = 0;
+	[[nodiscard]]
+	virtual Ref<class ChartSource> GetChartSource() const = 0;
 	// Is this a multiplayer game
 	[[nodiscard]]
 	virtual bool IsMultiplayerGame() const = 0;

@@ -74,6 +74,41 @@ bool CollectionFilter::IsAll() const
 	return false;
 }
 
+ChartSetFilter::ChartSetFilter(String name, String sortKey, FilterType type, const Vector<int32>& chartIds)
+	: m_type(type)
+{
+	Update(std::move(name), std::move(sortKey), chartIds);
+}
+
+void ChartSetFilter::Update(String name, String sortKey, const Vector<int32>& chartIds)
+{
+	m_name = std::move(name);
+	m_sortKey = std::move(sortKey);
+	m_chartIds.clear();
+	for (int32 chartId : chartIds)
+		m_chartIds.insert(chartId);
+}
+
+Map<int32, SongSelectIndex> ChartSetFilter::GetFiltered(const Map<int32, SongSelectIndex>& source)
+{
+	Map<int32, SongSelectIndex> filtered;
+	for (const auto& entry : source)
+	{
+		Vector<ChartIndex*> charts;
+		for (ChartIndex* chart : entry.second.GetCharts())
+		{
+			if (m_chartIds.count(chart->id))
+				charts.Add(chart);
+		}
+		if (!charts.empty())
+		{
+			SongSelectIndex index(entry.second.GetFolder(), charts);
+			filtered.Add(index.id, index);
+		}
+	}
+	return filtered;
+}
+
 Map<int32, ChallengeSelectIndex> ChallengeLevelFilter::GetFiltered(const Map<int32, ChallengeSelectIndex>& source)
 {
 	Map<int32, ChallengeSelectIndex> filtered;

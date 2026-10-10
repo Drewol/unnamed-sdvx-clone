@@ -36,7 +36,7 @@ public:
 	~AudioPlayback();
 	// Loads audio for beatmap
 	//	specify the root path for the map in order to let this class find the audio files
-	bool Init(class BeatmapPlayback &playback, const String &mapRootPath, bool preRender);
+	bool Init(class BeatmapPlayback &playback, Ref<class ChartSource> chartSource, bool preRender);
 
 	// Updates effects
 	void Tick(float deltaTime);
@@ -100,6 +100,7 @@ private:
 	const class Beatmap *m_beatmap;
 	// Root path of where the map was loaded from
 	String m_beatmapRootPath;
+	Ref<class ChartSource> m_chartSource;
 
 	Ref<AudioStream> m_music;
 	Ref<AudioStream> m_fxtrack;

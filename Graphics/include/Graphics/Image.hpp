@@ -13,6 +13,7 @@ namespace Graphics
 		virtual ~ImageRes() = default;
 		[[nodiscard]]
 		static Ref<ImageRes> Create(const String& assetPath);
+		static Ref<ImageRes> Create(const Resource& resource);
 		[[nodiscard]]
 		static Ref<ImageRes> Create(Vector2i size = Vector2i());
 		[[nodiscard]]

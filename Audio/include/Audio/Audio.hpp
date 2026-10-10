@@ -22,9 +22,13 @@ public:
 	//	settings preload loads the whole file into memory before playing
 	[[nodiscard]]
 	Ref<AudioStream> CreateStream(const String& path, bool preload = false);
+	[[nodiscard]]
+	Ref<AudioStream> CreateStream(const Resource& resource, bool preload = false);
 	// Open a wav file at path
 	[[nodiscard]]
 	Sample CreateSample(const String& path);
+	[[nodiscard]]
+	Sample CreateSample(const Resource& resource);
 
 	// Target/Output sample rate
 	[[nodiscard]]

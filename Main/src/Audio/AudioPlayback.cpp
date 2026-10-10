@@ -2,6 +2,7 @@
 #include "AudioPlayback.hpp"
 #include <Beatmap/BeatmapPlayback.hpp>
 #include <Beatmap/Beatmap.hpp>
+#include <Shared/ChartSource.hpp>
 #include <Audio/Audio.hpp>
 #include <Audio/DSP.hpp>
 #include <Shared/Profiling.hpp>
@@ -15,7 +16,7 @@ AudioPlayback::~AudioPlayback()
 	m_CleanupDSP(m_buttonDSPs[1]);
 	m_CleanupDSP(m_laserDSP);
 }
-bool AudioPlayback::Init(class BeatmapPlayback &playback, const String &mapRootPath, bool preRender)
+bool AudioPlayback::Init(class BeatmapPlayback &playback, Ref<ChartSource> chartSource, bool preRender)
 {
 	// Cleanup exising DSP's
 	m_currentHoldEffects[0] = nullptr;
@@ -26,24 +27,26 @@ bool AudioPlayback::Init(class BeatmapPlayback &playback, const String &mapRootP
 
 	m_playback = &playback;
 	m_beatmap = &playback.GetBeatmap();
-	m_beatmapRootPath = mapRootPath;
+	m_beatmapRootPath = "";
+	m_chartSource = std::move(chartSource);
 	assert(m_beatmap != nullptr);
 
 	// Set default effect type
 	SetLaserEffect(EffectType::PeakingFilter);
 
 	const BeatmapSettings &mapSettings = m_beatmap->GetMapSettings();
-	String audioPath = Path::Normalize(m_beatmapRootPath + Path::sep + mapSettings.audioNoFX);
-	audioPath.TrimBack(' ');
-	if (!Path::FileExists(audioPath))
+	String audioName = mapSettings.audioNoFX;
+	audioName.TrimBack(' ');
+	Resource audio = m_chartSource->ResolvePath(audioName);
+	if (!audio.IsValid())
 	{
-		Logf("Audio file for beatmap does not exists at: \"%s\"", Logger::Severity::Error, audioPath);
+		Logf("Audio file for beatmap does not exist: \"%s\"", Logger::Severity::Error, audioName);
 		return false;
 	}
-	m_music = g_audio->CreateStream(audioPath, true);
+	m_music = g_audio->CreateStream(audio, true);
 	if (!m_music)
 	{
-		Logf("Failed to load any audio for beatmap \"%s\"", Logger::Severity::Error, audioPath);
+		Logf("Failed to load any audio for beatmap \"%s\"", Logger::Severity::Error, audioName);
 		return false;
 	}
 
@@ -51,17 +54,18 @@ bool AudioPlayback::Init(class BeatmapPlayback &playback, const String &mapRootP
 	m_music->SetVolume(m_musicVolume);
 
 	// Load FX track
-	audioPath = Path::Normalize(m_beatmapRootPath + Path::sep + mapSettings.audioFX);
-	audioPath.TrimBack(' ');
-	if (!audioPath.empty())
+	audioName = mapSettings.audioFX;
+	audioName.TrimBack(' ');
+	if (!audioName.empty())
 	{
-		if (!Path::FileExists(audioPath) || Path::IsDirectory(audioPath))
+		audio = m_chartSource->ResolvePath(audioName);
+		if (!audio.IsValid() || (audio.IsPath() && Path::IsDirectory(audio.GetPath())))
 		{
-			Logf("FX audio for for beatmap does not exists at: \"%s\" Using real-time effects instead.", Logger::Severity::Warning, audioPath);
+			Logf("FX audio for beatmap does not exist: \"%s\" Using real-time effects instead.", Logger::Severity::Warning, audioName);
 		}
 		else
 		{
-			m_fxtrack = g_audio->CreateStream(audioPath, true);
+			m_fxtrack = g_audio->CreateStream(audio, true);
 			if (m_fxtrack)
 			{
 				// Initially mute normal track if fx is enabled
@@ -90,20 +94,21 @@ bool AudioPlayback::Init(class BeatmapPlayback &playback, const String &mapRootP
 	// Load switchable audio tracks
 	for (auto it = switchablePaths.begin(); it != switchablePaths.end(); ++it)
 	{
-		audioPath = Path::Normalize(m_beatmapRootPath + Path::sep + *it);
-		audioPath.TrimBack(' ');
+		audioName = *it;
+		audioName.TrimBack(' ');
 
 		SwitchableAudio switchable;
 		switchable.m_enabled = false;
-		if (!audioPath.empty())
+		if (!audioName.empty())
 		{
-			if (!Path::FileExists(audioPath))
+			audio = m_chartSource->ResolvePath(audioName);
+			if (!audio.IsValid())
 			{
-				Logf("Audio for a SwitchAudio effect does not exists at: \"%s\"", Logger::Severity::Warning, audioPath);
+				Logf("Audio for a SwitchAudio effect does not exist: \"%s\"", Logger::Severity::Warning, audioName);
 			}
 			else
 			{
-				switchable.m_audio = g_audio->CreateStream(audioPath, true);
+				switchable.m_audio = g_audio->CreateStream(audio, true);
 				if (switchable.m_audio)
 				{
 					// Mute all switchable audio by default

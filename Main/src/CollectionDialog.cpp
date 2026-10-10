@@ -4,6 +4,7 @@
 #include "Beatmap/MapDatabase.hpp"
 #include "lua.hpp"
 #include "GameConfig.hpp"
+#include "Application.hpp"
 
 // XXX probably should be moved with the other ones to its own class file?
 class TextInputCollectionDialog
@@ -238,7 +239,7 @@ void CollectionDialog::Open(const ChartIndex* song)
 	lua_settable(m_lua, -3);
 
 	lua_pushstring(m_lua, "jacket");
-	lua_pushstring(m_lua, *song->jacket_path);
+	lua_pushstring(m_lua, *g_application->RegisterChartResource(*song, song->jacket_path));
 	lua_settable(m_lua, -3);
 
 	m_closing = false;

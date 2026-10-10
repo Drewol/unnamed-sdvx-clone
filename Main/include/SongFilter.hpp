@@ -2,13 +2,16 @@
 #include "SongSelect.hpp"
 #include "ChallengeSelect.hpp"
 #include <Beatmap/MapDatabase.hpp>
+#include <unordered_set>
 
 enum FilterType
 {
 	All,
 	Folder,
 	Level,
-	Collection
+	Collection,
+	Table,
+	Pack
 };
 
 template<class ItemIndex>
@@ -19,6 +22,8 @@ public:
 	virtual ~Filter() = default;
 	[[nodiscard]]
 	virtual String GetName() const { return m_name; }
+	[[nodiscard]]
+	virtual String GetSortKey() const { return GetName(); }
 	[[nodiscard]]
 	virtual bool IsAll() const { return true; }
 	[[nodiscard]]
@@ -91,6 +96,30 @@ private:
 	String m_collection;
 	MapDatabase* m_mapDatabase;
 
+};
+
+class ChartSetFilter : public SongFilter
+{
+public:
+	ChartSetFilter(String name, String sortKey, FilterType type, const Vector<int32>& chartIds);
+	~ChartSetFilter() = default;
+	void Update(String name, String sortKey, const Vector<int32>& chartIds);
+	[[nodiscard]]
+	Map<int32, SongSelectIndex> GetFiltered(const Map<int32, SongSelectIndex>& source) override;
+	[[nodiscard]]
+	String GetName() const override { return m_name; }
+	[[nodiscard]]
+	String GetSortKey() const override { return m_sortKey; }
+	[[nodiscard]]
+	bool IsAll() const override { return false; }
+	[[nodiscard]]
+	FilterType GetType() const override { return m_type; }
+
+private:
+	String m_name;
+	String m_sortKey;
+	FilterType m_type;
+	std::unordered_set<int32> m_chartIds;
 };
 
 using ChallengeFilter = Filter<ChallengeSelectIndex>;

@@ -61,6 +61,32 @@ bool AudioStreamMa::Init(Audio *audio, const String &path, bool preload)
 	m_initSampling(sample_rate);
 	return true;
 }
+
+bool AudioStreamMa::Init(Audio *audio, const Resource& resource, bool preload)
+{
+	m_audio = audio;
+	m_sourceData = resource.GetBytes();
+	if (!m_sourceData)
+		return false;
+
+	ma_decoder_config config = ma_decoder_config_init(ma_format_f32, 2, sample_rate);
+	ma_result result;
+	if (preload)
+	{
+		result = ma_decode_memory(m_sourceData->data(), m_sourceData->size(), &config, &m_samplesTotal, (void **)&m_pcm);
+		m_sourceData.reset();
+	}
+	else
+	{
+		result = ma_decoder_init_memory(m_sourceData->data(), m_sourceData->size(), &config, &m_decoder);
+	}
+	if (result != MA_SUCCESS)
+		return false;
+
+	m_preloaded = preload;
+	m_initSampling(sample_rate);
+	return true;
+}
 int32 AudioStreamMa::GetStreamPosition_Internal()
 {
 	return m_playbackPointer;
@@ -147,6 +173,17 @@ Ref<AudioStream> AudioStreamMa::Create(class Audio *audio, const String &path, b
 {
 	AudioStreamMa *impl = new AudioStreamMa();
 	if (!impl->Init(audio, path, preload))
+	{
+		delete impl;
+		impl = nullptr;
+	}
+	return Utility::CastRef<AudioStreamMa, AudioStream>(Ref<AudioStreamMa>(impl));
+}
+
+Ref<AudioStream> AudioStreamMa::Create(class Audio *audio, const Resource& resource, bool preload)
+{
+	AudioStreamMa *impl = new AudioStreamMa();
+	if (!impl->Init(audio, resource, preload))
 	{
 		delete impl;
 		impl = nullptr;

@@ -14,6 +14,7 @@
 #include <Game.hpp>
 #include "Gauge.hpp"
 #include "Search.hpp"
+#include "BackbeatCatalog.hpp"
 
 #define MULTIPLAYER_VERSION "v0.19"
 
@@ -580,35 +581,16 @@ void MultiplayerScreen::m_changeDifficulty(int offset)
 
 }
 
-void MultiplayerScreen::GetMapBPMForSpeed(String path, struct MultiplayerBPMInfo& info)
+void MultiplayerScreen::GetMapBPMForSpeed(const ChartIndex& chart, struct MultiplayerBPMInfo& info)
 {
-	path = Path::Normalize(path);
-	if (!Path::FileExists(path))
-	{
-		Logf("Couldn't find map at %s", Logger::Severity::Error, path);
-
-		info = { 0, 0, 0, 0 };
-		return;
-	}
-
-	// Load map
 	Beatmap newMap;
-	File mapFile;
-	if (!mapFile.OpenRead(path))
+	Resource resource = chart.LoadChart();
+	if (newMap.Load(resource))
 	{
-		Logf("Could not read path for beatmap: %s", Logger::Severity::Error, path);
-		info = { 0, 0, 0, 0 };
+		newMap.GetBPMInfo(info.start, info.min, info.max, info.mode);
 		return;
 	}
-
-	FileReader reader(mapFile);
-	if (!newMap.Load(reader))
-	{
-		info = { 0, 0, 0, 0 };
-		return;
-	}
-
-	newMap.GetBPMInfo(info.start, info.min, info.max, info.mode);
+	info = { 0, 0, 0, 0 };
 }
 
 ChartIndex* MultiplayerScreen::GetCurrentSelectedChart() const
@@ -639,7 +621,7 @@ void MultiplayerScreen::m_updateSelectedMap(int32 mapid, int32 diff_ind, bool is
 	m_speedMod = g_gameConfig.GetEnum<Enum_SpeedMods>(GameConfigKeys::SpeedMod);
 	m_modSpeed = g_gameConfig.GetFloat(GameConfigKeys::ModSpeed);
 
-	GetMapBPMForSpeed(chart->path, m_bpm);
+	GetMapBPMForSpeed(*chart, m_bpm);
 
 
 	m_speedBPM = m_bpm.start;
@@ -663,7 +645,7 @@ void MultiplayerScreen::m_updateSelectedMap(int32 mapid, int32 diff_ind, bool is
 	m_PushStringToTable("path", folder->path.c_str());
 	m_PushStringToTable("short_path", *shortPath);
 
-	m_PushStringToTable("jacketPath", Path::Normalize(folder->path + "/" + chart->jacket_path).c_str());
+	m_PushStringToTable("jacketPath", g_application->RegisterChartResource(*chart, chart->jacket_path).c_str());
 	m_PushIntToTable("level", chart->level);
 	m_PushIntToTable("difficulty", chart->diff_index);
 	m_PushIntToTable("diff_index", diff_ind);
@@ -1265,6 +1247,9 @@ void MultiplayerScreen::OnRestore()
 		return;
 	}*/
 
+	bool reloadsDatabase = !m_mapDatabase->IsSearching();
+	if (reloadsDatabase && m_backbeatCatalog && m_backbeatCatalog->IsOpen())
+		(void)m_backbeatCatalog->PullCatalog();
 	m_mapDatabase->StartSearching();
 
 	// Retrive the lobby info now that we are out of the game
@@ -1309,6 +1294,9 @@ bool MultiplayerScreen::AsyncLoad()
 	m_mapDatabase->FinishInit();
 
 	m_mapDatabase->AddSearchPath(g_gameConfig.GetString(GameConfigKeys::SongFolder));
+	m_backbeatCatalog = GetBackbeatCatalog();
+	if (m_backbeatCatalog->IsOpen())
+		(void)m_backbeatCatalog->Prepare();
 	return true;
 }
 
@@ -1526,12 +1514,7 @@ int MultiplayerScreen::lNewRoomStep(lua_State* L)
 // This is basically copied from song-select
 void MultiplayerScreen::m_updatePreview(ChartIndex* diff, bool mapChanged)
 {
-	String mapRootPath = diff->path.substr(0, diff->path.find_last_of(Path::sep));
-
-	// Set current preview audio
-	String audioPath = mapRootPath + Path::sep + diff->preview_file;
-
-	PreviewParams params = {audioPath, static_cast<uint32>(diff->preview_offset), static_cast<uint32>(diff->preview_length)};
+	PreviewParams params = {diff->GetStableKey() + ":" + diff->preview_file, static_cast<uint32>(diff->preview_offset), static_cast<uint32>(diff->preview_length)};
 
 	/* A lot of pre-effected charts use different audio files for each difficulty; these
 	 * files differ only in their effects, so the preview offset and duration remain the
@@ -1545,7 +1528,7 @@ void MultiplayerScreen::m_updatePreview(ChartIndex* diff, bool mapChanged)
 
 	if (newPreview)
 	{
-		Ref<AudioStream> previewAudio = g_audio->CreateStream(audioPath);
+		Ref<AudioStream> previewAudio = g_audio->CreateStream(diff->ResolvePath(diff->preview_file));
 		if (previewAudio)
 		{
 			previewAudio->SetPosition(diff->preview_offset);
@@ -1558,7 +1541,7 @@ void MultiplayerScreen::m_updatePreview(ChartIndex* diff, bool mapChanged)
 		{
 			params = {"", 0, 0};
 
-			Logf("Failed to load preview audio from [%s]", Logger::Severity::Warning, audioPath);
+			Logf("Failed to load preview audio [%s] from %s", Logger::Severity::Warning, diff->preview_file, diff->backbeat_bundle_id.empty() ? "disk" : "backbeat");
 			if (m_previewParams != params)
 				m_previewPlayer.FadeTo(Ref<AudioStream>());
 		}

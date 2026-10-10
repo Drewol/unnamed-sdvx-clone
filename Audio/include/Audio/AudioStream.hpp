@@ -11,6 +11,7 @@ class AudioStream : public AudioBase
 {
 public:
 	static Ref<AudioStream> Create(Audio *audio, const String &path, bool preload);
+	static Ref<AudioStream> Create(Audio *audio, const Resource& resource, bool preload);
 	static Ref<AudioStream> Clone(Audio *audio, Ref<AudioStream> source);
 	virtual ~AudioStream() = default;
 	// Starts playback of the stream or continues a paused stream

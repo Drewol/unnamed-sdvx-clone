@@ -7,6 +7,7 @@
 #include "Shared/Files.hpp"
 #include "Shared/Time.hpp"
 #include "KShootMap.hpp"
+#include <Backbeat/BackbeatStore.hpp>
 #include <thread>
 #include <mutex>
 #include <chrono>
@@ -37,6 +38,8 @@ public:
 	Map<int32, ChartIndex*> m_charts;
 	Map<int32, ChallengeIndex*> m_challenges;
 	Map<int32, PracticeSetupIndex*> m_practiceSetups;
+	Vector<TableIndex> m_tables;
+	Vector<PackIndex> m_packs;
 
 	Map<String, ChartIndex*> m_chartsByHash;
 	Map<String, FolderIndex*> m_foldersByPath;
@@ -47,7 +50,6 @@ public:
 	int32 m_nextChalId = 1;
 	String m_sortField = "title";
 	bool m_transferScores = true;
-
 	struct SearchState
 	{
 		struct ExistingFileEntry
@@ -90,7 +92,7 @@ public:
 	List<Event> m_pendingChanges;
 	mutex m_pendingChangesLock;
 
-	static const int32 m_version = 20;
+	static const int32 m_version = 21;
 
 public:
 	MapDatabase_Impl(MapDatabase& outer, bool transferScores) : m_outer(outer)
@@ -426,6 +428,15 @@ public:
 				m_database.Exec("UPDATE Scores SET combo=?");
 				gotVersion = 20;
 			}
+			if (gotVersion == 20)
+			{
+				m_database.Exec("ALTER TABLE Charts ADD COLUMN backbeat_bundle_id TEXT");
+				m_CreateTableSchema();
+				m_CreatePackSchema();
+				m_database.Exec("ALTER TABLE Challenges ADD COLUMN source_key TEXT");
+				m_database.Exec("ALTER TABLE Challenges ADD COLUMN settings TEXT");
+				gotVersion = 21;
+			}
 			m_database.Exec(Utility::Sprintf("UPDATE Database SET `version`=%d WHERE `rowid`=1", m_version));
 
 			m_outer.OnDatabaseUpdateDone.Call();
@@ -439,6 +450,12 @@ public:
 			//       MapDatabase wrapper while loading challenges
 			//m_LoadInitialData();
 		}
+		m_database.Exec("CREATE UNIQUE INDEX IF NOT EXISTS Charts_backbeat_bundle_id ON Charts(backbeat_bundle_id)");
+		m_database.Exec("CREATE INDEX IF NOT EXISTS Charts_folderid ON Charts(folderid)");
+		m_database.Exec("CREATE INDEX IF NOT EXISTS TableSections_table ON TableSections(table_url,kind,section_index)");
+		m_database.Exec("CREATE INDEX IF NOT EXISTS TableSectionCharts_section ON TableSectionCharts(table_url,kind,section_index,chart_index)");
+		m_database.Exec("CREATE INDEX IF NOT EXISTS PackCharts_pack ON PackCharts(pack_url,chart_index)");
+		m_database.Exec("CREATE UNIQUE INDEX IF NOT EXISTS Challenges_source_key ON Challenges(source_key)");
 	}
 	~MapDatabase_Impl()
 	{
@@ -764,6 +781,15 @@ public:
 		return res;
 	}
 
+	const Vector<TableIndex>& GetTables() const
+	{
+		return m_tables;
+	}
+	const Vector<PackIndex>& GetPacks() const
+	{
+		return m_packs;
+	}
+
 	Vector<PracticeSetupIndex*> GetOrAddPracticeSetups(int32 chartId, const PracticeSetupIndex& defaultOptions)
 	{
 		Vector<PracticeSetupIndex*> res;
@@ -1008,6 +1034,7 @@ public:
 				chart->lwt = e.lwt;
 				chart->folderId = folder->id;
 				chart->path = e.path;
+				chart->chartData = std::make_shared<DiskChartSource>(chart->path);
 				chart->title = e.mapData->title;
 				chart->artist = e.mapData->artist;
 				chart->level = e.mapData->level;
@@ -1133,6 +1160,7 @@ public:
 				ChartIndex* chart = itChart->second;
 				chart->lwt = e.lwt;
 				chart->path = e.path;
+				chart->chartData = std::make_shared<DiskChartSource>(chart->path);
 				chart->title = e.mapData->title;
 				chart->artist = e.mapData->artist;
 				chart->level = e.mapData->level;
@@ -1518,9 +1546,45 @@ private:
 		m_charts.clear();
 		m_practiceSetups.clear();
 		m_practiceSetupsByChartId.clear();
+		m_tables.clear();
+		m_packs.clear();
+	}
+	void m_CreateTableSchema()
+	{
+		m_database.Exec("CREATE TABLE IF NOT EXISTS Tables("
+			"url TEXT PRIMARY KEY,"
+			"name TEXT,"
+			"symbol TEXT)");
+		m_database.Exec("CREATE TABLE IF NOT EXISTS TableSections("
+			"table_url TEXT,"
+			"section_index INTEGER,"
+			"kind INTEGER,"
+			"name TEXT,"
+			"FOREIGN KEY(table_url) REFERENCES Tables(url))");
+		m_database.Exec("CREATE TABLE IF NOT EXISTS TableSectionCharts("
+			"table_url TEXT,"
+			"section_index INTEGER,"
+			"kind INTEGER,"
+			"chart_index INTEGER,"
+			"chart_id INTEGER,"
+			"FOREIGN KEY(table_url) REFERENCES Tables(url),"
+			"FOREIGN KEY(chart_id) REFERENCES Charts(rowid))");
+	}
+	void m_CreatePackSchema()
+	{
+		m_database.Exec("CREATE TABLE IF NOT EXISTS PackCharts("
+			"pack_url TEXT,"
+			"pack_name TEXT,"
+			"chart_index INTEGER,"
+			"chart_id INTEGER,"
+			"FOREIGN KEY(chart_id) REFERENCES Charts(rowid))");
 	}
 	void m_CreateTables()
 	{
+		m_database.Exec("DROP TABLE IF EXISTS PackCharts");
+		m_database.Exec("DROP TABLE IF EXISTS TableSectionCharts");
+		m_database.Exec("DROP TABLE IF EXISTS TableSections");
+		m_database.Exec("DROP TABLE IF EXISTS Tables");
 		m_database.Exec("DROP TABLE IF EXISTS Folders");
 		m_database.Exec("DROP TABLE IF EXISTS Charts");
 		m_database.Exec("DROP TABLE IF EXISTS Scores");
@@ -1549,7 +1613,8 @@ private:
 			"lwt INTEGER,"
 			"hash TEXT,"
 			"preview_file TEXT,"
-			"custom_offset INTEGER, "
+			"custom_offset INTEGER,"
+			"backbeat_bundle_id TEXT, "
 			"FOREIGN KEY(folderid) REFERENCES folders(rowid))");
 
 		m_database.Exec("CREATE TABLE Scores"
@@ -1583,6 +1648,9 @@ private:
 			"UNIQUE(collection,folderid), "
 			"FOREIGN KEY(folderid) REFERENCES Folders(rowid))");
 
+		m_CreateTableSchema();
+		m_CreatePackSchema();
+
 		m_database.Exec("CREATE TABLE PracticeSetups ("
 			"chart_id INTEGER,"
 			"setup_title TEXT,"
@@ -1615,7 +1683,9 @@ private:
 			"path TEXT,"
 			"hash TEXT,"
 			"level INTEGER,"
-			"lwt INTEGER"
+			"lwt INTEGER,"
+			"source_key TEXT,"
+			"settings TEXT"
 			")");
 	}
 	void m_LoadInitialData()
@@ -1627,9 +1697,14 @@ private:
 
 		// Scan original maps
 		m_CleanupMapIndex();
+		auto backbeatStore = GetBackbeatStore();
+		bool backbeatAvailable = backbeatStore->IsOpen();
 
 		// Select Maps
-		DBStatement mapScan = m_database.Query("SELECT rowid, path FROM Folders");
+		String folderQuery = "SELECT rowid,path FROM Folders";
+		if (!backbeatAvailable)
+			folderQuery = "SELECT DISTINCT f.rowid,f.path FROM Folders f JOIN Charts c ON c.folderid=f.rowid WHERE c.backbeat_bundle_id IS NULL";
+		DBStatement mapScan = m_database.Query(folderQuery);
 		while(mapScan.StepRow())
 		{
 			FolderIndex* folder = new FolderIndex();
@@ -1642,7 +1717,7 @@ private:
 		m_nextFolderId = m_folders.empty() ? 1 : (m_folders.rbegin()->first + 1);
 
 		// Select Difficulties
-		DBStatement chartScan = m_database.Query("SELECT rowid"
+		String chartQuery = "SELECT rowid"
 			",folderId"
 			",path"
 			",title"
@@ -1662,14 +1737,23 @@ private:
 			",preview_offset"
 			",preview_length"
 			",lwt"
-			",custom_offset "
-			"FROM Charts");
+			",custom_offset"
+			",backbeat_bundle_id "
+			"FROM Charts";
+		if (!backbeatAvailable)
+			chartQuery += " WHERE backbeat_bundle_id IS NULL";
+		DBStatement chartScan = m_database.Query(chartQuery);
 		while(chartScan.StepRow())
 		{
 			ChartIndex* chart = new ChartIndex();
 			chart->id = chartScan.IntColumn(0);
 			chart->folderId = chartScan.IntColumn(1);
 			chart->path = chartScan.StringColumn(2);
+			chart->backbeat_bundle_id = chartScan.StringColumnEmptyOnNull(21);
+			if (chart->backbeat_bundle_id.empty())
+				chart->chartData = std::make_shared<DiskChartSource>(chart->path);
+			else
+				chart->chartData = std::make_shared<BackbeatChartSource>(backbeatStore, chart->backbeat_bundle_id, chart->path);
 			chart->title = chartScan.StringColumn(3);
 			chart->artist = chartScan.StringColumn(4);
 			chart->title_translit = chartScan.StringColumn(5);
@@ -1710,7 +1794,8 @@ private:
 				ed.lwt = chart->lwt;
 
 			}
-			m_searchState.difficulties.Add(chart->path, ed);
+			if (chart->backbeat_bundle_id.empty())
+				m_searchState.difficulties.Add(chart->path, ed);
 		}
 
 		// Select Scores
@@ -1799,6 +1884,60 @@ private:
 			m_practiceSetupsByChartId.Add(practiceSetup->chartId, practiceSetup);
 		}
 
+		DBStatement tableScan = m_database.Query(
+			"SELECT t.url,t.name,t.symbol,COALESCE(s.kind,-1),COALESCE(s.section_index,-1),"
+			"COALESCE(s.name,''),COALESCE(sc.chart_id,-1) "
+			"FROM Tables t "
+			"LEFT JOIN TableSections s ON s.table_url=t.url "
+			"LEFT JOIN TableSectionCharts sc ON sc.table_url=s.table_url AND sc.kind=s.kind "
+			"AND sc.section_index=s.section_index "
+			"ORDER BY t.name,t.url,s.kind,s.section_index,sc.chart_index");
+		while (tableScan.StepRow())
+		{
+			String url = tableScan.StringColumn(0);
+			if (m_tables.empty() || m_tables.back().url != url)
+			{
+				TableIndex table;
+				table.url = std::move(url);
+				table.name = tableScan.StringColumn(1);
+				table.symbol = tableScan.StringColumn(2);
+				m_tables.push_back(std::move(table));
+			}
+
+			int32 kind = tableScan.IntColumn(3);
+			int32 sectionIndex = tableScan.IntColumn(4);
+			if (sectionIndex < 0)
+				continue;
+			TableIndex& table = m_tables.back();
+			Vector<TableSectionIndex>& sections = kind == 0 ? table.levels : table.folders;
+			if (sections.size() <= (size_t)sectionIndex)
+				sections.resize(sectionIndex + 1);
+			TableSectionIndex& section = sections[sectionIndex];
+			section.name = tableScan.StringColumn(5);
+
+			int32 chartId = tableScan.IntColumn(6);
+			if (chartId >= 0)
+				section.chartIds.Add(chartId);
+		}
+
+		DBStatement packScan = m_database.Query(
+			"SELECT pack_url,pack_name,chart_id FROM PackCharts "
+			"ORDER BY pack_name,pack_url,chart_index");
+		while (packScan.StepRow())
+		{
+			String url = packScan.StringColumn(0);
+			if (m_packs.empty() || m_packs.back().url != url)
+			{
+				PackIndex pack;
+				pack.url = std::move(url);
+				pack.name = packScan.StringColumn(1);
+				m_packs.push_back(std::move(pack));
+			}
+			int32 chartId = packScan.IntColumn(2);
+			if (chartId >= 0)
+				m_packs.back().chartIds.Add(chartId);
+		}
+
 		m_outer.OnFoldersCleared.Call(m_folders);
 
 		DBStatement chalScan = m_database.Query("SELECT rowid"
@@ -1811,6 +1950,8 @@ private:
 			",hash"
 			",level"
 			",lwt"
+			",source_key"
+			",settings"
 			" FROM Challenges");
 		while (chalScan.StepRow())
 		{
@@ -1825,11 +1966,17 @@ private:
 			chal->hash = chalScan.StringColumn(7);
 			chal->level = chalScan.IntColumn(8);
 			chal->lwt = chalScan.Int64Column(9);
+			chal->sourceKey = chalScan.StringColumnEmptyOnNull(10);
+			chal->storedSettings = chalScan.StringColumnEmptyOnNull(11);
 			chal->missingChart = false;
 			chal->charts.clear();
+			if (!chal->storedSettings.empty())
+				chal->ReloadSettings();
 
 			nlohmann::json charts = nlohmann::json::parse(chartsString, nullptr, false);
 			chal->FindCharts(&m_outer, charts);
+			if (!chal->storedSettings.empty() && !chal->settings.is_null() && !chal->settings.is_discarded())
+				chal->GenerateDescription();
 
 			if (chal->charts.size() == 0)
 			{
@@ -1844,18 +1991,16 @@ private:
 
 			m_challenges.Add(chal->id, chal);
 
-			// Add to search state
-			SearchState::ExistingFileEntry ed;
-			ed.id = chal->id;
-			if (chal->hash.length() == 0)
+			if (chal->sourceKey.empty())
 			{
-				ed.lwt = 0;
+				SearchState::ExistingFileEntry ed;
+				ed.id = chal->id;
+				if (chal->hash.length() == 0)
+					ed.lwt = 0;
+				else
+					ed.lwt = chal->lwt;
+				m_searchState.challenges.Add(chal->path, ed);
 			}
-			else {
-				ed.lwt = chal->lwt;
-
-			}
-			m_searchState.challenges.Add(chal->path, ed);
 		}
 		m_nextChalId = m_challenges.empty() ? 1 : (m_challenges.rbegin()->first + 1);
 
@@ -2333,6 +2478,14 @@ Vector<String> MapDatabase::GetCollections()
 Vector<String> MapDatabase::GetCollectionsForMap(int32 mapid)
 {
 	return m_impl->GetCollectionsForMap(mapid);
+}
+const Vector<TableIndex>& MapDatabase::GetTables() const
+{
+	return m_impl->GetTables();
+}
+const Vector<PackIndex>& MapDatabase::GetPacks() const
+{
+	return m_impl->GetPacks();
 }
 Vector<PracticeSetupIndex*> MapDatabase::GetOrAddPracticeSetups(int32 chartId, const PracticeSetupIndex& defaultOptions)
 {

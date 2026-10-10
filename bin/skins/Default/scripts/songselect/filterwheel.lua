@@ -20,8 +20,48 @@ local folderLabels = {}
 local levelOffset = 0;
 local folderOffset = 0;
 
+local drawFolderIndicator = function()
+    local folder = filters and filters.folder and filters.folder[selectedFolder]
+    if not folder or folder == "All" then
+        return
+    end
+
+    local resx, resy = game.GetResolution()
+    local fontSize = math.max(18, math.min(26, math.floor(resy / 45)))
+    local padding = 10
+
+    gfx.LoadSkinFont("NotoSans-Regular.ttf")
+    gfx.FontSize(fontSize)
+    gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_MIDDLE)
+
+    local x = resx - 20
+    local y = math.max(40, resy * 0.075)
+    local textX = x - padding
+    local width = gfx.FastTextSize(folder)
+    local maxWidth = resx - 60
+    if width > maxWidth then
+        fontSize = fontSize * maxWidth / width
+        gfx.FontSize(fontSize)
+        width = gfx.FastTextSize(folder)
+    end
+
+    local height = fontSize + padding * 2
+
+    gfx.BeginPath()
+    gfx.RoundedRect(x - width - padding * 2, y - height / 2, width + padding * 2, height, 6)
+    gfx.FillColor(0, 0, 0, 190)
+    gfx.Fill()
+    gfx.StrokeColor(0, 128, 255, 220)
+    gfx.StrokeWidth(1)
+    gfx.Stroke()
+
+    gfx.FillColor(255, 255, 255, 255)
+    gfx.FastText(folder, textX, y)
+end
+
 render = function(deltaTime, shown)
     if not shown then
+        drawFolderIndicator()
         return
     end
     timer = (timer + deltaTime)

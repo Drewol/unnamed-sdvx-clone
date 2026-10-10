@@ -293,19 +293,15 @@ bool FastGuiGame::Init(Game* game)
 
 
 	const auto& settings = game->GetBeatmap()->GetMapSettings();
-	const auto jacketPath = Path::Absolute(game->GetChartRootPath() + Path::sep + settings.jacketPath);
-	if (Path::FileExists(jacketPath))
+	m_jacketImage = ImageRes::Create(game->ResolveChartResource(settings.jacketPath));
+	if (m_jacketImage)
 	{
-		m_jacketImage = ImageRes::Create(jacketPath);
-		if (m_jacketImage)
+		m_jacket = TextureRes::Create(g_gl, m_jacketImage);
+		m_jacketParams.SetParameter("color", Color::White);
+		m_jacketParams.SetParameter("mainTex", m_jacket);
+		if (m_jacket)
 		{
-			m_jacket = TextureRes::Create(g_gl, m_jacketImage);
-			m_jacketParams.SetParameter("color", Color::White);
-			m_jacketParams.SetParameter("mainTex", m_jacket);
-			if (m_jacket)
-			{
-				m_jacketWidth = 200.0f * m_scale;
-			}
+			m_jacketWidth = 200.0f * m_scale;
 		}
 	}
 

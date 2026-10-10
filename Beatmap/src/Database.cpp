@@ -150,7 +150,8 @@ void Database::Close()
 bool Database::Open(const String& path)
 {
 	Close();
- 	int32 r = sqlite3_open(*path, &db);
+	int32 r = sqlite3_open_v2(*path, &db,
+		SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI, nullptr);
 	if(r != 0)
 	{
 		return false;

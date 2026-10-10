@@ -211,6 +211,14 @@ namespace Graphics
 		}
 		return Image();
 	}
+	Image ImageRes::Create(const Resource& resource)
+	{
+		if (resource.IsPath())
+			return Create(resource.GetPath());
+		if (resource.IsValid())
+			return Create(*resource.GetBytes());
+		return {};
+	}
 	Image ImageRes::Screenshot(OpenGL* gl, Vector2i size, Vector2i pos)
 	{
 		Image_Impl* pImpl = new Image_Impl();

@@ -77,6 +77,9 @@ public:
 	Sample LoadSample(const String& name, const bool& external = false);
 	Graphics::Font LoadFont(const String& name, const bool& external = false);
 	int LoadImageJob(const String& path, Vector2i size, int placeholder, const bool& web = false);
+	String RegisterChartResource(const struct ChartIndex& chart, const String& relativePath);
+	Resource ResolveResource(const String& path);
+	int CreateImage(const String& path, int imageFlags);
 	void SetScriptPath(lua_State* L);
 
 

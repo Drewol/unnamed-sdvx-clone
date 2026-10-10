@@ -28,10 +28,11 @@ namespace Graphics
 	class Shader_Impl : public ShaderRes
 	{
 		ShaderType m_type;
-		uint32 m_prog;
+		uint32 m_prog = 0;
 		OpenGL* m_gl;
 
 		String m_sourcePath;
+		Ref<Buffer> m_sourceBytes;
 
 		// Hot Reload detection on windows
 #ifdef _WIN32
@@ -75,16 +76,19 @@ namespace Graphics
 #ifdef EMBEDDED
 		bool LoadProgram(uint32& programOut)
 		{
-			File in;
-			if(!in.OpenRead(m_sourcePath))
-				return false;
-
 			String sourceStr;
-			sourceStr.resize(in.GetSize());
+			File in;
+			if (m_sourceBytes)
+				sourceStr.assign((const char*)m_sourceBytes->data(), m_sourceBytes->size());
+			else if (in.OpenRead(m_sourcePath))
+			{
+				sourceStr.resize(in.GetSize());
+				in.Read(&sourceStr.front(), sourceStr.size());
+			}
+			else
+				return false;
 			if(sourceStr.size() == 0)
 				return false;
-
-			in.Read(&sourceStr.front(), sourceStr.size());
 			sourceStr = "#version 100\n#define EMBEDDED\n#define target gl_FragColor\n#define texture texture2D\nprecision mediump float;\n" + sourceStr;
 			const GLint programsize = sourceStr.size();
 
@@ -107,8 +111,11 @@ namespace Graphics
 			// Shader hot-reload in debug mode
 #if defined(_DEBUG) && defined(_WIN32)
 			// Store last write time
-			m_lwt = in.GetLastWriteTime();
-			SetupChangeHandler();
+			if (!m_sourceBytes)
+			{
+				m_lwt = in.GetLastWriteTime();
+				SetupChangeHandler();
+			}
 #endif
 			return true;
 		}
@@ -116,16 +123,19 @@ namespace Graphics
 		
 		bool LoadProgram(uint32& programOut)
 		{
-			File in;
-			if(!in.OpenRead(m_sourcePath))
-				return false;
-
 			String sourceStr;
-			sourceStr.resize(in.GetSize());
+			File in;
+			if (m_sourceBytes)
+				sourceStr.assign((const char*)m_sourceBytes->data(), m_sourceBytes->size());
+			else if (in.OpenRead(m_sourcePath))
+			{
+				sourceStr.resize(in.GetSize());
+				in.Read(&sourceStr.front(), sourceStr.size());
+			}
+			else
+				return false;
 			if(sourceStr.size() == 0)
 				return false;
-
-			in.Read(&sourceStr.front(), sourceStr.size());
 			String firstLine;
 			sourceStr.Split("\n", &firstLine, nullptr);
 			firstLine.Trim('\r');
@@ -154,8 +164,11 @@ namespace Graphics
 			// Shader hot-reload in debug mode
 #if defined(_DEBUG) && defined(_WIN32)
 			// Store last write time
-			m_lwt = in.GetLastWriteTime();
-			SetupChangeHandler();
+			if (!m_sourceBytes)
+			{
+				m_lwt = in.GetLastWriteTime();
+				SetupChangeHandler();
+			}
 #endif
 			return true;
 		}
@@ -199,6 +212,20 @@ namespace Graphics
 			#endif
 			
 			return LoadProgram(m_prog);
+		}
+		bool Init(ShaderType type, const Resource& resource)
+		{
+			if (resource.IsPath())
+				return Init(type, resource.GetPath());
+			m_sourcePath = resource.GetName();
+			m_sourceBytes = resource.GetBytes();
+			m_type = type;
+			#ifdef EMBEDDED
+			m_prog = glCreateShader(typeMap[(size_t)type]);
+			#endif
+			bool loaded = LoadProgram(m_prog);
+			m_sourceBytes.reset();
+			return loaded;
 		}
 #ifndef EMBEDDED
 		void Bind() override
@@ -289,6 +316,16 @@ namespace Graphics
 		{
 			return GetResourceManager<ResourceType::Shader>().Register(pImpl);
 		}
+	}
+	Shader ShaderRes::Create(class OpenGL* gl, ShaderType type, const Resource& resource)
+	{
+		Shader_Impl* pImpl = new Shader_Impl(gl);
+		if(!pImpl->Init(type, resource))
+		{
+			delete pImpl;
+			return Shader();
+		}
+		return GetResourceManager<ResourceType::Shader>().Register(pImpl);
 	}
 	void ShaderRes::Unbind(class OpenGL* gl, ShaderType type)
 	{

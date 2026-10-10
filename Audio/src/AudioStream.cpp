@@ -51,6 +51,18 @@ Ref<AudioStream> AudioStream::Create(Audio *audio, const String &path, bool prel
 	return impl;
 }
 
+Ref<AudioStream> AudioStream::Create(Audio *audio, const Resource& resource, bool preload)
+{
+	if (!resource.IsValid())
+		return {};
+	if (resource.IsPath())
+		return Create(audio, resource.GetPath(), preload);
+	Ref<AudioStream> impl = AudioStreamMa::Create(audio, resource, preload);
+	if (impl)
+		audio->GetImpl()->Register(impl.get());
+	return impl;
+}
+
 Ref<AudioStream> AudioStream::Clone(Audio *audio, Ref<AudioStream> source)
 {
 	auto clone = AudioStreamPcm::Create(audio, source);

@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "zlib.h"
 #include "Shared/CompressedFileStream.hpp"
+#include "BackbeatCatalog.hpp"
 
 bool Replay::Save(String path)
 {
@@ -303,6 +304,9 @@ ChartIndex* Replay::FindChart(MapDatabase** databaseHandle) const
 		database = new MapDatabase(true);
 		database->SetChartUpdateBehavior(g_gameConfig.GetBool(GameConfigKeys::TransferScoresOnChartUpdate));
 		database->FinishInit();
+		auto backbeatCatalog = GetBackbeatCatalog();
+		if (backbeatCatalog->IsOpen())
+			(void)backbeatCatalog->Prepare();
 		database->LoadDatabaseWithoutSearching();
 	}
 

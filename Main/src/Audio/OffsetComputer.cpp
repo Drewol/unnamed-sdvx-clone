@@ -29,24 +29,15 @@ OffsetComputer::OffsetComputer(Ref<AudioStream> music, const Beatmap& beatmap)
 
 bool OffsetComputer::Compute(const ChartIndex* chart, int& outOffset)
 {
-	const String chartPath = Path::Normalize(chart->path);
-	const String chartRootPath = Path::RemoveLast(chartPath, nullptr);
-
 	Beatmap beatmap;
-	File mapFile;
-
-	if (!mapFile.OpenRead(chartPath))
-		return false;
-
-	FileReader reader(mapFile);
-	if (!beatmap.Load(reader))
+	if (!beatmap.Load(chart->LoadChart()))
 		return false;
 
 	BeatmapPlayback beatmapPlayback(beatmap);
 	beatmapPlayback.Reset();
 
 	AudioPlayback audioPlayback;
-	if (!audioPlayback.Init(beatmapPlayback, chartRootPath, false))
+	if (!audioPlayback.Init(beatmapPlayback, chart->chartData, false))
 		return false;
 
 	return OffsetComputer(audioPlayback).Compute(outOffset);

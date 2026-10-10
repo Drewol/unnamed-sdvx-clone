@@ -22,6 +22,7 @@ namespace Graphics
 	public:
 		virtual ~ShaderRes() = default;
 		static Ref<ShaderRes> Create(class OpenGL* gl, ShaderType type, const String& assetPath);
+		static Ref<ShaderRes> Create(class OpenGL* gl, ShaderType type, const Resource& resource);
 		static void Unbind(class OpenGL* gl, ShaderType type);
 		friend class OpenGL;
 	public:

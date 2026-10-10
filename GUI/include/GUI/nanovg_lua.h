@@ -401,7 +401,7 @@ static int lCreateImage(lua_State* L /*const char* filename, int imageflags */)
 {
 	const char* filename = luaL_checkstring(L, 1);
 	int imageflags = luaL_checkinteger(L, 2);
-	int handle = nvgCreateImage(g_guiState.vg, filename, imageflags);
+	int handle = g_application->CreateImage(filename, imageflags);
 	if (handle != 0)
 	{
 		g_guiState.vgImages[L].Add(handle);

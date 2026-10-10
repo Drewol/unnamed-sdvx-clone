@@ -201,9 +201,17 @@ Ref<AudioStream> Audio::CreateStream(const String &path, bool preload)
 {
 	return AudioStream::Create(this, path, preload);
 }
+Ref<AudioStream> Audio::CreateStream(const Resource& resource, bool preload)
+{
+	return AudioStream::Create(this, resource, preload);
+}
 Sample Audio::CreateSample(const String &path)
 {
 	return SampleRes::Create(this, path);
+}
+Sample Audio::CreateSample(const Resource& resource)
+{
+	return SampleRes::Create(this, resource);
 }
 
 #if _DEBUG
