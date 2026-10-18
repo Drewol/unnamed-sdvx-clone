@@ -129,6 +129,9 @@ if(ASAN)
         -fsanitize=address
         -fno-omit-frame-pointer
     )
+    target_link_options(cc-common INTERFACE
+        -fsanitize=address
+    )
 endif()
 
 # Include macros
