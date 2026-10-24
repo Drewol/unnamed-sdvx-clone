@@ -204,7 +204,7 @@ public:
 
 		String matPath = "";
 		String fname = foreground ? "fg" : "bg";
-		String kshLayer = foreground ? game->GetBeatmap()->GetMapSettings().foregroundPath : game->GetBeatmap()->GetMapSettings().backgroundPath;
+		String kshLayer = game->GetBeatmap()->GetMapSettings().foregroundPath;
 		String layer;
 
 		if (!kshLayer.Split(";", &layer, nullptr))
@@ -229,6 +229,10 @@ public:
 			folderPath = chart
 				? g_application->RegisterChartResource(*chart, chartFolder)
 				: chartSource->ResolvePath(chartFolder).GetPath();
+			if (!folderPath.empty() && folderPath.back() != '/' && folderPath.back() != '\\')
+			{
+				folderPath += Path::sep;
+			}
 			Resource script = chartSource->ResolvePath(chartFolder + fname + ".lua");
 			Resource fragmentShader = chartSource->ResolvePath(chartFolder + fname + ".fs");
 			if (m_init(script, fragmentShader))
