@@ -1,6 +1,8 @@
 [Desktop Entry]
-Categories=Game;
 Type=Application
-Name=usc-game
+Name=Unnamed SDVX Clone
+Comment=A game based on K-Shoot MANIA and Sound Voltex
 Exec=usc-game
 Icon=usc-game
+Keywords=sdvx;sound voltex;k-shoot mania;kshootmania
+Categories=Game
